@@ -1,0 +1,19 @@
+version: '3'
+
+services:
+  __project__-pypy:
+    build:
+      context: .
+      args:
+      - PYTHON_IMAGE=${PYPY_IMAGE_NAME}
+      - PYTHON_IMAGE_VERSION=${PYPY_IMAGE_VERSION}
+    image: __dockerhub_login__/gon-pypy:__version__
+    volumes:
+      - ./gon/:/opt/gon/gon/
+      - ./tests/:/opt/gon/tests/
+      - ./README.md:/opt/gon/README.md
+      - ./requirements.txt:/opt/gon/requirements.txt
+      - ./requirements-tests.txt:/opt/gon/requirements-tests.txt
+      - ./setup.py:/opt/gon/setup.py
+      - ./setup.cfg:/opt/gon/setup.cfg
+    entrypoint: pytest
