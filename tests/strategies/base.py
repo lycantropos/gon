@@ -1,4 +1,6 @@
 import sys
+from operator import (methodcaller,
+                      ne)
 
 from hypothesis import strategies
 from lz.functional import (compose,
@@ -30,7 +32,8 @@ def scalars_to_points(scalars: Strategy[Scalar]) -> Strategy[Point]:
 
 
 points = scalars_strategies.flatmap(scalars_to_points)
-scalars_to_segments = compose(pack(strategies.tuples),
+scalars_to_segments = compose(methodcaller(Strategy.filter.__name__, pack(ne)),
+                              pack(strategies.tuples),
                               duplicate,
                               scalars_to_points)
 segments = scalars_strategies.flatmap(scalars_to_segments)
