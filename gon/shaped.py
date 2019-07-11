@@ -188,10 +188,9 @@ def segments_intersect(left_segment: Segment, right_segment: Segment) -> bool:
                 and on_segment(first_point, base_segment)):
             return True
         second_point_orientation = to_orientation(*base_segment, second_point)
-        if second_point_orientation == Orientation.COLLINEAR:
-            return on_segment(second_point, base_segment)
         if first_point_orientation == second_point_orientation:
-            break
-    else:
-        return True
-    return False
+            if second_point_orientation != Orientation.COLLINEAR:
+                return False
+            if on_segment(second_point, base_segment):
+                return True
+    return True
