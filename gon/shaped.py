@@ -9,10 +9,8 @@ from typing import (Iterable,
                     Sequence,
                     Tuple)
 
-from lz.hints import (Operator,
-                      Sortable)
+from lz.hints import Sortable
 from lz.iterating import first
-from lz.reversal import reverse
 from lz.sorting import Key
 from memoir import cached
 from reprit import seekers
@@ -30,16 +28,13 @@ from .utils import (to_index_min,
 Angle = Tuple[Point, Point, Point]
 
 
-def normalize_vertices(vertices: Sequence[Point],
-                       *,
-                       reverser: Operator[Sequence[Point]] = reverse
-                       ) -> Sequence[Point]:
+def normalize_vertices(vertices: Sequence[Point]) -> Sequence[Point]:
     result = sort_vertices(vertices,
                            # lowest-leftmost point
                            # is required by Graham scan
                            key=attrgetter('y', 'x'))
     if first(to_orientations(result)) != Orientation.COUNTERCLOCKWISE:
-        result = result[:1] + reverser(result[1:])
+        result = result[:1] + result[1:][::-1]
     return result
 
 
