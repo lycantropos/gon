@@ -9,11 +9,9 @@ from typing import (Iterable,
                     Sequence,
                     Tuple)
 
-from lz.hints import Sortable
 from lz.iterating import (first,
                           pairwise)
 from lz.sorting import Key
-from memoir import cached
 from reprit import seekers
 from reprit.base import generate_repr
 
@@ -21,6 +19,7 @@ from .base import (Orientation,
                    Point,
                    Vector,
                    to_orientation)
+from .hints import Scalar
 from .utils import (to_index_min,
                     triplewise)
 
@@ -29,9 +28,7 @@ Angle = Tuple[Point, Point, Point]
 
 def normalize_vertices(vertices: Sequence[Point]) -> Sequence[Point]:
     result = sort_vertices(vertices,
-                           # lowest-leftmost point
-                           # is required by Graham scan
-                           key=attrgetter('y', 'x'))
+                           key=attrgetter('x', 'y'))
     if first(to_orientations(result)) != Orientation.COUNTERCLOCKWISE:
         result = result[:1] + result[1:][::-1]
     return result
@@ -97,14 +94,13 @@ class SimplePolygon(Polygon):
             return False
         return self._vertices == other._vertices
 
-    @cached.property_
+    @property
     def convex_hull(self) -> Polygon:
         if len(self._vertices) == 3:
             return self
-        anchor_point, *rest_points = self._vertices
-        return Polygon(_to_convex_hull(anchor_point, rest_points))
+        return Polygon(_to_convex_hull(self._vertices))
 
-    @cached.property_
+    @property
     def is_convex(self) -> bool:
         if len(self._vertices) == 3:
             return True
@@ -114,33 +110,40 @@ class SimplePolygon(Polygon):
                    for orientation in orientations)
 
 
+def _to_convex_hull(points: Sequence[Point]) -> Sequence[Point]:
+    next_index = index = 0
+    result = [points[0]]
+
+    def to_squared_vector_length(start: Point, end: Point) -> Scalar:
+        return Vector.from_points(start, end).squared_length
+
+    while True:
+        candidate_index = (next_index + 1) % len(points)
+        for index, point in enumerate(points):
+            if index == next_index:
+                continue
+            orientation = to_orientation(points[next_index], point,
+                                         points[candidate_index])
+            if (orientation == Orientation.COUNTERCLOCKWISE
+                    or (orientation == Orientation.COLLINEAR
+                        and to_squared_vector_length(point,
+                                                     points[next_index])
+                        > to_squared_vector_length(points[candidate_index],
+                                                   points[next_index]))):
+                candidate_index = index
+        next_index = candidate_index
+        if next_index == index:
+            break
+        result.append(points[next_index])
+    return result
+
+
 def _validate_polygon_vertices(vertices: Sequence[Point]) -> None:
     if len(vertices) < 3:
         raise ValueError('Polygon should have at least 3 vertices.')
     if not vertices_forms_angles(vertices):
         raise ValueError('Consecutive vertices triplets '
                          'should not be on the same line.')
-
-
-def _to_convex_hull(anchor_point: Point,
-                    rest_points: Sequence[Point]) -> Sequence[Point]:
-    def sorting_key(vertex: Point,
-                    *,
-                    anchor_point: Point = anchor_point) -> Sortable:
-        vector = Vector.from_points(anchor_point, vertex)
-        return vector.pseudoangle, vector.squared_magnitude
-
-    next_point, *rest_points = sorted(rest_points,
-                                      key=sorting_key)
-    result = [anchor_point, next_point]
-    for point in rest_points:
-        while (to_orientation(result[-2], result[-1], point)
-               != Orientation.COUNTERCLOCKWISE):
-            del result[-1]
-            if len(result) < 2:
-                break
-        result.append(point)
-    return result
 
 
 def vertices_forms_angles(vertices: Sequence[Point]) -> bool:
