@@ -175,22 +175,27 @@ def self_intersects(points: Sequence[Point]) -> bool:
 
 
 def segments_intersect(left_segment: Segment, right_segment: Segment) -> bool:
-    def on_segment(point: Point, target_segment: Segment) -> bool:
-        left_x, right_x = sorted(point.x for point in target_segment)
-        bottom_y, top_y = sorted(point.y for point in target_segment)
+    def on_segment(point: Point, segment: Segment) -> bool:
+        left_x, right_x = sorted(point.x for point in segment)
+        bottom_y, top_y = sorted(point.y for point in segment)
         return left_x <= point.x <= right_x and bottom_y <= point.y <= top_y
 
-    for segment, base_segment in [(left_segment, right_segment),
-                                  (right_segment, left_segment)]:
-        first_point, second_point = segment
-        first_point_orientation = to_orientation(*base_segment, first_point)
-        if (first_point_orientation == Orientation.COLLINEAR
-                and on_segment(first_point, base_segment)):
-            return True
-        second_point_orientation = to_orientation(*base_segment, second_point)
-        if first_point_orientation == second_point_orientation:
-            if second_point_orientation != Orientation.COLLINEAR:
-                return False
-            if on_segment(second_point, base_segment):
-                return True
-    return True
+    ((first_left_end, second_left_end),
+     (first_right_end, second_right_end)) = left_segment, right_segment
+    first_left_orientation = to_orientation(*right_segment, first_left_end)
+    if (first_left_orientation == Orientation.COLLINEAR
+            and on_segment(first_left_end, right_segment)):
+        return True
+    second_left_orientation = to_orientation(*right_segment, second_left_end)
+    if (second_left_orientation == Orientation.COLLINEAR
+            and on_segment(second_left_end, right_segment)):
+        return True
+    first_right_orientation = to_orientation(*left_segment, first_right_end)
+    if (first_right_orientation == Orientation.COLLINEAR
+            and on_segment(first_right_end, left_segment)):
+        return True
+    second_right_orientation = to_orientation(*left_segment, second_right_end)
+    return (first_left_orientation * second_left_orientation < 0
+            and first_right_orientation * second_right_orientation < 0
+            or second_right_orientation == Orientation.COLLINEAR
+            and on_segment(second_right_end, left_segment))
