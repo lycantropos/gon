@@ -1,4 +1,5 @@
 import sys
+from decimal import Decimal
 from operator import (methodcaller,
                       ne)
 
@@ -16,15 +17,17 @@ decimals = strategies.decimals(allow_nan=False,
 
 
 def has_recoverable_significant_digits_count(number: float) -> bool:
-    significant_digits_str = str(number).rstrip('0').rstrip('.').lstrip('-')
-    return len(significant_digits_str) <= sys.float_info.dig
+    sign, digits, exponent = Decimal(number).as_tuple()
+    return len(digits) <= sys.float_info.dig
 
 
 floats = (strategies.floats(allow_nan=False,
                             allow_infinity=False)
           .filter(has_recoverable_significant_digits_count))
 fractions = strategies.fractions()
-scalars_strategies = strategies.sampled_from([decimals, floats, fractions])
+integers = strategies.integers()
+scalars_strategies = strategies.sampled_from([decimals, floats,
+                                              fractions, integers])
 
 
 def scalars_to_points(scalars: Strategy[Scalar]) -> Strategy[Point]:
