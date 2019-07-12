@@ -128,7 +128,7 @@ def _to_convex_hull(anchor_point: Point,
                     *,
                     anchor_point: Point = anchor_point) -> Sortable:
         vector = Vector.from_points(anchor_point, vertex)
-        return vector.angle, vector.squared_magnitude
+        return vector.pseudoangle, vector.squared_magnitude
 
     next_point, *rest_points = sorted(rest_points,
                                       key=sorting_key)

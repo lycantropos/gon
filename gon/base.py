@@ -1,6 +1,6 @@
 from enum import IntEnum
+from fractions import Fraction
 
-import math
 from reprit.base import generate_repr
 
 from .hints import Scalar
@@ -80,8 +80,20 @@ class Vector:
         return cls(end.x - start.x, end.y - start.y)
 
     @property
-    def angle(self) -> Scalar:
-        return math.atan2(self._y, self._x)
+    def pseudoangle(self) -> Scalar:
+        """
+        Based on: https://stackoverflow.com/a/27253590
+        """
+        above_anti_diagonal = self.x > -self.y
+        result = not above_anti_diagonal * 4
+        if self.y == 0:
+            return result
+        above_diagonal = self.x > self.y
+        if above_diagonal ^ above_anti_diagonal:
+            result += 2 - Fraction(self.x) / Fraction(self.y)
+        else:
+            result += Fraction(self.y) / Fraction(self.x)
+        return result
 
     @property
     def squared_magnitude(self) -> Scalar:
