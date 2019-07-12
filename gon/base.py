@@ -1,12 +1,6 @@
 from enum import IntEnum
-from itertools import (cycle,
-                       islice)
-from typing import (Iterable,
-                    Sequence,
-                    Tuple)
 
 import math
-from lz.iterating import pairwise
 from reprit.base import generate_repr
 
 from .hints import Scalar
@@ -43,13 +37,6 @@ class Point:
         if not isinstance(other, Point):
             return NotImplemented
         return self._x == other._x and self._y == other._y
-
-
-Segment = Tuple[Point, Point]
-
-
-def to_segments(points: Sequence[Point]) -> Iterable[Segment]:
-    return pairwise(islice(cycle(points), len(points) + 1))
 
 
 class Orientation(IntEnum):

@@ -10,6 +10,7 @@ from lz.replication import duplicate
 
 from gon.base import Point
 from gon.hints import Scalar
+from gon.shaped import Segment
 from tests.utils import Strategy
 
 decimals = strategies.decimals(allow_nan=False,
@@ -35,7 +36,9 @@ def scalars_to_points(scalars: Strategy[Scalar]) -> Strategy[Point]:
 
 
 points = scalars_strategies.flatmap(scalars_to_points)
-scalars_to_segments = compose(methodcaller(Strategy.filter.__name__, pack(ne)),
+scalars_to_segments = compose(methodcaller(Strategy.map.__name__,
+                                           pack(Segment)),
+                              methodcaller(Strategy.filter.__name__, pack(ne)),
                               pack(strategies.tuples),
                               duplicate,
                               scalars_to_points)
