@@ -10,7 +10,8 @@ from typing import (Iterable,
                     Tuple)
 
 from lz.hints import Sortable
-from lz.iterating import first
+from lz.iterating import (first,
+                          pairwise)
 from lz.sorting import Key
 from memoir import cached
 from reprit import seekers
@@ -18,10 +19,8 @@ from reprit.base import generate_repr
 
 from .base import (Orientation,
                    Point,
-                   Segment,
                    Vector,
-                   to_orientation,
-                   to_segments)
+                   to_orientation)
 from .utils import (to_index_min,
                     triplewise)
 
@@ -168,34 +167,69 @@ def self_intersects(points: Sequence[Point]) -> bool:
                                     max(segment_index - 1, 0)],
                            segments[segment_index + 2:
                                     segment_index - 1 + len(segments)])
-        if any(segments_intersect(segment, candidate)
+        if any(segment.intersects_with(candidate)
                for candidate in candidates):
             return True
     return False
 
 
-def segments_intersect(left_segment: Segment, right_segment: Segment) -> bool:
-    def on_segment(point: Point, segment: Segment) -> bool:
-        left_x, right_x = sorted(point.x for point in segment)
-        bottom_y, top_y = sorted(point.y for point in segment)
-        return left_x <= point.x <= right_x and bottom_y <= point.y <= top_y
+class Segment:
+    __slots__ = ('_first_end', '_second_end')
 
-    ((first_left_end, second_left_end),
-     (first_right_end, second_right_end)) = left_segment, right_segment
-    first_left_orientation = to_orientation(*right_segment, first_left_end)
-    if (first_left_orientation == Orientation.COLLINEAR
-            and on_segment(first_left_end, right_segment)):
-        return True
-    second_left_orientation = to_orientation(*right_segment, second_left_end)
-    if (second_left_orientation == Orientation.COLLINEAR
-            and on_segment(second_left_end, right_segment)):
-        return True
-    first_right_orientation = to_orientation(*left_segment, first_right_end)
-    if (first_right_orientation == Orientation.COLLINEAR
-            and on_segment(first_right_end, left_segment)):
-        return True
-    second_right_orientation = to_orientation(*left_segment, second_right_end)
-    return (first_left_orientation * second_left_orientation < 0
-            and first_right_orientation * second_right_orientation < 0
-            or second_right_orientation == Orientation.COLLINEAR
-            and on_segment(second_right_end, left_segment))
+    def __new__(cls, first_end: Point, second_end: Point) -> 'Segment':
+        if first_end == second_end:
+            raise ValueError('Degenerate segment found.')
+        return super().__new__(cls)
+
+    def __init__(self, left_end: Point, right_end: Point) -> None:
+        self._first_end = left_end
+        self._second_end = right_end
+
+    @property
+    def first_end(self) -> Point:
+        return self._first_end
+
+    @property
+    def second_end(self) -> Point:
+        return self._second_end
+
+    def intersects_with(self, other: 'Segment') -> bool:
+        def on_segment(point: Point, segment: Segment) -> bool:
+            left_x, right_x = sorted([segment.first_end.x,
+                                      segment.second_end.x])
+            bottom_y, top_y = sorted([segment.first_end.y,
+                                      segment.second_end.y])
+            return (left_x <= point.x <= right_x
+                    and bottom_y <= point.y <= top_y)
+
+        self_first_orientation = to_orientation(other.first_end,
+                                                other.second_end,
+                                                self.first_end)
+        if (self_first_orientation == Orientation.COLLINEAR
+                and on_segment(self.first_end, other)):
+            return True
+        self_second_orientation = to_orientation(other.first_end,
+                                                 other.second_end,
+                                                 self.second_end)
+        if (self_second_orientation == Orientation.COLLINEAR
+                and on_segment(self.second_end, other)):
+            return True
+        other_first_orientation = to_orientation(self.first_end,
+                                                 self.second_end,
+                                                 other.first_end)
+        if (other_first_orientation == Orientation.COLLINEAR
+                and on_segment(other.first_end, self)):
+            return True
+        other_second_orientation = to_orientation(self.first_end,
+                                                  self.second_end,
+                                                  other.second_end)
+        return (self_first_orientation * self_second_orientation < 0
+                and other_first_orientation * other_second_orientation < 0
+                or other_second_orientation == Orientation.COLLINEAR
+                and on_segment(other.second_end, self))
+
+
+def to_segments(points: Sequence[Point]) -> Iterable[Segment]:
+    return (Segment(left_end, right_end)
+            for left_end, right_end in pairwise(islice(cycle(points),
+                                                       len(points) + 1)))
