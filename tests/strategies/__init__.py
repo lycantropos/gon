@@ -3,6 +3,5 @@ from .base import (points,
                    segments,
                    segments_pairs)
 from .planar import (polygons,
-                     polygons_vertices_counts,
                      triangles,
                      triangles_vertices)
