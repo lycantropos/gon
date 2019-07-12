@@ -14,9 +14,6 @@ from tests.strategies.base import (scalars_strategies,
                                    scalars_to_points)
 from tests.utils import Strategy
 
-polygons_vertices_counts = strategies.integers(min_value=3,
-                                               max_value=20)
-
 triangles_vertices = (scalars_strategies
                       .flatmap(compose(pack(strategies.tuples),
                                        replicator(3),
