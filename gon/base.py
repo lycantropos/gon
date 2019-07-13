@@ -83,25 +83,11 @@ class Vector:
         return self._x ** 2 + self._y ** 2
 
 
-def to_cross_product_z(first_vector: Vector, second_vector: Vector) -> Scalar:
+def to_cross_product_z(left_vector: Vector, right_vector: Vector) -> Scalar:
     """
     Z-coordinate of planar vectors cross product
     (assuming that their z-coordinates are zeros).
 
     Corresponds to signed area of parallelogram built on given vectors.
     """
-    minuend_multiplier_min, minuend_multiplier_max = sorted(
-            (first_vector.x, second_vector.y),
-            key=abs)
-    subtrahend_multiplier_min, subtrahend_multiplier_max = sorted(
-            (first_vector.y, second_vector.x),
-            key=abs)
-    coordinate_abs_max = max(abs(minuend_multiplier_max),
-                             abs(subtrahend_multiplier_max))
-    if coordinate_abs_max == 0:
-        return 0
-    # dividing on max coordinate to handle near-infinity values
-    return (minuend_multiplier_max / coordinate_abs_max
-            * minuend_multiplier_min
-            - subtrahend_multiplier_max / coordinate_abs_max
-            * subtrahend_multiplier_min) * coordinate_abs_max
+    return left_vector.x * right_vector.y - left_vector.y * right_vector.x
