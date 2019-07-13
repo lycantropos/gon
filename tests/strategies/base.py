@@ -35,14 +35,15 @@ def scalars_to_points(scalars: Strategy[Scalar]) -> Strategy[Point]:
     return strategies.builds(Point, scalars, scalars)
 
 
+points_strategies = scalars_strategies.map(scalars_to_points)
 points = scalars_strategies.flatmap(scalars_to_points)
 scalars_to_segments = compose(methodcaller(Strategy.map.__name__,
                                            pack(Segment)),
-                              methodcaller(Strategy.filter.__name__, pack(ne)),
+                              methodcaller(Strategy.filter.__name__,
+                                           pack(ne)),
                               pack(strategies.tuples),
-                              duplicate,
-                              scalars_to_points)
-segments = scalars_strategies.flatmap(scalars_to_segments)
-segments_pairs = scalars_strategies.flatmap(compose(pack(strategies.tuples),
-                                                    duplicate,
-                                                    scalars_to_segments))
+                              duplicate)
+segments = points_strategies.flatmap(scalars_to_segments)
+segments_pairs = points_strategies.flatmap(compose(pack(strategies.tuples),
+                                                   duplicate,
+                                                   scalars_to_segments))

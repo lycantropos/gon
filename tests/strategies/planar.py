@@ -3,34 +3,27 @@ from typing import Sequence
 from hypothesis import strategies
 from lz.functional import (compose,
                            pack)
-from lz.logical import negate
 from lz.replication import replicator
 
 from gon.base import Point
 from gon.shaped import (Polygon,
-                        self_intersects,
                         vertices_forms_angles)
-from tests.strategies.base import (scalars_strategies,
-                                   scalars_to_points)
 from tests.utils import Strategy
+from .base import points_strategies
 
-triangles_vertices = (scalars_strategies
-                      .flatmap(compose(pack(strategies.tuples),
-                                       replicator(3),
-                                       scalars_to_points))
+to_triangles_vertices = compose(pack(strategies.tuples), replicator(3))
+triangles_vertices = (points_strategies
+                      .flatmap(to_triangles_vertices)
                       .filter(vertices_forms_angles))
 triangles = (triangles_vertices
              .map(Polygon))
 
 
 def to_vertices(points: Strategy[Point]) -> Strategy[Sequence[Point]]:
-    return strategies.lists(points,
-                            min_size=3)
+    return (to_triangles_vertices(points)
+            .filter(vertices_forms_angles))
 
 
-polygons = (scalars_strategies
-            .flatmap(compose(to_vertices,
-                             scalars_to_points))
-            .filter(vertices_forms_angles)
-            .filter(negate(self_intersects))
+polygons = (points_strategies
+            .flatmap(to_vertices)
             .map(Polygon))
