@@ -1,5 +1,4 @@
 from enum import IntEnum
-from fractions import Fraction
 
 from reprit.base import generate_repr
 
