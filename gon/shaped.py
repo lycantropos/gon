@@ -178,8 +178,8 @@ def self_intersects(vertices: Sequence[Point]) -> bool:
 class Segment:
     __slots__ = ('_start', '_end')
 
-    def __new__(cls, first_end: Point, second_end: Point) -> 'Segment':
-        if first_end == second_end:
+    def __new__(cls, start: Point, end: Point) -> 'Segment':
+        if start == end:
             raise ValueError('Degenerate segment found.')
         return super().__new__(cls)
 
