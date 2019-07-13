@@ -188,6 +188,17 @@ class Segment:
         self._first_end = left_end
         self._second_end = right_end
 
+    __repr__ = generate_repr(__init__)
+
+    def __eq__(self, other: 'Segment') -> bool:
+        return (self._first_end == other._first_end
+                and self._second_end == other._second_end
+                or self._first_end == other._second_end
+                and self._second_end == other._first_end)
+
+    def __hash__(self) -> int:
+        return hash((self._first_end, self._second_end))
+
     @property
     def first_end(self) -> Point:
         return self._first_end
