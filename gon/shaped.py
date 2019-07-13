@@ -159,91 +159,84 @@ def to_angles(vertices: Sequence[Point]) -> Iterable[Angle]:
     return triplewise(islice(cycle(vertices), len(vertices) + 2))
 
 
-def self_intersects(points: Sequence[Point]) -> bool:
-    if len(points) == 3:
+def self_intersects(vertices: Sequence[Point]) -> bool:
+    if len(vertices) == 3:
         return False
-    segments = tuple(to_segments(points))
-    for segment_index, segment in enumerate(segments):
+    edges = tuple(to_edges(vertices))
+    for index, edge in enumerate(edges):
         # skipping neighbours because they always intersect
-        # NOTE: first & last segments are neighbours
-        candidates = chain(segments[max(segment_index + 2 - len(segments), 0):
-                                    max(segment_index - 1, 0)],
-                           segments[segment_index + 2:
-                                    segment_index - 1 + len(segments)])
-        if any(segment.intersects_with(candidate)
-               for candidate in candidates):
+        # NOTE: first & last edges are neighbours
+        non_neighbours = chain(edges[max(index + 2 - len(edges), 0):
+                                     max(index - 1, 0)],
+                               edges[index + 2:index - 1 + len(edges)])
+        if any(edge.intersects_with(non_neighbour)
+               for non_neighbour in non_neighbours):
             return True
     return False
 
 
 class Segment:
-    __slots__ = ('_first_end', '_second_end')
+    __slots__ = ('_start', '_end')
 
     def __new__(cls, first_end: Point, second_end: Point) -> 'Segment':
         if first_end == second_end:
             raise ValueError('Degenerate segment found.')
         return super().__new__(cls)
 
-    def __init__(self, left_end: Point, right_end: Point) -> None:
-        self._first_end = left_end
-        self._second_end = right_end
+    def __init__(self, start: Point, end: Point) -> None:
+        self._start = start
+        self._end = end
 
     __repr__ = generate_repr(__init__)
 
     def __eq__(self, other: 'Segment') -> bool:
-        return (self._first_end == other._first_end
-                and self._second_end == other._second_end
-                or self._first_end == other._second_end
-                and self._second_end == other._first_end)
+        return (self._start == other._start
+                and self._end == other._end
+                or self._start == other._end
+                and self._end == other._start)
 
     def __hash__(self) -> int:
-        return hash((self._first_end, self._second_end))
+        return hash((self._start, self._end))
 
     @property
-    def first_end(self) -> Point:
-        return self._first_end
+    def start(self) -> Point:
+        return self._start
 
     @property
-    def second_end(self) -> Point:
-        return self._second_end
+    def end(self) -> Point:
+        return self._end
 
     def intersects_with(self, other: 'Segment') -> bool:
         def on_segment(point: Point, segment: Segment) -> bool:
-            left_x, right_x = sorted([segment.first_end.x,
-                                      segment.second_end.x])
-            bottom_y, top_y = sorted([segment.first_end.y,
-                                      segment.second_end.y])
+            left_x, right_x = sorted([segment.start.x, segment.end.x])
+            bottom_y, top_y = sorted([segment.start.y, segment.end.y])
             return (left_x <= point.x <= right_x
                     and bottom_y <= point.y <= top_y)
 
-        self_first_orientation = to_orientation(other.first_end,
-                                                other.second_end,
-                                                self.first_end)
-        if (self_first_orientation == Orientation.COLLINEAR
-                and on_segment(self.first_end, other)):
+        self_start_orientation = to_orientation(other.start, other.end,
+                                                self.start)
+        if (self_start_orientation == Orientation.COLLINEAR
+                and on_segment(self.start, other)):
             return True
-        self_second_orientation = to_orientation(other.first_end,
-                                                 other.second_end,
-                                                 self.second_end)
-        if (self_second_orientation == Orientation.COLLINEAR
-                and on_segment(self.second_end, other)):
+        self_end_orientation = to_orientation(other.start, other.end,
+                                              self.end)
+        if (self_end_orientation == Orientation.COLLINEAR
+                and on_segment(self.end, other)):
             return True
-        other_first_orientation = to_orientation(self.first_end,
-                                                 self.second_end,
-                                                 other.first_end)
-        if (other_first_orientation == Orientation.COLLINEAR
-                and on_segment(other.first_end, self)):
+        other_start_orientation = to_orientation(self.start, self.end,
+                                                 other.start)
+        if (other_start_orientation == Orientation.COLLINEAR
+                and on_segment(other.start, self)):
             return True
-        other_second_orientation = to_orientation(self.first_end,
-                                                  self.second_end,
-                                                  other.second_end)
-        return (self_first_orientation * self_second_orientation < 0
-                and other_first_orientation * other_second_orientation < 0
-                or other_second_orientation == Orientation.COLLINEAR
-                and on_segment(other.second_end, self))
+        other_end_orientation = to_orientation(self.start, self.end,
+                                               other.end)
+        return (self_start_orientation * self_end_orientation < 0
+                and other_start_orientation * other_end_orientation < 0
+                or other_end_orientation == Orientation.COLLINEAR
+                and on_segment(other.end, self))
 
 
-def to_segments(points: Sequence[Point]) -> Iterable[Segment]:
-    return (Segment(left_end, right_end)
-            for left_end, right_end in pairwise(islice(cycle(points),
-                                                       len(points) + 1)))
+def to_edges(vertices: Sequence[Point]) -> Iterable[Segment]:
+    return (Segment(start, end)
+            for start, end in pairwise(islice(cycle(vertices),
+                                              len(vertices) + 1)))
