@@ -1,5 +1,5 @@
 gon
-===========
+===
 
 [![](https://travis-ci.com/lycantropos/gon.svg?branch=master)](https://travis-ci.com/lycantropos/gon "Travis CI")
 [![](https://dev.azure.com/lycantropos/gon/_apis/build/status/lycantropos.gon?branchName=master)](https://dev.azure.com/lycantropos/gon/_build/latest?branchName=master "Azure Pipelines")
