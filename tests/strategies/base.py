@@ -1,5 +1,6 @@
 import sys
-from decimal import Decimal
+from decimal import (Decimal,
+                     getcontext)
 from fractions import Fraction
 from functools import partial
 from typing import Optional
@@ -27,12 +28,15 @@ def to_floats(*,
             .filter(has_recoverable_significant_digits_count))
 
 
-scalars_strategies_factories = {Decimal: partial(strategies.decimals,
-                                                 allow_nan=False,
-                                                 allow_infinity=False),
-                                float: to_floats,
-                                Fraction: strategies.fractions,
-                                int: strategies.integers}
+scalars_strategies_factories = {
+    Decimal: partial(strategies.decimals,
+                     allow_nan=False,
+                     allow_infinity=False,
+                     places=max(getcontext().prec // 3, 1)),
+    float: to_floats,
+    Fraction: strategies.fractions,
+    int: strategies.integers,
+}
 scalars_strategies = strategies.sampled_from(
         [factory() for factory in scalars_strategies_factories.values()])
 

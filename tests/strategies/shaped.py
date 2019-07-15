@@ -1,4 +1,5 @@
-from operator import (methodcaller,
+from operator import (attrgetter,
+                      methodcaller,
                       ne)
 from typing import (Sequence,
                     Tuple)
@@ -13,6 +14,7 @@ from gon.base import Point
 from gon.hints import Scalar
 from gon.shaped import (Polygon,
                         Segment,
+                        to_convex_hull,
                         to_edges,
                         vertices_forms_angles)
 from tests.utils import Strategy
@@ -49,17 +51,21 @@ segments_pairs = points_strategies.flatmap(compose(pack(strategies.tuples),
                                                    duplicate,
                                                    points_to_segments))
 
-to_triangles_vertices = compose(pack(strategies.tuples), replicator(3))
+to_triplets_strategy = compose(pack(strategies.tuples), replicator(3))
 triangles_vertices = (points_strategies
-                      .flatmap(to_triangles_vertices)
+                      .flatmap(to_triplets_strategy)
                       .filter(vertices_forms_angles))
 triangles = (triangles_vertices
              .map(Polygon))
 
 
 def to_vertices(points: Strategy[Point]) -> Strategy[Sequence[Point]]:
-    return (to_triangles_vertices(points)
-            .filter(vertices_forms_angles))
+    # TODO: add concave polygons support
+    return (strategies.lists(points,
+                             min_size=3,
+                             unique_by=(attrgetter('x'), attrgetter('y')))
+            .filter(vertices_forms_angles)
+            .map(to_convex_hull))
 
 
 polygons = (points_strategies
