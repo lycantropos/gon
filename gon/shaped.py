@@ -18,7 +18,8 @@ from reprit.base import generate_repr
 from .base import (Orientation,
                    Point,
                    to_orientation)
-from .utils import (to_index_min,
+from .utils import (is_odd,
+                    to_index_min,
                     triplewise)
 
 Angle = Tuple[Point, Point, Point]
@@ -53,6 +54,10 @@ class Polygon(ABC):
 
     @abstractmethod
     def __eq__(self, other: 'Polygon') -> bool:
+        pass
+
+    @abstractmethod
+    def __contains__(self, point: Point) -> bool:
         pass
 
     @property
@@ -91,6 +96,25 @@ class SimplePolygon(Polygon):
         if not isinstance(other, SimplePolygon):
             return False
         return self._vertices == other._vertices
+
+    def __contains__(self, point: Point) -> bool:
+        leftmost_bottom_vertex = self._vertices[0]
+        if (point.x < leftmost_bottom_vertex.x
+                or point.x == leftmost_bottom_vertex.x
+                and point.y < leftmost_bottom_vertex.y):
+            return False
+        try:
+            segment = Segment(leftmost_bottom_vertex, point)
+        except ValueError:
+            # degenerate segment, point is a leftmost vertex
+            return True
+        edges_intersections = 0
+        for edge in to_edges(self._vertices):
+            intersects_with_edge = segment.intersects_with(edge)
+            if intersects_with_edge and point in edge:
+                return True
+            edges_intersections += intersects_with_edge
+        return is_odd(edges_intersections)
 
     @property
     def convex_hull(self) -> Polygon:

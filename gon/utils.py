@@ -30,6 +30,10 @@ def to_index_min(values: Iterable[Domain],
 triplewise = slider(3)
 
 
+def is_odd(number: int) -> bool:
+    return number % 2 == 1
+
+
 def to_sign(value: Scalar) -> int:
     validate_value(value)
     if value > 0:
