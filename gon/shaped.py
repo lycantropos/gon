@@ -190,6 +190,10 @@ class Segment:
     def __hash__(self) -> int:
         return hash((self._start, self._end))
 
+    def __contains__(self, point: Point) -> bool:
+        return (self.orientation_with(point) == Orientation.COLLINEAR
+                and _on_segment(point, self))
+
     @property
     def start(self) -> Point:
         return self._start
@@ -199,33 +203,33 @@ class Segment:
         return self._end
 
     def intersects_with(self, other: 'Segment') -> bool:
-        def on_segment(point: Point, segment: Segment) -> bool:
-            left_x, right_x = sorted([segment.start.x, segment.end.x])
-            bottom_y, top_y = sorted([segment.start.y, segment.end.y])
-            return (left_x <= point.x <= right_x
-                    and bottom_y <= point.y <= top_y)
-
-        self_start_orientation = to_orientation(other.start, other.end,
-                                                self.start)
+        self_start_orientation = other.orientation_with(self.start)
         if (self_start_orientation == Orientation.COLLINEAR
-                and on_segment(self.start, other)):
+                and _on_segment(self.start, other)):
             return True
-        self_end_orientation = to_orientation(other.start, other.end,
-                                              self.end)
+        self_end_orientation = other.orientation_with(self.end)
         if (self_end_orientation == Orientation.COLLINEAR
-                and on_segment(self.end, other)):
+                and _on_segment(self.end, other)):
             return True
-        other_start_orientation = to_orientation(self.start, self.end,
-                                                 other.start)
+        other_start_orientation = self.orientation_with(other.start)
         if (other_start_orientation == Orientation.COLLINEAR
-                and on_segment(other.start, self)):
+                and _on_segment(other.start, self)):
             return True
-        other_end_orientation = to_orientation(self.start, self.end,
-                                               other.end)
+        other_end_orientation = self.orientation_with(other.end)
         return (self_start_orientation * self_end_orientation < 0
                 and other_start_orientation * other_end_orientation < 0
                 or other_end_orientation == Orientation.COLLINEAR
-                and on_segment(other.end, self))
+                and _on_segment(other.end, self))
+
+    def orientation_with(self, point: Point) -> int:
+        return to_orientation(self.start, self.end, point)
+
+
+def _on_segment(point: Point, segment: Segment) -> bool:
+    left_x, right_x = sorted([segment.start.x, segment.end.x])
+    bottom_y, top_y = sorted([segment.start.y, segment.end.y])
+    return (left_x <= point.x <= right_x
+            and bottom_y <= point.y <= top_y)
 
 
 def to_edges(vertices: Sequence[Point]) -> Iterable[Segment]:
