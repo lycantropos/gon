@@ -17,9 +17,7 @@ from reprit.base import generate_repr
 
 from .base import (Orientation,
                    Point,
-                   Vector,
                    to_orientation)
-from .hints import Scalar
 from .utils import (to_index_min,
                     triplewise)
 
@@ -98,7 +96,7 @@ class SimplePolygon(Polygon):
     def convex_hull(self) -> Polygon:
         if len(self._vertices) == 3:
             return self
-        return Polygon(_to_convex_hull(self._vertices))
+        return Polygon(to_convex_hull(self._vertices))
 
     @property
     def is_convex(self) -> bool:
@@ -110,31 +108,25 @@ class SimplePolygon(Polygon):
                    for orientation in orientations)
 
 
-def _to_convex_hull(points: Sequence[Point]) -> Sequence[Point]:
-    next_index = index = 0
-    result = [points[0]]
 
-    def to_squared_vector_length(start: Point, end: Point) -> Scalar:
-        return Vector.from_points(start, end).squared_length
+def to_convex_hull(points: Sequence[Point]) -> Sequence[Point]:
+    points = sorted(points,
+                    key=attrgetter('x', 'y'))
+    lower = _to_sub_hull(points)
+    upper = _to_sub_hull(reversed(points))
+    return lower[:-1] + upper[:-1]
 
-    while True:
-        candidate_index = (next_index + 1) % len(points)
-        for index, point in enumerate(points):
-            if index == next_index:
-                continue
-            orientation = to_orientation(points[next_index], point,
-                                         points[candidate_index])
-            if (orientation == Orientation.COUNTERCLOCKWISE
-                    or (orientation == Orientation.COLLINEAR
-                        and to_squared_vector_length(point,
-                                                     points[next_index])
-                        > to_squared_vector_length(points[candidate_index],
-                                                   points[next_index]))):
-                candidate_index = index
-        next_index = candidate_index
-        if next_index == index:
-            break
-        result.append(points[next_index])
+
+def _to_sub_hull(points: Iterable[Point]) -> Sequence[Point]:
+    result = []
+    for point in points:
+        while len(result) >= 2:
+            orientation = to_orientation(result[-2], result[-1], point)
+            if orientation != Orientation.COUNTERCLOCKWISE:
+                del result[-1]
+            else:
+                break
+        result.append(point)
     return result
 
 
