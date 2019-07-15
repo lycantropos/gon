@@ -1,3 +1,5 @@
+from itertools import (product,
+                       starmap)
 from operator import (attrgetter,
                       methodcaller,
                       ne)
@@ -10,7 +12,9 @@ from lz.functional import (compose,
 from lz.replication import (duplicate,
                             replicator)
 
-from gon.base import Point
+from gon.base import (Orientation,
+                      Point,
+                      to_orientation)
 from gon.hints import Scalar
 from gon.shaped import (Polygon,
                         Segment,
@@ -59,18 +63,26 @@ triangles = (triangles_vertices
              .map(Polygon))
 
 
-def to_vertices(points: Strategy[Point]) -> Strategy[Sequence[Point]]:
-    # TODO: add concave polygons support
+def to_convex_vertices(points: Strategy[Point]) -> Strategy[Sequence[Point]]:
     return (strategies.lists(points,
-                             min_size=3,
+                             min_size=4,
                              unique_by=(attrgetter('x'), attrgetter('y')))
-            .filter(vertices_forms_angles)
+            .filter(in_general_position)
             .map(to_convex_hull))
 
 
-polygons = (points_strategies
-            .flatmap(to_vertices)
-            .map(Polygon))
+def in_general_position(points: Sequence[Point]) -> bool:
+    return all(orientation != Orientation.COLLINEAR
+               for orientation in starmap(to_orientation, product(points,
+                                                                  repeat=3)))
+
+
+convex_polygons = (triangles
+                   | (points_strategies
+                      .flatmap(to_convex_vertices)
+                      .map(Polygon)))
+# TODO: add concave polygons support
+polygons = convex_polygons
 
 
 def to_polygon_with_points(polygon: Polygon
