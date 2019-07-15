@@ -12,7 +12,6 @@ from typing import (Iterable,
 from lz.iterating import (first,
                           pairwise)
 from lz.sorting import Key
-from reprit import seekers
 from reprit.base import generate_repr
 
 from .base import (Orientation,
@@ -62,6 +61,11 @@ class Polygon(ABC):
 
     @property
     @abstractmethod
+    def vertices(self) -> Sequence[Point]:
+        pass
+
+    @property
+    @abstractmethod
     def convex_hull(self) -> 'Polygon':
         pass
 
@@ -84,8 +88,7 @@ class SimplePolygon(Polygon):
     def __init__(self, vertices: Sequence[Point]) -> None:
         self._vertices = tuple(normalize_vertices(vertices))
 
-    __repr__ = generate_repr(__init__,
-                             field_seeker=seekers.complex_)
+    __repr__ = generate_repr(__init__)
 
     def __hash__(self) -> int:
         return hash(self._vertices)
@@ -115,6 +118,10 @@ class SimplePolygon(Polygon):
                 return True
             edges_intersections += intersects_with_edge
         return is_odd(edges_intersections)
+
+    @property
+    def vertices(self) -> Sequence[Point]:
+        return self._vertices
 
     @property
     def convex_hull(self) -> Polygon:
