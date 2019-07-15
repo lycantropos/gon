@@ -12,6 +12,7 @@ from typing import (Iterable,
 from lz.iterating import (first,
                           pairwise)
 from lz.sorting import Key
+from memoir import cached
 from reprit.base import generate_repr
 
 from .base import (Orientation,
@@ -123,13 +124,13 @@ class SimplePolygon(Polygon):
     def vertices(self) -> Sequence[Point]:
         return self._vertices
 
-    @property
+    @cached.property_
     def convex_hull(self) -> Polygon:
         if len(self._vertices) == 3:
             return self
         return Polygon(to_convex_hull(self._vertices))
 
-    @property
+    @cached.property_
     def is_convex(self) -> bool:
         if len(self._vertices) == 3:
             return True
