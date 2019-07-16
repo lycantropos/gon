@@ -49,7 +49,7 @@ def to_orientation(vertex: Point,
                    second_ray_point: Point) -> int:
     first_ray_vector = Vector.from_points(vertex, first_ray_point)
     second_ray_vector = Vector.from_points(vertex, second_ray_point)
-    return to_sign(to_cross_product_z(first_ray_vector, second_ray_vector))
+    return to_sign(first_ray_vector.cross_z(second_ray_vector))
 
 
 class Vector:
@@ -78,12 +78,11 @@ class Vector:
     def from_points(cls, start: Point, end: Point) -> 'Vector':
         return cls(end.x - start.x, end.y - start.y)
 
+    def cross_z(self, other: 'Vector') -> Scalar:
+        """
+        Z-coordinate of planar vectors cross product
+        (assuming that their z-coordinates are zeros).
 
-def to_cross_product_z(left_vector: Vector, right_vector: Vector) -> Scalar:
-    """
-    Z-coordinate of planar vectors cross product
-    (assuming that their z-coordinates are zeros).
-
-    Corresponds to signed area of parallelogram built on given vectors.
-    """
-    return left_vector.x * right_vector.y - left_vector.y * right_vector.x
+        Corresponds to signed area of parallelogram built on given vectors.
+        """
+        return self.x * other.y - self.y * other.x
