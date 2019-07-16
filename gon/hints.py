@@ -1,6 +1,7 @@
 from decimal import Decimal
 from numbers import Real
-from typing import TypeVar
+from typing import (Sequence,
+                    TypeVar)
 
-Domain = TypeVar('Domain')
 Scalar = TypeVar('Scalar', Real, Decimal)
+Permutation = Sequence[int]
