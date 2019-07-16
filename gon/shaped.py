@@ -4,11 +4,14 @@ from itertools import (chain,
                        cycle,
                        islice,
                        starmap)
-from operator import attrgetter
+from operator import (attrgetter,
+                      itemgetter)
 from typing import (Iterable,
                     Sequence,
                     Tuple)
 
+from lz.functional import compose
+from lz.hints import Domain
 from lz.iterating import (first,
                           pairwise)
 from lz.sorting import Key
@@ -18,28 +21,33 @@ from reprit.base import generate_repr
 from .base import (Orientation,
                    Point,
                    to_orientation)
-from .hints import Scalar
-from .utils import (is_odd,
+from .hints import (Permutation,
+                    Scalar)
+from .utils import (inverse_permutation,
+                    is_odd,
                     to_index_min,
                     triplewise)
 
 Angle = Tuple[Point, Point, Point]
 
 
-def normalize_vertices(vertices: Sequence[Point]) -> Sequence[Point]:
-    result = sort_vertices(vertices,
-                           key=attrgetter('x', 'y'))
-    if first(to_orientations(result)) != Orientation.COUNTERCLOCKWISE:
-        result = result[:1] + result[1:][::-1]
-    return result
+def _normalize_vertices(vertices: Sequence[Point]) -> Tuple[Permutation,
+                                                            Sequence[Point]]:
+    order, vertices = zip(*_shift_sequence(tuple(enumerate(vertices)),
+                                           key=compose(attrgetter('x', 'y'),
+                                                       itemgetter(1))))
+    if first(to_orientations(vertices)) != Orientation.COUNTERCLOCKWISE:
+        order, vertices = (order[:1] + order[1:][::-1],
+                           vertices[:1] + vertices[1:][::-1])
+    return order, vertices
 
 
-def sort_vertices(vertices: Sequence[Point],
-                  *,
-                  key: Key = None) -> Sequence[Point]:
-    index_min = to_index_min(vertices,
+def _shift_sequence(sequence: Sequence[Domain],
+                    *,
+                    key: Key = None) -> Sequence[Domain]:
+    index_min = to_index_min(sequence,
                              key=key)
-    return vertices[index_min:] + vertices[:index_min]
+    return sequence[index_min:] + sequence[:index_min]
 
 
 class Polygon(ABC):
@@ -83,7 +91,7 @@ class Polygon(ABC):
 
 
 class SimplePolygon(Polygon):
-    __slots__ = ('_vertices',)
+    __slots__ = ('_order', '_vertices')
 
     def __new__(cls, vertices: Sequence[Point]) -> Polygon:
         if cls is not __class__:
@@ -93,7 +101,7 @@ class SimplePolygon(Polygon):
         return super().__new__(cls, vertices)
 
     def __init__(self, vertices: Sequence[Point]) -> None:
-        self._vertices = tuple(normalize_vertices(vertices))
+        self._order, self._vertices = _normalize_vertices(tuple(vertices))
 
     __repr__ = generate_repr(__init__)
 
@@ -126,9 +134,9 @@ class SimplePolygon(Polygon):
             edges_intersections += intersects_with_edge
         return is_odd(edges_intersections)
 
-    @property
+    @cached.property_
     def vertices(self) -> Sequence[Point]:
-        return self._vertices
+        return itemgetter(*inverse_permutation(self._order))(self._vertices)
 
     @cached.property_
     def area(self) -> Scalar:
