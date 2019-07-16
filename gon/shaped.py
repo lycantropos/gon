@@ -18,6 +18,7 @@ from reprit.base import generate_repr
 from .base import (Orientation,
                    Point,
                    to_orientation)
+from .hints import Scalar
 from .utils import (is_odd,
                     to_index_min,
                     triplewise)
@@ -63,6 +64,11 @@ class Polygon(ABC):
     @property
     @abstractmethod
     def vertices(self) -> Sequence[Point]:
+        pass
+
+    @property
+    @abstractmethod
+    def area(self) -> Scalar:
         pass
 
     @property
@@ -123,6 +129,11 @@ class SimplePolygon(Polygon):
     @property
     def vertices(self) -> Sequence[Point]:
         return self._vertices
+
+    @cached.property_
+    def area(self) -> Scalar:
+        return sum(edge.start.x * edge.end.y - edge.start.y * edge.end.x
+                   for edge in to_edges(self._vertices)) / 2
 
     @cached.property_
     def convex_hull(self) -> Polygon:
