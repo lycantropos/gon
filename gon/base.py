@@ -1,10 +1,7 @@
-from enum import IntEnum
-
 from reprit.base import generate_repr
 
 from .hints import Scalar
-from .utils import (to_sign,
-                    validate_value)
+from .utils import validate_value
 
 
 class Point:
@@ -36,20 +33,6 @@ class Point:
         if not isinstance(other, Point):
             return NotImplemented
         return self._x == other._x and self._y == other._y
-
-
-class Orientation(IntEnum):
-    CLOCKWISE = -1
-    COLLINEAR = 0
-    COUNTERCLOCKWISE = 1
-
-
-def to_orientation(vertex: Point,
-                   first_ray_point: Point,
-                   second_ray_point: Point) -> int:
-    first_ray_vector = Vector.from_points(vertex, first_ray_point)
-    second_ray_vector = Vector.from_points(vertex, second_ray_point)
-    return to_sign(first_ray_vector.cross_z(second_ray_vector))
 
 
 class Vector:
