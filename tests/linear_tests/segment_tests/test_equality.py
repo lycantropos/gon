@@ -23,3 +23,10 @@ def test_transitivity(left_segment: Segment,
     assert implication(left_segment == mid_segment
                        and mid_segment == right_segment,
                        left_segment == right_segment)
+
+
+@given(strategies.segments)
+def test_independence_from_ends_order(segment: Segment) -> None:
+    reversed_segment = Segment(segment.end, segment.start)
+
+    assert segment == reversed_segment
