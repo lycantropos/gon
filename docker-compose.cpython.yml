@@ -1,13 +1,13 @@
 version: '3'
 
 services:
-  __project__-cpython:
+  gon-cpython:
     build:
       context: .
       args:
       - PYTHON_IMAGE=${CPYTHON_IMAGE_NAME}
       - PYTHON_IMAGE_VERSION=${CPYTHON_IMAGE_VERSION}
-    image: __dockerhub_login__/gon-cpython:__version__
+    image: lycantropos/gon-cpython:0.0.0
     volumes:
       - ./gon/:/opt/gon/gon/
       - ./tests/:/opt/gon/tests/
