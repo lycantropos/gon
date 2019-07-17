@@ -97,8 +97,6 @@ class SimplePolygon(Polygon):
     __slots__ = ('_order', '_vertices')
 
     def __new__(cls, vertices: Sequence[Point]) -> Polygon:
-        if cls is not __class__:
-            return super().__new__(cls, vertices)
         if self_intersects(vertices):
             raise ValueError('Simple polygon should not be self-intersecting.')
         return super().__new__(cls, vertices)
