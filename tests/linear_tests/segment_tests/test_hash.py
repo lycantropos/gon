@@ -24,3 +24,10 @@ def test_connection_with_equality(left_segment: Segment,
                                   right_segment: Segment) -> None:
     assert equivalence(left_segment == right_segment,
                        hash(left_segment) == hash(right_segment))
+
+
+@given(strategies.segments)
+def test_independence_from_ends_order(segment: Segment) -> None:
+    reversed_segment = Segment(segment.end, segment.start)
+
+    assert hash(segment) == hash(reversed_segment)
