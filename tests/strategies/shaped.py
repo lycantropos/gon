@@ -22,6 +22,7 @@ from gon.shaped import (Polygon,
                         self_intersects,
                         to_convex_hull,
                         to_edges,
+                        to_polygon,
                         vertices_forms_angles)
 from tests.utils import Strategy
 from .base import (points_strategies,
@@ -40,7 +41,7 @@ invalid_vertices = points_strategies.flatmap(to_non_triangle_vertices_base)
 invalid_vertices = (invalid_vertices.filter(self_intersects)
                     | invalid_vertices.filter(negate(vertices_forms_angles)))
 triangles = (triangles_vertices
-             .map(Polygon))
+             .map(to_polygon))
 
 
 def to_convex_vertices(points: Strategy[Point]) -> Strategy[Sequence[Point]]:
@@ -52,7 +53,7 @@ def to_convex_vertices(points: Strategy[Point]) -> Strategy[Sequence[Point]]:
 convex_polygons = (triangles
                    | (points_strategies
                       .flatmap(to_convex_vertices)
-                      .map(Polygon)))
+                      .map(to_polygon)))
 
 
 def to_concave_vertices(points: Strategy[Point]) -> Strategy[Sequence[Point]]:
@@ -144,7 +145,7 @@ def squared_distance_to_point(segment: Segment,
 
 concave_polygons = (points_strategies
                     .flatmap(to_concave_vertices)
-                    .map(Polygon)
+                    .map(to_polygon)
                     .filter(lambda polygon: not polygon.is_convex))
 polygons = concave_polygons | convex_polygons
 

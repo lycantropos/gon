@@ -29,33 +29,7 @@ from .utils import (inverse_permutation,
                     triplewise)
 
 
-def _normalize_vertices(vertices: Sequence[Point]) -> Tuple[Permutation,
-                                                            Sequence[Point]]:
-    order, vertices = zip(*_shift_sequence(tuple(enumerate(vertices)),
-                                           key=compose(attrgetter('x', 'y'),
-                                                       itemgetter(1))))
-    first_angle = Angle(vertices[0], vertices[1], vertices[2])
-    if first_angle.orientation != Orientation.COUNTERCLOCKWISE:
-        order, vertices = (order[:1] + order[1:][::-1],
-                           vertices[:1] + vertices[1:][::-1])
-    return order, vertices
-
-
-def _shift_sequence(sequence: Sequence[Domain],
-                    *,
-                    key: Key = None) -> Sequence[Domain]:
-    index_min = to_index_min(sequence,
-                             key=key)
-    return sequence[index_min:] + sequence[:index_min]
-
-
 class Polygon(ABC):
-    def __new__(cls, vertices: Sequence[Point]) -> 'Polygon':
-        if cls is not __class__:
-            return super().__new__(cls)
-        _validate_polygon_vertices(vertices)
-        return SimplePolygon(vertices)
-
     @abstractmethod
     def __hash__(self) -> int:
         pass
@@ -91,11 +65,6 @@ class Polygon(ABC):
 
 class SimplePolygon(Polygon):
     __slots__ = ('_order', '_vertices')
-
-    def __new__(cls, vertices: Sequence[Point]) -> Polygon:
-        if self_intersects(vertices):
-            raise ValueError('Simple polygon should not be self-intersecting.')
-        return super().__new__(cls, vertices)
 
     def __init__(self, vertices: Sequence[Point]) -> None:
         self._order, self._vertices = _normalize_vertices(tuple(vertices))
@@ -144,7 +113,7 @@ class SimplePolygon(Polygon):
     def convex_hull(self) -> Polygon:
         if len(self._vertices) == 3:
             return self
-        return Polygon(to_convex_hull(self._vertices))
+        return SimplePolygon(to_convex_hull(self._vertices))
 
     @cached.property_
     def is_convex(self) -> bool:
@@ -155,6 +124,37 @@ class SimplePolygon(Polygon):
         base_orientation = next(orientations)
         return all(orientation == base_orientation
                    for orientation in orientations)
+
+
+def to_polygon(vertices: Sequence[Point]) -> Polygon:
+    if len(vertices) < 3:
+        raise ValueError('Polygon should have at least 3 vertices.')
+    if not vertices_forms_angles(vertices):
+        raise ValueError('Consecutive vertices triplets '
+                         'should not be on the same line.')
+    if self_intersects(vertices):
+        raise ValueError('Simple polygon should not be self-intersecting.')
+    return SimplePolygon(vertices)
+
+
+def _normalize_vertices(vertices: Sequence[Point]) -> Tuple[Permutation,
+                                                            Sequence[Point]]:
+    order, vertices = zip(*_shift_sequence(tuple(enumerate(vertices)),
+                                           key=compose(attrgetter('x', 'y'),
+                                                       itemgetter(1))))
+    first_angle = Angle(vertices[0], vertices[1], vertices[2])
+    if first_angle.orientation != Orientation.COUNTERCLOCKWISE:
+        order, vertices = (order[:1] + order[1:][::-1],
+                           vertices[:1] + vertices[1:][::-1])
+    return order, vertices
+
+
+def _shift_sequence(sequence: Sequence[Domain],
+                    *,
+                    key: Key = None) -> Sequence[Domain]:
+    index_min = to_index_min(sequence,
+                             key=key)
+    return sequence[index_min:] + sequence[:index_min]
 
 
 def to_convex_hull(points: Sequence[Point]) -> Sequence[Point]:
@@ -176,14 +176,6 @@ def _to_sub_hull(points: Iterable[Point]) -> Sequence[Point]:
                 break
         result.append(point)
     return result
-
-
-def _validate_polygon_vertices(vertices: Sequence[Point]) -> None:
-    if len(vertices) < 3:
-        raise ValueError('Polygon should have at least 3 vertices.')
-    if not vertices_forms_angles(vertices):
-        raise ValueError('Consecutive vertices triplets '
-                         'should not be on the same line.')
 
 
 def vertices_forms_angles(vertices: Sequence[Point]) -> bool:

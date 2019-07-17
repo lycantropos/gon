@@ -4,11 +4,11 @@ import pytest
 from hypothesis import given
 
 from gon.base import Point
-from gon.shaped import Polygon
+from gon.shaped import to_polygon
 from tests import strategies
 
 
 @given(strategies.invalid_vertices)
 def test_invalid_vertices(vertices: Sequence[Point]) -> None:
     with pytest.raises(ValueError):
-        Polygon(vertices)
+        to_polygon(vertices)
