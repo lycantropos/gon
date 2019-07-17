@@ -56,8 +56,8 @@ class Interval:
                 and self._end == other._start)
 
     def __hash__(self) -> int:
-        return hash((self._start, self._end,
-                     self.start_inclusive, self.end_inclusive))
+        return hash(frozenset([(self._start, self.start_inclusive),
+                               (self._end, self.end_inclusive)]))
 
     def __contains__(self, point: Point) -> bool:
         return (self.orientation_with(point) == Orientation.COLLINEAR
