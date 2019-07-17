@@ -273,8 +273,6 @@ class Interval:
                 *,
                 start_inclusive: bool,
                 end_inclusive: bool) -> 'Interval':
-        if cls is not __class__:
-            return super().__new__(cls)
         if start == end:
             raise ValueError('Degenerate interval found.')
         return super().__new__(cls)
