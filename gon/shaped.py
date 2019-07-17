@@ -1,7 +1,6 @@
 from abc import (ABC,
                  abstractmethod)
-from itertools import (chain,
-                       cycle,
+from itertools import (cycle,
                        islice,
                        starmap)
 from operator import (attrgetter,
@@ -202,22 +201,6 @@ def to_angles(vertices: Sequence[Point]) -> Iterable[Angle]:
     return triplewise(islice(cycle(vertices), len(vertices) + 2))
 
 
-def self_intersects(vertices: Sequence[Point]) -> bool:
-    if len(vertices) == 3:
-        return False
-    edges = tuple(to_edges(vertices))
-    for index, edge in enumerate(edges):
-        # skipping neighbours because they always intersect
-        # NOTE: first & last edges are neighbours
-        non_neighbours = chain(edges[max(index + 2 - len(edges), 0):
-                                     max(index - 1, 0)],
-                               edges[index + 2:index - 1 + len(edges)])
-        if any(edge.intersects_with(non_neighbour)
-               for non_neighbour in non_neighbours):
-            return True
-    return False
-
-
 class Segment:
     __slots__ = ('_start', '_end')
 
@@ -274,6 +257,25 @@ class Segment:
 
     def orientation_with(self, point: Point) -> int:
         return to_orientation(self.start, self.end, point)
+
+
+def self_intersects(vertices: Sequence[Point]) -> bool:
+    if len(vertices) == 3:
+        return False
+    edges = tuple(to_edges(vertices))
+    for index, edge in enumerate(edges):
+        # skipping neighbours because they always intersect
+        # NOTE: first & last edges are neighbours
+        if any(edge.intersects_with(non_neighbour)
+               for non_neighbour in _to_non_neighbours(index, edges)):
+            return True
+    return False
+
+
+def _to_non_neighbours(edge_index: int,
+                       edges: Sequence[Segment]) -> Sequence[Segment]:
+    return (edges[max(edge_index + 2 - len(edges), 0):max(edge_index - 1, 0)]
+            + edges[edge_index + 2:edge_index - 1 + len(edges)])
 
 
 def _on_segment(point: Point, segment: Segment) -> bool:
