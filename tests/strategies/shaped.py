@@ -1,6 +1,4 @@
 from functools import partial
-from itertools import (product,
-                       starmap)
 from operator import (attrgetter,
                       itemgetter,
                       methodcaller,
@@ -72,14 +70,8 @@ def to_convex_vertices(points: Strategy[Point]) -> Strategy[Sequence[Point]]:
     return (strategies.lists(points,
                              min_size=4,
                              unique_by=(attrgetter('x'), attrgetter('y')))
-            .filter(in_general_position)
-            .map(to_convex_hull))
-
-
-def in_general_position(points: Sequence[Point]) -> bool:
-    return all(angle.orientation != Orientation.COLLINEAR
-               for angle in starmap(Angle, product(points,
-                                                   repeat=3)))
+            .map(to_convex_hull)
+            .filter(lambda vertices: len(vertices) >= 3))
 
 
 convex_polygons = (triangles
