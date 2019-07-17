@@ -2,7 +2,7 @@ import pytest
 from hypothesis import given
 
 from gon.base import Point
-from gon.shaped import Segment
+from gon.linear import Segment
 from tests import strategies
 
 
