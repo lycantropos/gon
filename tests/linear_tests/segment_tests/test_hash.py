@@ -1,8 +1,8 @@
 from hypothesis import given
 
 from gon.linear import Segment
-from tests import strategies
 from tests.utils import equivalence
+from . import strategies
 
 
 @given(strategies.segments)
