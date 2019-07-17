@@ -227,6 +227,33 @@ class Angle:
                                                self._second_ray_point)
         return to_sign(first_ray_vector.cross_z(second_ray_vector))
 
+    @property
+    def is_acute(self) -> bool:
+        return self.kind == AngleKind.ACUTE
+
+    @property
+    def is_right(self) -> bool:
+        return self.kind == AngleKind.RIGHT
+
+    @property
+    def is_obtuse(self) -> bool:
+        return self.kind == AngleKind.OBTUSE
+
+    @property
+    def kind(self) -> int:
+        return to_sign(
+                self.vertex.squared_distance_to(self._first_ray_point)
+                - self._first_ray_point.squared_distance_to(
+                        self._second_ray_point)
+                + self.vertex.squared_distance_to(
+                        self._second_ray_point))
+
+
+class AngleKind(IntEnum):
+    OBTUSE = -1
+    RIGHT = 0
+    ACUTE = 1
+
 
 class Orientation(IntEnum):
     CLOCKWISE = -1

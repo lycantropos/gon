@@ -34,6 +34,9 @@ class Point:
             return NotImplemented
         return self._x == other._x and self._y == other._y
 
+    def squared_distance_to(self, destination: 'Point') -> Scalar:
+        return Vector.from_points(self, destination).squared_length
+
 
 class Vector:
     __slots__ = ('_x', '_y')
@@ -69,3 +72,7 @@ class Vector:
         Corresponds to signed area of parallelogram built on given vectors.
         """
         return self.x * other.y - self.y * other.x
+
+    @property
+    def squared_length(self) -> Scalar:
+        return self.x ** 2 + self.y ** 2
