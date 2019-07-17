@@ -3,8 +3,8 @@ from typing import Tuple
 from hypothesis import given
 
 from gon.linear import Segment
-from tests import strategies
 from tests.utils import implication
+from . import strategies
 
 
 @given(strategies.segments)
