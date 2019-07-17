@@ -2,7 +2,8 @@ from operator import (le,
                       lt)
 from types import MappingProxyType
 from typing import (Callable,
-                    Mapping)
+                    Mapping,
+                    Union)
 
 from reprit.base import generate_repr
 
@@ -14,14 +15,6 @@ from .hints import Scalar
 
 class Interval:
     __slots__ = ('_start', '_end', '_start_inclusive', '_end_inclusive')
-
-    def __new__(cls, start: Point, end: Point,
-                *,
-                start_inclusive: bool,
-                end_inclusive: bool) -> 'Interval':
-        if start == end:
-            raise ValueError('Degenerate interval found.')
-        return super().__new__(cls)
 
     def __init__(self,
                  start: Point,
@@ -98,17 +91,25 @@ class Interval:
 
 
 class Segment(Interval):
-    def __new__(cls, start: Point, end: Point) -> 'Interval':
-        return super().__new__(cls, start, end,
-                               start_inclusive=True,
-                               end_inclusive=True)
-
     def __init__(self, start: Point, end: Point) -> None:
         super().__init__(start, end,
                          start_inclusive=True,
                          end_inclusive=True)
 
     __repr__ = generate_repr(__init__)
+
+
+def to_interval(start: Point, end: Point,
+                *,
+                start_inclusive: bool = True,
+                end_inclusive: bool = True) -> Union[Interval, Segment]:
+    if start == end:
+        raise ValueError('Degenerate interval found.')
+    if start_inclusive and end_inclusive:
+        return Segment(start, end)
+    return Interval(start, end,
+                    start_inclusive=start_inclusive,
+                    end_inclusive=end_inclusive)
 
 
 def _in_interval(point: Point, interval: Interval,

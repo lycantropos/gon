@@ -21,7 +21,8 @@ from .angular import (Angle,
 from .base import Point
 from .hints import (Permutation,
                     Scalar)
-from .linear import Segment
+from .linear import (Segment,
+                     to_interval)
 from .utils import (inverse_permutation,
                     is_odd,
                     to_index_min,
@@ -118,7 +119,7 @@ class SimplePolygon(Polygon):
                 and point.y < leftmost_bottom_vertex.y):
             return False
         try:
-            segment = Segment(leftmost_bottom_vertex, point)
+            segment = to_interval(leftmost_bottom_vertex, point)
         except ValueError:
             # degenerate segment, point is a leftmost vertex
             return True
@@ -215,6 +216,6 @@ def _to_non_neighbours(edge_index: int,
 
 
 def to_edges(vertices: Sequence[Point]) -> Iterable[Segment]:
-    return (Segment(start, end)
+    return (to_interval(start, end)
             for start, end in pairwise(islice(cycle(vertices),
                                               len(vertices) + 1)))
