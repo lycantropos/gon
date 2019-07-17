@@ -141,8 +141,8 @@ class SimplePolygon(Polygon):
 
     @cached.property_
     def area(self) -> Scalar:
-        return sum(edge.start.x * edge.end.y - edge.start.y * edge.end.x
-                   for edge in to_edges(self._vertices)) / 2
+        return abs(sum(edge.start.x * edge.end.y - edge.start.y * edge.end.x
+                       for edge in to_edges(self._vertices))) / 2
 
     @cached.property_
     def convex_hull(self) -> Polygon:
