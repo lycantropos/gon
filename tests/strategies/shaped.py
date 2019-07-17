@@ -9,6 +9,7 @@ from typing import (Sequence,
 from hypothesis import strategies
 from lz.functional import (compose,
                            pack)
+from lz.logical import negate
 from lz.replication import (duplicate,
                             replicator)
 
@@ -21,6 +22,7 @@ from gon.shaped import (Angle,
                         Polygon,
                         Segment,
                         _to_non_neighbours,
+                        self_intersects,
                         to_convex_hull,
                         to_edges,
                         vertices_forms_angles)
@@ -62,14 +64,19 @@ to_triplets_strategy = compose(pack(strategies.tuples), replicator(3))
 triangles_vertices = (points_strategies
                       .flatmap(to_triplets_strategy)
                       .filter(vertices_forms_angles))
+to_non_triangle_vertices_base = partial(strategies.lists,
+                                        min_size=4,
+                                        unique_by=(attrgetter('x'),
+                                                   attrgetter('y')))
+invalid_vertices = points_strategies.flatmap(to_non_triangle_vertices_base)
+invalid_vertices = (invalid_vertices.filter(self_intersects)
+                    | invalid_vertices.filter(negate(vertices_forms_angles)))
 triangles = (triangles_vertices
              .map(Polygon))
 
 
 def to_convex_vertices(points: Strategy[Point]) -> Strategy[Sequence[Point]]:
-    return (strategies.lists(points,
-                             min_size=4,
-                             unique_by=(attrgetter('x'), attrgetter('y')))
+    return (to_non_triangle_vertices_base(points)
             .map(to_convex_hull)
             .filter(lambda vertices: len(vertices) >= 3))
 

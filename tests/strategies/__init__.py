@@ -1,6 +1,7 @@
 from .base import (points,
                    scalars_strategies)
-from .shaped import (polygons,
+from .shaped import (invalid_vertices,
+                     polygons,
                      polygons_with_points,
                      segments,
                      segments_pairs,
