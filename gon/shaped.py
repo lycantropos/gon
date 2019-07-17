@@ -1,5 +1,6 @@
 from abc import (ABC,
                  abstractmethod)
+from enum import IntEnum
 from itertools import (cycle,
                        islice,
                        starmap)
@@ -11,23 +12,20 @@ from typing import (Iterable,
 
 from lz.functional import compose
 from lz.hints import Domain
-from lz.iterating import (first,
-                          pairwise)
+from lz.iterating import pairwise
 from lz.sorting import Key
 from memoir import cached
 from reprit.base import generate_repr
 
-from .base import (Orientation,
-                   Point,
-                   to_orientation)
+from .base import (Point,
+                   Vector)
 from .hints import (Permutation,
                     Scalar)
 from .utils import (inverse_permutation,
                     is_odd,
                     to_index_min,
+                    to_sign,
                     triplewise)
-
-Angle = Tuple[Point, Point, Point]
 
 
 def _normalize_vertices(vertices: Sequence[Point]) -> Tuple[Permutation,
@@ -35,7 +33,8 @@ def _normalize_vertices(vertices: Sequence[Point]) -> Tuple[Permutation,
     order, vertices = zip(*_shift_sequence(tuple(enumerate(vertices)),
                                            key=compose(attrgetter('x', 'y'),
                                                        itemgetter(1))))
-    if first(to_orientations(vertices)) != Orientation.COUNTERCLOCKWISE:
+    first_angle = Angle(vertices[0], vertices[1], vertices[2])
+    if first_angle.orientation != Orientation.COUNTERCLOCKWISE:
         order, vertices = (order[:1] + order[1:][::-1],
                            vertices[:1] + vertices[1:][::-1])
     return order, vertices
@@ -152,7 +151,8 @@ class SimplePolygon(Polygon):
     def is_convex(self) -> bool:
         if len(self._vertices) == 3:
             return True
-        orientations = iter(to_orientations(self._vertices))
+        orientations = (angle.orientation
+                        for angle in to_angles(self._vertices))
         base_orientation = next(orientations)
         return all(orientation == base_orientation
                    for orientation in orientations)
@@ -171,8 +171,8 @@ def _to_sub_hull(points: Iterable[Point]) -> Sequence[Point]:
     result = []
     for point in points:
         while len(result) >= 2:
-            orientation = to_orientation(result[-2], result[-1], point)
-            if orientation != Orientation.COUNTERCLOCKWISE:
+            if (Angle(result[-2], result[-1], point).orientation
+                    != Orientation.COUNTERCLOCKWISE):
                 del result[-1]
             else:
                 break
@@ -189,16 +189,51 @@ def _validate_polygon_vertices(vertices: Sequence[Point]) -> None:
 
 
 def vertices_forms_angles(vertices: Sequence[Point]) -> bool:
-    return all(orientation != Orientation.COLLINEAR
-               for orientation in to_orientations(vertices))
+    return all(angle.orientation != Orientation.COLLINEAR
+               for angle in to_angles(vertices))
 
 
-def to_orientations(vertices: Sequence[Point]) -> Iterable[int]:
-    return starmap(to_orientation, to_angles(vertices))
+class Angle:
+    def __init__(self,
+                 vertex: Point,
+                 first_ray_point: Point,
+                 second_ray_point: Point) -> None:
+        self._vertex = vertex
+        self._first_ray_point = first_ray_point
+        self._second_ray_point = second_ray_point
+
+    @property
+    def vertex(self) -> Point:
+        return self._vertex
+
+    @property
+    def first_ray_point(self) -> Point:
+        return self._first_ray_point
+
+    @property
+    def second_ray_point(self) -> Point:
+        return self._second_ray_point
+
+    __repr__ = generate_repr(__init__)
+
+    @property
+    def orientation(self) -> int:
+        first_ray_vector = Vector.from_points(self.vertex,
+                                              self._first_ray_point)
+        second_ray_vector = Vector.from_points(self.vertex,
+                                               self._second_ray_point)
+        return to_sign(first_ray_vector.cross_z(second_ray_vector))
+
+
+class Orientation(IntEnum):
+    CLOCKWISE = -1
+    COLLINEAR = 0
+    COUNTERCLOCKWISE = 1
 
 
 def to_angles(vertices: Sequence[Point]) -> Iterable[Angle]:
-    return triplewise(islice(cycle(vertices), len(vertices) + 2))
+    return starmap(Angle,
+                   triplewise(islice(cycle(vertices), len(vertices) + 2)))
 
 
 class Segment:
@@ -256,7 +291,7 @@ class Segment:
                 and _on_segment(other.end, self))
 
     def orientation_with(self, point: Point) -> int:
-        return to_orientation(self.start, self.end, point)
+        return Angle(self.start, self.end, point).orientation
 
 
 def self_intersects(vertices: Sequence[Point]) -> bool:

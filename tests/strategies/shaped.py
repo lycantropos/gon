@@ -12,11 +12,11 @@ from lz.functional import (compose,
 from lz.replication import (duplicate,
                             replicator)
 
-from gon.base import (Orientation,
-                      Point,
-                      to_orientation)
+from gon.base import Point
 from gon.hints import Scalar
-from gon.shaped import (Polygon,
+from gon.shaped import (Angle,
+                        Orientation,
+                        Polygon,
                         Segment,
                         to_convex_hull,
                         to_edges,
@@ -72,9 +72,9 @@ def to_convex_vertices(points: Strategy[Point]) -> Strategy[Sequence[Point]]:
 
 
 def in_general_position(points: Sequence[Point]) -> bool:
-    return all(orientation != Orientation.COLLINEAR
-               for orientation in starmap(to_orientation, product(points,
-                                                                  repeat=3)))
+    return all(angle.orientation != Orientation.COLLINEAR
+               for angle in starmap(Angle, product(points,
+                                                   repeat=3)))
 
 
 convex_polygons = (triangles
