@@ -2,9 +2,9 @@ from typing import Tuple
 
 from hypothesis import given
 
+from gon.angular import Orientation
 from gon.base import Point
-from gon.shaped import (Orientation,
-                        Segment)
+from gon.linear import Segment
 from tests import strategies
 from tests.utils import implication
 
