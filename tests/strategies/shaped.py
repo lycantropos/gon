@@ -15,8 +15,8 @@ from gon.angular import (Angle,
 from gon.base import (Point,
                       Vector)
 from gon.hints import Scalar
-from gon.linear import (Interval,
-                        Segment)
+from gon.linear import (Segment,
+                        to_interval)
 from gon.shaped import (Polygon,
                         _to_non_neighbours,
                         self_intersects,
@@ -71,8 +71,8 @@ def points_to_concave_vertices(points: Sequence[Point]) -> Sequence[Point]:
         def forms_angle_with_neighbours(indexed_edge: Tuple[int, Segment]
                                         ) -> bool:
             index, edge = indexed_edge
-            point_start_segment = Segment(point, edge.start)
-            point_end_segment = Segment(point, edge.end)
+            point_start_segment = to_interval(point, edge.start)
+            point_end_segment = to_interval(point, edge.end)
             prior_edge, next_edge = _to_neighbours(index, edges)
             return (point_start_segment.orientation_with(prior_edge.start)
                     != Orientation.COLLINEAR
@@ -85,17 +85,17 @@ def points_to_concave_vertices(points: Sequence[Point]) -> Sequence[Point]:
 
         def is_visible_edge(indexed_edge: Tuple[int, Segment]) -> bool:
             index, edge = indexed_edge
-            point_start_segment = Segment(point, edge.start)
-            point_end_segment = Segment(point, edge.end)
+            point_start_segment = to_interval(point, edge.start)
+            point_end_segment = to_interval(point, edge.end)
             prior_edge, next_edge = _to_neighbours(index, edges)
-            prior_edge_interval = Interval(prior_edge.start,
-                                           prior_edge.end,
-                                           start_inclusive=True,
-                                           end_inclusive=False)
-            next_edge_interval = Interval(next_edge.start,
-                                          next_edge.end,
-                                          start_inclusive=False,
-                                          end_inclusive=True)
+            prior_edge_interval = to_interval(prior_edge.start,
+                                              prior_edge.end,
+                                              start_inclusive=True,
+                                              end_inclusive=False)
+            next_edge_interval = to_interval(next_edge.start,
+                                             next_edge.end,
+                                             start_inclusive=False,
+                                             end_inclusive=True)
             if (prior_edge_interval.intersects_with(point_start_segment)
                     or next_edge_interval.intersects_with(point_start_segment)
                     or prior_edge_interval.intersects_with(point_end_segment)
