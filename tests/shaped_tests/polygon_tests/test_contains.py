@@ -22,3 +22,10 @@ def test_point_on_edge(polygon_with_point: Tuple[Polygon, Point]) -> None:
     assert implication(any(point in edge
                            for edge in to_edges(polygon.vertices)),
                        point in polygon)
+
+
+@given(strategies.polygons_with_points)
+def test_convex_hull(polygon_with_point: Tuple[Polygon, Point]) -> None:
+    polygon, point = polygon_with_point
+
+    assert implication(point in polygon, point in polygon.convex_hull)
