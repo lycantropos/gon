@@ -22,7 +22,8 @@ from .base import Point
 from .hints import (Permutation,
                     Scalar)
 from .linear import (Segment,
-                     to_interval)
+                     to_interval,
+                     to_segment)
 from .utils import (inverse_permutation,
                     to_index_min,
                     triplewise)
@@ -201,7 +202,12 @@ def _to_non_neighbours(edge_index: int,
             + edges[edge_index + 2:edge_index - 1 + len(edges)])
 
 
-def to_edges(vertices: Sequence[Point]) -> Iterable[Segment]:
-    return (to_interval(start, end)
+def to_edges(vertices: Sequence[Point],
+             *,
+             start_inclusive: bool = True,
+             end_inclusive: bool = True) -> Iterable[Segment]:
+    return (to_interval(start, end,
+                        start_inclusive=start_inclusive,
+                        end_inclusive=end_inclusive)
             for start, end in pairwise(islice(cycle(vertices),
                                               len(vertices) + 1)))
