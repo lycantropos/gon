@@ -1,3 +1,4 @@
+from functools import partial
 from operator import (le,
                       lt)
 from types import MappingProxyType
@@ -101,8 +102,8 @@ class Segment(Interval):
 
 def to_interval(start: Point, end: Point,
                 *,
-                start_inclusive: bool = True,
-                end_inclusive: bool = True) -> Union[Interval, Segment]:
+                start_inclusive: bool,
+                end_inclusive: bool) -> Union[Interval, Segment]:
     if start == end:
         raise ValueError('Degenerate interval found.')
     if start_inclusive and end_inclusive:
@@ -110,6 +111,11 @@ def to_interval(start: Point, end: Point,
     return Interval(start, end,
                     start_inclusive=start_inclusive,
                     end_inclusive=end_inclusive)
+
+
+to_segment = partial(to_interval,
+                     start_inclusive=True,
+                     end_inclusive=True)
 
 
 def _in_interval(point: Point, interval: Interval,

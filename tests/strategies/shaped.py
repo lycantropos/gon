@@ -16,7 +16,8 @@ from gon.base import (Point,
                       Vector)
 from gon.hints import Scalar
 from gon.linear import (Segment,
-                        to_interval)
+                        to_interval,
+                        to_segment)
 from gon.shaped import (Polygon,
                         _to_non_neighbours,
                         self_intersects,
@@ -72,8 +73,8 @@ def points_to_concave_vertices(points: Sequence[Point]) -> Sequence[Point]:
         def forms_angle_with_neighbours(indexed_edge: Tuple[int, Segment]
                                         ) -> bool:
             index, edge = indexed_edge
-            point_start_segment = to_interval(point, edge.start)
-            point_end_segment = to_interval(point, edge.end)
+            point_start_segment = to_segment(point, edge.start)
+            point_end_segment = to_segment(point, edge.end)
             prior_edge, next_edge = _to_neighbours(index, edges)
             return (point_start_segment.orientation_with(prior_edge.start)
                     != Orientation.COLLINEAR
@@ -86,8 +87,8 @@ def points_to_concave_vertices(points: Sequence[Point]) -> Sequence[Point]:
 
         def is_visible_edge(indexed_edge: Tuple[int, Segment]) -> bool:
             index, edge = indexed_edge
-            point_start_segment = to_interval(point, edge.start)
-            point_end_segment = to_interval(point, edge.end)
+            point_start_segment = to_segment(point, edge.start)
+            point_end_segment = to_segment(point, edge.end)
             prior_edge, next_edge = _to_neighbours(index, edges)
             prior_edge_interval = to_interval(prior_edge.start,
                                               prior_edge.end,
