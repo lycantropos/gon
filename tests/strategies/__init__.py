@@ -1,5 +1,4 @@
-from .base import (points,
-                   points_strategies,
+from .base import (points_strategies,
                    scalars_strategies,
                    scalars_to_points)
 from .linear import segment_to_scalars
