@@ -81,6 +81,15 @@ class SimplePolygon(Polygon):
         return self._vertices == other._vertices
 
     def __contains__(self, point: Point) -> bool:
+        """
+        Based on PNPOLY ray-casting algorithm.
+
+        Reference:
+            https://wrf.ecse.rpi.edu//Research/Short_Notes/pnpoly.html
+
+        Complexity:
+            O(n)
+        """
         result = False
         for edge in to_edges(self._vertices):
             if point in edge:
