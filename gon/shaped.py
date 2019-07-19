@@ -81,7 +81,6 @@ class SimplePolygon(Polygon):
         return self._vertices == other._vertices
 
     def __contains__(self, point: Point) -> bool:
-        # based on PNPOLY algorithm
         result = False
         for edge in to_edges(self._vertices):
             if point in edge:
