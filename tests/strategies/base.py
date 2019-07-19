@@ -54,3 +54,4 @@ def scalars_to_points(scalars: Strategy[Scalar]) -> Strategy[Point]:
 
 
 points_strategies = scalars_strategies.map(scalars_to_points)
+points = scalars_strategies.flatmap(scalars_to_points)
