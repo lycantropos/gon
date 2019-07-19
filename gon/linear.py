@@ -127,14 +127,20 @@ def _in_interval(point: Point, interval: Interval,
                  ) -> bool:
     start_predicate = flags_predicates[interval.start_inclusive]
     end_predicate = flags_predicates[interval.end_inclusive]
-    ((left_x, left_x_predicate),
-     (right_x, right_x_predicate)) = sorted([(interval.start.x,
-                                              start_predicate),
-                                             (interval.end.x,
-                                              end_predicate)])
-    ((bottom_y, bottom_y_predicate),
-     (top_y, top_y_predicate)) = sorted([(interval.start.y, start_predicate),
-                                         (interval.end.y, end_predicate)])
+    ((left_x, _, left_x_predicate),
+     (right_x, _, right_x_predicate)) = sorted([(interval.start.x,
+                                                 interval.start.y,
+                                                 start_predicate),
+                                                (interval.end.x,
+                                                 interval.end.y,
+                                                 end_predicate)])
+    ((bottom_y, _, bottom_y_predicate),
+     (top_y, _, top_y_predicate)) = sorted([(interval.start.y,
+                                             interval.start.x,
+                                             start_predicate),
+                                            (interval.end.y,
+                                             interval.end.x,
+                                             end_predicate)])
     return (left_x_predicate(left_x, point.x)
             and right_x_predicate(point.x, right_x)
             and bottom_y_predicate(bottom_y, point.y)
