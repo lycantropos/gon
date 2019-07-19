@@ -39,7 +39,9 @@ to_non_triangle_vertices_base = partial(strategies.lists,
                                         unique_by=(attrgetter('x'),
                                                    attrgetter('y')))
 invalid_vertices = points_strategies.flatmap(to_non_triangle_vertices_base)
-invalid_vertices = (invalid_vertices.filter(self_intersects)
+invalid_vertices = (points_strategies.flatmap(partial(strategies.lists,
+                                                      max_size=2))
+                    | invalid_vertices.filter(self_intersects)
                     | invalid_vertices.filter(negate(vertices_forms_angles)))
 triangles = (triangles_vertices
              .map(to_polygon))
