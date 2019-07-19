@@ -24,7 +24,6 @@ from .hints import (Permutation,
 from .linear import (Segment,
                      to_interval)
 from .utils import (inverse_permutation,
-                    is_odd,
                     to_index_min,
                     triplewise)
 
@@ -82,23 +81,18 @@ class SimplePolygon(Polygon):
         return self._vertices == other._vertices
 
     def __contains__(self, point: Point) -> bool:
-        leftmost_bottom_vertex = self._vertices[0]
-        if (point.x < leftmost_bottom_vertex.x
-                or point.x == leftmost_bottom_vertex.x
-                and point.y < leftmost_bottom_vertex.y):
-            return False
-        try:
-            segment = to_interval(leftmost_bottom_vertex, point)
-        except ValueError:
-            # degenerate segment, point is a leftmost vertex
-            return True
-        edges_intersections = 0
+        # based on PNPOLY algorithm
+        result = False
         for edge in to_edges(self._vertices):
-            intersects_with_edge = segment.intersects_with(edge)
-            if intersects_with_edge and point in edge:
+            if point in edge:
                 return True
-            edges_intersections += intersects_with_edge
-        return is_odd(edges_intersections)
+            if (((edge.start.y > point.y) is not (edge.end.y > point.y))
+                    and point.x < ((edge.start.x - edge.end.x)
+                                   * (point.y - edge.end.y)
+                                   / (edge.start.y - edge.end.y)
+                                   + edge.end.x)):
+                result = not result
+        return result
 
     @cached.property_
     def vertices(self) -> Sequence[Point]:
