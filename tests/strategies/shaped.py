@@ -62,7 +62,8 @@ def to_concave_vertices(points: Strategy[Point]) -> Strategy[Sequence[Point]]:
                              min_size=4,
                              unique_by=(attrgetter('x'), attrgetter('y')))
             .map(points_to_concave_vertices)
-            .filter(lambda vertices: len(vertices) > 3))
+            .filter(lambda vertices: len(vertices) > 3)
+            .filter(vertices_forms_angles))
 
 
 def points_to_concave_vertices(points: Sequence[Point]) -> Sequence[Point]:
