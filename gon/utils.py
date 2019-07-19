@@ -31,10 +31,6 @@ def to_index_min(values: Iterable[Domain],
 triplewise = slider(3)
 
 
-def is_odd(number: int) -> bool:
-    return number % 2 == 1
-
-
 def inverse_permutation(permutation: Permutation) -> Permutation:
     return next(zip(*sorted(enumerate(permutation),
                             key=itemgetter(1))))
