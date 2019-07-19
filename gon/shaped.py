@@ -113,6 +113,15 @@ class SimplePolygon(Polygon):
 
     @cached.property_
     def convex_hull(self) -> Polygon:
+        """
+        Based on "Monotone chain" (aka "Andrew's algorithm").
+
+        Reference:
+            https://en.wikibooks.org/wiki/Algorithm_Implementation/Geometry/Convex_hull/Monotone_chain
+
+        Complexity:
+            O(n * log n)
+        """
         if len(self._vertices) == 3:
             return self
         return SimplePolygon(to_convex_hull(self._vertices))
