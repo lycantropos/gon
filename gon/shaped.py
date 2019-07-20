@@ -177,11 +177,29 @@ class SimplePolygon(Polygon):
 
     @cached.property_
     def is_convex(self) -> bool:
+        """
+        Based on:
+            property that each internal angle of convex polygon
+            is less than 180 degrees.
+
+        Reference:
+            https://en.wikipedia.org/wiki/Convex_polygon
+
+        Time complexity:
+            O(n)
+
+        >>> polygon = SimplePolygon([Point(-1, -1), Point(1, -1),
+        ...                          Point(1, 1), Point(-1, 1)])
+        >>> polygon.is_convex
+        True
+        """
         if len(self._vertices) == 3:
             return True
         orientations = (angle.orientation
                         for angle in to_angles(self._vertices))
         base_orientation = next(orientations)
+        # orientation change means
+        # that internal angle is greater than 180 degrees
         return all(orientation == base_orientation
                    for orientation in orientations)
 
