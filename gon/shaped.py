@@ -88,7 +88,7 @@ class SimplePolygon(Polygon):
         Reference:
             https://wrf.ecse.rpi.edu//Research/Short_Notes/pnpoly.html
 
-        Complexity:
+        Time complexity:
             O(n)
 
         >>> polygon = SimplePolygon([Point(-1, -1), Point(1, -1),
@@ -123,7 +123,7 @@ class SimplePolygon(Polygon):
         Reference:
             http://mathworld.wolfram.com/InversePermutation.html
 
-        Complexity:
+        Time complexity:
             O(n)
 
         >>> vertices = [Point(-1, -1), Point(1, -1), Point(1, 1), Point(-1, 1)]
@@ -143,7 +143,7 @@ class SimplePolygon(Polygon):
         Reference:
             https://en.wikipedia.org/wiki/Shoelace_formula
 
-        Complexity:
+        Time complexity:
             O(n)
 
         >>> polygon = SimplePolygon([Point(-1, -1), Point(1, -1),
@@ -163,7 +163,7 @@ class SimplePolygon(Polygon):
         Reference:
             https://en.wikibooks.org/wiki/Algorithm_Implementation/Geometry/Convex_hull/Monotone_chain
 
-        Complexity:
+        Time complexity:
             O(n * log n)
 
         >>> polygon = SimplePolygon([Point(-1, -1), Point(1, -1),
