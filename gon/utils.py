@@ -32,8 +32,10 @@ triplewise = slider(3)
 
 
 def inverse_permutation(permutation: Permutation) -> Permutation:
-    return next(zip(*sorted(enumerate(permutation),
-                            key=itemgetter(1))))
+    result = [None] * len(permutation)
+    for index, element in enumerate(permutation):
+        result[element] = index
+    return type(permutation)(result)
 
 
 def to_sign(value: Scalar) -> int:
