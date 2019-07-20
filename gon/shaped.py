@@ -150,6 +150,11 @@ class SimplePolygon(Polygon):
 
         Complexity:
             O(n * log n)
+
+        >>> polygon = SimplePolygon([Point(-1, -1), Point(1, -1),
+        ...                          Point(1, 1), Point(-1, 1)])
+        >>> polygon.convex_hull == polygon
+        True
         """
         if len(self._vertices) == 3:
             return self
