@@ -125,6 +125,12 @@ class SimplePolygon(Polygon):
 
         Complexity:
             O(n)
+
+        >>> vertices = [Point(-1, -1), Point(1, -1), Point(1, 1), Point(-1, 1)]
+        >>> polygon = SimplePolygon(vertices)
+        >>> all(actual == original
+        ...     for actual, original in zip(polygon.vertices, vertices))
+        True
         """
         return itemgetter(*inverse_permutation(self._order))(self._vertices)
 
