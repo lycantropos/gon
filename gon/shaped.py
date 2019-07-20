@@ -105,6 +105,16 @@ class SimplePolygon(Polygon):
 
     @cached.property_
     def vertices(self) -> Sequence[Point]:
+        """
+        Based on:
+            inversion of permutation to get original vertices order.
+
+        Reference:
+            http://mathworld.wolfram.com/InversePermutation.html
+
+        Complexity:
+            O(n)
+        """
         return itemgetter(*inverse_permutation(self._order))(self._vertices)
 
     @cached.property_
