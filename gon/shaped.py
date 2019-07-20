@@ -136,6 +136,21 @@ class SimplePolygon(Polygon):
 
     @cached.property_
     def area(self) -> Scalar:
+        """
+        Based on:
+            "Shoelace formula".
+
+        Reference:
+            https://en.wikipedia.org/wiki/Shoelace_formula
+
+        Complexity:
+            O(n)
+
+        >>> polygon = SimplePolygon([Point(-1, -1), Point(1, -1),
+        ...                          Point(1, 1), Point(-1, 1)])
+        >>> polygon.area == 4
+        True
+        """
         return abs(sum(edge.start.x * edge.end.y - edge.start.y * edge.end.x
                        for edge in to_edges(self._vertices))) / 2
 
