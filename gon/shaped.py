@@ -83,13 +83,24 @@ class SimplePolygon(Polygon):
     def __contains__(self, point: Point) -> bool:
         """
         Based on:
-            PNPOLY ray-casting algorithm.
+            "PNPOLY" ray-casting algorithm.
 
         Reference:
             https://wrf.ecse.rpi.edu//Research/Short_Notes/pnpoly.html
 
         Complexity:
             O(n)
+
+        >>> polygon = SimplePolygon([Point(-1, -1), Point(1, -1),
+        ...                          Point(1, 1), Point(-1, 1)])
+        >>> Point(1, 1) in polygon
+        True
+        >>> Point(0, 0) in polygon
+        True
+        >>> Point(2, 2) in polygon
+        False
+        >>> Point(-2, -2) in polygon
+        False
         """
         result = False
         for edge in to_edges(self._vertices):
