@@ -39,7 +39,7 @@ def inverse_permutation(permutation: Permutation) -> Permutation:
     Reference:
         http://mathworld.wolfram.com/InversePermutation.html
 
-    Complexity:
+    Time complexity:
         O(n)
     """
     result = [None] * len(permutation)
