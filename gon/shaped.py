@@ -82,7 +82,8 @@ class SimplePolygon(Polygon):
 
     def __contains__(self, point: Point) -> bool:
         """
-        Based on PNPOLY ray-casting algorithm.
+        Based on:
+            PNPOLY ray-casting algorithm.
 
         Reference:
             https://wrf.ecse.rpi.edu//Research/Short_Notes/pnpoly.html
@@ -114,7 +115,8 @@ class SimplePolygon(Polygon):
     @cached.property_
     def convex_hull(self) -> Polygon:
         """
-        Based on "Monotone chain" (aka "Andrew's algorithm").
+        Based on:
+            "Monotone chain" (aka "Andrew's algorithm").
 
         Reference:
             https://en.wikibooks.org/wiki/Algorithm_Implementation/Geometry/Convex_hull/Monotone_chain
