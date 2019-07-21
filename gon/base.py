@@ -67,7 +67,7 @@ class Vector:
     def cross_z(self, other: 'Vector') -> Scalar:
         """
         Based on:
-            z-coordinate of planar vectors cross product
+            z-coordinate of planar vectors' cross product
             (assuming that their z-coordinates are zeros).
 
         Reference:
