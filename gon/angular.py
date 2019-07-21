@@ -52,6 +52,20 @@ class Angle:
 
     @property
     def kind(self) -> int:
+        """
+        Based on:
+            law of cosines.
+
+        Reference:
+            https://en.wikipedia.org/wiki/Law_of_cosines
+
+        Time complexity:
+            O(1)
+
+        >>> angle = Angle(Point(0, 0), Point(1, 0), Point(0, 1))
+        >>> angle.kind == AngleKind.RIGHT
+        True
+        """
         return to_sign(
                 self.vertex.squared_distance_to(self._first_ray_point)
                 - self._first_ray_point.squared_distance_to(
