@@ -66,10 +66,23 @@ class Vector:
 
     def cross_z(self, other: 'Vector') -> Scalar:
         """
-        Z-coordinate of planar vectors cross product
-        (assuming that their z-coordinates are zeros).
+        Based on:
+            z-coordinate of planar vectors cross product
+            (assuming that their z-coordinates are zeros).
 
-        Corresponds to signed area of parallelogram built on given vectors.
+        Reference:
+            https://en.wikipedia.org/wiki/Cross_product
+
+        Time complexity:
+            O(1)
+
+        >>> basis_vector_x, basis_vector_y = Vector(1, 0), Vector(0, 1)
+        >>> basis_vector_x.cross_z(basis_vector_y) == 1
+        True
+        >>> basis_vector_x.cross_z(basis_vector_x) == 0
+        True
+        >>> basis_vector_y.cross_z(basis_vector_y) == 0
+        True
         """
         return self.x * other.y - self.y * other.x
 
