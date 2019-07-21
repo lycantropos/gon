@@ -54,7 +54,7 @@ class Angle:
     def kind(self) -> int:
         """
         Based on:
-            law of cosines.
+            "law of cosines" (aka "cosine formula").
 
         Reference:
             https://en.wikipedia.org/wiki/Law_of_cosines
