@@ -63,6 +63,17 @@ class Polygon(ABC):
 
 
 class SimplePolygon(Polygon):
+    """
+    Based on:
+        reordering vertices to simplify equality check & hashing.
+
+    Reference:
+        https://en.wikipedia.org/wiki/Simple_polygon
+
+    Time complexity:
+        O(n)
+    """
+
     __slots__ = ('_order', '_vertices')
 
     def __init__(self, vertices: Sequence[Point]) -> None:
