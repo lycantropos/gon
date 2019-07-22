@@ -156,7 +156,7 @@ polygons = vertices.map(to_polygon)
 
 
 def to_polygon_with_points(polygon: Polygon
-                           ) -> Strategy[Tuple[Segment, Point]]:
+                           ) -> Strategy[Tuple[Polygon, Point]]:
     scalars = strategies.one_of(list(map(segment_to_scalars,
                                          to_edges(polygon.vertices))))
     return strategies.tuples(strategies.just(polygon),
@@ -164,3 +164,14 @@ def to_polygon_with_points(polygon: Polygon
 
 
 polygons_with_points = polygons.flatmap(to_polygon_with_points)
+
+
+def to_polygon_with_vertices_indices(polygon: Polygon
+                                     ) -> Strategy[Tuple[Polygon, int]]:
+    indices = strategies.integers(min_value=0,
+                                  max_value=len(polygon.vertices))
+    return strategies.tuples(strategies.just(polygon), indices)
+
+
+polygons_with_vertices_indices = (polygons
+                                  .flatmap(to_polygon_with_vertices_indices))

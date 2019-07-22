@@ -1,6 +1,9 @@
+from typing import Tuple
+
 from hypothesis import given
 
-from gon.shaped import Polygon
+from gon.shaped import (Polygon,
+                        to_polygon)
 from tests.utils import implication
 from . import strategies
 
@@ -23,3 +26,14 @@ def test_transitivity(left_polygon: Polygon,
     assert implication(left_polygon == mid_polygon
                        and mid_polygon == right_polygon,
                        left_polygon == right_polygon)
+
+
+@given(strategies.polygons_with_vertices_indices)
+def test_vertices_shift(polygon_with_vertices_index: Tuple[Polygon, int]
+                        ) -> None:
+    polygon, index = polygon_with_vertices_index
+
+    shifted_polygon = to_polygon(polygon.vertices[index:]
+                                 + polygon.vertices[:index])
+
+    assert polygon == shifted_polygon
