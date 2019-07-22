@@ -20,6 +20,7 @@ from gon.linear import (Segment,
                         to_segment)
 from gon.shaped import (Polygon,
                         _to_non_neighbours,
+                        _vertices_forms_convex_polygon,
                         self_intersects,
                         to_convex_hull,
                         to_edges,
@@ -43,8 +44,7 @@ invalid_vertices = (points_strategies.flatmap(partial(strategies.lists,
                                                       max_size=2))
                     | invalid_vertices.filter(self_intersects)
                     | invalid_vertices.filter(negate(vertices_forms_angles)))
-triangles = (triangles_vertices
-             .map(to_polygon))
+triangles = triangles_vertices.map(to_polygon)
 
 
 def to_convex_vertices(points: Strategy[Point]) -> Strategy[Sequence[Point]]:
@@ -53,24 +53,34 @@ def to_convex_vertices(points: Strategy[Point]) -> Strategy[Sequence[Point]]:
             .filter(lambda vertices: len(vertices) >= 3))
 
 
-convex_polygons = (triangles
-                   | (points_strategies
-                      .flatmap(to_convex_vertices)
-                      .map(to_polygon)))
+convex_vertices = (triangles_vertices
+                   | points_strategies.flatmap(to_convex_vertices))
 
 
 def to_concave_vertices(points: Strategy[Point]) -> Strategy[Sequence[Point]]:
     return (strategies.lists(points,
                              min_size=4,
                              unique_by=(attrgetter('x'), attrgetter('y')))
-            .map(points_to_concave_vertices)
-            .filter(lambda vertices: len(vertices) > 3)
+            .map(split_by_convex_hull)
+            .filter(itemgetter(1))
+            .map(combine_vertices)
+            .filter(itemgetter(1))
+            .map(itemgetter(0))
             .filter(vertices_forms_angles))
 
 
-def points_to_concave_vertices(points: Sequence[Point]) -> Sequence[Point]:
-    result = list(to_convex_hull(points))
-    rest_points = [point for point in points if point not in result]
+def split_by_convex_hull(points: Sequence[Point]
+                         ) -> Tuple[Sequence[Point], Sequence[Point]]:
+    convex_hull = to_convex_hull(points)
+    rest_points = [point for point in points if point not in convex_hull]
+    return convex_hull, rest_points
+
+
+def combine_vertices(convex_hull_rest_points: Tuple[Sequence[Point],
+                                                    Sequence[Point]]
+                     ) -> Tuple[Sequence[Point], int]:
+    result, rest_points = convex_hull_rest_points
+    inserted_points_count = 0
     for point in rest_points:
         edges = tuple(to_edges(result))
 
@@ -125,7 +135,8 @@ def points_to_concave_vertices(points: Sequence[Point]) -> Sequence[Point]:
         else:
             index, _ = indexed_edge
         result.insert(index + 1, point)
-    return result
+        inserted_points_count += 1
+    return result, inserted_points_count
 
 
 def _to_neighbours(index: int,
@@ -148,11 +159,10 @@ def squared_distance_to_point(segment: Segment,
             / segment_vector.squared_length)
 
 
-concave_polygons = (points_strategies
-                    .flatmap(to_concave_vertices)
-                    .map(to_polygon)
-                    .filter(lambda polygon: not polygon.is_convex))
-polygons = concave_polygons | convex_polygons
+concave_vertices = (points_strategies.flatmap(to_concave_vertices)
+                    .filter(negate(_vertices_forms_convex_polygon)))
+polygons_vertices = convex_vertices | concave_vertices
+polygons = polygons_vertices.map(to_polygon)
 
 
 def to_polygon_with_points(polygon: Polygon
