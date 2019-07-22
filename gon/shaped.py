@@ -205,6 +205,20 @@ class SimplePolygon(Polygon):
 
 
 def to_polygon(vertices: Sequence[Point]) -> Polygon:
+    """
+    Based on:
+        vertices validation for non-collinear consecutive edges
+        & checking of self-intersection.
+
+    Reference:
+        https://en.wikipedia.org/wiki/Polygon
+
+    Time complexity:
+        O(n^2)
+
+    >>> to_polygon([Point(-1, -1), Point(1, -1), Point(1, 1), Point(-1, 1)])
+    SimplePolygon((Point(-1, -1), Point(1, -1), Point(1, 1), Point(-1, 1)))
+    """
     if len(vertices) < 3:
         raise ValueError('Polygon should have at least 3 vertices.')
     if not vertices_forms_angles(vertices):
