@@ -50,6 +50,9 @@ class Vector:
         self._x = x
         self._y = y
 
+    def __bool__(self) -> bool:
+        return bool(self._x and self._y)
+
     @property
     def x(self) -> Scalar:
         return self._x
