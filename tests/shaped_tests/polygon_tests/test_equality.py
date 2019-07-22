@@ -1,8 +1,8 @@
 from hypothesis import given
 
 from gon.shaped import Polygon
-from tests import strategies
 from tests.utils import implication
+from . import strategies
 
 
 @given(strategies.polygons)
