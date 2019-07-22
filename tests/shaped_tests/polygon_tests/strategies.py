@@ -5,10 +5,8 @@ from typing import (Sequence,
                     Tuple)
 
 from hypothesis import strategies
-from lz.functional import (compose,
-                           pack)
+from lz.functional import compose
 from lz.logical import negate
-from lz.replication import replicator
 
 from gon.angular import (Angle,
                          Orientation)
@@ -28,12 +26,10 @@ from gon.shaped import (Polygon,
 from tests.strategies import (points_strategies,
                               scalars_to_points,
                               segment_to_scalars,
-                              to_non_triangle_vertices_base)
+                              to_non_triangle_vertices_base,
+                              triangles_vertices)
 from tests.utils import Strategy
 
-triangles_vertices = (points_strategies
-                      .flatmap(compose(pack(strategies.tuples), replicator(3)))
-                      .filter(vertices_forms_angles))
 triangles = triangles_vertices.map(to_polygon)
 
 
