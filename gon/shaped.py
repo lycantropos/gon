@@ -193,15 +193,17 @@ class SimplePolygon(Polygon):
         >>> polygon.is_convex
         True
         """
-        if len(self._vertices) == 3:
-            return True
-        orientations = (angle.orientation
-                        for angle in to_angles(self._vertices))
-        base_orientation = next(orientations)
-        # orientation change means
-        # that internal angle is greater than 180 degrees
-        return all(orientation == base_orientation
-                   for orientation in orientations)
+        return _vertices_forms_convex_polygon(self._vertices)
+
+
+def _vertices_forms_convex_polygon(vertices: Sequence[Point]) -> bool:
+    if len(vertices) == 3:
+        return True
+    orientations = (angle.orientation for angle in to_angles(vertices))
+    base_orientation = next(orientations)
+    # orientation change means
+    # that internal angle is greater than 180 degrees
+    return all(orientation == base_orientation for orientation in orientations)
 
 
 def to_polygon(vertices: Sequence[Point]) -> Polygon:
