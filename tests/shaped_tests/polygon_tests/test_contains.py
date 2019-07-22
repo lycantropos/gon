@@ -5,8 +5,8 @@ from hypothesis import given
 from gon.base import Point
 from gon.shaped import (Polygon,
                         to_edges)
-from tests import strategies
 from tests.utils import implication
+from . import strategies
 
 
 @given(strategies.polygons)
