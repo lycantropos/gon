@@ -51,6 +51,20 @@ class Vector:
         self._y = y
 
     def __bool__(self) -> bool:
+        """
+        Based on:
+            checking if vector is non-zero.
+
+        Reference:
+            https://en.wikipedia.org/wiki/Zero_element
+
+        Time complexity:
+            O(1)
+
+        >>> zero_vector = Vector(0, 0)
+        >>> not zero_vector
+        True
+        """
         return bool(self._x and self._y)
 
     @property
