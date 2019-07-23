@@ -38,7 +38,7 @@ class Polygon(ABC):
 
     @abstractmethod
     def __contains__(self, point: Point) -> bool:
-        """Checks if given point lies inside the polygon or on its boundary."""
+        """Checks if the point lies inside the polygon or on its boundary."""
         pass
 
     @abstractmethod
@@ -92,7 +92,7 @@ class SimplePolygon(Polygon):
 
     def __contains__(self, point: Point) -> bool:
         """
-        Checks if point lies inside or on boundary of the polygon.
+        Checks if the point lies inside the polygon or on its boundary.
 
         Based on:
             "PNPOLY" ray-casting algorithm.
