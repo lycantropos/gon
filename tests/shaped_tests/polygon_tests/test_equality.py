@@ -23,8 +23,7 @@ def test_symmetry(left_polygon: Polygon, right_polygon: Polygon) -> None:
 def test_transitivity(left_polygon: Polygon,
                       mid_polygon: Polygon,
                       right_polygon: Polygon) -> None:
-    assert implication(left_polygon == mid_polygon
-                       and mid_polygon == right_polygon,
+    assert implication(left_polygon == mid_polygon == right_polygon,
                        left_polygon == right_polygon)
 
 
