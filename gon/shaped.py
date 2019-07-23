@@ -44,36 +44,30 @@ class Polygon(ABC):
     @abstractmethod
     def __eq__(self, other: 'Polygon') -> bool:
         """Checks if polygons are equal."""
-        pass
 
     @abstractmethod
     def __hash__(self) -> int:
         """Returns hash value of the polygon."""
-        pass
 
     @property
     @abstractmethod
     def vertices(self) -> Sequence[Point]:
         """Returns vertices of the polygon."""
-        pass
 
     @property
     @abstractmethod
     def area(self) -> Scalar:
         """Returns area of the polygon."""
-        pass
 
     @property
     @abstractmethod
     def convex_hull(self) -> 'Polygon':
         """Returns convex hull of the polygon."""
-        pass
 
     @property
     @abstractmethod
     def is_convex(self) -> bool:
         """Checks if the polygon is convex."""
-        pass
 
 
 class SimplePolygon(Polygon):
