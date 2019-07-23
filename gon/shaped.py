@@ -29,49 +29,64 @@ from .utils import (inverse_permutation,
 
 
 class Polygon(ABC):
+    """
+    Polygons interface.
+
+    Reference:
+        https://en.wikipedia.org/wiki/Polygon
+    """
+
     @abstractmethod
-    def __hash__(self) -> int:
+    def __contains__(self, point: Point) -> bool:
+        """Checks if given point lies inside the polygon or on its boundary."""
         pass
 
     @abstractmethod
     def __eq__(self, other: 'Polygon') -> bool:
+        """Checks if polygons are equal."""
         pass
 
     @abstractmethod
-    def __contains__(self, point: Point) -> bool:
+    def __hash__(self) -> int:
+        """Returns hash value of the polygon."""
         pass
 
     @property
     @abstractmethod
     def vertices(self) -> Sequence[Point]:
+        """Returns vertices of the polygon."""
         pass
 
     @property
     @abstractmethod
     def area(self) -> Scalar:
+        """Returns area of the polygon."""
         pass
 
     @property
     @abstractmethod
     def convex_hull(self) -> 'Polygon':
+        """Returns convex hull of the polygon."""
         pass
 
     @property
     @abstractmethod
     def is_convex(self) -> bool:
+        """Checks if the polygon is convex."""
         pass
 
 
 class SimplePolygon(Polygon):
     """
-    Based on:
-        reordering vertices to simplify equality check & hashing.
+    Sorts vertices by lexicographical order
+    and rotates to establish counter-clockwise orientation.
 
     Reference:
         https://en.wikipedia.org/wiki/Simple_polygon
 
     Time complexity:
-        O(n)
+        O(n), where
+        n -- vertices count.
     """
 
     __slots__ = ('_order', '_vertices')
@@ -81,18 +96,10 @@ class SimplePolygon(Polygon):
 
     __repr__ = generate_repr(__init__)
 
-    def __hash__(self) -> int:
-        return hash(self._vertices)
-
-    def __eq__(self, other: Polygon) -> bool:
-        if not isinstance(other, Polygon):
-            return NotImplemented
-        if not isinstance(other, SimplePolygon):
-            return False
-        return self._vertices == other._vertices
-
     def __contains__(self, point: Point) -> bool:
         """
+        Checks if point lies inside or on boundary of the polygon.
+
         Based on:
             "PNPOLY" ray-casting algorithm.
 
@@ -100,7 +107,8 @@ class SimplePolygon(Polygon):
             https://wrf.ecse.rpi.edu//Research/Short_Notes/pnpoly.html
 
         Time complexity:
-            O(n)
+            O(n), where
+            n -- polygon's vertices count.
 
         >>> polygon = SimplePolygon([Point(-1, -1), Point(1, -1),
         ...                          Point(1, 1), Point(-1, 1)])
@@ -125,17 +133,51 @@ class SimplePolygon(Polygon):
                 result = not result
         return result
 
+    def __eq__(self, other: Polygon) -> bool:
+        """
+        Checks if polygons are equal.
+
+        Time complexity:
+            O(min(m, n)), where
+            m -- polygon's vertices count,
+            n -- compared polygon's vertices count.
+
+        >>> polygon = SimplePolygon([Point(-1, -1), Point(1, -1),
+        ...                          Point(1, 1), Point(-1, 1)])
+        >>> polygon == polygon
+        """
+        if not isinstance(other, Polygon):
+            return NotImplemented
+        if not isinstance(other, SimplePolygon):
+            return False
+        return self._vertices == other._vertices
+
+    def __hash__(self) -> int:
+        """
+        Returns hash value of the polygon.
+
+        Time complexity:
+            O(n), where
+            n -- polygon's vertices count.
+        """
+        return hash(self._vertices)
+
     @cached.property_
     def vertices(self) -> Sequence[Point]:
         """
+        Returns vertices of the polygon in the original order.
+        Original order is the order from polygon's definition.
+
         Based on:
-            inversion of permutation to get original vertices order.
+            inversion of vertices' permutation
+            produced during polygon's creation.
 
         Reference:
             http://mathworld.wolfram.com/InversePermutation.html
 
         Time complexity:
-            O(n)
+            O(n), where
+            n -- polygon's vertices count.
 
         >>> vertices = [Point(-1, -1), Point(1, -1), Point(1, 1), Point(-1, 1)]
         >>> polygon = SimplePolygon(vertices)
@@ -148,6 +190,8 @@ class SimplePolygon(Polygon):
     @cached.property_
     def area(self) -> Scalar:
         """
+        Returns area of the polygon.
+
         Based on:
             "Shoelace formula".
 
@@ -155,7 +199,8 @@ class SimplePolygon(Polygon):
             https://en.wikipedia.org/wiki/Shoelace_formula
 
         Time complexity:
-            O(n)
+            O(n), where
+            n -- polygon's vertices count.
 
         >>> polygon = SimplePolygon([Point(-1, -1), Point(1, -1),
         ...                          Point(1, 1), Point(-1, 1)])
@@ -168,6 +213,8 @@ class SimplePolygon(Polygon):
     @cached.property_
     def convex_hull(self) -> Polygon:
         """
+        Returns convex hull of the polygon.
+
         Based on:
             "Monotone chain" (aka "Andrew's algorithm").
 
@@ -175,7 +222,8 @@ class SimplePolygon(Polygon):
             https://en.wikibooks.org/wiki/Algorithm_Implementation/Geometry/Convex_hull/Monotone_chain
 
         Time complexity:
-            O(n * log n)
+            O(n * log n), where
+            n -- polygon's vertices count.
 
         >>> polygon = SimplePolygon([Point(-1, -1), Point(1, -1),
         ...                          Point(1, 1), Point(-1, 1)])
@@ -189,6 +237,8 @@ class SimplePolygon(Polygon):
     @cached.property_
     def is_convex(self) -> bool:
         """
+        Checks if the polygon is convex.
+
         Based on:
             property that each internal angle of convex polygon
             is less than 180 degrees.
@@ -197,7 +247,8 @@ class SimplePolygon(Polygon):
             https://en.wikipedia.org/wiki/Convex_polygon
 
         Time complexity:
-            O(n)
+            O(n), where
+            n -- polygon's vertices count.
 
         >>> polygon = SimplePolygon([Point(-1, -1), Point(1, -1),
         ...                          Point(1, 1), Point(-1, 1)])
