@@ -272,7 +272,8 @@ def to_polygon(vertices: Sequence[Point]) -> Polygon:
         https://en.wikipedia.org/wiki/Polygon
 
     Time complexity:
-        O(n^2)
+        O(n^2), where
+        n -- vertices count.
 
     >>> to_polygon([Point(-1, -1), Point(1, -1), Point(1, 1), Point(-1, 1)])
     SimplePolygon((Point(-1, -1), Point(1, -1), Point(1, 1), Point(-1, 1)))
