@@ -58,10 +58,6 @@ class Polygon(ABC):
     def __ge__(self, other: 'Polygon') -> bool:
         """Checks if the polygon is a superset of the compared one."""
 
-    def issuperset(self, other: 'Polygon') -> bool:
-        """Checks if the polygon is a superset of the compared one."""
-        return self >= other
-
     def __gt__(self, other: 'Polygon') -> bool:
         """Checks if the polygon is a proper superset of the compared one."""
         return self >= other and self != other
@@ -69,10 +65,6 @@ class Polygon(ABC):
     @abstractmethod
     def __le__(self, other: 'Polygon') -> bool:
         """Checks if the polygon is a proper subset of the compared one."""
-
-    def issubset(self, other: 'Polygon') -> bool:
-        """Checks if the polygon is a superset of the compared one."""
-        return self <= other
 
     def __lt__(self, other: 'Polygon') -> bool:
         """Checks if the polygon is a proper superset of the compared one."""

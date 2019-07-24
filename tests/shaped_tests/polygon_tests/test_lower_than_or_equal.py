@@ -42,10 +42,3 @@ def test_relation_with_greater_than_or_equal(left_polygon: Polygon,
                                              right_polygon: Polygon) -> None:
     assert equivalence(left_polygon <= right_polygon,
                        right_polygon >= left_polygon)
-
-
-@given(strategies.polygons, strategies.polygons)
-def test_relation_with_issubset(left_polygon: Polygon,
-                                right_polygon: Polygon) -> None:
-    assert equivalence(left_polygon <= right_polygon,
-                       left_polygon.issubset(right_polygon))
