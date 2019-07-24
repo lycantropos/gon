@@ -49,7 +49,6 @@ class Polygon(ABC):
     @abstractmethod
     def __contains__(self, point: Point) -> InclusionKind:
         """Checks if the point lies inside the polygon or on its boundary."""
-        pass
 
     @abstractmethod
     def __eq__(self, other: 'Polygon') -> bool:
