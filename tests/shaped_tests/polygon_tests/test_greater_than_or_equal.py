@@ -25,7 +25,7 @@ def test_transitivity(left_polygon: Polygon,
                        left_polygon >= right_polygon)
 
 
-@given(strategies.polygons, strategies.polygons, strategies.polygons)
+@given(strategies.polygons, strategies.polygons)
 def test_relation_with_issuperset(left_polygon: Polygon,
                                   right_polygon: Polygon) -> None:
     assert equivalence(left_polygon >= right_polygon,
