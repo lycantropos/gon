@@ -171,6 +171,11 @@ class SimplePolygon(Polygon):
             O(m * n), where
             m -- polygon's vertices count,
             n -- compared polygon's vertices count.
+
+        >>> polygon = SimplePolygon([Point(-1, -1), Point(1, -1),
+        ...                          Point(1, 1), Point(-1, 1)])
+        >>> polygon >= polygon
+        True
         """
         return (all(vertex in self for vertex in other.vertices)
                 and all(_point_not_inside(vertex, other)
