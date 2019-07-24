@@ -3,7 +3,8 @@ from typing import Tuple
 from hypothesis import given
 
 from gon.base import Point
-from gon.shaped import (Polygon,
+from gon.shaped import (InclusionKind,
+                        Polygon,
                         to_edges)
 from tests.utils import implication
 from . import strategies
@@ -21,7 +22,9 @@ def test_point_on_edge(polygon_with_point: Tuple[Polygon, Point]) -> None:
 
     assert implication(any(point in edge
                            for edge in to_edges(polygon.vertices)),
-                       point in polygon)
+                       point in polygon
+                       and polygon.__contains__(point)
+                       is InclusionKind.ON_BOUNDARY)
 
 
 @given(strategies.polygons_with_points)
