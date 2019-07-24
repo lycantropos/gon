@@ -224,6 +224,11 @@ class SimplePolygon(Polygon):
         Time complexity:
             O(n), where
             n -- polygon's vertices count.
+
+        >>> polygon = SimplePolygon([Point(-1, -1), Point(1, -1),
+        ...                          Point(1, 1), Point(-1, 1)])
+        >>> hash(polygon) == hash(polygon)
+        True
         """
         return hash(self._vertices)
 
