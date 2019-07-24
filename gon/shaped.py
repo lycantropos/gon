@@ -64,6 +64,22 @@ class Polygon(ABC):
     def __gt__(self, other: 'Polygon') -> bool:
         """Checks if the polygon is a proper superset of the compared one."""
 
+    def __le__(self, other: 'Polygon') -> bool:
+        """
+        Checks if the polygon is a subset of the compared one.
+
+        Reference:
+            https://en.wikipedia.org/wiki/Subset
+
+        Time complexity:
+            O(m * n), where
+            m -- polygon's vertices count,
+            n -- compared polygon's vertices count.
+        """
+        return self == other or self < other
+
+    issubset = __le__
+
     def __lt__(self, other: 'Polygon') -> bool:
         """Checks if the polygon is a proper subset of the compared one."""
 
