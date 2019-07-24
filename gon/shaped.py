@@ -45,6 +45,9 @@ class Polygon(ABC):
     def __eq__(self, other: 'Polygon') -> bool:
         """Checks if polygons are equal."""
 
+    def __gt__(self, other: 'Polygon') -> bool:
+        """Checks if the polygon is a proper superset of the compared one."""
+
     @abstractmethod
     def __hash__(self) -> int:
         """Returns hash value of the polygon."""
@@ -126,6 +129,21 @@ class SimplePolygon(Polygon):
                                    + edge.end.x)):
                 result = not result
         return result
+
+    def __gt__(self, other: Polygon) -> bool:
+        """
+        Checks if the polygon is a proper superset of the compared one.
+
+        Reference:
+            https://en.wikipedia.org/wiki/Subset
+
+        Time complexity:
+            O(m * n), where
+            m -- polygon's vertices count,
+            n -- compared polygon's vertices count.
+        """
+        return (all(vertex in self for vertex in other.vertices)
+                and all(vertex not in other for vertex in self._vertices))
 
     def __eq__(self, other: Polygon) -> bool:
         """
