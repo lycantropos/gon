@@ -177,6 +177,7 @@ class SimplePolygon(Polygon):
         >>> polygon = SimplePolygon([Point(-1, -1), Point(1, -1),
         ...                          Point(1, 1), Point(-1, 1)])
         >>> polygon == polygon
+        True
         """
         if not isinstance(other, Polygon):
             return NotImplemented
