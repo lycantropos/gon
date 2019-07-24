@@ -7,7 +7,7 @@ services:
       args:
       - PYTHON_IMAGE=${PYPY_IMAGE_NAME}
       - PYTHON_IMAGE_VERSION=${PYPY_IMAGE_VERSION}
-    image: lycantropos/gon-pypy:0.0.2
+    image: lycantropos/gon-pypy:0.0.3-alpha
     volumes:
       - ./gon/:/opt/gon/gon/
       - ./tests/:/opt/gon/tests/
