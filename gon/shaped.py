@@ -1,5 +1,7 @@
 from abc import (ABC,
                  abstractmethod)
+from enum import (IntEnum,
+                  unique)
 from itertools import (cycle,
                        islice,
                        starmap)
@@ -28,6 +30,13 @@ from .utils import (inverse_permutation,
                     triplewise)
 
 
+@unique
+class InclusionKind(IntEnum):
+    OUTSIDE = 0
+    INSIDE = 1
+    ON_BOUNDARY = 2
+
+
 class Polygon(ABC):
     """
     Polygons interface.
@@ -37,7 +46,7 @@ class Polygon(ABC):
     """
 
     @abstractmethod
-    def __contains__(self, point: Point) -> bool:
+    def __contains__(self, point: Point) -> InclusionKind:
         """Checks if the point lies inside the polygon or on its boundary."""
         pass
 
@@ -45,43 +54,29 @@ class Polygon(ABC):
     def __eq__(self, other: 'Polygon') -> bool:
         """Checks if polygons are equal."""
 
+    @abstractmethod
     def __ge__(self, other: 'Polygon') -> bool:
-        """
-        Checks if the polygon is a superset of the compared one.
+        """Checks if the polygon is a superset of the compared one."""
 
-        Reference:
-            https://en.wikipedia.org/wiki/Subset
-
-        Time complexity:
-            O(m * n), where
-            m -- polygon's vertices count,
-            n -- compared polygon's vertices count.
-        """
-        return self == other or self > other
-
-    issuperset = __ge__
+    def issuperset(self, other: 'Polygon') -> bool:
+        """Checks if the polygon is a superset of the compared one."""
+        return self >= other
 
     def __gt__(self, other: 'Polygon') -> bool:
         """Checks if the polygon is a proper superset of the compared one."""
+        return self >= other and self != other
 
+    @abstractmethod
     def __le__(self, other: 'Polygon') -> bool:
-        """
-        Checks if the polygon is a subset of the compared one.
+        """Checks if the polygon is a proper subset of the compared one."""
 
-        Reference:
-            https://en.wikipedia.org/wiki/Subset
-
-        Time complexity:
-            O(m * n), where
-            m -- polygon's vertices count,
-            n -- compared polygon's vertices count.
-        """
-        return self == other or self < other
-
-    issubset = __le__
+    def issubset(self, other: 'Polygon') -> bool:
+        """Checks if the polygon is a superset of the compared one."""
+        return self <= other
 
     def __lt__(self, other: 'Polygon') -> bool:
-        """Checks if the polygon is a proper subset of the compared one."""
+        """Checks if the polygon is a proper superset of the compared one."""
+        return self <= other and self != other
 
     @abstractmethod
     def __hash__(self) -> int:
@@ -128,7 +123,7 @@ class SimplePolygon(Polygon):
 
     __repr__ = generate_repr(__init__)
 
-    def __contains__(self, point: Point) -> bool:
+    def __contains__(self, point: Point) -> InclusionKind:
         """
         Checks if the point lies inside the polygon or on its boundary.
 
@@ -156,18 +151,18 @@ class SimplePolygon(Polygon):
         result = False
         for edge in to_edges(self._vertices):
             if point in edge:
-                return True
+                return InclusionKind.ON_BOUNDARY
             if (((edge.start.y > point.y) is not (edge.end.y > point.y))
                     and point.x < ((edge.end.x - edge.start.x)
                                    * (point.y - edge.end.y)
                                    / (edge.end.y - edge.start.y)
                                    + edge.end.x)):
                 result = not result
-        return result
+        return InclusionKind(result)
 
-    def __gt__(self, other: Polygon) -> bool:
+    def __ge__(self, other: Polygon) -> bool:
         """
-        Checks if the polygon is a proper superset of the compared one.
+        Checks if the polygon is a superset of the compared one.
 
         Reference:
             https://en.wikipedia.org/wiki/Subset
@@ -178,11 +173,12 @@ class SimplePolygon(Polygon):
             n -- compared polygon's vertices count.
         """
         return (all(vertex in self for vertex in other.vertices)
-                and all(vertex not in other for vertex in self._vertices))
+                and all(_point_not_inside(vertex, other)
+                        for vertex in self._vertices))
 
-    def __lt__(self, other: Polygon) -> bool:
+    def __le__(self, other: Polygon) -> bool:
         """
-        Checks if the polygon is a proper subset of the compared one.
+        Checks if the polygon is a subset of the compared one.
 
         Reference:
             https://en.wikipedia.org/wiki/Subset
@@ -193,9 +189,10 @@ class SimplePolygon(Polygon):
             n -- compared polygon's vertices count.
         """
         if not isinstance(other, SimplePolygon):
-            return other > self
+            return other >= self
         return (all(vertex in other for vertex in self._vertices)
-                and all(vertex not in self for vertex in other._vertices))
+                and all(_point_not_inside(vertex, self)
+                        for vertex in other._vertices))
 
     def __eq__(self, other: Polygon) -> bool:
         """
@@ -326,6 +323,10 @@ class SimplePolygon(Polygon):
         True
         """
         return _vertices_forms_convex_polygon(self._vertices)
+
+
+def _point_not_inside(point: Point, polygon: Polygon) -> bool:
+    return polygon.__contains__(point) is not InclusionKind.INSIDE
 
 
 def _vertices_forms_convex_polygon(vertices: Sequence[Point]) -> bool:
