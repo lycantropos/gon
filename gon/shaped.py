@@ -45,6 +45,22 @@ class Polygon(ABC):
     def __eq__(self, other: 'Polygon') -> bool:
         """Checks if polygons are equal."""
 
+    def __ge__(self, other: 'Polygon') -> bool:
+        """
+        Checks if the polygon is a superset of the compared one.
+
+        Reference:
+            https://en.wikipedia.org/wiki/Subset
+
+        Time complexity:
+            O(m * n), where
+            m -- polygon's vertices count,
+            n -- compared polygon's vertices count.
+        """
+        return self == other or self > other
+
+    issuperset = __ge__
+
     def __gt__(self, other: 'Polygon') -> bool:
         """Checks if the polygon is a proper superset of the compared one."""
 
