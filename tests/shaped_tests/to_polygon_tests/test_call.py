@@ -5,7 +5,7 @@ from hypothesis import given
 
 from gon.base import Point
 from gon.shaped import to_polygon
-from tests import strategies
+from . import strategies
 
 
 @given(strategies.invalid_vertices)
