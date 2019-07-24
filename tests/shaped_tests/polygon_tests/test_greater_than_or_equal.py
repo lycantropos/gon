@@ -1,8 +1,7 @@
 from hypothesis import given
 
 from gon.shaped import Polygon
-from tests.utils import (equivalence,
-                         implication)
+from tests.utils import implication
 from . import strategies
 
 
@@ -35,10 +34,3 @@ def test_relation_with_greater_than(left_polygon: Polygon,
                                     right_polygon: Polygon) -> None:
     assert implication(left_polygon > right_polygon,
                        left_polygon >= right_polygon)
-
-
-@given(strategies.polygons, strategies.polygons)
-def test_relation_with_issuperset(left_polygon: Polygon,
-                                  right_polygon: Polygon) -> None:
-    assert equivalence(left_polygon >= right_polygon,
-                       left_polygon.issuperset(right_polygon))
