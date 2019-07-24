@@ -25,6 +25,11 @@ def test_transitivity(left_polygon: Polygon,
                        left_polygon < right_polygon)
 
 
+@given(strategies.polygons)
+def test_convex_hull(polygon: Polygon) -> None:
+    assert implication(not polygon.is_convex, polygon < polygon.convex_hull)
+
+
 @given(strategies.polygons, strategies.polygons)
 def test_relation_with_greater_than(left_polygon: Polygon,
                                     right_polygon: Polygon) -> None:
