@@ -13,6 +13,7 @@ matrix:
       sudo: true
 
 install:
+  - python -m pip install codecov
   - python -m pip install -r requirements-tests.txt
   - python -m pip install -r requirements.txt
 
@@ -21,4 +22,4 @@ script:
   - python -m doctest README.md
 
 after_success:
-  - bash <(curl -s https://codecov.io/bash)
+  - python -m codecov -f coverage.xml -X gcov
