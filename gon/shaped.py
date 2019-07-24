@@ -27,6 +27,7 @@ from .linear import (Segment,
                      to_segment)
 from .utils import (inverse_permutation,
                     to_index_min,
+                    to_sign,
                     triplewise)
 
 
@@ -152,11 +153,8 @@ class SimplePolygon(Polygon):
         for edge in to_edges(self._vertices):
             if point in edge:
                 return InclusionKind.ON_BOUNDARY
-            if (((edge.start.y > point.y) is not (edge.end.y > point.y))
-                    and point.x < ((edge.end.x - edge.start.x)
-                                   * (point.y - edge.end.y)
-                                   / (edge.end.y - edge.start.y)
-                                   + edge.end.x)):
+            if ((edge.start.y > point.y) is not (edge.end.y > point.y)
+                    and _is_point_to_the_left_of_line(point, edge)):
                 result = not result
         return InclusionKind(result)
 
@@ -333,6 +331,14 @@ class SimplePolygon(Polygon):
         True
         """
         return _vertices_forms_convex_polygon(self._vertices)
+
+
+def _is_point_to_the_left_of_line(point: Point, line_segment: Segment) -> bool:
+    y_diff = line_segment.end.y - line_segment.start.y
+    return ((point.x - line_segment.end.x) * abs(y_diff)
+            < ((line_segment.end.x - line_segment.start.x)
+               * (point.y - line_segment.end.y)
+               * to_sign(y_diff)))
 
 
 def _point_not_inside(point: Point, polygon: Polygon) -> bool:
