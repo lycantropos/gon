@@ -3,8 +3,7 @@ from abc import (ABC,
 from enum import (IntEnum,
                   unique)
 from itertools import (cycle,
-                       islice,
-                       starmap)
+                       islice)
 from operator import (attrgetter,
                       itemgetter)
 from typing import (Iterable,
@@ -27,8 +26,7 @@ from .linear import (Segment,
                      to_segment)
 from .utils import (inverse_permutation,
                     to_index_min,
-                    to_sign,
-                    triplewise)
+                    to_sign)
 
 
 @unique
@@ -377,7 +375,7 @@ def _normalize_vertices(vertices: Sequence[Point]) -> Tuple[Permutation,
     order, vertices = zip(*_shift_sequence(tuple(enumerate(vertices)),
                                            key=compose(attrgetter('x', 'y'),
                                                        itemgetter(1))))
-    first_angle = Angle(vertices[0], vertices[1], vertices[2])
+    first_angle = Angle(vertices[-1], vertices[0], vertices[1])
     if first_angle.orientation != Orientation.COUNTERCLOCKWISE:
         order, vertices = (order[:1] + order[1:][::-1],
                            vertices[:1] + vertices[1:][::-1])
@@ -404,7 +402,7 @@ def _to_sub_hull(points: Iterable[Point]) -> Sequence[Point]:
     result = []
     for point in points:
         while len(result) >= 2:
-            if (Angle(result[-2], result[-1], point).orientation
+            if (Angle(result[-1], result[-2], point).orientation
                     != Orientation.COUNTERCLOCKWISE):
                 del result[-1]
             else:
@@ -419,8 +417,10 @@ def vertices_forms_angles(vertices: Sequence[Point]) -> bool:
 
 
 def to_angles(vertices: Sequence[Point]) -> Iterable[Angle]:
-    return starmap(Angle,
-                   triplewise(islice(cycle(vertices), len(vertices) + 2)))
+    return (Angle(vertices[index - 1],
+                  vertices[index],
+                  vertices[(index + 1) % len(vertices)])
+            for index in range(len(vertices)))
 
 
 def self_intersects(vertices: Sequence[Point]) -> bool:
