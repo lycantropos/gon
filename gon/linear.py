@@ -88,7 +88,7 @@ class Interval:
                 and _in_interval(other.end, self))
 
     def orientation_with(self, point: Point) -> int:
-        return Angle(self.start, self.end, point).orientation
+        return Angle(self.end, self.start, point).orientation
 
 
 class Segment(Interval):

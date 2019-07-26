@@ -9,8 +9,8 @@ from .utils import to_sign
 
 class Angle:
     def __init__(self,
-                 vertex: Point,
                  first_ray_point: Point,
+                 vertex: Point,
                  second_ray_point: Point) -> None:
         self._vertex = vertex
         self._first_ray_point = first_ray_point
@@ -32,11 +32,15 @@ class Angle:
 
     @property
     def orientation(self) -> int:
-        first_ray_vector = Vector.from_points(self.vertex,
-                                              self._first_ray_point)
-        second_ray_vector = Vector.from_points(self.vertex,
-                                               self._second_ray_point)
-        return to_sign(first_ray_vector.cross_z(second_ray_vector))
+        return to_sign(self.first_ray_vector.cross_z(self.second_ray_vector))
+
+    @property
+    def first_ray_vector(self) -> Vector:
+        return Vector.from_points(self.vertex, self._first_ray_point)
+
+    @property
+    def second_ray_vector(self):
+        return Vector.from_points(self.vertex, self._second_ray_point)
 
     @property
     def is_acute(self) -> bool:
@@ -62,7 +66,7 @@ class Angle:
         Time complexity:
             O(1)
 
-        >>> angle = Angle(Point(0, 0), Point(1, 0), Point(0, 1))
+        >>> angle = Angle(Point(1, 0), Point(0, 0), Point(0, 1))
         >>> angle.kind == AngleKind.RIGHT
         True
         """

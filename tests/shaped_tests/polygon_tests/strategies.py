@@ -133,8 +133,8 @@ def _to_neighbours(index: int,
 def squared_distance_to_point(segment: Segment,
                               *,
                               point: Point) -> Scalar:
-    if not (Angle(segment.start, point, segment.end).is_acute
-            and Angle(segment.end, point, segment.start).is_acute):
+    if not (Angle(point, segment.start, segment.end).is_acute
+            and Angle(point, segment.end, segment.start).is_acute):
         return min(point.squared_distance_to(segment.start),
                    point.squared_distance_to(segment.end))
     segment_vector = Vector.from_points(segment.start, segment.end)

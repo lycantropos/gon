@@ -9,7 +9,7 @@ from . import strategies
 def test_basic(vertex: Point,
                first_ray_point: Point,
                second_ray_point: Point) -> None:
-    angle = Angle(vertex, first_ray_point, second_ray_point)
+    angle = Angle(first_ray_point, vertex, second_ray_point)
 
     assert angle.vertex == vertex
     assert angle.first_ray_point == first_ray_point
