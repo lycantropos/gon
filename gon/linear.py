@@ -1,3 +1,4 @@
+from enum import IntEnum
 from functools import partial
 from operator import (le,
                       lt)
@@ -12,6 +13,12 @@ from .angular import (Angle,
                       Orientation)
 from .base import Point
 from .hints import Scalar
+
+
+class IntersectionKind(IntEnum):
+    NONE = 0
+    CROSS = 1
+    OVERLAP = 2
 
 
 class Interval:
@@ -65,27 +72,33 @@ class Interval:
                 and _in_interval(point, self))
 
     def intersects_with(self, other: 'Interval') -> bool:
+        return self.relationship_with(other) is not IntersectionKind.NONE
+
+    def relationship_with(self, other: 'Interval') -> IntersectionKind:
         self_start_orientation = other.orientation_with(self.start)
         if (self.start_inclusive
                 and self_start_orientation == Orientation.COLLINEAR
                 and _in_interval(self.start, other)):
-            return True
+            return IntersectionKind.OVERLAP
         self_end_orientation = other.orientation_with(self.end)
         if (self.end_inclusive
                 and self_end_orientation == Orientation.COLLINEAR
                 and _in_interval(self.end, other)):
-            return True
+            return IntersectionKind.OVERLAP
         other_start_orientation = self.orientation_with(other.start)
         if (other.start_inclusive
                 and other_start_orientation == Orientation.COLLINEAR
                 and _in_interval(other.start, self)):
-            return True
+            return IntersectionKind.OVERLAP
         other_end_orientation = self.orientation_with(other.end)
-        return (self_start_orientation * self_end_orientation < 0
-                and other_start_orientation * other_end_orientation < 0
-                or other.end_inclusive
+        if (self_start_orientation * self_end_orientation < 0
+                and other_start_orientation * other_end_orientation < 0):
+            return IntersectionKind.CROSS
+        if (other.end_inclusive
                 and other_end_orientation == Orientation.COLLINEAR
-                and _in_interval(other.end, self))
+                and _in_interval(other.end, self)):
+            return IntersectionKind.OVERLAP
+        return IntersectionKind.NONE
 
     def orientation_with(self, point: Point) -> int:
         return Angle(self.end, self.start, point).orientation

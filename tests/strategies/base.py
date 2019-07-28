@@ -1,6 +1,7 @@
 import sys
 from decimal import Decimal
 from fractions import Fraction
+from functools import partial
 from typing import (Optional,
                     Union)
 
@@ -41,10 +42,9 @@ def has_recoverable_significant_digits_count(number: Union[Decimal, float]
     return len(digits) <= sys.float_info.dig
 
 
-scalars_strategies_factories = {Decimal: to_decimals,
-                                float: to_floats,
-                                Fraction: strategies.fractions,
-                                int: strategies.integers}
+scalars_strategies_factories = {int: partial(strategies.integers,
+                                             min_value=-100,
+                                             max_value=100)}
 scalars_strategies = strategies.sampled_from(
         [factory() for factory in scalars_strategies_factories.values()])
 

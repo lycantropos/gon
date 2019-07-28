@@ -3,7 +3,7 @@ from typing import Sequence
 from hypothesis import given
 
 from gon.base import Point
-from gon.shaped import self_intersects
+from gon.shaped.contracts import self_intersects
 from tests import strategies
 
 
