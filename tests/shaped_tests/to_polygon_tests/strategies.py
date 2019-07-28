@@ -6,8 +6,8 @@ from hypothesis import strategies
 from lz.logical import negate
 
 from gon.base import Point
-from gon.shaped import (self_intersects,
-                        vertices_forms_angles)
+from gon.shaped.contracts import (self_intersects,
+                                  vertices_forms_angles)
 from tests.strategies import (points_strategies,
                               to_non_triangle_vertices_base)
 from tests.utils import Strategy

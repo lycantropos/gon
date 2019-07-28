@@ -2,31 +2,31 @@ from abc import (ABC,
                  abstractmethod)
 from enum import (IntEnum,
                   unique)
-from itertools import (cycle,
-                       islice)
 from operator import (attrgetter,
                       itemgetter)
-from typing import (Iterable,
-                    Sequence,
+from typing import (Sequence,
                     Tuple)
 
 from lz.functional import compose
 from lz.hints import Domain
-from lz.iterating import pairwise
 from lz.sorting import Key
 from memoir import cached
 from reprit.base import generate_repr
 
-from .angular import (Angle,
-                      Orientation)
-from .base import Point
-from .hints import (Permutation,
-                    Scalar)
-from .linear import (Segment,
-                     to_segment)
-from .utils import (inverse_permutation,
-                    to_index_min,
-                    to_sign)
+from gon.angular import (Angle,
+                         Orientation)
+from gon.base import Point
+from gon.hints import (Permutation,
+                       Scalar)
+from gon.linear import Segment
+from gon.utils import (inverse_permutation,
+                       to_index_min,
+                       to_sign)
+from .contracts import (self_intersects,
+                        vertices_forms_angles,
+                        vertices_forms_convex_polygon)
+from .utils import (to_convex_hull,
+                    to_edges)
 
 
 @unique
@@ -319,7 +319,7 @@ class SimplePolygon(Polygon):
         >>> polygon.is_convex
         True
         """
-        return _vertices_forms_convex_polygon(self._vertices)
+        return vertices_forms_convex_polygon(self._vertices)
 
 
 def _is_point_to_the_left_of_line(point: Point, line_segment: Segment) -> bool:
@@ -332,16 +332,6 @@ def _is_point_to_the_left_of_line(point: Point, line_segment: Segment) -> bool:
 
 def _point_not_inside(point: Point, polygon: Polygon) -> bool:
     return polygon.__contains__(point) is not InclusionKind.INSIDE
-
-
-def _vertices_forms_convex_polygon(vertices: Sequence[Point]) -> bool:
-    if len(vertices) == 3:
-        return True
-    orientations = (angle.orientation for angle in to_angles(vertices))
-    base_orientation = next(orientations)
-    # orientation change means
-    # that internal angle is greater than 180 degrees
-    return all(orientation == base_orientation for orientation in orientations)
 
 
 def to_polygon(vertices: Sequence[Point]) -> Polygon:
@@ -388,61 +378,3 @@ def _shift_sequence(sequence: Sequence[Domain],
     index_min = to_index_min(sequence,
                              key=key)
     return sequence[index_min:] + sequence[:index_min]
-
-
-def to_convex_hull(points: Sequence[Point]) -> Sequence[Point]:
-    points = sorted(points,
-                    key=attrgetter('x', 'y'))
-    lower = _to_sub_hull(points)
-    upper = _to_sub_hull(reversed(points))
-    return lower[:-1] + upper[:-1]
-
-
-def _to_sub_hull(points: Iterable[Point]) -> Sequence[Point]:
-    result = []
-    for point in points:
-        while len(result) >= 2:
-            if (Angle(result[-1], result[-2], point).orientation
-                    != Orientation.COUNTERCLOCKWISE):
-                del result[-1]
-            else:
-                break
-        result.append(point)
-    return result
-
-
-def vertices_forms_angles(vertices: Sequence[Point]) -> bool:
-    return all(angle.orientation != Orientation.COLLINEAR
-               for angle in to_angles(vertices))
-
-
-def to_angles(vertices: Sequence[Point]) -> Iterable[Angle]:
-    return (Angle(vertices[index - 1],
-                  vertices[index],
-                  vertices[(index + 1) % len(vertices)])
-            for index in range(len(vertices)))
-
-
-def self_intersects(vertices: Sequence[Point]) -> bool:
-    if len(vertices) == 3:
-        return False
-    edges = tuple(to_edges(vertices))
-    for index, edge in enumerate(edges):
-        # skipping neighbours because they always intersect
-        # NOTE: first & last edges are neighbours
-        if any(edge.intersects_with(non_neighbour)
-               for non_neighbour in _to_non_neighbours(index, edges)):
-            return True
-    return False
-
-
-def _to_non_neighbours(edge_index: int,
-                       edges: Sequence[Segment]) -> Sequence[Segment]:
-    return (edges[max(edge_index + 2 - len(edges), 0):max(edge_index - 1, 0)]
-            + edges[edge_index + 2:edge_index - 1 + len(edges)])
-
-
-def to_edges(vertices: Sequence[Point]) -> Iterable[Segment]:
-    return (to_segment(start, end)
-            for start, end in pairwise(islice(cycle(vertices),
-                                              len(vertices) + 1)))

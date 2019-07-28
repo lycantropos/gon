@@ -3,9 +3,9 @@ from typing import Tuple
 from hypothesis import given
 
 from gon.base import Point
-from gon.shaped import (InclusionKind,
-                        Polygon,
-                        to_edges)
+from gon.shaped.base import (InclusionKind,
+                             Polygon,
+                             to_edges)
 from tests.utils import implication
 from . import strategies
 

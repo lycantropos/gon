@@ -1,7 +1,8 @@
 from functools import partial
 from operator import (attrgetter,
                       itemgetter)
-from typing import (Sequence,
+from typing import (List,
+                    Sequence,
                     Tuple)
 
 from hypothesis import strategies
@@ -17,12 +18,12 @@ from gon.linear import (Segment,
                         to_interval,
                         to_segment)
 from gon.shaped import (Polygon,
-                        _to_non_neighbours,
-                        _vertices_forms_convex_polygon,
-                        to_convex_hull,
-                        to_edges,
-                        to_polygon,
-                        vertices_forms_angles)
+                        to_polygon)
+from gon.shaped.contracts import (vertices_forms_angles,
+                                  vertices_forms_convex_polygon)
+from gon.shaped.utils import (_to_non_neighbours,
+                              to_convex_hull,
+                              to_edges)
 from tests.strategies import (points_strategies,
                               scalars_to_points,
                               segment_to_scalars,
@@ -56,13 +57,13 @@ def to_concave_vertices(points: Strategy[Point]) -> Strategy[Sequence[Point]]:
 
 
 def split_by_convex_hull(points: Sequence[Point]
-                         ) -> Tuple[Sequence[Point], Sequence[Point]]:
+                         ) -> Tuple[List[Point], Sequence[Point]]:
     convex_hull = to_convex_hull(points)
     rest_points = [point for point in points if point not in convex_hull]
     return convex_hull, rest_points
 
 
-def combine_vertices(convex_hull_rest_points: Tuple[Sequence[Point],
+def combine_vertices(convex_hull_rest_points: Tuple[List[Point],
                                                     Sequence[Point]]
                      ) -> Tuple[Sequence[Point], int]:
     result, rest_points = convex_hull_rest_points
@@ -146,7 +147,7 @@ def squared_distance_to_point(segment: Segment,
 
 
 concave_vertices = (points_strategies.flatmap(to_concave_vertices)
-                    .filter(negate(_vertices_forms_convex_polygon)))
+                    .filter(negate(vertices_forms_convex_polygon)))
 vertices = convex_vertices | concave_vertices
 polygons = vertices.map(to_polygon)
 

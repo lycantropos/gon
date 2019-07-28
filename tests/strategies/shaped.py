@@ -6,7 +6,7 @@ from lz.functional import (compose,
                            pack)
 from lz.replication import replicator
 
-from gon.shaped import vertices_forms_angles
+from gon.shaped.contracts import vertices_forms_angles
 from .base import points_strategies
 
 triangles_vertices = (points_strategies
