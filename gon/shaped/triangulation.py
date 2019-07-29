@@ -190,10 +190,12 @@ def constrained_delaunay(points: Sequence[Point],
                                       adjacency=adjacency)
 
     def is_outsider_touching_boundary(index: int, vertices: Vertices) -> bool:
+        neighbours = neighbourhood[index]
         return (all(vertex in boundary_vertices
                     for vertex in vertices)
+                and neighbours
                 and all(neighbour in external_triangles
-                        for neighbour in neighbourhood[index]))
+                        for neighbour in neighbours))
 
     return [vertices
             for index, vertices in enumerate(result)
