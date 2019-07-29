@@ -1,5 +1,7 @@
 from collections import (defaultdict,
                          deque)
+from enum import (IntEnum,
+                  unique)
 from functools import partial
 from heapq import nlargest
 from typing import (Dict,
@@ -9,6 +11,7 @@ from typing import (Dict,
                     Set,
                     Tuple)
 
+from lz.hints import Sortable
 from lz.iterating import flatten
 
 from gon.angular import (Angle,
@@ -152,6 +155,13 @@ def _to_line_intersection_point(first_line_start: Point,
                  / denominator)
 
 
+@unique
+class TriangleKind(IntEnum):
+    UNKNOWN = 0
+    INNER = 1
+    OUTER = 2
+
+
 def constrained_delaunay(points: Sequence[Point],
                          *,
                          constraints: Iterable[Segment]) -> Sequence[Vertices]:
@@ -175,37 +185,77 @@ def constrained_delaunay(points: Sequence[Point],
         _restore_delaunay_criterion(constraint, result,
                                     adjacency=adjacency,
                                     new_edges=new_edges)
+    return _filter_outsiders(result,
+                             adjacency=adjacency,
+                             boundary=boundary)
 
-    def is_outsider_lying_on_boundary(vertices: Vertices) -> bool:
+
+def _filter_outsiders(triangulation: List[Vertices],
+                      *,
+                      adjacency: Dict[Segment, Set[int]],
+                      boundary: Dict[Segment, Segment]) -> List[Vertices]:
+    def classify_lying_on_boundary(vertices: Vertices) -> TriangleKind:
         for edge in to_edges(vertices):
             try:
                 boundary_edge = boundary[edge]
             except KeyError:
                 continue
             if boundary_edge.start != edge.start:
-                return True
-        return False
+                return TriangleKind.OUTER
+            return TriangleKind.INNER
+        return TriangleKind.UNKNOWN
 
-    external_triangles = {index
-                          for index, vertices in enumerate(result)
-                          if is_outsider_lying_on_boundary(vertices)}
+    triangles_kinds = {index: classify_lying_on_boundary(vertices)
+                       for index, vertices in enumerate(triangulation)}
     boundary_vertices = frozenset(flatten((edge.start, edge.end)
                                           for edge in boundary))
-    neighbourhood = _to_neighbourhood(result,
+    neighbourhood = _to_neighbourhood(triangulation,
                                       adjacency=adjacency)
 
-    def is_outsider_touching_boundary(index: int, vertices: Vertices) -> bool:
+    def sorting_key(index: int) -> Sortable:
         neighbours = neighbourhood[index]
-        return (all(vertex in boundary_vertices
-                    for vertex in vertices)
-                and neighbours
-                and all(neighbour in external_triangles
-                        for neighbour in neighbours))
+        neighbours_kinds = {neighbour: triangles_kinds[neighbour]
+                            for neighbour in neighbours}
+        unprocessed_neighbours = {
+            neighbour: kind
+            for neighbour, kind in neighbours_kinds.items()
+            if kind is TriangleKind.UNKNOWN}
+        return (len(unprocessed_neighbours),
+                set(unprocessed_neighbours.keys()) | {index})
 
+    unprocessed = sorted((index
+                          for index, kind in triangles_kinds.items()
+                          if kind is TriangleKind.UNKNOWN),
+                         key=sorting_key)
+
+    def is_touching_boundary_outsider(index: int, vertices: Vertices) -> bool:
+        if not all(vertex in boundary_vertices
+                   for vertex in vertices):
+            return False
+        neighbours = neighbourhood[index]
+        if not neighbours:
+            return False
+        return (all(is_neighbour_outsider(index, neighbour)
+                    for neighbour in neighbours))
+
+    def is_neighbour_outsider(index: int, neighbour: int) -> bool:
+        neighbour_kind = triangles_kinds[neighbour]
+        return (neighbour_kind is TriangleKind.OUTER
+                # special case of two outside adjacent triangles
+                or neighbour_kind is TriangleKind.UNKNOWN
+                and all(triangles_kinds[non_neighbour] is TriangleKind.OUTER
+                        for non_neighbour in neighbourhood[neighbour]
+                        - {index}))
+
+    for index in unprocessed:
+        vertices = triangulation[index]
+        triangles_kinds[index] = (TriangleKind.OUTER
+                                  if is_touching_boundary_outsider(index,
+                                                                   vertices)
+                                  else TriangleKind.INNER)
     return [vertices
-            for index, vertices in enumerate(result)
-            if index not in external_triangles
-            and not is_outsider_touching_boundary(index, vertices)]
+            for index, vertices in enumerate(triangulation)
+            if triangles_kinds[index] is TriangleKind.INNER]
 
 
 def _to_points_triangles(triangulation: Sequence[Vertices]
