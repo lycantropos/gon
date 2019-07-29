@@ -34,13 +34,7 @@ def delaunay(points: Sequence[Point]) -> List[Vertices]:
     for point in points:
         is_invalid_triangle = partial(_is_point_inside_circumcircle, point)
         invalid_triangles = tuple(filter(is_invalid_triangle, result))
-        hole_edges = set()
-        for vertices in invalid_triangles:
-            for edge in to_edges(vertices):
-                if edge in hole_edges:
-                    hole_edges.remove(edge)
-                else:
-                    hole_edges.add(edge)
+        hole_edges = _to_boundary(invalid_triangles)
         for vertices in invalid_triangles:
             result.remove(vertices)
         for edge in hole_edges:
@@ -55,6 +49,17 @@ def delaunay(points: Sequence[Point]) -> List[Vertices]:
             for vertices in result
             if all(vertex not in super_triangle_vertices
                    for vertex in vertices)]
+
+
+def _to_boundary(triangles_vertices: Iterable[Vertices]) -> Set[Segment]:
+    result = set()
+    for vertices in triangles_vertices:
+        for edge in to_edges(vertices):
+            if edge in result:
+                result.remove(edge)
+            else:
+                result.add(edge)
+    return result
 
 
 def _to_super_triangle_vertices(points: Sequence[Point]) -> Vertices:
