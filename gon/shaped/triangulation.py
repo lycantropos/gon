@@ -25,10 +25,10 @@ from .utils import (to_angles,
                     to_convex_hull,
                     to_edges)
 
-TriangleVertices = Tuple[Point, Point, Point]
+Vertices = Sequence[Point]
 
 
-def delaunay(points: Sequence[Point]) -> List[TriangleVertices]:
+def delaunay(points: Sequence[Point]) -> List[Vertices]:
     super_triangle_vertices = _to_super_triangle_vertices(points)
     result = {super_triangle_vertices}
     for point in points:
@@ -57,7 +57,7 @@ def delaunay(points: Sequence[Point]) -> List[TriangleVertices]:
                    for vertex in vertices)]
 
 
-def _to_super_triangle_vertices(points: Sequence[Point]) -> TriangleVertices:
+def _to_super_triangle_vertices(points: Sequence[Point]) -> Vertices:
     bounding_triangle = _to_bounding_triangle_vertices(points)
     return tuple(Point(3 * point.x
                        - bounding_triangle[index - 1].x
@@ -70,8 +70,7 @@ def _to_super_triangle_vertices(points: Sequence[Point]) -> TriangleVertices:
                  for index, point in enumerate(bounding_triangle))
 
 
-def _to_bounding_triangle_vertices(points: Sequence[Point]
-                                   ) -> TriangleVertices:
+def _to_bounding_triangle_vertices(points: Sequence[Point]) -> Vertices:
     convex_hull = to_convex_hull(points)
     base_angle = min(to_angles(convex_hull),
                      key=to_squared_cosine)
@@ -150,8 +149,7 @@ def _to_line_intersection_point(first_line_start: Point,
 
 def constrained_delaunay(points: Sequence[Point],
                          *,
-                         constraints: Iterable[Segment]
-                         ) -> Sequence[TriangleVertices]:
+                         constraints: Iterable[Segment]) -> Sequence[Vertices]:
     result = delaunay(points)
     adjacency = _to_adjacency(result)
     neighbourhood = _to_neighbourhood(result,
@@ -173,7 +171,7 @@ def constrained_delaunay(points: Sequence[Point],
                                     adjacency=adjacency,
                                     new_edges=new_edges)
 
-    def is_outsider_lying_on_boundary(vertices: TriangleVertices) -> bool:
+    def is_outsider_lying_on_boundary(vertices: Vertices) -> bool:
         for edge in to_edges(vertices):
             try:
                 boundary_edge = boundary[edge]
@@ -191,8 +189,7 @@ def constrained_delaunay(points: Sequence[Point],
     neighbourhood = _to_neighbourhood(result,
                                       adjacency=adjacency)
 
-    def is_outsider_touching_boundary(index: int,
-                                      vertices: TriangleVertices) -> bool:
+    def is_outsider_touching_boundary(index: int, vertices: Vertices) -> bool:
         return (all(vertex in boundary_vertices
                     for vertex in vertices)
                 and all(neighbour in external_triangles
@@ -204,7 +201,7 @@ def constrained_delaunay(points: Sequence[Point],
             and not is_outsider_touching_boundary(index, vertices)]
 
 
-def _to_points_triangles(triangulation: Sequence[TriangleVertices]
+def _to_points_triangles(triangulation: Sequence[Vertices]
                          ) -> Dict[Point, Set[int]]:
     result = defaultdict(set)
     for index, vertices in enumerate(triangulation):
@@ -213,7 +210,7 @@ def _to_points_triangles(triangulation: Sequence[TriangleVertices]
     return result
 
 
-def _to_adjacency(triangulation: Sequence[TriangleVertices]
+def _to_adjacency(triangulation: Sequence[Vertices]
                   ) -> Dict[Segment, Set[int]]:
     result = defaultdict(set)
     for index, vertices in enumerate(triangulation):
@@ -222,7 +219,7 @@ def _to_adjacency(triangulation: Sequence[TriangleVertices]
     return result
 
 
-def _to_neighbourhood(triangulation: Sequence[TriangleVertices],
+def _to_neighbourhood(triangulation: Sequence[Vertices],
                       *,
                       adjacency: Dict[Segment, Set[int]]
                       ) -> Dict[int, Set[int]]:
@@ -234,7 +231,7 @@ def _to_neighbourhood(triangulation: Sequence[TriangleVertices],
 
 
 def _restore_delaunay_criterion(constraint: Segment,
-                                triangulation: List[TriangleVertices],
+                                triangulation: List[Vertices],
                                 *,
                                 adjacency: Dict[Segment, Set[int]],
                                 new_edges: Set[Segment]) -> None:
@@ -270,7 +267,7 @@ def _restore_delaunay_criterion(constraint: Segment,
 
 
 def _resolve_crossings(constraint: Segment,
-                       triangulation: List[TriangleVertices],
+                       triangulation: List[Vertices],
                        *,
                        adjacency: Dict[Segment, Set[int]],
                        crossed_edges: Set[Segment]) -> Set[Segment]:
@@ -301,7 +298,7 @@ def _resolve_crossings(constraint: Segment,
 
 
 def _find_crossed_edges(constraint: Segment,
-                        triangulation: Sequence[TriangleVertices],
+                        triangulation: Sequence[Vertices],
                         *,
                         neighbourhood: Dict[int, Set[int]],
                         points_triangles: Dict[Point, Set[int]]
@@ -353,7 +350,7 @@ def _find_crossed_edges(constraint: Segment,
 def _swap_edges(src_edge: Segment, dst_edge: Segment,
                 *,
                 adjacency: Dict[Segment, Set[int]],
-                triangulation: List[Tuple[Point, Point, Point]]) -> None:
+                triangulation: List[Vertices]) -> None:
     _update_adjacency(src_edge, dst_edge,
                       adjacency=adjacency)
     _update_triangulation(src_edge, dst_edge,
@@ -365,7 +362,7 @@ def _swap_edges(src_edge: Segment, dst_edge: Segment,
 def _update_triangulation(src_edge: Segment, dst_edge: Segment,
                           *,
                           adjacency: Dict[Segment, Set[int]],
-                          triangulation: List[TriangleVertices]) -> None:
+                          triangulation: List[Vertices]) -> None:
     first_vertices, second_vertices = _to_replacements(src_edge, dst_edge)
     first_adjacent, second_adjacent = adjacency[src_edge]
     triangulation[first_adjacent] = first_vertices
@@ -388,8 +385,8 @@ def _update_adjacency(src_edge: Segment, dst_edge: Segment,
                        adjacency=adjacency)
 
 
-def _to_replacements(src_edge: Segment, dst_edge: Segment
-                     ) -> Tuple[TriangleVertices, TriangleVertices]:
+def _to_replacements(src_edge: Segment,
+                     dst_edge: Segment) -> Tuple[Vertices, Vertices]:
     first_vertices = _to_ccw_triangle_vertices((dst_edge.start, dst_edge.end,
                                                 src_edge.start))
     second_vertices = _to_ccw_triangle_vertices((dst_edge.start, dst_edge.end,
@@ -397,15 +394,14 @@ def _to_replacements(src_edge: Segment, dst_edge: Segment
     return first_vertices, second_vertices
 
 
-def _register_adjacent(index: int, vertices: TriangleVertices,
+def _register_adjacent(index: int, vertices: Vertices,
                        *,
                        adjacency: Dict[Segment, Set[int]]) -> None:
     for edge in to_edges(vertices):
         adjacency[edge].add(index)
 
 
-def _to_ccw_triangle_vertices(result: Tuple[Point, Point, Point]
-                              ) -> TriangleVertices:
+def _to_ccw_triangle_vertices(result: Vertices) -> Vertices:
     if Angle(*result).orientation != Orientation.COUNTERCLOCKWISE:
         result = result[::-1]
     return result
