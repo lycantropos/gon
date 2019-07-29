@@ -2,7 +2,6 @@ from collections import (defaultdict,
                          deque)
 from functools import partial
 from heapq import nlargest
-from itertools import cycle, islice
 from typing import (Dict,
                     Iterable,
                     List,
@@ -11,8 +10,6 @@ from typing import (Dict,
                     Tuple)
 
 from lz.iterating import flatten
-from lz.transposition import transpose
-from matplotlib import pyplot
 
 from gon.angular import (Angle,
                          Orientation,
@@ -406,10 +403,3 @@ def _is_point_inside_circumcircle(point: Point,
             - second_vector.squared_length * first_vector.cross_z(third_vector)
             + third_vector.squared_length * first_vector.cross_z(second_vector)
             ) < 0
-
-
-def draw(vertices):
-    contour = ((vertex.x, vertex.y)
-               for vertex in islice(cycle(vertices),
-                                    len(vertices) + 1))
-    pyplot.plot(*map(list, transpose(contour)))
