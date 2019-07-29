@@ -81,6 +81,10 @@ class Vector:
     def from_points(cls, start: Point, end: Point) -> 'Vector':
         return cls(end.x - start.x, end.y - start.y)
 
+    @property
+    def squared_length(self) -> Scalar:
+        return self.x ** 2 + self.y ** 2
+
     def cross_z(self, other: 'Vector') -> Scalar:
         """
         Based on:
@@ -103,6 +107,5 @@ class Vector:
         """
         return self.x * other.y - self.y * other.x
 
-    @property
-    def squared_length(self) -> Scalar:
-        return self.x ** 2 + self.y ** 2
+    def dot(self, other: 'Vector') -> Scalar:
+        return self.x * other.x + self.y * other.y
