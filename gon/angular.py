@@ -2,9 +2,9 @@ from enum import IntEnum
 
 from reprit.base import generate_repr
 
-from gon.hints import Scalar
 from .base import (Point,
                    Vector)
+from .hints import Scalar
 from .utils import to_sign
 
 
