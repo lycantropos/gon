@@ -359,6 +359,7 @@ def _swap_edges(src_edge: Segment, dst_edge: Segment,
     _update_triangulation(src_edge, dst_edge,
                           adjacency=adjacency,
                           triangulation=triangulation)
+    del adjacency[src_edge]
 
 
 def _update_triangulation(src_edge: Segment, dst_edge: Segment,
@@ -377,7 +378,6 @@ def _update_adjacency(src_edge: Segment, dst_edge: Segment,
     first_vertices, second_vertices = _to_replacements(src_edge, dst_edge)
     adjacents = adjacency[src_edge]
     first_adjacent, second_adjacent = adjacents
-    del adjacency[src_edge]
     for edge in to_edges(first_vertices):
         adjacency[edge] -= adjacents
     for edge in to_edges(second_vertices):
