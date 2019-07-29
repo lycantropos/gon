@@ -173,17 +173,35 @@ def constrained_delaunay(points: Sequence[Point],
                                     adjacency=adjacency,
                                     new_edges=new_edges)
 
-    def is_not_mouth(vertices: TriangleVertices) -> bool:
+    def is_outsider_lying_on_boundary(vertices: TriangleVertices) -> bool:
         for edge in to_edges(vertices):
             try:
                 boundary_edge = boundary[edge]
             except KeyError:
                 continue
             if boundary_edge.start != edge.start:
-                return False
-        return True
+                return True
+        return False
 
-    return [vertices for vertices in result if is_not_mouth(vertices)]
+    external_triangles = {index
+                          for index, vertices in enumerate(result)
+                          if is_outsider_lying_on_boundary(vertices)}
+    boundary_vertices = frozenset(flatten((edge.start, edge.end)
+                                          for edge in boundary))
+    neighbourhood = _to_neighbourhood(result,
+                                      adjacency=adjacency)
+
+    def is_outsider_touching_boundary(index: int,
+                                      vertices: TriangleVertices) -> bool:
+        return (all(vertex in boundary_vertices
+                    for vertex in vertices)
+                and all(neighbour in external_triangles
+                        for neighbour in neighbourhood[index]))
+
+    return [vertices
+            for index, vertices in enumerate(result)
+            if index not in external_triangles
+            and not is_outsider_touching_boundary(index, vertices)]
 
 
 def _to_points_triangles(triangulation: Sequence[TriangleVertices]
