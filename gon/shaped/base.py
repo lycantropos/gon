@@ -93,9 +93,11 @@ class Polygon(ABC):
     def is_convex(self) -> bool:
         """Checks if the polygon is convex."""
 
+    @property
     @abstractmethod
-    def triangulate(self) -> Sequence['Polygon']:
+    def triangulation(self) -> Sequence['Polygon']:
         """Returns triangulation of the polygon."""
+
 
 class SimplePolygon(Polygon):
     """
@@ -325,7 +327,8 @@ class SimplePolygon(Polygon):
         """
         return vertices_forms_convex_polygon(self._vertices)
 
-    def triangulate(self) -> Sequence[Polygon]:
+    @property
+    def triangulation(self) -> Sequence[Polygon]:
         """
         Returns triangulation of the polygon.
 
