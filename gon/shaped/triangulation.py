@@ -337,11 +337,13 @@ def _resolve_crossings(constraint: Segment,
     while crossed_edges:
         edge = crossed_edges.popleft()
         first_adjacent, second_adjacent = adjacency[edge]
-        quadriliteral_vertices = to_convex_hull(
-                triangulation[first_adjacent] + triangulation[second_adjacent])
-        if not vertices_forms_convex_polygon(quadriliteral_vertices):
+        vertices = to_convex_hull(triangulation[first_adjacent]
+                                  + triangulation[second_adjacent])
+        if not (len(vertices) == 4
+                and vertices_forms_convex_polygon(vertices)):
+            crossed_edges.append(edge)
             continue
-        anti_diagonal = to_segment(*(set(quadriliteral_vertices)
+        anti_diagonal = to_segment(*(set(vertices)
                                      - {edge.start, edge.end}))
         _swap_edges(edge, anti_diagonal,
                     adjacency=adjacency,
