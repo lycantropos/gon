@@ -22,7 +22,7 @@ from gon.linear import Segment
 from gon.utils import (inverse_permutation,
                        to_index_min,
                        to_sign)
-from . import triangulation
+from . import triangular
 from .contracts import (self_intersects,
                         vertices_forms_angles,
                         vertices_forms_convex_polygon)
@@ -342,7 +342,7 @@ class SimplePolygon(Polygon):
             O(n * log n), where
             n -- polygon's vertices count.
         """
-        result = triangulation.constrained_delaunay(
+        result = triangular.constrained_delaunay(
                 self._vertices,
                 constraints=to_edges(self._vertices))
         return [SimplePolygon(vertices) for vertices in result]
