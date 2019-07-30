@@ -1,12 +1,11 @@
-from functools import partial
-from operator import (attrgetter,
-                      itemgetter)
-from typing import (List,
-                    Sequence,
+from collections import defaultdict
+from operator import attrgetter
+from typing import (Sequence,
+                    Set,
                     Tuple)
 
 from hypothesis import strategies
-from lz.functional import compose
+from lz.iterating import flatten
 from lz.logical import negate
 
 from gon.angular import (Angle,
@@ -15,14 +14,12 @@ from gon.base import (Point,
                       Vector)
 from gon.hints import Scalar
 from gon.linear import (Segment,
-                        to_interval,
                         to_segment)
 from gon.shaped import (Polygon,
-                        to_polygon)
-from gon.shaped.contracts import (vertices_forms_angles,
-                                  vertices_forms_convex_polygon)
-from gon.shaped.utils import (_to_non_neighbours,
-                              to_convex_hull,
+                        to_polygon,
+                        triangular)
+from gon.shaped.contracts import vertices_forms_convex_polygon
+from gon.shaped.utils import (to_convex_hull,
                               to_edges)
 from tests.strategies import (points_strategies,
                               scalars_to_points,
@@ -48,87 +45,82 @@ def to_concave_vertices(points: Strategy[Point]) -> Strategy[Sequence[Point]]:
     return (strategies.lists(points,
                              min_size=4,
                              unique_by=(attrgetter('x'), attrgetter('y')))
-            .map(split_by_convex_hull)
-            .filter(itemgetter(1))
-            .map(combine_vertices)
-            .filter(itemgetter(1))
-            .map(itemgetter(0))
-            .filter(vertices_forms_angles))
+            .filter(negate(vertices_forms_convex_polygon))
+            .map(points_to_concave_vertices))
 
 
-def split_by_convex_hull(points: Sequence[Point]
-                         ) -> Tuple[List[Point], Sequence[Point]]:
-    convex_hull = to_convex_hull(points)
-    rest_points = [point for point in points if point not in convex_hull]
-    return convex_hull, rest_points
+def points_to_concave_vertices(points: Sequence[Point]) -> Sequence[Point]:
+    triangulation = triangular.delaunay(points)
+    points_triangles = triangular._to_points_triangles(triangulation)
+    boundary = triangular._to_boundary(triangulation)
+    boundary_points = set(flatten((edge.start, edge.end) for edge in boundary))
 
+    def is_mouth(vertices: triangular.Vertices) -> bool:
+        return (sum(vertex in boundary_points
+                    for vertex in vertices) == 2
+                and sum(edge in boundary
+                        for edge in to_edges(vertices)) == 1)
 
-def combine_vertices(convex_hull_rest_points: Tuple[List[Point],
-                                                    Sequence[Point]]
-                     ) -> Tuple[Sequence[Point], int]:
-    result, rest_points = convex_hull_rest_points
-    inserted_points_count = 0
-    for point in rest_points:
-        edges = tuple(to_edges(result))
-
-        def forms_angle_with_neighbours(indexed_edge: Tuple[int, Segment]
-                                        ) -> bool:
-            index, edge = indexed_edge
-            point_start_segment = to_segment(point, edge.start)
-            point_end_segment = to_segment(point, edge.end)
-            prior_edge, next_edge = _to_neighbours(index, edges)
-            return (point_start_segment.orientation_with(prior_edge.start)
-                    != Orientation.COLLINEAR
-                    and point_end_segment.orientation_with(prior_edge.end)
-                    != Orientation.COLLINEAR
-                    and point_start_segment.orientation_with(next_edge.start)
-                    != Orientation.COLLINEAR
-                    and point_end_segment.orientation_with(prior_edge.end)
-                    != Orientation.COLLINEAR)
-
-        def is_visible_edge(indexed_edge: Tuple[int, Segment]) -> bool:
-            index, edge = indexed_edge
-            point_start_segment = to_segment(point, edge.start)
-            point_end_segment = to_segment(point, edge.end)
-            prior_edge, next_edge = _to_neighbours(index, edges)
-            prior_edge_interval = to_interval(prior_edge.start,
-                                              prior_edge.end,
-                                              start_inclusive=True,
-                                              end_inclusive=False)
-            next_edge_interval = to_interval(next_edge.start,
-                                             next_edge.end,
-                                             start_inclusive=False,
-                                             end_inclusive=True)
-            if (prior_edge_interval.intersects_with(point_start_segment)
-                    or next_edge_interval.intersects_with(point_start_segment)
-                    or prior_edge_interval.intersects_with(point_end_segment)
-                    or next_edge_interval.intersects_with(point_end_segment)):
-                return False
-            non_neighbours_edges = _to_non_neighbours(index, edges)
-            return not (any(point_start_segment.intersects_with(non_neighbour)
-                            for non_neighbour in non_neighbours_edges)
-                        or any(point_end_segment.intersects_with(non_neighbour)
-                               for non_neighbour in non_neighbours_edges))
-
-        indexed_edges = filter(forms_angle_with_neighbours, enumerate(edges))
-        indexed_edges = filter(is_visible_edge, indexed_edges)
+    mouths = {index: vertices
+              for index, vertices in enumerate(triangulation)
+              if is_mouth(vertices)}
+    neighbourhood = triangular._to_neighbourhood(
+            triangulation,
+            adjacency=triangular._to_adjacency(triangulation))
+    for _ in range(len(points) - len(boundary)):
         try:
-            indexed_edge = min(indexed_edges,
-                               key=compose(partial(squared_distance_to_point,
-                                                   point=point),
-                                           itemgetter(1)))
-        except ValueError:
+            index, vertices = mouths.popitem()
+        except KeyError:
+            break
+        mouth_vertex = next(vertex
+                            for vertex in vertices
+                            if vertex not in boundary_points)
+        edges = set(to_edges(vertices))
+        boundary_points.update(vertices)
+        boundary.symmetric_difference_update(edges)
+        for connected in points_triangles[mouth_vertex]:
+            connected_vertices = triangulation[connected]
+            if is_mouth(connected_vertices):
+                mouths[connected] = concave_vertices
+            else:
+                mouths.pop(connected, None)
+            for vertex in set(connected_vertices) - {mouth_vertex}:
+                points_triangles[vertex].discard(index)
+        for neighbour in neighbourhood[index]:
+            neighbour_vertices = triangulation[neighbour]
+            if is_mouth(neighbour_vertices):
+                mouths[neighbour] = neighbour_vertices
+            else:
+                mouths.pop(neighbour, None)
+            neighbourhood[neighbour].remove(index)
+    return boundary_to_vertices(boundary)
+
+
+def shrink_collinear_vertices(vertices: Sequence[Point]) -> Sequence[Point]:
+    result = []
+    for index, vertex in enumerate(vertices):
+        angle = Angle(vertices[index - 1], vertex,
+                      vertices[(index + 1) % len(vertices)])
+        if angle.orientation == Orientation.COLLINEAR:
             continue
-        else:
-            index, _ = indexed_edge
-        result.insert(index + 1, point)
-        inserted_points_count += 1
-    return result, inserted_points_count
+        result.append(vertex)
+    return result
 
 
-def _to_neighbours(index: int,
-                   edges: Sequence[Segment]) -> Sequence[Segment]:
-    return edges[index - 1], edges[(index + 1) % len(edges)]
+def boundary_to_vertices(boundary: Set[Segment]) -> Sequence[Point]:
+    connectivity = defaultdict(dict)
+    for edge in boundary:
+        connectivity[edge.start][edge.end] = edge
+        connectivity[edge.end][edge.start] = to_segment(edge.end, edge.start)
+    edge = min(boundary,
+               key=lambda edge: min(edge.start.x, edge.end.x))
+    result = [edge.start]
+    for _ in range(len(boundary) - 1):
+        edge = next(candidate
+                    for endpoint, candidate in connectivity[edge.end].items()
+                    if endpoint != edge.start)
+        result.append(edge.start)
+    return shrink_collinear_vertices(result)
 
 
 def squared_distance_to_point(segment: Segment,

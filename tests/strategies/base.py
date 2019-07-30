@@ -11,18 +11,6 @@ from gon.hints import Scalar
 from tests.utils import Strategy
 
 
-def to_floats(*,
-              min_value: Optional[Scalar] = None,
-              max_value: Optional[Scalar] = None,
-              allow_nan: bool = False,
-              allow_infinity: bool = False) -> Strategy:
-    return (strategies.floats(min_value=min_value,
-                              max_value=max_value,
-                              allow_nan=allow_nan,
-                              allow_infinity=allow_infinity)
-            .filter(has_recoverable_significant_digits_count))
-
-
 def to_decimals(*,
                 min_value: Optional[Scalar] = None,
                 max_value: Optional[Scalar] = None,
@@ -35,6 +23,42 @@ def to_decimals(*,
             .filter(has_recoverable_significant_digits_count))
 
 
+def to_floats(*,
+              min_value: Optional[Scalar] = None,
+              max_value: Optional[Scalar] = None,
+              allow_nan: bool = False,
+              allow_infinity: bool = False) -> Strategy:
+    return (strategies.floats(min_value=min_value,
+                              max_value=max_value,
+                              allow_nan=allow_nan,
+                              allow_infinity=allow_infinity)
+            .filter(has_recoverable_significant_digits_count))
+
+
+def to_fractions(*,
+                 min_value: Optional[Scalar] = None,
+                 max_value: Optional[Scalar] = None,
+                 max_denominator: Optional[Scalar] = None) -> Strategy:
+    def fraction_has_recoverable_significant_digits_count(fraction: Fraction
+                                                          ) -> bool:
+        return (has_recoverable_significant_digits_count(fraction.numerator)
+                and has_recoverable_significant_digits_count(fraction
+                                                             .denominator))
+
+    return (strategies.fractions(min_value=min_value,
+                                 max_value=max_value,
+                                 max_denominator=max_denominator)
+            .filter(fraction_has_recoverable_significant_digits_count))
+
+
+def to_integers(*,
+                min_value: Optional[Scalar] = None,
+                max_value: Optional[Scalar] = None) -> Strategy:
+    return (strategies.integers(min_value=min_value,
+                                max_value=max_value)
+            .filter(has_recoverable_significant_digits_count))
+
+
 def has_recoverable_significant_digits_count(number: Union[Decimal, float]
                                              ) -> bool:
     sign, digits, exponent = Decimal(number).as_tuple()
@@ -43,8 +67,8 @@ def has_recoverable_significant_digits_count(number: Union[Decimal, float]
 
 scalars_strategies_factories = {Decimal: to_decimals,
                                 float: to_floats,
-                                Fraction: strategies.fractions,
-                                int: strategies.integers}
+                                Fraction: to_fractions,
+                                int: to_integers}
 scalars_strategies = strategies.sampled_from(
         [factory() for factory in scalars_strategies_factories.values()])
 
