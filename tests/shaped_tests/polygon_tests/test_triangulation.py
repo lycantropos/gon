@@ -4,7 +4,7 @@ from hypothesis import given
 
 from gon.shaped import (Polygon,
                         SimplePolygon)
-from gon.shaped.triangulation import _to_boundary
+from gon.shaped.triangular import _to_boundary
 from gon.shaped.utils import to_edges
 from . import strategies
 
