@@ -81,6 +81,10 @@ class Vector:
     def from_points(cls, start: Point, end: Point) -> 'Vector':
         return cls(end.x - start.x, end.y - start.y)
 
+    @classmethod
+    def from_point(cls, end: Point) -> 'Vector':
+        return cls(end.x, end.y)
+
     @property
     def squared_length(self) -> Scalar:
         return self.x ** 2 + self.y ** 2

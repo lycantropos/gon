@@ -135,23 +135,18 @@ def _to_line_intersection_point(first_line_start: Point,
                                 first_line_end: Point,
                                 second_line_start: Point,
                                 second_line_end: Point) -> Point:
-    denominator = ((first_line_start.x - first_line_end.x)
-                   * (second_line_start.y - second_line_end.y)
-                   - (first_line_start.y - first_line_end.y)
-                   * (second_line_start.x - second_line_end.x))
-    first_line_coefficient = (second_line_start.x * second_line_end.y
-                              - second_line_start.y * second_line_end.x)
-    second_line_coefficient = (first_line_start.x * first_line_end.y
-                               - first_line_start.y * first_line_end.x)
-    return Point((second_line_coefficient
-                  * (second_line_start.x - second_line_end.x)
-                  - first_line_coefficient
-                  * (first_line_start.x - first_line_end.x))
+    first_line_vector = Vector.from_points(first_line_start, first_line_end)
+    second_line_vector = Vector.from_points(second_line_start, second_line_end)
+    denominator = first_line_vector.cross_z(second_line_vector)
+    first_line_coefficient = (Vector.from_point(second_line_start)
+                              .cross_z(Vector.from_point(second_line_end)))
+    second_line_coefficient = (Vector.from_point(first_line_start)
+                               .cross_z(Vector.from_point(first_line_end)))
+    return Point((first_line_coefficient * first_line_vector.x
+                  - second_line_coefficient * second_line_vector.x)
                  / denominator,
-                 (second_line_coefficient
-                  * (second_line_start.y - second_line_end.y)
-                  - first_line_coefficient
-                  * (first_line_start.y - first_line_end.y))
+                 (first_line_coefficient * first_line_vector.y
+                  - second_line_coefficient * second_line_vector.y)
                  / denominator)
 
 
