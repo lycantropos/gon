@@ -37,10 +37,9 @@ def delaunay(points: Sequence[Point]) -> List[Vertices]:
     for point in points:
         is_invalid_triangle = partial(_is_point_inside_circumcircle, point)
         invalid_triangles = tuple(filter(is_invalid_triangle, result))
-        hole_edges = _to_boundary(invalid_triangles)
         for vertices in invalid_triangles:
             result.remove(vertices)
-        for edge in hole_edges:
+        for edge in _to_boundary(invalid_triangles):
             orientation = edge.orientation_with(point)
             if orientation == Orientation.COLLINEAR:
                 continue
