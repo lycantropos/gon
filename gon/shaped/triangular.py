@@ -454,10 +454,10 @@ def _register_adjacent(index: int, vertices: Vertices,
         adjacency[edge].add(index)
 
 
-def _to_ccw_triangle_vertices(result: Vertices) -> Vertices:
-    if Angle(*result).orientation != Orientation.COUNTERCLOCKWISE:
-        result = result[::-1]
-    return result
+def _to_ccw_triangle_vertices(vertices: Vertices) -> Vertices:
+    if Angle(*vertices).orientation != Orientation.COUNTERCLOCKWISE:
+        vertices = vertices[::-1]
+    return vertices
 
 
 def _is_point_inside_circumcircle(point: Point,
