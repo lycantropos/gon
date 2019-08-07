@@ -461,7 +461,7 @@ def _to_ccw_triangle_vertices(result: Vertices) -> Vertices:
 
 
 def _is_point_inside_circumcircle(point: Point,
-                                  triangle_vertices: Sequence[Point]) -> bool:
+                                  triangle_vertices: Vertices) -> bool:
     first_vertex, second_vertex, third_vertex = triangle_vertices
     first_vector = Vector.from_points(point, first_vertex)
     second_vector = Vector.from_points(point, second_vertex)
