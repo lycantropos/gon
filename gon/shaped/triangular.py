@@ -1,9 +1,12 @@
+import math
 from collections import (defaultdict,
                          deque)
 from enum import (IntEnum,
                   unique)
 from functools import partial
 from heapq import nlargest
+from operator import attrgetter
+from statistics import mean
 from typing import (Dict,
                     Iterable,
                     List,
@@ -66,15 +69,35 @@ def _to_boundary(triangles_vertices: Iterable[Vertices]) -> Set[Segment]:
 
 def _to_super_triangle_vertices(points: Sequence[Point]) -> Vertices:
     bounding_triangle = _to_bounding_triangle_vertices(points)
-    return tuple(Point(3 * point.x
-                       - bounding_triangle[index - 1].x
-                       - bounding_triangle[(index + 1)
-                                           % len(bounding_triangle)].x,
-                       3 * point.y
-                       - bounding_triangle[index - 1].y
-                       - bounding_triangle[(index + 1)
-                                           % len(bounding_triangle)].y)
-                 for index, point in enumerate(bounding_triangle))
+    leftmost_point = min(points,
+                         key=attrgetter('x', 'y'))
+    max_squared_distance = max(map(leftmost_point.squared_distance_to, points))
+    centroid = _to_centroid(bounding_triangle)
+    delta_x = (max(point.x for point in points)
+               - min(point.x for point in points))
+    delta_y = (max(point.y for point in points)
+               - min(point.y for point in points))
+    aspect_ratio = (delta_x / delta_y
+                    if delta_x > delta_y
+                    else delta_y / delta_x)
+    scale = max((2 + math.sqrt(max_squared_distance
+                               / min(Vector.from_points(vertex, centroid)
+                                     .squared_length
+                                     for vertex in bounding_triangle))),
+                # handles "thin" cases
+                math.sqrt(aspect_ratio))
+
+    def scale_vertex(vertex: Point) -> Point:
+        vector = Vector.from_points(centroid, vertex)
+        return Point(centroid.x + vector.x * scale,
+                     centroid.y + vector.y * scale)
+
+    return tuple(map(scale_vertex, bounding_triangle))
+
+
+def _to_centroid(points: Sequence[Point]) -> Point:
+    return Point(mean(point.x for point in points),
+                 mean(point.y for point in points))
 
 
 def _to_bounding_triangle_vertices(points: Sequence[Point]) -> Vertices:
