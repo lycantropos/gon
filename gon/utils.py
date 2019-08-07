@@ -54,7 +54,8 @@ def to_sign(value: Scalar) -> int:
         return 1
     elif value < 0:
         return -1
-    return 0
+    else:
+        return 0
 
 
 def validate_value(value: Scalar) -> None:
