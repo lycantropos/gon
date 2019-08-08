@@ -17,8 +17,8 @@ def vertices_forms_convex_polygon(vertices: Sequence[Point]) -> bool:
     return all(orientation == base_orientation for orientation in orientations)
 
 
-def vertices_forms_angles(vertices: Sequence[Point]) -> bool:
-    return all(angle.orientation != Orientation.COLLINEAR
+def vertices_forms_strict_polygon(vertices: Sequence[Point]) -> bool:
+    return all(angle.orientation is not Orientation.COLLINEAR
                for angle in to_angles(vertices))
 
 

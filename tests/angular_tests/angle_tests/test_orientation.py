@@ -7,7 +7,7 @@ from . import strategies
 
 @given(strategies.angles)
 def test_alternatives(angle: Angle) -> None:
-    assert angle.orientation in set(Orientation)
+    assert angle.orientation in Orientation
 
 
 @given(strategies.angles)
@@ -16,4 +16,5 @@ def test_rays_flip(angle: Angle) -> None:
                           angle.vertex,
                           angle.first_ray_point)
 
-    assert flipped_angle.orientation == -angle.orientation
+    assert (angle.orientation is Orientation.COLLINEAR
+            or flipped_angle.orientation is not angle.orientation)

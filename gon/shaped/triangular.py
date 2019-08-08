@@ -45,10 +45,10 @@ def delaunay(points: Sequence[Point]) -> List[Vertices]:
             result.remove(vertices)
         for edge in _to_boundary(invalid_triangles):
             orientation = edge.orientation_with(point)
-            if orientation == Orientation.COLLINEAR:
+            if orientation is Orientation.COLLINEAR:
                 continue
             vertices = (edge.end, edge.start, point)
-            if orientation != Orientation.COUNTERCLOCKWISE:
+            if orientation is not Orientation.CLOCKWISE:
                 vertices = vertices[::-1]
             result.add(vertices)
     return [vertices
@@ -110,19 +110,17 @@ def _to_bounding_triangle_vertices(points: Sequence[Point]) -> Vertices:
             key=base_angle.vertex.squared_distance_to)
 
     def is_point_on_angle_rays(point: Point, angle: Angle) -> bool:
-        return (Segment(angle.vertex,
-                        angle.first_ray_point).orientation_with(point)
-                == Orientation.COLLINEAR
-                or Segment(angle.vertex,
-                           angle.second_ray_point).orientation_with(point)
-                == Orientation.COLLINEAR)
+        return (to_segment(angle.vertex, angle.first_ray_point)
+                .orientation_with(point) is Orientation.COLLINEAR
+                or to_segment(angle.vertex, angle.second_ray_point)
+                .orientation_with(point) is Orientation.COLLINEAR)
 
     if is_point_on_angle_rays(first_farthest_point, base_angle):
         if is_point_on_angle_rays(second_farthest_point, base_angle):
             result = (base_angle.vertex,
                       base_angle.second_ray_point,
                       base_angle.first_ray_point)
-            if base_angle.orientation != Orientation.COUNTERCLOCKWISE:
+            if base_angle.orientation is not Orientation.COUNTERCLOCKWISE:
                 result = result[::-1]
             return result
         return _to_ccw_triangle_vertices(
@@ -481,7 +479,7 @@ def _register_adjacent(index: int, vertices: Vertices,
 
 
 def _to_ccw_triangle_vertices(vertices: Vertices) -> Vertices:
-    if Angle(*vertices).orientation != Orientation.COUNTERCLOCKWISE:
+    if Angle(*vertices).orientation is not Orientation.CLOCKWISE:
         vertices = vertices[::-1]
     return vertices
 
@@ -495,4 +493,4 @@ def _is_point_inside_circumcircle(point: Point,
     return (first_vector.squared_length * second_vector.cross_z(third_vector)
             - second_vector.squared_length * first_vector.cross_z(third_vector)
             + third_vector.squared_length * first_vector.cross_z(second_vector)
-            ) < 0
+            ) > 0

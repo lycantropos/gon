@@ -21,4 +21,4 @@ def test_orientation(segment_with_point: Tuple[Segment, Point]) -> None:
 
     assert implication(point in segment,
                        segment.orientation_with(point)
-                       == Orientation.COLLINEAR)
+                       is Orientation.COLLINEAR)

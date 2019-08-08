@@ -68,7 +68,7 @@ class Interval:
                                (self._end, self.end_inclusive)]))
 
     def __contains__(self, point: Point) -> bool:
-        return (self.orientation_with(point) == Orientation.COLLINEAR
+        return (self.orientation_with(point) is Orientation.COLLINEAR
                 and _in_interval(point, self))
 
     def intersects_with(self, other: 'Interval') -> bool:
@@ -77,17 +77,17 @@ class Interval:
     def relationship_with(self, other: 'Interval') -> IntersectionKind:
         self_start_orientation = other.orientation_with(self.start)
         if (self.start_inclusive
-                and self_start_orientation == Orientation.COLLINEAR
+                and self_start_orientation is Orientation.COLLINEAR
                 and _in_interval(self.start, other)):
             return IntersectionKind.OVERLAP
         self_end_orientation = other.orientation_with(self.end)
         if (self.end_inclusive
-                and self_end_orientation == Orientation.COLLINEAR
+                and self_end_orientation is Orientation.COLLINEAR
                 and _in_interval(self.end, other)):
             return IntersectionKind.OVERLAP
         other_start_orientation = self.orientation_with(other.start)
         if (other.start_inclusive
-                and other_start_orientation == Orientation.COLLINEAR
+                and other_start_orientation is Orientation.COLLINEAR
                 and _in_interval(other.start, self)):
             return IntersectionKind.OVERLAP
         other_end_orientation = self.orientation_with(other.end)
@@ -95,7 +95,7 @@ class Interval:
                 and other_start_orientation * other_end_orientation < 0):
             return IntersectionKind.CROSS
         if (other.end_inclusive
-                and other_end_orientation == Orientation.COLLINEAR
+                and other_end_orientation is Orientation.COLLINEAR
                 and _in_interval(other.end, self)):
             return IntersectionKind.OVERLAP
         return IntersectionKind.NONE

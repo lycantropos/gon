@@ -46,7 +46,7 @@ def _to_sub_hull(points: Iterable[Point]) -> List[Point]:
     for point in points:
         while len(result) >= 2:
             if (Angle(result[-1], result[-2], point).orientation
-                    != Orientation.COUNTERCLOCKWISE):
+                    is not Orientation.COUNTERCLOCKWISE):
                 del result[-1]
             else:
                 break

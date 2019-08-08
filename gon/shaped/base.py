@@ -24,7 +24,7 @@ from gon.utils import (inverse_permutation,
                        to_sign)
 from . import triangular
 from .contracts import (self_intersects,
-                        vertices_forms_angles,
+                        vertices_forms_strict_polygon,
                         vertices_forms_convex_polygon)
 from .utils import (to_convex_hull,
                     to_edges)
@@ -378,7 +378,7 @@ def to_polygon(vertices: Sequence[Point]) -> Polygon:
     """
     if len(vertices) < 3:
         raise ValueError('Polygon should have at least 3 vertices.')
-    if not vertices_forms_angles(vertices):
+    if not vertices_forms_strict_polygon(vertices):
         raise ValueError('Consecutive vertices triplets '
                          'should not be on the same line.')
     if self_intersects(vertices):
@@ -392,7 +392,7 @@ def _normalize_vertices(vertices: Sequence[Point]) -> Tuple[Permutation,
                                            key=compose(attrgetter('x', 'y'),
                                                        itemgetter(1))))
     first_angle = Angle(vertices[-1], vertices[0], vertices[1])
-    if first_angle.orientation != Orientation.COUNTERCLOCKWISE:
+    if first_angle.orientation is not Orientation.CLOCKWISE:
         order, vertices = (order[:1] + order[1:][::-1],
                            vertices[:1] + vertices[1:][::-1])
     return order, vertices

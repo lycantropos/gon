@@ -102,7 +102,7 @@ def shrink_collinear_vertices(vertices: Sequence[Point]) -> Sequence[Point]:
     for index, vertex in enumerate(vertices):
         angle = Angle(vertices[index - 1], vertex,
                       vertices[(index + 1) % len(vertices)])
-        if angle.orientation == Orientation.COLLINEAR:
+        if angle.orientation is Orientation.COLLINEAR:
             continue
         result.append(vertex)
     return result
