@@ -120,7 +120,7 @@ def _to_bounding_triangle_vertices(points: Sequence[Point]) -> Vertices:
             result = (base_angle.vertex,
                       base_angle.second_ray_point,
                       base_angle.first_ray_point)
-            if base_angle.orientation is not Orientation.COUNTERCLOCKWISE:
+            if base_angle.orientation is not Orientation.CLOCKWISE:
                 result = result[::-1]
             return result
         return _to_ccw_triangle_vertices(
