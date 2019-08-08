@@ -7,7 +7,8 @@ from functools import partial
 from heapq import nlargest
 from operator import attrgetter
 from statistics import mean
-from typing import (Dict,
+from typing import (Container,
+                    Dict,
                     Iterable,
                     List,
                     Sequence,
@@ -211,7 +212,15 @@ def _filter_outsiders(triangulation: List[Vertices],
                       *,
                       adjacency: Dict[Segment, Set[int]],
                       boundary: Dict[Segment, Segment]) -> List[Vertices]:
-    def classify_lying_on_boundary(vertices: Vertices) -> TriangleKind:
+    def classify_lying_on_boundary(
+            vertices: Vertices,
+            *,
+            boundary_vertices: Container[Point] =
+            frozenset(flatten((edge.start, edge.end)
+                              for edge in boundary))) -> TriangleKind:
+        if not all(vertex in boundary_vertices
+                   for vertex in vertices):
+            return TriangleKind.INNER
         for edge in to_edges(vertices):
             try:
                 boundary_edge = boundary[edge]
@@ -224,8 +233,6 @@ def _filter_outsiders(triangulation: List[Vertices],
 
     triangles_kinds = {index: classify_lying_on_boundary(vertices)
                        for index, vertices in enumerate(triangulation)}
-    boundary_vertices = frozenset(flatten((edge.start, edge.end)
-                                          for edge in boundary))
     neighbourhood = _to_neighbourhood(triangulation,
                                       adjacency=adjacency)
 
@@ -245,30 +252,26 @@ def _filter_outsiders(triangulation: List[Vertices],
                           if kind is TriangleKind.UNKNOWN),
                          key=sorting_key)
 
-    def is_touching_boundary_outsider(index: int, vertices: Vertices) -> bool:
-        if not all(vertex in boundary_vertices
-                   for vertex in vertices):
-            return False
+    def is_touching_boundary_outsider(index: int) -> bool:
         neighbours = neighbourhood[index]
         if not neighbours:
             return False
-        return (all(is_neighbour_outsider(index, neighbour)
-                    for neighbour in neighbours))
+        return all(is_neighbour_outsider(index, neighbour)
+                   for neighbour in neighbours)
 
     def is_neighbour_outsider(index: int, neighbour: int) -> bool:
         neighbour_kind = triangles_kinds[neighbour]
         return (neighbour_kind is TriangleKind.OUTER
                 # special case of two outside adjacent triangles
                 or neighbour_kind is TriangleKind.UNKNOWN
-                and all(triangles_kinds[non_neighbour] is TriangleKind.OUTER
+                and all(triangles_kinds[non_neighbour]
+                        is not TriangleKind.INNER
                         for non_neighbour in neighbourhood[neighbour]
                         - {index}))
 
     for index in unprocessed:
-        vertices = triangulation[index]
         triangles_kinds[index] = (TriangleKind.OUTER
-                                  if is_touching_boundary_outsider(index,
-                                                                   vertices)
+                                  if is_touching_boundary_outsider(index)
                                   else TriangleKind.INNER)
     return [vertices
             for index, vertices in enumerate(triangulation)
