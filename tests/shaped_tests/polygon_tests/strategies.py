@@ -18,7 +18,8 @@ from gon.linear import (Segment,
 from gon.shaped import (Polygon,
                         to_polygon,
                         triangular)
-from gon.shaped.contracts import vertices_forms_convex_polygon
+from gon.shaped.contracts import (self_intersects,
+                                  vertices_forms_convex_polygon)
 from gon.shaped.utils import (to_convex_hull,
                               to_edges)
 from tests.strategies import (points_strategies,
@@ -139,7 +140,8 @@ def squared_distance_to_point(segment: Segment,
 
 
 concave_vertices = (points_strategies.flatmap(to_concave_vertices)
-                    .filter(negate(vertices_forms_convex_polygon)))
+                    .filter(negate(vertices_forms_convex_polygon))
+                    .filter(negate(self_intersects)))
 vertices = convex_vertices | concave_vertices
 polygons = vertices.map(to_polygon)
 
