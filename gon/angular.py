@@ -8,6 +8,18 @@ from .hints import Scalar
 from .utils import to_sign
 
 
+class AngleKind(IntEnum):
+    OBTUSE = -1
+    RIGHT = 0
+    ACUTE = 1
+
+
+class Orientation(IntEnum):
+    CLOCKWISE = -1
+    COLLINEAR = 0
+    COUNTERCLOCKWISE = 1
+
+
 class Angle:
     def __init__(self,
                  first_ray_point: Point,
@@ -49,8 +61,9 @@ class Angle:
         return cosine / sine > other_cosine / other_sine
 
     @property
-    def orientation(self) -> int:
-        return to_sign(self.first_ray_vector.cross_z(self.second_ray_vector))
+    def orientation(self) -> Orientation:
+        return Orientation(to_sign(self.first_ray_vector
+                                   .cross_z(self.second_ray_vector)))
 
     @property
     def first_ray_vector(self) -> Vector:
@@ -73,7 +86,7 @@ class Angle:
         return self.kind == AngleKind.OBTUSE
 
     @property
-    def kind(self) -> int:
+    def kind(self) -> AngleKind:
         """
         Based on:
             "law of cosines" (aka "cosine formula").
@@ -88,12 +101,12 @@ class Angle:
         >>> angle.kind == AngleKind.RIGHT
         True
         """
-        return to_sign(
+        return AngleKind(to_sign(
                 self.vertex.squared_distance_to(self._first_ray_point)
                 - self._first_ray_point.squared_distance_to(
                         self._second_ray_point)
                 + self.vertex.squared_distance_to(
-                        self._second_ray_point))
+                        self._second_ray_point)))
 
 class Region(IntEnum):
     pass
@@ -141,15 +154,3 @@ def to_squared_cosine(angle: Angle) -> Scalar:
     return (first_ray_vector.dot(second_ray_vector) ** 2
             / (first_ray_vector.squared_length
                * second_ray_vector.squared_length))
-
-
-class AngleKind(IntEnum):
-    OBTUSE = -1
-    RIGHT = 0
-    ACUTE = 1
-
-
-class Orientation(IntEnum):
-    CLOCKWISE = -1
-    COLLINEAR = 0
-    COUNTERCLOCKWISE = 1
