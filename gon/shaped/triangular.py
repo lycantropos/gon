@@ -210,6 +210,15 @@ def _filter_outsiders(triangulation: List[Vertices],
                       *,
                       adjacency: Dict[Segment, Set[int]],
                       boundary: Dict[Segment, Segment]) -> List[Vertices]:
+    vertices_edges = defaultdict(set)
+    for edge in boundary:
+        vertices_edges[edge.start].add(edge)
+        vertices_edges[edge.end].add(edge)
+    edges_neighbourhood = {}
+    for edge in boundary:
+        edges_neighbourhood[edge] = (list(vertices_edges[edge.start] - {edge})
+                                     + list(vertices_edges[edge.end] - {edge}))
+
     def classify_lying_on_boundary(
             vertices: Vertices,
             *,
@@ -219,15 +228,41 @@ def _filter_outsiders(triangulation: List[Vertices],
         if not all(vertex in boundary_vertices
                    for vertex in vertices):
             return TriangleKind.INNER
-        for edge in to_edges(vertices):
-            try:
-                boundary_edge = boundary[edge]
-            except KeyError:
-                continue
-            if boundary_edge.start != edge.start:
+        edges = set(to_edges(vertices))
+        boundary_edges = {edge for edge in edges if edge in boundary}
+        if not boundary_edges:
+            return TriangleKind.UNKNOWN
+        elif len(boundary_edges) == 1:
+            edge, = boundary_edges
+            oriented_boundary_edge = boundary[edge]
+            if edge.start != oriented_boundary_edge.start:
                 return TriangleKind.OUTER
+            else:
+                return TriangleKind.INNER
+        elif len(boundary_edges) == 2:
+            first_edge, second_edge = map(boundary.get, boundary_edges)
+            invalid_order = first_edge.end != second_edge.start
+            if invalid_order:
+                first_edge, second_edge = second_edge, first_edge
+            previous_edge = edges_neighbourhood[first_edge][0]
+            previous_orientation = Angle(previous_edge.start,
+                                         previous_edge.end,
+                                         first_edge.end).orientation
+            current_orientation = Angle(first_edge.start,
+                                        first_edge.end,
+                                        second_edge.end).orientation
+            if previous_orientation is Orientation.CLOCKWISE:
+                if current_orientation is Orientation.COUNTERCLOCKWISE:
+                    return TriangleKind.OUTER
+                else:
+                    return TriangleKind.INNER
+            elif current_orientation is Orientation.CLOCKWISE:
+                return TriangleKind.INNER
+            else:
+                return TriangleKind.OUTER
+        else:
+            # degenerate case with single triangle
             return TriangleKind.INNER
-        return TriangleKind.UNKNOWN
 
     triangles_kinds = {index: classify_lying_on_boundary(vertices)
                        for index, vertices in enumerate(triangulation)}
@@ -257,15 +292,17 @@ def _filter_outsiders(triangulation: List[Vertices],
         return all(is_neighbour_outsider(index, neighbour)
                    for neighbour in neighbours)
 
-    def is_neighbour_outsider(index: int, neighbour: int) -> bool:
+    def is_neighbour_outsider(index: int, neighbour: int,
+                              *,
+                              excluded: Set[int] = frozenset()) -> bool:
         neighbour_kind = triangles_kinds[neighbour]
         return (neighbour_kind is TriangleKind.OUTER
                 # special case of two outside adjacent triangles
                 or neighbour_kind is TriangleKind.UNKNOWN
-                and all(triangles_kinds[non_neighbour]
-                        is not TriangleKind.INNER
-                        for non_neighbour in neighbourhood[neighbour]
-                        - {index}))
+                and all(is_neighbour_outsider(neighbour, post_neighbour,
+                                              excluded=excluded | {index})
+                        for post_neighbour in neighbourhood[neighbour]
+                        - {index} - excluded))
 
     for index in unprocessed:
         triangles_kinds[index] = (TriangleKind.OUTER
