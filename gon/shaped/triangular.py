@@ -171,13 +171,6 @@ def _to_line_intersection_point(first_line_start: Point,
                  / denominator)
 
 
-@unique
-class TriangleKind(IntEnum):
-    UNKNOWN = 0
-    INNER = 1
-    OUTER = 2
-
-
 def constrained_delaunay(points: Sequence[Point],
                          *,
                          constraints: Iterable[Segment]) -> Sequence[Vertices]:
@@ -204,6 +197,13 @@ def constrained_delaunay(points: Sequence[Point],
     return _filter_outsiders(result,
                              adjacency=adjacency,
                              boundary=boundary)
+
+
+@unique
+class TriangleKind(IntEnum):
+    UNKNOWN = 0
+    INNER = 1
+    OUTER = 2
 
 
 def _filter_outsiders(triangulation: List[Vertices],
