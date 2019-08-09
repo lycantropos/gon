@@ -54,22 +54,6 @@ class Polygon(ABC):
         """Checks if polygons are equal."""
 
     @abstractmethod
-    def __ge__(self, other: 'Polygon') -> bool:
-        """Checks if the polygon is a superset of the compared one."""
-
-    def __gt__(self, other: 'Polygon') -> bool:
-        """Checks if the polygon is a proper superset of the compared one."""
-        return self >= other and self != other
-
-    @abstractmethod
-    def __le__(self, other: 'Polygon') -> bool:
-        """Checks if the polygon is a proper subset of the compared one."""
-
-    def __lt__(self, other: 'Polygon') -> bool:
-        """Checks if the polygon is a proper superset of the compared one."""
-        return self <= other and self != other
-
-    @abstractmethod
     def __hash__(self) -> int:
         """Returns hash value of the polygon."""
 
@@ -152,50 +136,6 @@ class SimplePolygon(Polygon):
                     and _is_point_to_the_left_of_line(point, edge)):
                 result = not result
         return InclusionKind(result)
-
-    def __ge__(self, other: Polygon) -> bool:
-        """
-        Checks if the polygon is a superset of the compared one.
-
-        Reference:
-            https://en.wikipedia.org/wiki/Subset
-
-        Time complexity:
-            O(m * n), where
-            m -- polygon's vertices count,
-            n -- compared polygon's vertices count.
-
-        >>> polygon = SimplePolygon([Point(-1, -1), Point(1, -1),
-        ...                          Point(1, 1), Point(-1, 1)])
-        >>> polygon >= polygon
-        True
-        """
-        return (all(vertex in self for vertex in other.vertices)
-                and all(_point_not_inside(vertex, other)
-                        for vertex in self._vertices))
-
-    def __le__(self, other: Polygon) -> bool:
-        """
-        Checks if the polygon is a subset of the compared one.
-
-        Reference:
-            https://en.wikipedia.org/wiki/Subset
-
-        Time complexity:
-            O(m * n), where
-            m -- polygon's vertices count,
-            n -- compared polygon's vertices count.
-
-        >>> polygon = SimplePolygon([Point(-1, -1), Point(1, -1),
-        ...                          Point(1, 1), Point(-1, 1)])
-        >>> polygon <= polygon
-        True
-        """
-        if not isinstance(other, SimplePolygon):
-            return other >= self
-        return (all(vertex in other for vertex in self._vertices)
-                and all(_point_not_inside(vertex, self)
-                        for vertex in other._vertices))
 
     def __eq__(self, other: Polygon) -> bool:
         """
