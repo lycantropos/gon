@@ -86,7 +86,7 @@ def _to_super_triangle_vertices(points: Sequence[Point]) -> Vertices:
                                      .squared_length
                                      for vertex in bounding_triangle))),
                 # handles "thin" cases
-                math.sqrt(aspect_ratio))
+                aspect_ratio)
 
     def scale_vertex(vertex: Point) -> Point:
         vector = Vector.from_points(centroid, vertex)
