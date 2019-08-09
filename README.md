@@ -81,13 +81,6 @@ True
 True
 >>> square.area
 1.0
->>> triangle = to_polygon([Point(0, 0), Point(1, 0), Point(0, 1)])
->>> triangle <= square
-True
->>> triangle != square
-True
->>> triangle < square
-True
 
 ```
 
