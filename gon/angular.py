@@ -148,9 +148,9 @@ def _to_region(cosine: Scalar, sine: Scalar) -> Region:
             return Fixed.ONE_AND_A_HALF_RADIAN
 
 
-def to_squared_cosine(angle: Angle) -> Scalar:
+def to_squared_sine(angle: Angle) -> Scalar:
     first_ray_vector = angle.first_ray_vector
     second_ray_vector = angle.second_ray_vector
-    return (first_ray_vector.dot(second_ray_vector) ** 2
+    return (first_ray_vector.cross_z(second_ray_vector) ** 2
             / (first_ray_vector.squared_length
                * second_ray_vector.squared_length))

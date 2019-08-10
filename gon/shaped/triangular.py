@@ -4,13 +4,12 @@ from collections import (defaultdict,
 from enum import (IntEnum,
                   unique)
 from functools import partial
-from heapq import nlargest
-from operator import attrgetter
 from statistics import mean
 from typing import (Container,
                     Dict,
                     Iterable,
                     List,
+                    Optional,
                     Sequence,
                     Set,
                     Tuple)
@@ -20,13 +19,15 @@ from lz.iterating import flatten
 
 from gon.angular import (Angle,
                          Orientation,
-                         to_squared_cosine)
+                         to_squared_sine)
 from gon.base import (Point,
                       Vector)
+from gon.hints import Scalar
 from gon.linear import (IntersectionKind,
                         Segment,
                         to_interval,
                         to_segment)
+from gon.utils import to_index_min
 from .contracts import vertices_forms_convex_polygon
 from .utils import (to_angles,
                     to_convex_hull,
@@ -70,23 +71,51 @@ def _to_boundary(triangles_vertices: Iterable[Vertices]) -> Set[Segment]:
 
 def _to_super_triangle_vertices(points: Sequence[Point]) -> Vertices:
     bounding_triangle = _to_bounding_triangle_vertices(points)
-    leftmost_point = min(points,
-                         key=attrgetter('x', 'y'))
-    max_squared_distance = max(map(leftmost_point.squared_distance_to, points))
+    flattest_angle = min(to_angles(to_convex_hull(points)),
+                         key=to_squared_sine)
+    center, radius = _to_circumcircle(
+            (flattest_angle.first_ray_point,
+             flattest_angle.vertex,
+             flattest_angle.second_ray_point))
     centroid = _to_centroid(bounding_triangle)
-    delta_x = (max(point.x for point in points)
-               - min(point.x for point in points))
-    delta_y = (max(point.y for point in points)
-               - min(point.y for point in points))
-    aspect_ratio = (delta_x / delta_y
-                    if delta_x > delta_y
-                    else delta_y / delta_x)
-    scale = max((2 + math.sqrt(max_squared_distance
-                               / min(Vector.from_points(vertex, centroid)
-                                     .squared_length
-                                     for vertex in bounding_triangle))),
-                # handles "thin" cases
-                aspect_ratio)
+    radius += max(_to_max_positive_square_equation_solution(
+            1,
+            2 * radius,
+            - center.squared_distance_to(vertex))
+                  for vertex in bounding_triangle)
+    if center != centroid:
+        farthest_point = max(_to_line_circle_intersections(center, centroid,
+                                                           center, radius),
+                             key=centroid.squared_distance_to)
+        radius = math.sqrt(centroid.squared_distance_to(farthest_point))
+        center = centroid
+
+    def guess_scale(first_vertex: Point, second_vertex: Point) -> Scalar:
+        edge_vector = Vector.from_points(first_vertex, second_vertex)
+        edge = to_segment(first_vertex, second_vertex)
+        perpendicular_point = Point(center.x - edge_vector.y,
+                                    center.y + edge_vector.x)
+        circle_intersection_point = next(
+                point
+                for point in _to_line_circle_intersections(center,
+                                                           perpendicular_point,
+                                                           center,
+                                                           radius)
+                if edge.relationship_with(to_segment(point, center))
+                is IntersectionKind.CROSS)
+        edge_intersection_point = _to_lines_intersection_point(
+                center,
+                perpendicular_point,
+                first_vertex,
+                second_vertex)
+        return math.sqrt(Vector.from_points(center, circle_intersection_point)
+                         .squared_length
+                         / Vector.from_points(center, edge_intersection_point)
+                         .squared_length)
+
+    scale = max(guess_scale(bounding_triangle[index - 1],
+                            bounding_triangle[index])
+                for index in range(len(bounding_triangle)))
 
     def scale_vertex(vertex: Point) -> Point:
         vector = Vector.from_points(centroid, vertex)
@@ -96,66 +125,98 @@ def _to_super_triangle_vertices(points: Sequence[Point]) -> Vertices:
     return tuple(map(scale_vertex, bounding_triangle))
 
 
+def _to_line_circle_intersections(line_segment_start: Point,
+                                  line_segment_end: Point,
+                                  center: Point,
+                                  radius: Scalar):
+    line_vector = (Vector.from_points(line_segment_start, line_segment_end)
+                   .normalized)
+    scale = Vector.from_points(line_segment_start, center).dot(line_vector)
+    nearest_line_point_to_center = Point(
+            scale * line_vector.x + line_segment_start.x,
+            scale * line_vector.y + line_segment_start.y)
+    distance_to_nearest_point = Vector.from_points(
+            center, nearest_line_point_to_center).length
+    if distance_to_nearest_point < radius:
+        distance_to_intersection_point = math.sqrt(
+                radius ** 2 - distance_to_nearest_point ** 2)
+        yield Point((scale - distance_to_intersection_point) * line_vector.x
+                    + line_segment_start.x,
+                    (scale - distance_to_intersection_point) * line_vector.y
+                    + line_segment_start.y)
+        yield Point((scale + distance_to_intersection_point) * line_vector.x
+                    + line_segment_start.x,
+                    (scale + distance_to_intersection_point) * line_vector.y
+                    + line_segment_start.y)
+    elif distance_to_nearest_point == radius:
+        yield nearest_line_point_to_center
+    else:
+        raise ValueError('No intersection found '
+                         'between line '
+                         'passing through points {start}, {end} '
+                         'and circle with center {center} '
+                         'and radius {radius}.'
+                         .format(start=line_segment_start,
+                                 end=line_segment_end,
+                                 center=center,
+                                 radius=radius))
+
+
+def _to_max_positive_square_equation_solution(quadratic_coefficient: Scalar,
+                                              linear_coefficient: Scalar,
+                                              free_term: Scalar
+                                              ) -> Optional[Scalar]:
+    if quadratic_coefficient == 0:
+        return max(-free_term / linear_coefficient, 0)
+    discriminant = (linear_coefficient ** 2
+                    - 4 * quadratic_coefficient * free_term)
+    if discriminant < 0:
+        if quadratic_coefficient < 0:
+            return None
+        return 0
+    discriminant_root = math.sqrt(discriminant)
+    return max((-linear_coefficient + discriminant_root)
+               / (2 * quadratic_coefficient),
+               (-linear_coefficient - discriminant_root)
+               / (2 * quadratic_coefficient),
+               0)
+
+
+def _to_bounding_triangle_vertices(points: Sequence[Point]) -> Vertices:
+    leftmost_x = min(point.x for point in points)
+    rightmost_x = max(point.x for point in points)
+    bottom_y = min(point.y for point in points)
+    top_y = max(point.y for point in points)
+    centroid = _to_centroid(points)
+    rectangle_vertices = [Point(leftmost_x, bottom_y),
+                          Point(rightmost_x, bottom_y),
+                          Point(rightmost_x, top_y),
+                          Point(leftmost_x, top_y)]
+    base_vertex_index = to_index_min(rectangle_vertices,
+                                     key=centroid.squared_distance_to)
+    base_vertex = rectangle_vertices[base_vertex_index]
+    left_neighbour, right_neighbour = (
+        rectangle_vertices[base_vertex_index - 1],
+        rectangle_vertices[(base_vertex_index + 1) % len(rectangle_vertices)])
+    non_neighbour = rectangle_vertices[(base_vertex_index + 2)
+                                       % len(rectangle_vertices)]
+    vector = Vector.from_points(left_neighbour, right_neighbour)
+    left_vertex = Point(non_neighbour.x - vector.x,
+                        non_neighbour.y - vector.y)
+    right_vertex = Point(non_neighbour.x + vector.x,
+                         non_neighbour.y + vector.y)
+    return left_vertex, base_vertex, right_vertex
+
+
 def _to_centroid(points: Sequence[Point]) -> Point:
     return Point(mean(point.x for point in points),
                  mean(point.y for point in points))
 
 
-def _to_bounding_triangle_vertices(points: Sequence[Point]) -> Vertices:
-    convex_hull = to_convex_hull(points)
-    base_angle = min(to_angles(convex_hull),
-                     key=to_squared_cosine)
-    first_farthest_point, second_farthest_point = nlargest(
-            2, convex_hull,
-            key=base_angle.vertex.squared_distance_to)
-
-    def is_point_on_angle_rays(point: Point, angle: Angle) -> bool:
-        return (to_segment(angle.vertex, angle.first_ray_point)
-                .orientation_with(point) is Orientation.COLLINEAR
-                or to_segment(angle.vertex, angle.second_ray_point)
-                .orientation_with(point) is Orientation.COLLINEAR)
-
-    if is_point_on_angle_rays(first_farthest_point, base_angle):
-        if is_point_on_angle_rays(second_farthest_point, base_angle):
-            result = (base_angle.vertex,
-                      base_angle.second_ray_point,
-                      base_angle.first_ray_point)
-            if base_angle.orientation is not Orientation.CLOCKWISE:
-                result = result[::-1]
-            return result
-        return _to_ccw_triangle_vertices(
-                (base_angle.vertex,
-                 _to_line_intersection_point(base_angle.vertex,
-                                             base_angle.first_ray_point,
-                                             first_farthest_point,
-                                             second_farthest_point),
-                 _to_line_intersection_point(base_angle.vertex,
-                                             base_angle.second_ray_point,
-                                             first_farthest_point,
-                                             second_farthest_point)))
-    else:
-        perpendicular_point = Point(base_angle.vertex.y
-                                    + first_farthest_point.x
-                                    - first_farthest_point.y,
-                                    first_farthest_point.x
-                                    + first_farthest_point.y
-                                    - base_angle.vertex.x)
-        return _to_ccw_triangle_vertices(
-                (base_angle.vertex,
-                 _to_line_intersection_point(base_angle.vertex,
-                                             base_angle.first_ray_point,
-                                             first_farthest_point,
-                                             perpendicular_point),
-                 _to_line_intersection_point(base_angle.vertex,
-                                             base_angle.second_ray_point,
-                                             first_farthest_point,
-                                             perpendicular_point)))
-
-
-def _to_line_intersection_point(first_line_start: Point,
-                                first_line_end: Point,
-                                second_line_start: Point,
-                                second_line_end: Point) -> Point:
+def _to_lines_intersection_point(first_line_start: Point,
+                                 first_line_end: Point,
+                                 second_line_start: Point,
+                                 second_line_end: Point) -> Point:
     first_line_vector = Vector.from_points(first_line_start, first_line_end)
     second_line_vector = Vector.from_points(second_line_start, second_line_end)
     denominator = first_line_vector.cross_z(second_line_vector)
@@ -531,3 +592,26 @@ def _is_point_inside_circumcircle(point: Point,
             - second_vector.squared_length * first_vector.cross_z(third_vector)
             + third_vector.squared_length * first_vector.cross_z(second_vector)
             ) > 0
+
+
+def _to_circumcircle(vertices: Vertices) -> Tuple[Point, Scalar]:
+    first_vertex, second_vertex, third_vertex = vertices
+    denominator = (2 * (first_vertex.x * (second_vertex.y - third_vertex.y)
+                        + second_vertex.x * (third_vertex.y - first_vertex.y)
+                        + third_vertex.x * (first_vertex.y - second_vertex.y)))
+    center_x = ((first_vertex.x ** 2 + first_vertex.y ** 2)
+                * (second_vertex.y - third_vertex.y)
+                + (second_vertex.x ** 2 + second_vertex.y ** 2)
+                * (third_vertex.y - first_vertex.y)
+                + (third_vertex.x ** 2 + third_vertex.y ** 2)
+                * (first_vertex.y - second_vertex.y)) / denominator
+    center_y = ((first_vertex.x ** 2 + first_vertex.y ** 2)
+                * (third_vertex.x - second_vertex.x)
+                + (second_vertex.x ** 2 + second_vertex.y ** 2)
+                * (first_vertex.x - third_vertex.x)
+                + (third_vertex.x ** 2 + third_vertex.y ** 2)
+                * (second_vertex.x - first_vertex.x)) / denominator
+    squared_radius = ((first_vertex.x - center_x) ** 2
+                      + (first_vertex.y - center_y) ** 2)
+    radius = math.sqrt(squared_radius)
+    return Point(center_x, center_y), radius
