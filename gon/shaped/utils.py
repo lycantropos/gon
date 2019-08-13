@@ -1,11 +1,7 @@
-from itertools import (cycle,
-                       islice)
 from operator import attrgetter
 from typing import (Iterable,
                     List,
                     Sequence)
-
-from lz.iterating import pairwise
 
 from gon.angular import (Angle,
                          Orientation)
@@ -22,9 +18,8 @@ def to_angles(vertices: Sequence[Point]) -> Iterable[Angle]:
 
 
 def to_edges(vertices: Sequence[Point]) -> Iterable[Segment]:
-    return (to_segment(start, end)
-            for start, end in pairwise(islice(cycle(vertices),
-                                              len(vertices) + 1)))
+    return (to_segment(vertices[index], vertices[(index + 1) % len(vertices)])
+            for index in range(len(vertices)))
 
 
 def _to_non_neighbours(edge_index: int,
