@@ -282,10 +282,10 @@ class SimplePolygon(Polygon):
             O(n * log n), where
             n -- polygon's vertices count.
         """
-        result = triangular.constrained_delaunay(
+        triangulation = triangular.constrained_delaunay(
                 self._vertices,
                 constraints=to_edges(self._vertices))
-        return [SimplePolygon(vertices) for vertices in result]
+        return [SimplePolygon(triangle.vertices) for triangle in triangulation]
 
 
 def _is_point_to_the_left_of_line(point: Point, line_segment: Segment) -> bool:

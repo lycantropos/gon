@@ -19,7 +19,8 @@ from gon.shaped import (Polygon,
                         to_polygon,
                         triangular)
 from gon.shaped.contracts import (self_intersects,
-                                  vertices_forms_convex_polygon)
+                                  vertices_forms_convex_polygon,
+                                  vertices_forms_strict_polygon)
 from gon.shaped.utils import (to_convex_hull,
                               to_edges)
 from tests.strategies import (points_strategies,
@@ -46,46 +47,50 @@ def to_concave_vertices(points: Strategy[Point]) -> Strategy[Sequence[Point]]:
     return (strategies.lists(points,
                              min_size=4,
                              unique_by=(attrgetter('x'), attrgetter('y')))
-            .filter(negate(vertices_forms_convex_polygon))
-            .map(points_to_concave_vertices))
+            .map(points_to_concave_vertices)
+            .filter(bool)
+            .filter(vertices_forms_strict_polygon)
+            .filter(negate(vertices_forms_convex_polygon)))
 
 
-def points_to_concave_vertices(points: Sequence[Point]) -> Sequence[Point]:
+def points_to_concave_vertices(points: Sequence[Point]) -> triangular.Vertices:
     triangulation = triangular.delaunay(points)
+    if not triangulation:
+        return []
     points_triangles = triangular._to_points_triangles(triangulation)
     boundary = triangular._to_boundary(triangulation)
     boundary_points = set(flatten((edge.start, edge.end) for edge in boundary))
 
-    def is_mouth(vertices: triangular.Vertices) -> bool:
+    def is_mouth(triangle: triangular.Triangle) -> bool:
         return (sum(vertex in boundary_points
-                    for vertex in vertices) == 2
+                    for vertex in triangle.vertices) == 2
                 and sum(edge in boundary
-                        for edge in to_edges(vertices)) == 1)
+                        for edge in to_edges(triangle.vertices)) == 1)
 
-    mouths = {index: vertices
-              for index, vertices in enumerate(triangulation)
-              if is_mouth(vertices)}
+    mouths = {index: triangle
+              for index, triangle in enumerate(triangulation)
+              if is_mouth(triangle)}
     neighbourhood = triangular._to_neighbourhood(
             triangulation,
             adjacency=triangular._to_adjacency(triangulation))
     for _ in range(len(points) - len(boundary)):
         try:
-            index, vertices = mouths.popitem()
+            index, triangle = mouths.popitem()
         except KeyError:
             break
         mouth_vertex = next(vertex
-                            for vertex in vertices
+                            for vertex in triangle.vertices
                             if vertex not in boundary_points)
-        edges = set(to_edges(vertices))
-        boundary_points.update(vertices)
+        edges = set(to_edges(triangle.vertices))
+        boundary_points.update(triangle.vertices)
         boundary.symmetric_difference_update(edges)
         for connected in points_triangles[mouth_vertex]:
-            connected_vertices = triangulation[connected]
-            if is_mouth(connected_vertices):
+            connected_triangle = triangulation[connected]
+            if is_mouth(connected_triangle):
                 mouths[connected] = concave_vertices
             else:
                 mouths.pop(connected, None)
-            for vertex in set(connected_vertices) - {mouth_vertex}:
+            for vertex in set(connected_triangle.vertices) - {mouth_vertex}:
                 points_triangles[vertex].discard(index)
         for neighbour in neighbourhood[index]:
             neighbour_vertices = triangulation[neighbour]
@@ -140,7 +145,6 @@ def squared_distance_to_point(segment: Segment,
 
 
 concave_vertices = (points_strategies.flatmap(to_concave_vertices)
-                    .filter(negate(vertices_forms_convex_polygon))
                     .filter(negate(self_intersects)))
 vertices = convex_vertices | concave_vertices
 polygons = vertices.map(to_polygon)

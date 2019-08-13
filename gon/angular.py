@@ -1,3 +1,4 @@
+import math
 from enum import IntEnum
 
 from reprit.base import generate_repr
@@ -18,6 +19,24 @@ class Orientation(IntEnum):
     CLOCKWISE = -1
     COLLINEAR = 0
     COUNTERCLOCKWISE = 1
+
+
+class Region(IntEnum):
+    pass
+
+
+class Fixed(Region):
+    ZERO_RADIAN = 0
+    HALF_PI_RADIAN = 2
+    PI_RADIAN = 4
+    ONE_AND_A_HALF_RADIAN = 6
+
+
+class Quadrant(Region):
+    FIRST = 1
+    SECOND = 3
+    THIRD = 5
+    FOURTH = 7
 
 
 class Angle:
@@ -61,9 +80,39 @@ class Angle:
         return cosine / sine > other_cosine / other_sine
 
     @property
+    def region(self) -> Region:
+        first_ray_vector = self.first_ray_vector
+        second_ray_vector = self.second_ray_vector
+        cosine = first_ray_vector.dot(second_ray_vector)
+        sine = first_ray_vector.cross_z(second_ray_vector)
+        return _to_region(cosine, sine)
+
+    @property
     def orientation(self) -> Orientation:
         return Orientation(to_sign(self.first_ray_vector
                                    .cross_z(self.second_ray_vector)))
+
+    @property
+    def cosine(self) -> Scalar:
+        first_ray_vector = self.first_ray_vector
+        second_ray_vector = self.second_ray_vector
+        if not (first_ray_vector and second_ray_vector):
+            return 1
+        result = ((first_ray_vector.dot(second_ray_vector)
+                   / math.sqrt(first_ray_vector.squared_length
+                               * second_ray_vector.squared_length)))
+        return max(min(result, 1), -1)
+
+    @property
+    def sine(self) -> Scalar:
+        first_ray_vector = self.first_ray_vector
+        second_ray_vector = self.second_ray_vector
+        if not (first_ray_vector and second_ray_vector):
+            return 0
+        result = ((first_ray_vector.cross_z(second_ray_vector)
+                   / math.sqrt(first_ray_vector.squared_length
+                               * second_ray_vector.squared_length)))
+        return max(min(result, 1), -1)
 
     @property
     def first_ray_vector(self) -> Vector:
@@ -108,23 +157,6 @@ class Angle:
                 + self.vertex.squared_distance_to(
                         self._second_ray_point)))
 
-class Region(IntEnum):
-    pass
-
-
-class Fixed(Region):
-    ZERO_RADIAN = 0
-    HALF_PI_RADIAN = 2
-    PI_RADIAN = 4
-    ONE_AND_A_HALF_RADIAN = 6
-
-
-class Quadrant(Region):
-    FIRST = 1
-    SECOND = 3
-    THIRD = 5
-    FOURTH = 7
-
 
 def _to_region(cosine: Scalar, sine: Scalar) -> Region:
     if cosine > 0:
@@ -154,3 +186,15 @@ def to_squared_sine(angle: Angle) -> Scalar:
     return (first_ray_vector.cross_z(second_ray_vector) ** 2
             / (first_ray_vector.squared_length
                * second_ray_vector.squared_length))
+
+
+def to_half_angle_cosine(angle: Angle) -> Scalar:
+    result = math.sqrt((1 + angle.cosine) / 2)
+    if Fixed.ZERO_RADIAN <= angle.region <= Quadrant.SECOND:
+        return result
+    else:
+        return -result
+
+
+def to_half_angle_sine(angle: Angle) -> Scalar:
+    return math.sqrt((1 - angle.cosine) / 2)

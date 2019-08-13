@@ -3,22 +3,27 @@ from collections import (defaultdict,
                          deque)
 from enum import (IntEnum,
                   unique)
-from functools import partial
+from functools import (partial,
+                       reduce)
 from statistics import mean
 from typing import (Container,
                     Dict,
                     Iterable,
                     List,
-                    Optional,
                     Sequence,
                     Set,
                     Tuple)
 
+from lz.functional import flatmap
 from lz.hints import Sortable
 from lz.iterating import flatten
+from memoir import cached
+from reprit.base import generate_repr
 
 from gon.angular import (Angle,
                          Orientation,
+                         to_half_angle_cosine,
+                         to_half_angle_sine,
                          to_squared_sine)
 from gon.base import (Point,
                       Vector)
@@ -27,41 +32,160 @@ from gon.linear import (IntersectionKind,
                         Segment,
                         to_interval,
                         to_segment)
-from gon.utils import to_index_min
 from .contracts import vertices_forms_convex_polygon
 from .utils import (to_angles,
                     to_convex_hull,
                     to_edges)
 
+
+class Circle:
+    __slots__ = ('_center', '_squared_radius', '__weakref__')
+
+    def __init__(self, center: Point, squared_radius: Scalar) -> None:
+        self._center = center
+        self._squared_radius = squared_radius
+
+    @property
+    def center(self) -> Point:
+        return self._center
+
+    @property
+    def squared_radius(self) -> Scalar:
+        return self._squared_radius
+
+    @cached.property_
+    def radius(self) -> Scalar:
+        return math.sqrt(self._squared_radius)
+
+    __repr__ = generate_repr(__init__)
+
+    def __hash__(self) -> int:
+        return hash((self._center, self._squared_radius))
+
+    def __eq__(self, other: 'Circle') -> bool:
+        if not isinstance(other, Circle):
+            return NotImplemented
+        return (self._center == other._center
+                and self._squared_radius == other._squared_radius)
+
+    def merge(self, other: 'Circle') -> 'Circle':
+        center = _to_centroid([self.center, other.center])
+        if center == self.center or center == other.center:
+            squared_radius = max(self.squared_radius, other.squared_radius)
+        else:
+            squared_radius = max(
+                    map(center.squared_distance_to,
+                        list(self.intersections_with_line(center, self.center))
+                        + list(other.intersections_with_line(center,
+                                                             other.center))))
+        return Circle(center, squared_radius)
+
+    def intersections_with_line(self,
+                                line_segment_start: Point,
+                                line_segment_end: Point) -> Iterable[Point]:
+        line_vector = (Vector.from_points(line_segment_start, line_segment_end)
+                       .normalized)
+        scale = Vector.from_points(line_segment_start,
+                                   self._center).dot(line_vector)
+        nearest_line_point_to_center = Point(
+                scale * line_vector.x + line_segment_start.x,
+                scale * line_vector.y + line_segment_start.y)
+        squared_distance_to_nearest_point = self._center.squared_distance_to(
+                nearest_line_point_to_center)
+        if squared_distance_to_nearest_point < self._squared_radius:
+            distance_to_intersection_point = math.sqrt(
+                    self._squared_radius - squared_distance_to_nearest_point)
+            yield Point((scale - distance_to_intersection_point)
+                        * line_vector.x
+                        + line_segment_start.x,
+                        (scale - distance_to_intersection_point)
+                        * line_vector.y
+                        + line_segment_start.y)
+            yield Point((scale + distance_to_intersection_point)
+                        * line_vector.x
+                        + line_segment_start.x,
+                        (scale + distance_to_intersection_point)
+                        * line_vector.y
+                        + line_segment_start.y)
+        elif squared_distance_to_nearest_point == self._squared_radius:
+            yield nearest_line_point_to_center
+
+    def tangent_line_point(self, tangent_point: Point) -> Point:
+        radius_vector = Vector.from_points(self._center, tangent_point)
+        if abs(radius_vector.x) > abs(radius_vector.y):
+            result_y = 2 * (tangent_point.y + 1)
+            return Point((self._squared_radius
+                          - radius_vector.y * (result_y - self._center.y))
+                         / radius_vector.x
+                         + self._center.x,
+                         result_y)
+        else:
+            result_x = 2 * (tangent_point.y + 1)
+            return Point(result_x,
+                         (self._squared_radius
+                          - radius_vector.x * (result_x - self._center.x))
+                         / radius_vector.y
+                         + self._center.y)
+
+
 Vertices = Sequence[Point]
 
 
-def delaunay(points: Sequence[Point]) -> List[Vertices]:
+class Triangle:
+    __slots__ = ('_vertices', '__weakref__')
+
+    def __init__(self, vertices: Vertices) -> None:
+        if Angle(*vertices).orientation is not Orientation.CLOCKWISE:
+            vertices = vertices[::-1]
+        self._vertices = tuple(vertices)
+
+    @property
+    def vertices(self) -> Vertices:
+        return self._vertices
+
+    __repr__ = generate_repr(__init__)
+
+    def __hash__(self) -> int:
+        return hash(self._vertices)
+
+    def __eq__(self, other: 'Triangle') -> bool:
+        if not isinstance(other, Triangle):
+            return NotImplemented
+        return self._vertices == other._vertices
+
+    def is_point_inside_circumcircle(self, point: Point) -> bool:
+        first_vertex, second_vertex, third_vertex = self.vertices
+        first_vector = Vector.from_points(point, first_vertex)
+        second_vector = Vector.from_points(point, second_vertex)
+        third_vector = Vector.from_points(point, third_vertex)
+        return (first_vector.squared_length
+                * second_vector.cross_z(third_vector)
+                - second_vector.squared_length
+                * first_vector.cross_z(third_vector)
+                + third_vector.squared_length
+                * first_vector.cross_z(second_vector)) > 0
+
+
+def delaunay(points: Sequence[Point]) -> List[Triangle]:
     super_triangle_vertices = _to_super_triangle_vertices(points)
-    result = {super_triangle_vertices}
+    result = {Triangle(super_triangle_vertices)}
     for point in points:
-        is_invalid_triangle = partial(_is_point_inside_circumcircle, point)
-        invalid_triangles = tuple(filter(is_invalid_triangle, result))
-        for vertices in invalid_triangles:
-            result.remove(vertices)
-        for edge in _to_boundary(invalid_triangles):
-            orientation = edge.orientation_with(point)
-            if orientation is Orientation.COLLINEAR:
-                continue
-            vertices = (edge.end, edge.start, point)
-            if orientation is not Orientation.CLOCKWISE:
-                vertices = vertices[::-1]
-            result.add(vertices)
-    return [vertices
-            for vertices in result
+        invalid_triangles = [triangle
+                             for triangle in result
+                             if triangle.is_point_inside_circumcircle(point)]
+        result.difference_update(invalid_triangles)
+        result.update(Triangle((edge.end, edge.start, point))
+                      for edge in _to_boundary(invalid_triangles))
+    return [triangle
+            for triangle in result
             if all(vertex not in super_triangle_vertices
-                   for vertex in vertices)]
+                   for vertex in triangle.vertices)]
 
 
-def _to_boundary(triangles_vertices: Iterable[Vertices]) -> Set[Segment]:
+def _to_boundary(triangles: Iterable[Triangle]) -> Set[Segment]:
     result = set()
-    for vertices in triangles_vertices:
-        for edge in to_edges(vertices):
+    for triangle in triangles:
+        for edge in to_edges(triangle.vertices):
             if edge in result:
                 result.remove(edge)
             else:
@@ -70,142 +194,99 @@ def _to_boundary(triangles_vertices: Iterable[Vertices]) -> Set[Segment]:
 
 
 def _to_super_triangle_vertices(points: Sequence[Point]) -> Vertices:
-    bounding_triangle = _to_bounding_triangle_vertices(points)
-    flattest_angle = min(to_angles(to_convex_hull(points)),
-                         key=to_squared_sine)
-    center, radius = _to_circumcircle(
-            (flattest_angle.first_ray_point,
-             flattest_angle.vertex,
-             flattest_angle.second_ray_point))
-    centroid = _to_centroid(bounding_triangle)
-    radius += max(_to_max_positive_square_equation_solution(
-            1,
-            2 * radius,
-            - center.squared_distance_to(vertex))
-                  for vertex in bounding_triangle)
-    if center != centroid:
-        farthest_point = max(_to_line_circle_intersections(center, centroid,
-                                                           center, radius),
-                             key=centroid.squared_distance_to)
-        radius = math.sqrt(centroid.squared_distance_to(farthest_point))
-        center = centroid
+    convex_hull = to_convex_hull(points)
+    bounding_triangle = _to_bounding_triangle_vertices(convex_hull)
 
-    def guess_scale(first_vertex: Point, second_vertex: Point) -> Scalar:
-        edge_vector = Vector.from_points(first_vertex, second_vertex)
-        edge = to_segment(first_vertex, second_vertex)
-        perpendicular_point = Point(center.x - edge_vector.y,
-                                    center.y + edge_vector.x)
-        circle_intersection_point = next(
-                point
-                for point in _to_line_circle_intersections(center,
-                                                           perpendicular_point,
-                                                           center,
-                                                           radius)
-                if edge.relationship_with(to_segment(point, center))
-                is IntersectionKind.CROSS)
-        edge_intersection_point = _to_lines_intersection_point(
-                center,
-                perpendicular_point,
-                first_vertex,
-                second_vertex)
-        return math.sqrt(Vector.from_points(center, circle_intersection_point)
-                         .squared_length
-                         / Vector.from_points(center, edge_intersection_point)
-                         .squared_length)
-
-    scale = max(guess_scale(bounding_triangle[index - 1],
-                            bounding_triangle[index])
-                for index in range(len(bounding_triangle)))
-
-    def scale_vertex(vertex: Point) -> Point:
+    def scale_vertex(vertex: Point,
+                     *,
+                     scale: Scalar,
+                     centroid: Point = _to_centroid(bounding_triangle)
+                     ) -> Point:
         vector = Vector.from_points(centroid, vertex)
         return Point(centroid.x + vector.x * scale,
                      centroid.y + vector.y * scale)
 
-    return tuple(map(scale_vertex, bounding_triangle))
+    result = tuple(map(partial(scale_vertex,
+                               scale=2),
+                       bounding_triangle))
+    circumcircle = _to_circumcircle(result)
+    base_circle = reduce(Circle.merge,
+                         [_to_circumcircle((edge.start, edge.end, point))
+                          for edge in to_edges(result)
+                          for point in points])
+    max_distance_between_circumferences = (circumcircle.center
+                                           .distance_to(base_circle.center)
+                                           + circumcircle.radius
+                                           + base_circle.radius)
+    scale = max_distance_between_circumferences / min(circumcircle.radius,
+                                                      base_circle.radius)
+    return tuple(map(partial(scale_vertex,
+                             scale=scale),
+                     result))
 
 
-def _to_line_circle_intersections(line_segment_start: Point,
-                                  line_segment_end: Point,
-                                  center: Point,
-                                  radius: Scalar):
-    line_vector = (Vector.from_points(line_segment_start, line_segment_end)
-                   .normalized)
-    scale = Vector.from_points(line_segment_start, center).dot(line_vector)
-    nearest_line_point_to_center = Point(
-            scale * line_vector.x + line_segment_start.x,
-            scale * line_vector.y + line_segment_start.y)
-    distance_to_nearest_point = Vector.from_points(
-            center, nearest_line_point_to_center).length
-    if distance_to_nearest_point < radius:
-        distance_to_intersection_point = math.sqrt(
-                radius ** 2 - distance_to_nearest_point ** 2)
-        yield Point((scale - distance_to_intersection_point) * line_vector.x
-                    + line_segment_start.x,
-                    (scale - distance_to_intersection_point) * line_vector.y
-                    + line_segment_start.y)
-        yield Point((scale + distance_to_intersection_point) * line_vector.x
-                    + line_segment_start.x,
-                    (scale + distance_to_intersection_point) * line_vector.y
-                    + line_segment_start.y)
-    elif distance_to_nearest_point == radius:
-        yield nearest_line_point_to_center
+def _to_bounding_triangle_vertices(convex_vertices: Vertices) -> Vertices:
+    def angle_sorting_key(angle: Angle) -> Sortable:
+        squared_sine = to_squared_sine(angle)
+        # we are not interested in angles with 0 and 180 degrees
+        return squared_sine != 0, squared_sine
+
+    base_angle = min(to_angles(convex_vertices),
+                     key=angle_sorting_key)
+    point = max(convex_vertices,
+                key=base_angle.vertex.squared_distance_to)
+
+    def is_point_on_angle_rays(point: Point, angle: Angle) -> bool:
+        return (to_segment(angle.vertex, angle.first_ray_point)
+                .orientation_with(point) is Orientation.COLLINEAR
+                or to_segment(angle.vertex, angle.second_ray_point)
+                .orientation_with(point) is Orientation.COLLINEAR)
+
+    if is_point_on_angle_rays(point, base_angle):
+        base_circle = Circle(base_angle.vertex,
+                             base_angle.vertex.squared_distance_to(point))
+        bisector_point = _move_to_circumference(_to_bisector_point(base_angle),
+                                                base_circle)
+        tangent_line_point = base_circle.tangent_line_point(bisector_point)
+        return (base_angle.vertex,
+                _to_lines_intersection_point(bisector_point,
+                                             tangent_line_point,
+                                             base_angle.vertex,
+                                             base_angle.first_ray_point),
+                _to_lines_intersection_point(bisector_point,
+                                             tangent_line_point,
+                                             base_angle.vertex,
+                                             base_angle.second_ray_point))
     else:
-        raise ValueError('No intersection found '
-                         'between line '
-                         'passing through points {start}, {end} '
-                         'and circle with center {center} '
-                         'and radius {radius}.'
-                         .format(start=line_segment_start,
-                                 end=line_segment_end,
-                                 center=center,
-                                 radius=radius))
+        circle = Circle(base_angle.vertex,
+                        base_angle.vertex.squared_distance_to(point))
+        tangent_line_point = circle.tangent_line_point(point)
+        return (base_angle.vertex,
+                _to_lines_intersection_point(base_angle.vertex,
+                                             base_angle.first_ray_point,
+                                             point,
+                                             tangent_line_point),
+                _to_lines_intersection_point(base_angle.vertex,
+                                             base_angle.second_ray_point,
+                                             point,
+                                             tangent_line_point))
 
 
-def _to_max_positive_square_equation_solution(quadratic_coefficient: Scalar,
-                                              linear_coefficient: Scalar,
-                                              free_term: Scalar
-                                              ) -> Optional[Scalar]:
-    if quadratic_coefficient == 0:
-        return max(-free_term / linear_coefficient, 0)
-    discriminant = (linear_coefficient ** 2
-                    - 4 * quadratic_coefficient * free_term)
-    if discriminant < 0:
-        if quadratic_coefficient < 0:
-            return None
-        return 0
-    discriminant_root = math.sqrt(discriminant)
-    return max((-linear_coefficient + discriminant_root)
-               / (2 * quadratic_coefficient),
-               (-linear_coefficient - discriminant_root)
-               / (2 * quadratic_coefficient),
-               0)
+def _move_to_circumference(point: Point, circle: Circle) -> Point:
+    return min(circle.intersections_with_line(circle.center, point),
+               key=point.squared_distance_to)
 
 
-def _to_bounding_triangle_vertices(points: Sequence[Point]) -> Vertices:
-    leftmost_x = min(point.x for point in points)
-    rightmost_x = max(point.x for point in points)
-    bottom_y = min(point.y for point in points)
-    top_y = max(point.y for point in points)
-    centroid = _to_centroid(points)
-    rectangle_vertices = [Point(leftmost_x, bottom_y),
-                          Point(rightmost_x, bottom_y),
-                          Point(rightmost_x, top_y),
-                          Point(leftmost_x, top_y)]
-    base_vertex_index = to_index_min(rectangle_vertices,
-                                     key=centroid.squared_distance_to)
-    base_vertex = rectangle_vertices[base_vertex_index]
-    left_neighbour, right_neighbour = (
-        rectangle_vertices[base_vertex_index - 1],
-        rectangle_vertices[(base_vertex_index + 1) % len(rectangle_vertices)])
-    non_neighbour = rectangle_vertices[(base_vertex_index + 2)
-                                       % len(rectangle_vertices)]
-    vector = Vector.from_points(left_neighbour, right_neighbour)
-    left_vertex = Point(non_neighbour.x - vector.x,
-                        non_neighbour.y - vector.y)
-    right_vertex = Point(non_neighbour.x + vector.x,
-                         non_neighbour.y + vector.y)
-    return left_vertex, base_vertex, right_vertex
+def _to_bisector_point(angle: Angle) -> Point:
+    rotation_sine = to_half_angle_sine(angle)
+    rotation_cosine = to_half_angle_cosine(angle)
+    ray_point = (angle.first_ray_point
+                 if angle.orientation is Orientation.COUNTERCLOCKWISE
+                 else angle.second_ray_point)
+    return Point(ray_point.x * rotation_cosine
+                 - ray_point.y * rotation_sine,
+                 ray_point.x * rotation_sine
+                 + ray_point.y * rotation_cosine)
 
 
 def _to_centroid(points: Sequence[Point]) -> Point:
@@ -234,13 +315,14 @@ def _to_lines_intersection_point(first_line_start: Point,
 
 def constrained_delaunay(points: Sequence[Point],
                          *,
-                         constraints: Iterable[Segment]) -> Sequence[Vertices]:
+                         constraints: Iterable[Segment]) -> Sequence[Triangle]:
     result = delaunay(points)
     adjacency = _to_adjacency(result)
     neighbourhood = _to_neighbourhood(result,
                                       adjacency=adjacency)
     points_triangles = _to_points_triangles(result)
-    result_edges = frozenset(flatten(map(to_edges, result)))
+    result_edges = frozenset(flatmap(to_edges, (triangle.vertices
+                                                for triangle in result)))
     boundary = {}
     for constraint in constraints:
         boundary[constraint] = constraint
@@ -267,10 +349,10 @@ class TriangleKind(IntEnum):
     OUTER = 2
 
 
-def _filter_outsiders(triangulation: List[Vertices],
+def _filter_outsiders(triangulation: List[Triangle],
                       *,
                       adjacency: Dict[Segment, Set[int]],
-                      boundary: Dict[Segment, Segment]) -> List[Vertices]:
+                      boundary: Dict[Segment, Segment]) -> List[Triangle]:
     vertices_edges = defaultdict(set)
     for edge in boundary:
         vertices_edges[edge.start].add(edge)
@@ -281,15 +363,15 @@ def _filter_outsiders(triangulation: List[Vertices],
                                      + list(vertices_edges[edge.end] - {edge}))
 
     def classify_lying_on_boundary(
-            vertices: Vertices,
+            triangle: Triangle,
             *,
             boundary_vertices: Container[Point] =
             frozenset(flatten((edge.start, edge.end)
                               for edge in boundary))) -> TriangleKind:
         if not all(vertex in boundary_vertices
-                   for vertex in vertices):
+                   for vertex in triangle.vertices):
             return TriangleKind.INNER
-        edges = set(to_edges(vertices))
+        edges = set(to_edges(triangle.vertices))
         boundary_edges = {edge for edge in edges if edge in boundary}
         if not boundary_edges:
             return TriangleKind.UNKNOWN
@@ -325,8 +407,8 @@ def _filter_outsiders(triangulation: List[Vertices],
             # degenerate case with single triangle
             return TriangleKind.INNER
 
-    triangles_kinds = {index: classify_lying_on_boundary(vertices)
-                       for index, vertices in enumerate(triangulation)}
+    triangles_kinds = {index: classify_lying_on_boundary(triangle)
+                       for index, triangle in enumerate(triangulation)}
     neighbourhood = _to_neighbourhood(triangulation,
                                       adjacency=adjacency)
 
@@ -369,42 +451,45 @@ def _filter_outsiders(triangulation: List[Vertices],
         triangles_kinds[index] = (TriangleKind.OUTER
                                   if is_touching_boundary_outsider(index)
                                   else TriangleKind.INNER)
-    return [vertices
-            for index, vertices in enumerate(triangulation)
+    return [triangle
+            for index, triangle in enumerate(triangulation)
             if triangles_kinds[index] is TriangleKind.INNER]
 
 
-def _to_points_triangles(triangulation: Sequence[Vertices]
+def _to_points_triangles(triangulation: Sequence[Triangle]
                          ) -> Dict[Point, Set[int]]:
     result = defaultdict(set)
-    for index, vertices in enumerate(triangulation):
-        for point in vertices:
-            result[point].add(index)
+    for index, triangle in enumerate(triangulation):
+        for vertex in triangle.vertices:
+            result[vertex].add(index)
+    result.default_factory = None
     return result
 
 
-def _to_adjacency(triangulation: Sequence[Vertices]
+def _to_adjacency(triangulation: Sequence[Triangle]
                   ) -> Dict[Segment, Set[int]]:
     result = defaultdict(set)
-    for index, vertices in enumerate(triangulation):
-        _register_adjacent(index, vertices,
+    for index, triangle in enumerate(triangulation):
+        _register_adjacent(index, triangle,
                            adjacency=result)
+    result.default_factory = None
     return result
 
 
-def _to_neighbourhood(triangulation: Sequence[Vertices],
+def _to_neighbourhood(triangulation: Sequence[Triangle],
                       *,
                       adjacency: Dict[Segment, Set[int]]
                       ) -> Dict[int, Set[int]]:
     result = defaultdict(set)
-    for index, vertices in enumerate(triangulation):
-        for edge in to_edges(vertices):
+    for index, triangle in enumerate(triangulation):
+        for edge in to_edges(triangle.vertices):
             result[index].update(adjacency[edge] - {index})
+    result.default_factory = None
     return result
 
 
 def _restore_delaunay_criterion(constraint: Segment,
-                                triangulation: List[Vertices],
+                                triangulation: List[Triangle],
                                 *,
                                 adjacency: Dict[Segment, Set[int]],
                                 new_edges: Set[Segment]) -> None:
@@ -417,17 +502,17 @@ def _restore_delaunay_criterion(constraint: Segment,
             first_adjacent_index, second_adjacent_index = adjacents
             first_adjacent = triangulation[first_adjacent_index]
             second_adjacent = triangulation[second_adjacent_index]
-            quadriliteral_vertices = to_convex_hull(first_adjacent
-                                                    + second_adjacent)
+            quadriliteral_vertices = to_convex_hull(first_adjacent.vertices
+                                                    + second_adjacent.vertices)
             if not vertices_forms_convex_polygon(quadriliteral_vertices):
                 continue
             edge_points = {edge.start, edge.end}
             first_non_edge_vertex, = set(first_adjacent) - edge_points
             second_non_edge_vertex, = set(second_adjacent) - edge_points
-            if not (_is_point_inside_circumcircle(first_non_edge_vertex,
-                                                  second_adjacent)
-                    or _is_point_inside_circumcircle(first_non_edge_vertex,
-                                                     second_adjacent)):
+            if not (first_adjacent.is_point_inside_circumcircle(
+                    second_non_edge_vertex)
+                    or second_adjacent.is_point_inside_circumcircle(
+                            first_non_edge_vertex)):
                 continue
             anti_diagonal = to_segment(first_non_edge_vertex,
                                        second_non_edge_vertex)
@@ -440,7 +525,7 @@ def _restore_delaunay_criterion(constraint: Segment,
 
 
 def _resolve_crossings(constraint: Segment,
-                       triangulation: List[Vertices],
+                       triangulation: List[Triangle],
                        *,
                        adjacency: Dict[Segment, Set[int]],
                        crossed_edges: Set[Segment]) -> Set[Segment]:
@@ -453,8 +538,8 @@ def _resolve_crossings(constraint: Segment,
     while crossed_edges:
         edge = crossed_edges.popleft()
         first_adjacent, second_adjacent = adjacency[edge]
-        vertices = to_convex_hull(triangulation[first_adjacent]
-                                  + triangulation[second_adjacent])
+        vertices = to_convex_hull(triangulation[first_adjacent].vertices
+                                  + triangulation[second_adjacent].vertices)
         if not (len(vertices) == 4
                 and vertices_forms_convex_polygon(vertices)):
             crossed_edges.append(edge)
@@ -473,7 +558,7 @@ def _resolve_crossings(constraint: Segment,
 
 
 def _find_crossed_edges(constraint: Segment,
-                        triangulation: Sequence[Vertices],
+                        triangulation: Sequence[Triangle],
                         *,
                         neighbourhood: Dict[int, Set[int]],
                         points_triangles: Dict[Point, Set[int]]
@@ -488,8 +573,8 @@ def _find_crossed_edges(constraint: Segment,
     while True:
         next_step = set()
         for index in step:
-            vertices = triangulation[index]
-            for edge in to_edges(vertices):
+            triangle = triangulation[index]
+            for edge in to_edges(triangle.vertices):
                 if (edge.start not in visited_points
                         and edge.start in open_constraint):
                     next_step.update(points_triangles[edge.start]
@@ -525,7 +610,7 @@ def _find_crossed_edges(constraint: Segment,
 def _swap_edges(src_edge: Segment, dst_edge: Segment,
                 *,
                 adjacency: Dict[Segment, Set[int]],
-                triangulation: List[Vertices]) -> None:
+                triangulation: List[Triangle]) -> None:
     _update_adjacency(src_edge, dst_edge,
                       adjacency=adjacency)
     _update_triangulation(src_edge, dst_edge,
@@ -537,7 +622,7 @@ def _swap_edges(src_edge: Segment, dst_edge: Segment,
 def _update_triangulation(src_edge: Segment, dst_edge: Segment,
                           *,
                           adjacency: Dict[Segment, Set[int]],
-                          triangulation: List[Vertices]) -> None:
+                          triangulation: List[Triangle]) -> None:
     first_vertices, second_vertices = _to_replacements(src_edge, dst_edge)
     first_adjacent, second_adjacent = adjacency[src_edge]
     triangulation[first_adjacent] = first_vertices
@@ -547,54 +632,33 @@ def _update_triangulation(src_edge: Segment, dst_edge: Segment,
 def _update_adjacency(src_edge: Segment, dst_edge: Segment,
                       *,
                       adjacency: Dict[Segment, Set[int]]) -> None:
-    first_vertices, second_vertices = _to_replacements(src_edge, dst_edge)
+    first_triangle, second_triangle = _to_replacements(src_edge, dst_edge)
     adjacents = adjacency[src_edge]
     first_adjacent, second_adjacent = adjacents
-    for edge in to_edges(first_vertices):
+    for edge in to_edges(first_triangle.vertices):
         adjacency[edge] -= adjacents
-    for edge in to_edges(second_vertices):
+    for edge in to_edges(second_triangle.vertices):
         adjacency[edge] -= adjacents
-    _register_adjacent(first_adjacent, first_vertices,
+    _register_adjacent(first_adjacent, first_triangle,
                        adjacency=adjacency)
-    _register_adjacent(second_adjacent, second_vertices,
+    _register_adjacent(second_adjacent, second_triangle,
                        adjacency=adjacency)
 
 
 def _to_replacements(src_edge: Segment,
-                     dst_edge: Segment) -> Tuple[Vertices, Vertices]:
-    first_vertices = _to_ccw_triangle_vertices((dst_edge.start, dst_edge.end,
-                                                src_edge.start))
-    second_vertices = _to_ccw_triangle_vertices((dst_edge.start, dst_edge.end,
-                                                 src_edge.end))
-    return first_vertices, second_vertices
+                     dst_edge: Segment) -> Tuple[Triangle, Triangle]:
+    return (Triangle((dst_edge.start, dst_edge.end, src_edge.start)),
+            Triangle((dst_edge.start, dst_edge.end, src_edge.end)))
 
 
-def _register_adjacent(index: int, vertices: Vertices,
+def _register_adjacent(index: int, triangle: Triangle,
                        *,
                        adjacency: Dict[Segment, Set[int]]) -> None:
-    for edge in to_edges(vertices):
+    for edge in to_edges(triangle.vertices):
         adjacency[edge].add(index)
 
 
-def _to_ccw_triangle_vertices(vertices: Vertices) -> Vertices:
-    if Angle(*vertices).orientation is not Orientation.CLOCKWISE:
-        vertices = vertices[::-1]
-    return vertices
-
-
-def _is_point_inside_circumcircle(point: Point,
-                                  triangle_vertices: Vertices) -> bool:
-    first_vertex, second_vertex, third_vertex = triangle_vertices
-    first_vector = Vector.from_points(point, first_vertex)
-    second_vector = Vector.from_points(point, second_vertex)
-    third_vector = Vector.from_points(point, third_vertex)
-    return (first_vector.squared_length * second_vector.cross_z(third_vector)
-            - second_vector.squared_length * first_vector.cross_z(third_vector)
-            + third_vector.squared_length * first_vector.cross_z(second_vector)
-            ) > 0
-
-
-def _to_circumcircle(vertices: Vertices) -> Tuple[Point, Scalar]:
+def _to_circumcircle(vertices: Vertices) -> Circle:
     first_vertex, second_vertex, third_vertex = vertices
     denominator = (2 * (first_vertex.x * (second_vertex.y - third_vertex.y)
                         + second_vertex.x * (third_vertex.y - first_vertex.y)
@@ -613,5 +677,4 @@ def _to_circumcircle(vertices: Vertices) -> Tuple[Point, Scalar]:
                 * (second_vertex.x - first_vertex.x)) / denominator
     squared_radius = ((first_vertex.x - center_x) ** 2
                       + (first_vertex.y - center_y) ** 2)
-    radius = math.sqrt(squared_radius)
-    return Point(center_x, center_y), radius
+    return Circle(Point(center_x, center_y), squared_radius)

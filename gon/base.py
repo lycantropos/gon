@@ -1,3 +1,4 @@
+import math
 from reprit.base import generate_repr
 
 from .hints import Scalar
@@ -37,6 +38,8 @@ class Point:
     def squared_distance_to(self, destination: 'Point') -> Scalar:
         return Vector.from_points(self, destination).squared_length
 
+    def distance_to(self, destination: 'Point') -> Scalar:
+        return Vector.from_points(self, destination).length
 
 class Vector:
     __slots__ = ('_x', '_y')
@@ -88,6 +91,15 @@ class Vector:
     @property
     def squared_length(self) -> Scalar:
         return self.x ** 2 + self.y ** 2
+
+    @property
+    def length(self) -> Scalar:
+        return math.sqrt(self.squared_length)
+
+    @property
+    def normalized(self) -> 'Vector':
+        length = self.length
+        return Vector(self.x / length, self.y / length)
 
     def cross_z(self, other: 'Vector') -> Scalar:
         """
