@@ -1,8 +1,8 @@
+import math
 from operator import itemgetter
 from typing import (Any,
                     Iterable)
 
-import math
 from lz.functional import compose
 from lz.hints import Domain
 from lz.iterating import slider
