@@ -183,9 +183,15 @@ def delaunay(points: Sequence[Point]) -> List[Triangle]:
 
 
 def _to_boundary(triangles: Iterable[Triangle]) -> Set[Segment]:
+    return _to_polygons_vertices_boundary(triangle.vertices
+                                          for triangle in triangles)
+
+
+def _to_polygons_vertices_boundary(polygons_vertices: Iterable[Vertices]
+                                   ) -> Set[Segment]:
     result = set()
-    for triangle in triangles:
-        for edge in to_edges(triangle.vertices):
+    for vertices in polygons_vertices:
+        for edge in to_edges(vertices):
             if edge in result:
                 result.remove(edge)
             else:
