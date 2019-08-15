@@ -183,7 +183,10 @@ def _to_region(cosine: Scalar, sine: Scalar) -> Region:
 def to_squared_sine(angle: Angle) -> Scalar:
     first_ray_vector = angle.first_ray_vector
     second_ray_vector = angle.second_ray_vector
-    return (first_ray_vector.cross_z(second_ray_vector) ** 2
+    area_sine = first_ray_vector.cross_z(second_ray_vector)
+    if not area_sine:
+        return 0
+    return (area_sine ** 2
             / (first_ray_vector.squared_length
                * second_ray_vector.squared_length))
 
