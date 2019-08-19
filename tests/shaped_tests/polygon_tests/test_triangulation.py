@@ -4,7 +4,7 @@ from hypothesis import given
 
 from gon.shaped import (Polygon,
                         SimplePolygon)
-from gon.shaped.triangular import _to_polygons_vertices_boundary
+from gon.shaped.triangular import _to_boundary
 from gon.shaped.utils import to_edges
 from . import strategies
 
@@ -32,8 +32,6 @@ def test_triangle(triangle: Polygon) -> None:
 
 @given(strategies.polygons)
 def test_boundary(polygon: Polygon) -> None:
-    triangles_vertices = [triangle.vertices
-                          for triangle in polygon.triangulation]
-
-    assert (_to_polygons_vertices_boundary(triangles_vertices)
+    assert (_to_boundary(triangle.vertices
+                         for triangle in polygon.triangulation)
             == set(to_edges(polygon.vertices)))

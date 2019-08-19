@@ -189,15 +189,3 @@ def to_squared_sine(angle: Angle) -> Scalar:
     return (area_sine ** 2
             / (first_ray_vector.squared_length
                * second_ray_vector.squared_length))
-
-
-def to_half_angle_cosine(angle: Angle) -> Scalar:
-    result = math.sqrt((1 + angle.cosine) / 2)
-    if Fixed.ZERO_RADIAN <= angle.region <= Quadrant.SECOND:
-        return result
-    else:
-        return -result
-
-
-def to_half_angle_sine(angle: Angle) -> Scalar:
-    return math.sqrt((1 - angle.cosine) / 2)

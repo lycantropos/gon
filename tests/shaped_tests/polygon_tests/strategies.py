@@ -55,17 +55,15 @@ def to_concave_vertices(points: Strategy[Point]) -> Strategy[Sequence[Point]]:
 
 def points_to_concave_vertices(points: Sequence[Point]) -> triangular.Vertices:
     triangulation = triangular.delaunay(points)
-    if not triangulation:
-        return []
     points_triangles = triangular._to_points_triangles(triangulation)
     boundary = triangular._to_boundary(triangulation)
     boundary_points = set(flatten((edge.start, edge.end) for edge in boundary))
 
-    def is_mouth(triangle: triangular.Triangle) -> bool:
+    def is_mouth(triangle_vertices: triangular.Vertices) -> bool:
         return (sum(vertex in boundary_points
-                    for vertex in triangle.vertices) == 2
+                    for vertex in triangle_vertices) == 2
                 and sum(edge in boundary
-                        for edge in to_edges(triangle.vertices)) == 1)
+                        for edge in to_edges(triangle_vertices)) == 1)
 
     mouths = {index: triangle
               for index, triangle in enumerate(triangulation)
@@ -75,22 +73,22 @@ def points_to_concave_vertices(points: Sequence[Point]) -> triangular.Vertices:
             adjacency=triangular._to_adjacency(triangulation))
     for _ in range(len(points) - len(boundary)):
         try:
-            index, triangle = mouths.popitem()
+            index, triangle_vertices = mouths.popitem()
         except KeyError:
             break
         mouth_vertex = next(vertex
-                            for vertex in triangle.vertices
+                            for vertex in triangle_vertices
                             if vertex not in boundary_points)
-        edges = set(to_edges(triangle.vertices))
-        boundary_points.update(triangle.vertices)
+        edges = set(to_edges(triangle_vertices))
+        boundary_points.update(triangle_vertices)
         boundary.symmetric_difference_update(edges)
         for connected in points_triangles[mouth_vertex]:
-            connected_triangle = triangulation[connected]
-            if is_mouth(connected_triangle):
+            connected_triangle_vertices = triangulation[connected]
+            if is_mouth(connected_triangle_vertices):
                 mouths[connected] = concave_vertices
             else:
                 mouths.pop(connected, None)
-            for vertex in set(connected_triangle.vertices) - {mouth_vertex}:
+            for vertex in set(connected_triangle_vertices) - {mouth_vertex}:
                 points_triangles[vertex].discard(index)
         for neighbour in neighbourhood[index]:
             neighbour_vertices = triangulation[neighbour]
