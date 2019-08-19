@@ -241,41 +241,20 @@ def _to_bounding_triangle_vertices(convex_vertices: Vertices) -> Vertices:
                      key=angle_sorting_key)
     point = max(convex_vertices,
                 key=base_angle.vertex.squared_distance_to)
-
-    def is_point_on_angle_rays(point: Point, angle: Angle) -> bool:
-        return (to_segment(angle.vertex, angle.first_ray_point)
-                .orientation_with(point) is Orientation.COLLINEAR
-                or to_segment(angle.vertex, angle.second_ray_point)
-                .orientation_with(point) is Orientation.COLLINEAR)
-
-    if is_point_on_angle_rays(point, base_angle):
-        base_circle = Circle(base_angle.vertex,
-                             base_angle.vertex.squared_distance_to(point))
-        bisector_point = _move_to_circumference(_to_bisector_point(base_angle),
-                                                base_circle)
-        tangent_line_point = base_circle.tangent_line_point(bisector_point)
-        return (base_angle.vertex,
-                _to_lines_intersection_point(bisector_point,
-                                             tangent_line_point,
-                                             base_angle.vertex,
-                                             base_angle.first_ray_point),
-                _to_lines_intersection_point(bisector_point,
-                                             tangent_line_point,
-                                             base_angle.vertex,
-                                             base_angle.second_ray_point))
-    else:
-        circle = Circle(base_angle.vertex,
-                        base_angle.vertex.squared_distance_to(point))
-        tangent_line_point = circle.tangent_line_point(point)
-        return (base_angle.vertex,
-                _to_lines_intersection_point(base_angle.vertex,
-                                             base_angle.first_ray_point,
-                                             point,
-                                             tangent_line_point),
-                _to_lines_intersection_point(base_angle.vertex,
-                                             base_angle.second_ray_point,
-                                             point,
-                                             tangent_line_point))
+    circle = Circle(base_angle.vertex,
+                    base_angle.vertex.squared_distance_to(point))
+    bisector_point = _move_to_circumference(_to_bisector_point(base_angle),
+                                            circle)
+    tangent_line_point = circle.tangent_line_point(bisector_point)
+    return (base_angle.vertex,
+            _to_lines_intersection_point(bisector_point,
+                                         tangent_line_point,
+                                         base_angle.vertex,
+                                         base_angle.first_ray_point),
+            _to_lines_intersection_point(bisector_point,
+                                         tangent_line_point,
+                                         base_angle.vertex,
+                                         base_angle.second_ray_point))
 
 
 def _move_to_circumference(point: Point, circle: Circle) -> Point:
