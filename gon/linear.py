@@ -51,6 +51,12 @@ class Interval:
     def end_inclusive(self) -> bool:
         return self._end_inclusive
 
+    @property
+    def reversed(self) -> 'Interval':
+        return type(self)(self.end, self.start,
+                          start_inclusive=self.end_inclusive,
+                          end_inclusive=self.start_inclusive)
+
     __repr__ = generate_repr(__init__)
 
     def __eq__(self, other: 'Interval') -> bool:
@@ -100,15 +106,21 @@ class Interval:
             return IntersectionKind.OVERLAP
         return IntersectionKind.NONE
 
-    def orientation_with(self, point: Point) -> int:
-        return Angle(self.end, self.start, point).orientation
+    def orientation_with(self, point: Point) -> Orientation:
+        return self.angle_with(point).orientation
 
+    def angle_with(self, point: Point) -> Angle:
+        return Angle(self.end, self.start, point)
 
 class Segment(Interval):
     def __init__(self, start: Point, end: Point) -> None:
         super().__init__(start, end,
                          start_inclusive=True,
                          end_inclusive=True)
+
+    @property
+    def reversed(self) -> 'Interval':
+        return type(self)(self.end, self.start)
 
     __repr__ = generate_repr(__init__)
 

@@ -24,8 +24,8 @@ from gon.utils import (inverse_permutation,
                        to_sign)
 from . import triangular
 from .contracts import (self_intersects,
-                        vertices_forms_strict_polygon,
-                        vertices_forms_convex_polygon)
+                        vertices_forms_convex_polygon,
+                        vertices_forms_strict_polygon)
 from .utils import (to_convex_hull,
                     to_edges)
 
@@ -285,7 +285,8 @@ class SimplePolygon(Polygon):
         triangulation = triangular.constrained_delaunay(
                 self._vertices,
                 constraints=to_edges(self._vertices))
-        return [SimplePolygon(triangle.vertices) for triangle in triangulation]
+        return [SimplePolygon(triangle_vertices)
+                for triangle_vertices in triangulation]
 
 
 def _is_point_to_the_left_of_line(point: Point, line_segment: Segment) -> bool:
