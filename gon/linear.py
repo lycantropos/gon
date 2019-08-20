@@ -1,4 +1,5 @@
-from enum import IntEnum
+from enum import (IntEnum,
+                  unique)
 from functools import partial
 from operator import (le,
                       lt)
@@ -15,6 +16,7 @@ from .base import Point
 from .hints import Scalar
 
 
+@unique
 class IntersectionKind(IntEnum):
     NONE = 0
     CROSS = 1
