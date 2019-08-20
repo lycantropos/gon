@@ -3,10 +3,10 @@ from collections import (defaultdict,
                          deque)
 from enum import (IntEnum,
                   unique)
+from itertools import chain
 from operator import attrgetter
 from types import MappingProxyType
 from typing import (AbstractSet,
-                    Container,
                     DefaultDict,
                     Dict,
                     Iterable,
@@ -17,9 +17,7 @@ from typing import (AbstractSet,
                     Set,
                     Tuple)
 
-from lz.functional import flatmap
-from lz.hints import (Domain,
-                      Sortable)
+from lz.hints import Domain
 from lz.iterating import (flatten,
                           grouper)
 from memoir import cached
@@ -33,7 +31,6 @@ from gon.linear import (IntersectionKind,
                         Segment,
                         to_interval,
                         to_segment)
-from .contracts import vertices_forms_convex_polygon
 from .utils import (_to_sub_hull,
                     to_convex_hull,
                     to_edges)
@@ -128,7 +125,7 @@ class Triangulation:
         return MappingProxyType(self._linkage)
 
     @property
-    def edges(self) -> Set[Segment]:
+    def edges(self) -> AbstractSet[Segment]:
         return set(self._iter_edges())
 
     def _iter_edges(self) -> Iterable[Segment]:
@@ -143,7 +140,7 @@ class Triangulation:
         return frozenset(to_edges(_to_non_strict_convex_hull(self._points)))
 
     @property
-    def inner_edges(self) -> Set[Segment]:
+    def inner_edges(self) -> AbstractSet[Segment]:
         return self.edges - self.boundary
 
     def to_triangles_vertices(self) -> List[Vertices]:
@@ -158,15 +155,19 @@ class Triangulation:
 
     def update(self, edges: Iterable[Segment]) -> None:
         for edge in edges:
-            self.add(edge)
-
-    def add(self, edge: Segment) -> None:
-        self._linkage[edge.start].add(edge.end)
-        self._linkage[edge.end].add(edge.start)
+            self._add(edge)
 
     def remove(self, edge: Segment) -> None:
         self._linkage[edge.start].remove(edge.end)
         self._linkage[edge.end].remove(edge.start)
+
+    def replace(self, edge: Segment, replacement: Segment) -> None:
+        self.remove(edge)
+        self._add(replacement)
+
+    def _add(self, edge: Segment) -> None:
+        self._linkage[edge.start].add(edge.end)
+        self._linkage[edge.end].add(edge.start)
 
     def _to_non_adjacent_vertices(self, edge: Segment) -> Set[Point]:
         return _to_visible_non_adjacent_vertices(self._linkage[edge.start]
@@ -276,7 +277,10 @@ def _initialize_triangulation(points: Sequence[Point]) -> Triangulation:
         return initializer(points)
 
 
-def _set_delaunay_criterion(triangulation: Triangulation) -> None:
+def _set_delaunay_criterion(triangulation: Triangulation,
+                            *,
+                            target_edges: Optional[AbstractSet[Segment]] = None
+                            ) -> None:
     """
     Straightforward flip algorithm.
 
@@ -285,10 +289,16 @@ def _set_delaunay_criterion(triangulation: Triangulation) -> None:
         n -- points count.
     """
     adjacency = triangulation.to_adjacency()
+    if target_edges is None:
+        target_edges = set(triangulation.inner_edges)
     while True:
-        no_flips = True
-        for edge in triangulation.inner_edges:
+        removed_edges = set()
+        for edge in target_edges:
             first_non_edge_vertex, second_non_edge_vertex = adjacency[edge]
+            if not _points_form_convex_quadrilateral((edge.start, edge.end,
+                                                      first_non_edge_vertex,
+                                                      second_non_edge_vertex)):
+                continue
             if not (_is_point_inside_circumcircle(
                     _to_ccw_triangle_vertices((first_non_edge_vertex,
                                                edge.start, edge.end)),
@@ -298,35 +308,41 @@ def _set_delaunay_criterion(triangulation: Triangulation) -> None:
                                                        edge.start, edge.end)),
                             first_non_edge_vertex)):
                 continue
-            replacement = to_segment(first_non_edge_vertex,
-                                     second_non_edge_vertex)
-            adjacency[replacement] = {edge.start, edge.end}
-            adjacency[to_segment(edge.start,
-                                 first_non_edge_vertex)].remove(edge.end)
-            adjacency[to_segment(edge.start,
-                                 second_non_edge_vertex)].remove(edge.end)
-            adjacency[to_segment(first_non_edge_vertex,
-                                 edge.end)].remove(edge.start)
-            adjacency[to_segment(second_non_edge_vertex,
-                                 edge.end)].remove(edge.start)
-            (adjacency[to_segment(edge.start,
-                                  first_non_edge_vertex)]
-             .add(second_non_edge_vertex))
-            (adjacency[to_segment(edge.start,
-                                  second_non_edge_vertex)]
-             .add(first_non_edge_vertex))
-            (adjacency[to_segment(first_non_edge_vertex,
-                                  edge.end)]
-             .add(second_non_edge_vertex))
-            (adjacency[to_segment(second_non_edge_vertex,
-                                  edge.end)]
-             .add(first_non_edge_vertex))
-            del adjacency[edge]
-            triangulation.remove(edge)
-            triangulation.add(replacement)
-            no_flips = False
-        if no_flips:
+            anti_diagonal = to_segment(first_non_edge_vertex,
+                                       second_non_edge_vertex)
+            removed_edges.add(edge)
+            _flip_diagonal(edge,
+                           anti_diagonal,
+                           adjacency=adjacency,
+                           triangulation=triangulation)
+        if not removed_edges:
             break
+        target_edges.difference_update(removed_edges)
+
+
+def _flip_diagonal(diagonal: Segment, anti_diagonal: Segment,
+                   *,
+                   adjacency: Dict[Segment, Set[Point]],
+                   triangulation: Triangulation) -> None:
+    diagonals_starts = to_segment(diagonal.start, anti_diagonal.start)
+    diagonal_start_anti_diagonal_end = to_segment(diagonal.start,
+                                                  anti_diagonal.end)
+    diagonal_end_anti_diagonal_start = to_segment(diagonal.end,
+                                                  anti_diagonal.start)
+    diagonals_ends = to_segment(diagonal.end, anti_diagonal.end)
+
+    adjacency[diagonals_starts].remove(diagonal.end)
+    adjacency[diagonal_start_anti_diagonal_end].remove(diagonal.end)
+    adjacency[diagonal_end_anti_diagonal_start].remove(diagonal.start)
+    adjacency[diagonals_ends].remove(diagonal.start)
+    del adjacency[diagonal]
+
+    adjacency[diagonals_starts].add(anti_diagonal.end)
+    adjacency[diagonal_start_anti_diagonal_end].add(anti_diagonal.start)
+    adjacency[diagonal_end_anti_diagonal_start].add(anti_diagonal.end)
+    adjacency[diagonals_ends].add(anti_diagonal.start)
+    adjacency[anti_diagonal] = {diagonal.start, diagonal.end}
+    triangulation.replace(diagonal, anti_diagonal)
 
 
 def _split(sequence: Sequence[Domain],
@@ -505,32 +521,33 @@ def _to_boundary(polygons_vertices: Iterable[Vertices]) -> Set[Segment]:
 
 def constrained_delaunay(points: Sequence[Point],
                          *,
-                         constraints: Iterable[Segment]) -> List[Vertices]:
-    result = delaunay(points)
-    adjacency = _to_adjacency(result)
-    neighbourhood = _to_neighbourhood(result,
-                                      adjacency=adjacency)
-    points_triangles = _to_points_triangles(result)
-    result_edges = frozenset(flatmap(to_edges,
-                                     (triangle_vertices
-                                      for triangle_vertices in result)))
-    boundary = {}
+                         boundary: Sequence[Segment],
+                         extra_constraints: Optional[Iterable[Segment]] = None
+                         ) -> List[Vertices]:
+    result = _delaunay(points)
+    if not extra_constraints and all(edge in result.boundary
+                                     for edge in boundary):
+        return result.to_triangles_vertices()
+    _set_constraints(result,
+                     constraints=(boundary if extra_constraints is None
+                                  else chain(boundary, extra_constraints)))
+    _set_boundary(result,
+                  boundary=boundary)
+    return result.to_triangles_vertices()
+
+
+def _set_constraints(triangulation: Triangulation,
+                     *,
+                     constraints: Iterable[Segment]) -> None:
+    triangulation_edges = frozenset(triangulation.edges)
     for constraint in constraints:
-        boundary[constraint] = constraint
-        if constraint in result_edges:
+        if constraint in triangulation_edges:
             continue
-        crossed_edges = _find_crossed_edges(constraint, result,
-                                            neighbourhood=neighbourhood,
-                                            points_triangles=points_triangles)
-        new_edges = _resolve_crossings(constraint, result,
-                                       adjacency=adjacency,
+        crossed_edges = _find_crossed_edges(constraint, triangulation)
+        new_edges = _resolve_crossings(constraint, triangulation,
                                        crossed_edges=crossed_edges)
-        _restore_delaunay_criterion(result,
-                                    adjacency=adjacency,
-                                    new_edges=new_edges - {constraint})
-    return _filter_outsiders(result,
-                             adjacency=adjacency,
-                             boundary=boundary)
+        _set_delaunay_criterion(triangulation,
+                                target_edges=new_edges - {constraint})
 
 
 @unique
@@ -540,111 +557,20 @@ class TriangleKind(IntEnum):
     OUTER = 2
 
 
-def _filter_outsiders(triangulation: List[Vertices],
-                      *,
-                      adjacency: Dict[Segment, Set[int]],
-                      boundary: Dict[Segment, Segment]) -> List[Vertices]:
-    vertices_edges = defaultdict(set)
-    for edge in boundary:
-        vertices_edges[edge.start].add(edge)
-        vertices_edges[edge.end].add(edge)
-    edges_neighbourhood = {}
-    for edge in boundary:
-        edges_neighbourhood[edge] = (list(vertices_edges[edge.start] - {edge})
-                                     + list(vertices_edges[edge.end] - {edge}))
-
-    def classify_lying_on_boundary(
-            triangle_vertices: Vertices,
-            *,
-            boundary_vertices: Container[Point] =
-            frozenset(flatten((edge.start, edge.end)
-                              for edge in boundary))) -> TriangleKind:
-        if not all(vertex in boundary_vertices
-                   for vertex in triangle_vertices):
-            return TriangleKind.INNER
-        edges = set(to_edges(triangle_vertices))
-        boundary_edges = {edge for edge in edges if edge in boundary}
-        if not boundary_edges:
-            return TriangleKind.UNKNOWN
-        elif len(boundary_edges) == 1:
-            edge, = boundary_edges
-            oriented_boundary_edge = boundary[edge]
-            if edge.start != oriented_boundary_edge.start:
-                return TriangleKind.OUTER
-            else:
-                return TriangleKind.INNER
-        elif len(boundary_edges) == 2:
-            first_edge, second_edge = map(boundary.get, boundary_edges)
-            invalid_order = first_edge.end != second_edge.start
-            if invalid_order:
-                first_edge, second_edge = second_edge, first_edge
-            previous_edge = edges_neighbourhood[first_edge][0]
-            previous_orientation = Angle(previous_edge.start,
-                                         previous_edge.end,
-                                         first_edge.end).orientation
-            current_orientation = Angle(first_edge.start,
-                                        first_edge.end,
-                                        second_edge.end).orientation
-            if previous_orientation is Orientation.CLOCKWISE:
-                if current_orientation is Orientation.COUNTERCLOCKWISE:
-                    return TriangleKind.OUTER
-                else:
-                    return TriangleKind.INNER
-            elif current_orientation is Orientation.CLOCKWISE:
-                return TriangleKind.INNER
-            else:
-                return TriangleKind.OUTER
-        else:
-            # degenerate case with single triangle
-            return TriangleKind.INNER
-
-    triangles_kinds = {index: classify_lying_on_boundary(triangle)
-                       for index, triangle in enumerate(triangulation)}
-    neighbourhood = _to_neighbourhood(triangulation,
-                                      adjacency=adjacency)
-
-    def sorting_key(index: int) -> Sortable:
-        neighbours = neighbourhood[index]
-        neighbours_kinds = {neighbour: triangles_kinds[neighbour]
-                            for neighbour in neighbours}
-        unprocessed_neighbours = {
-            neighbour: kind
-            for neighbour, kind in neighbours_kinds.items()
-            if kind is TriangleKind.UNKNOWN}
-        return (len(unprocessed_neighbours),
-                set(unprocessed_neighbours.keys()) | {index})
-
-    unprocessed = sorted((index
-                          for index, kind in triangles_kinds.items()
-                          if kind is TriangleKind.UNKNOWN),
-                         key=sorting_key)
-
-    def is_touching_boundary_outsider(index: int) -> bool:
-        neighbours = neighbourhood[index]
-        if not neighbours:
-            return False
-        return all(is_neighbour_outsider(index, neighbour)
-                   for neighbour in neighbours)
-
-    def is_neighbour_outsider(index: int, neighbour: int,
-                              *,
-                              excluded: Set[int] = frozenset()) -> bool:
-        neighbour_kind = triangles_kinds[neighbour]
-        return (neighbour_kind is TriangleKind.OUTER
-                # special case of two outside adjacent triangles
-                or neighbour_kind is TriangleKind.UNKNOWN
-                and all(is_neighbour_outsider(neighbour, post_neighbour,
-                                              excluded=excluded | {index})
-                        for post_neighbour in neighbourhood[neighbour]
-                        - {index} - excluded))
-
-    for index in unprocessed:
-        triangles_kinds[index] = (TriangleKind.OUTER
-                                  if is_touching_boundary_outsider(index)
-                                  else TriangleKind.INNER)
-    return [triangle_vertices
-            for index, triangle_vertices in enumerate(triangulation)
-            if triangles_kinds[index] is TriangleKind.INNER]
+def _set_boundary(triangulation: Triangulation,
+                  *,
+                  boundary: Sequence[Segment]) -> None:
+    boundary = frozenset(boundary)
+    non_boundary = set(triangulation.boundary) - boundary
+    while non_boundary:
+        edge = non_boundary.pop()
+        triangulation.remove(edge)
+        non_edge_vertex, = triangulation._to_non_adjacent_vertices(edge)
+        candidates = (to_segment(edge.start, non_edge_vertex),
+                      to_segment(non_edge_vertex, edge.end))
+        non_boundary.update(candidate
+                            for candidate in candidates
+                            if candidate not in boundary)
 
 
 def _to_points_triangles(triangulation: Sequence[Vertices]
@@ -679,46 +605,11 @@ def _to_neighbourhood(triangulation: Sequence[Vertices],
     return result
 
 
-def _restore_delaunay_criterion(triangulation: List[Vertices],
-                                *,
-                                adjacency: Dict[Segment, Set[int]],
-                                new_edges: Set[Segment]) -> None:
-    while True:
-        no_swaps = True
-        for edge in new_edges:
-            adjacents = adjacency[edge]
-            first_adjacent_index, second_adjacent_index = adjacents
-            first_adjacent = triangulation[first_adjacent_index]
-            second_adjacent = triangulation[second_adjacent_index]
-            quadriliteral_vertices = to_convex_hull(first_adjacent
-                                                    + second_adjacent)
-            if not vertices_forms_convex_polygon(quadriliteral_vertices):
-                continue
-            edge_points = {edge.start, edge.end}
-            first_non_edge_vertex, = (set(first_adjacent)
-                                      - edge_points)
-            second_non_edge_vertex, = (set(second_adjacent)
-                                       - edge_points)
-            if not (_is_point_inside_circumcircle(first_adjacent,
-                                                  second_non_edge_vertex)
-                    or _is_point_inside_circumcircle(second_adjacent,
-                                                     first_non_edge_vertex)):
-                continue
-            anti_diagonal = to_segment(first_non_edge_vertex,
-                                       second_non_edge_vertex)
-            _swap_edges(edge, anti_diagonal,
-                        adjacency=adjacency,
-                        triangulation=triangulation)
-            no_swaps = False
-        if no_swaps:
-            break
-
-
 def _resolve_crossings(constraint: Segment,
-                       triangulation: List[Vertices],
+                       triangulation: Triangulation,
                        *,
-                       adjacency: Dict[Segment, Set[int]],
                        crossed_edges: Set[Segment]) -> Set[Segment]:
+    adjacency = triangulation.to_adjacency()
     open_constraint = to_interval(constraint.start, constraint.end,
                                   start_inclusive=False,
                                   end_inclusive=False)
@@ -727,18 +618,17 @@ def _resolve_crossings(constraint: Segment,
                           maxlen=len(crossed_edges))
     while crossed_edges:
         edge = crossed_edges.popleft()
-        first_adjacent, second_adjacent = adjacency[edge]
-        vertices = to_convex_hull(triangulation[first_adjacent]
-                                  + triangulation[second_adjacent])
-        if not (len(vertices) == 4
-                and vertices_forms_convex_polygon(vertices)):
+        first_non_edge_vertex, second_non_edge_vertex = adjacency[edge]
+        if not _points_form_convex_quadrilateral((edge.start, edge.end,
+                                                  first_non_edge_vertex,
+                                                  second_non_edge_vertex)):
             crossed_edges.append(edge)
             continue
-        anti_diagonal = to_segment(*(set(vertices)
-                                     - {edge.start, edge.end}))
-        _swap_edges(edge, anti_diagonal,
-                    adjacency=adjacency,
-                    triangulation=triangulation)
+        anti_diagonal = to_segment(first_non_edge_vertex,
+                                   second_non_edge_vertex)
+        _flip_diagonal(edge, anti_diagonal,
+                       adjacency=adjacency,
+                       triangulation=triangulation)
         if (anti_diagonal.relationship_with(open_constraint)
                 is IntersectionKind.CROSS):
             crossed_edges.append(anti_diagonal)
@@ -747,66 +637,21 @@ def _resolve_crossings(constraint: Segment,
     return result
 
 
+def _points_form_convex_quadrilateral(points: Sequence[Point]) -> bool:
+    vertices = to_convex_hull(points)
+    return (len(vertices) == 4
+            and all(vertex in points for vertex in vertices))
+
+
 def _find_crossed_edges(constraint: Segment,
-                        triangulation: Sequence[Vertices],
-                        *,
-                        neighbourhood: Dict[int, Set[int]],
-                        points_triangles: Dict[Point, Set[int]]
-                        ) -> Set[Segment]:
+                        triangulation: Triangulation) -> Set[Segment]:
     open_constraint = to_interval(constraint.start, constraint.end,
                                   start_inclusive=False,
                                   end_inclusive=False)
-    step, target_indices = (points_triangles[constraint.start],
-                            points_triangles[constraint.end])
-    visited_points = {constraint.start}
-    result = set()
-    while True:
-        next_step = set()
-        for index in step:
-            triangle_vertices = triangulation[index]
-            for edge in to_edges(triangle_vertices):
-                if (edge.start not in visited_points
-                        and edge.start in open_constraint):
-                    next_step.update(points_triangles[edge.start]
-                                     - step)
-                    visited_points.add(edge.start)
-                    break
-                elif (edge.end not in visited_points
-                      and edge.end in open_constraint):
-                    next_step.update(points_triangles[edge.end]
-                                     - step)
-                    visited_points.add(edge.end)
-                    break
-                relationship = edge.relationship_with(open_constraint)
-                if relationship is IntersectionKind.NONE:
-                    continue
-                elif relationship is IntersectionKind.CROSS:
-                    result.add(edge)
-                    next_step.update(neighbourhood[index])
-                    break
-                else:
-                    raise RuntimeError('Unexpected edge-to-constraint '
-                                       'relationship: {}.'
-                                       .format(relationship))
-            else:
-                continue
-            break
-        if step & target_indices:
-            break
-        step = next_step
-    return result
-
-
-def _swap_edges(src_edge: Segment, dst_edge: Segment,
-                *,
-                adjacency: Dict[Segment, Set[int]],
-                triangulation: List[Vertices]) -> None:
-    _update_adjacency(src_edge, dst_edge,
-                      adjacency=adjacency)
-    _update_triangulation(src_edge, dst_edge,
-                          adjacency=adjacency,
-                          triangulation=triangulation)
-    del adjacency[src_edge]
+    return {edge
+            for edge in triangulation.inner_edges
+            if edge.relationship_with(open_constraint)
+            is IntersectionKind.CROSS}
 
 
 def _update_triangulation(src_edge: Segment, dst_edge: Segment,
