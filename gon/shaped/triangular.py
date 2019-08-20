@@ -1,3 +1,4 @@
+import heapq
 from collections import (defaultdict,
                          deque)
 from enum import (IntEnum,
@@ -383,27 +384,26 @@ def _is_segment_not_below_another(first_segment: Segment,
 
 def _find_left_candidate(base_edge: Segment,
                          triangulation: Triangulation) -> Optional[Point]:
-    def to_potential_candidate(candidates: Set[Point],
-                               *,
-                               visited: Set[Point] = set()) -> Optional[Point]:
-        result = min(candidates - visited,
-                     key=lambda point: Angle(base_edge.end,
-                                             base_edge.start,
-                                             point),
-                     default=None)
-        visited.add(result)
-        return result
+    angles = [Angle(base_edge.end, base_edge.start, point)
+              for point in triangulation.linkage[base_edge.start]]
+    heapq.heapify(angles)
 
-    potential_candidate = to_potential_candidate(
-            triangulation.linkage[base_edge.start])
+    def to_potential_candidate(candidates_angles: List[Angle] = angles
+                               ) -> Optional[Point]:
+        try:
+            angle = heapq.heappop(candidates_angles)
+        except IndexError:
+            return None
+        return angle.second_ray_point
+
+    potential_candidate = to_potential_candidate()
     if potential_candidate is None:
         return potential_candidate
     while True:
         if (base_edge.orientation_with(potential_candidate)
                 is not Orientation.COUNTERCLOCKWISE):
             return None
-        next_potential_candidate = to_potential_candidate(
-                triangulation.linkage[base_edge.start])
+        next_potential_candidate = to_potential_candidate()
         if next_potential_candidate is None:
             return potential_candidate
         elif _is_point_inside_circumcircle(
