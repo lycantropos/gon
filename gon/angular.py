@@ -1,5 +1,6 @@
 import math
-from enum import IntEnum
+from enum import (IntEnum,
+                  unique)
 
 from reprit.base import generate_repr
 
@@ -9,12 +10,14 @@ from .hints import Scalar
 from .utils import to_sign
 
 
+@unique
 class AngleKind(IntEnum):
     OBTUSE = -1
     RIGHT = 0
     ACUTE = 1
 
 
+@unique
 class Orientation(IntEnum):
     CLOCKWISE = -1
     COLLINEAR = 0
@@ -25,6 +28,7 @@ class Region(IntEnum):
     pass
 
 
+@unique
 class Fixed(Region):
     ZERO_RADIAN = 0
     HALF_PI_RADIAN = 2
@@ -32,6 +36,7 @@ class Fixed(Region):
     ONE_AND_A_HALF_RADIAN = 6
 
 
+@unique
 class Quadrant(Region):
     FIRST = 1
     SECOND = 3

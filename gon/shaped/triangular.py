@@ -351,6 +351,7 @@ def _split(sequence: Sequence[Domain],
             for number in range(size)]
 
 
+@unique
 class EdgeKind(IntEnum):
     LEFT = -1
     UNKNOWN = 0
@@ -545,13 +546,6 @@ def _set_constraints(triangulation: Triangulation,
                                        crossed_edges=crossed_edges)
         _set_delaunay_criterion(triangulation,
                                 target_edges=new_edges - {constraint})
-
-
-@unique
-class TriangleKind(IntEnum):
-    UNKNOWN = 0
-    INNER = 1
-    OUTER = 2
 
 
 def _set_boundary(triangulation: Triangulation,
