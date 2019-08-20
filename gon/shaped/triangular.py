@@ -345,19 +345,25 @@ class EdgeKind(IntEnum):
 
 
 def _merge(left: Triangulation, right: Triangulation) -> Triangulation:
-    base_edge, previous_edge_type = (_find_base_edge(left, right),
-                                     EdgeKind.UNKNOWN)
-    edges = set()
-    while base_edge is not None:
-        edges.add(base_edge)
-        base_edge, previous_edge_type = _to_next_base_edge(base_edge,
-                                                           previous_edge_type,
-                                                           left, right)
     result = Triangulation(left.points + right.points)
-    result.update(edges)
+    # operations order matters:
+    # while searching for merging edges
+    # both triangulations gets modified
+    result.update(_to_merging_edges(left, right))
     result.update(left.edges)
     result.update(right.edges)
     return result
+
+
+def _to_merging_edges(left: Triangulation,
+                      right: Triangulation) -> Iterable[Segment]:
+    base_edge, previous_edge_type = (_find_base_edge(left, right),
+                                     EdgeKind.UNKNOWN)
+    while base_edge is not None:
+        yield base_edge
+        base_edge, previous_edge_type = _to_next_base_edge(base_edge,
+                                                           previous_edge_type,
+                                                           left, right)
 
 
 def _find_base_edge(left: Triangulation, right: Triangulation) -> Segment:
