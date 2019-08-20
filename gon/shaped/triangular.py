@@ -360,14 +360,25 @@ def _merge(left: Triangulation, right: Triangulation) -> Triangulation:
 
 
 def _find_base_edge(left: Triangulation, right: Triangulation) -> Segment:
-    lower_convex_hull = _to_sub_hull(left.points + right.points)
-    return min(set(to_edges(lower_convex_hull))
-               - left.boundary
-               - right.boundary,
-               key=lambda edge:
-               (edge.start.y, edge.end.y)
-               if edge.start.y < edge.end.y
-               else (edge.end.y, edge.start.y))
+    candidates = iter(
+            set(to_edges(_to_sub_hull(left.points + right.points)))
+            - set(to_edges(_to_sub_hull(left.points)))
+            - set(to_edges(_to_sub_hull(right.points))))
+    result = next(candidates)
+    for candidate in candidates:
+        if _is_segment_not_below_another(result, candidate):
+            result = candidate
+    return result
+
+
+def _is_segment_not_below_another(first_segment: Segment,
+                                  second_segment: Segment) -> bool:
+    if first_segment.start.x > first_segment.end.x:
+        first_segment = first_segment.reversed
+    return (first_segment.orientation_with(second_segment.start)
+            is not Orientation.COUNTERCLOCKWISE
+            and first_segment.orientation_with(second_segment.end)
+            is not Orientation.COUNTERCLOCKWISE)
 
 
 def _find_left_candidate(base_edge: Segment,
