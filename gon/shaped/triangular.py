@@ -176,16 +176,13 @@ class Triangulation:
 
 
 def _to_visible_non_adjacent_vertices(candidates, edge):
-    if len(candidates) <= 2:
-        return candidates
-    else:
-        return {min(points,
-                    key=edge.angle_with
-                    if orientation is Orientation.COUNTERCLOCKWISE
-                    else edge.reversed.angle_with)
-                for (orientation,
-                     points) in grouper(edge.orientation_with)(candidates)
-                if orientation is not Orientation.COLLINEAR}
+    return {min(points,
+                key=edge.angle_with
+                if orientation is Orientation.COUNTERCLOCKWISE
+                else edge.reversed.angle_with)
+            for (orientation,
+                 points) in grouper(edge.orientation_with)(candidates)
+            if orientation is not Orientation.COLLINEAR}
 
 
 def delaunay(points: Sequence[Point]) -> List[Vertices]:
