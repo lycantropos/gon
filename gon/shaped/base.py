@@ -284,7 +284,7 @@ class SimplePolygon(Polygon):
         """
         triangulation = triangular.constrained_delaunay(
                 self._vertices,
-                constraints=to_edges(self._vertices))
+                boundary=tuple(to_edges(self._vertices)))
         return [SimplePolygon(triangle_vertices)
                 for triangle_vertices in triangulation]
 
