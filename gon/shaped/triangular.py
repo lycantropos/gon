@@ -192,8 +192,9 @@ def delaunay(points: Sequence[Point]) -> List[Vertices]:
 def _delaunay(points: Sequence[Point]) -> Triangulation:
     result = [tuple(sorted(points,
                            key=attrgetter('x', 'y')))]
-    while max(map(len, result)) > 5:
-        result = list(flatten(_split(part) if len(part) > 5 else [part]
+    while max(map(len, result)) > max(_initializers):
+        result = list(flatten(_split(part) if len(part) > max(_initializers)
+                              else [part]
                               for part in result))
     result = [_initialize_triangulation(points) for points in result]
     while len(result) > 1:
