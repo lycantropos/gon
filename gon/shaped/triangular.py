@@ -145,7 +145,7 @@ class Triangulation:
 
     def to_triangles_vertices(self) -> List[Vertices]:
         if len(self.points) == 3:
-            return [self.points]
+            return [_to_ccw_triangle_vertices(self.points)]
         adjacency = self.to_adjacency()
         result = {frozenset((edge.start, edge.end, point))
                   for edge in self.inner_edges
