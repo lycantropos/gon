@@ -437,26 +437,22 @@ def _find_left_candidate(base_edge: Segment,
 
 def _find_right_candidate(base_edge: Segment,
                           triangulation: Triangulation) -> Optional[Point]:
-    angles = [Angle(point, base_edge.end, base_edge.start)
-              for point in triangulation.linkage[base_edge.end]]
-    heapq.heapify(angles)
+    def to_potential_candidates() -> Iterator[Point]:
+        angles = [Angle(point, base_edge.end, base_edge.start)
+                  for point in triangulation.linkage[base_edge.end]]
+        heapq.heapify(angles)
+        while angles:
+            yield heapq.heappop(angles).first_ray_point
 
-    def to_potential_candidate(candidates_angles: List[Angle] = angles
-                               ) -> Optional[Point]:
-        try:
-            angle = heapq.heappop(candidates_angles)
-        except IndexError:
-            return None
-        return angle.first_ray_point
-
-    potential_candidate = to_potential_candidate()
+    potential_candidates = to_potential_candidates()
+    potential_candidate = next(potential_candidates, None)
     if potential_candidate is None:
         return potential_candidate
     while True:
         if (base_edge.orientation_with(potential_candidate)
                 is not Orientation.COUNTERCLOCKWISE):
             return None
-        next_potential_candidate = to_potential_candidate()
+        next_potential_candidate = next(potential_candidates, None)
         if next_potential_candidate is None:
             return potential_candidate
         elif _is_point_inside_circumcircle(
