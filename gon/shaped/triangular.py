@@ -149,11 +149,11 @@ class Feather:
             self._left._right = self._left._left = None
         self._left = self._right = None
 
-    def orientation_with(self, other: 'Feather') -> Orientation:
-        return self.angle_with(other).orientation
+    def orientation_with(self, point: Point) -> Orientation:
+        return self.angle_with(point).orientation
 
-    def angle_with(self, other: 'Feather') -> Angle:
-        return Angle(self._end, self._start, other._end)
+    def angle_with(self, point: Point) -> Angle:
+        return Angle(self._end, self._start, point)
 
 
 
@@ -205,43 +205,42 @@ class Wing:
         self._feathers[feather.segment] = feather
         if self._current is None:
             self._current = feather
-        elif (self._current.orientation_with(feather)
+        elif (self._current.orientation_with(end)
               is Orientation.COUNTERCLOCKWISE):
             if self._current.left is not None:
-                self.approach_lefter(feather)
+                self.approach_lefter(end)
             self._current.left = feather
             self._current = feather
         else:
             if self._current.right is not None:
-                self.approach_righter(feather)
+                self.approach_righter(end)
             self._current.right = feather
             self._current = feather
 
     def remove(self, end: Point) -> None:
         feather = Feather(self._start, end)
         del self._feathers[feather.segment]
-        if (self._current.orientation_with(feather)
-                is Orientation.COUNTERCLOCKWISE):
-            self.approach_lefter(feather)
+        if self._current.orientation_with(end) is Orientation.COUNTERCLOCKWISE:
+            self.approach_lefter(end)
         else:
-            self.approach_righter(feather)
+            self.approach_righter(end)
         target_feather = self._current
         self._current = target_feather.left or target_feather.right
         target_feather.take_out()
 
-    def approach_righter(self, feather: Feather) -> None:
-        angle = feather.angle_with(self._current)
+    def approach_righter(self, point: Point) -> None:
+        angle = self._current.angle_with(point).reversed
         while True:
-            next_angle = feather.angle_with(self._current.right)
+            next_angle = self._current.right.angle_with(point).reversed
             if next_angle > angle:
                 break
             self.step_to_right()
             angle = next_angle
 
-    def approach_lefter(self, feather: Feather) -> None:
-        angle = self._current.angle_with(feather)
+    def approach_lefter(self, point: Point) -> None:
+        angle = self._current.angle_with(point)
         while True:
-            next_angle = self._current.left.angle_with(feather)
+            next_angle = self._current.left.angle_with(point)
             if next_angle > angle:
                 break
             self.step_to_left()
