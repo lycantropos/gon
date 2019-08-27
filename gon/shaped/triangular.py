@@ -21,7 +21,8 @@ from typing import (AbstractSet,
 
 from lz.hints import Domain
 from lz.iterating import (flatten,
-                          grouper)
+                          grouper,
+                          pairwise)
 from memoir import cached
 from reprit.base import generate_repr
 
@@ -154,7 +155,6 @@ class Feather:
 
     def angle_with(self, point: Point) -> Angle:
         return Angle(self._end, self._start, point)
-
 
 
 def iter_feathers(start: Feather,
