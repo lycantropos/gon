@@ -141,12 +141,6 @@ class Feather:
     def segment(self) -> Segment:
         return to_segment(self._start, self._end)
 
-    def is_on_the_right_of(self, other: 'Feather') -> bool:
-        return self.orientation_with(other) is Orientation.COUNTERCLOCKWISE
-
-    def is_on_the_left_of(self, other: 'Feather') -> bool:
-        return self.orientation_with(other) is Orientation.CLOCKWISE
-
     def take_out(self) -> None:
         self._left._right = self._right
         self._right._left = self._left
@@ -208,7 +202,8 @@ class Wing:
         self._feathers[feather.segment] = feather
         if self._current is None:
             self._current = feather
-        elif feather.is_on_the_left_of(self._current):
+        elif (self._current.orientation_with(feather)
+              is Orientation.COUNTERCLOCKWISE):
             if self._current.left is not None:
                 self.approach_lefter(feather)
             self._current.left = feather
@@ -222,7 +217,8 @@ class Wing:
     def remove(self, end: Point) -> None:
         feather = Feather(self._start, end)
         del self._feathers[feather.segment]
-        if feather.is_on_the_left_of(self._current):
+        if (self._current.orientation_with(feather)
+                is Orientation.COUNTERCLOCKWISE):
             self.approach_lefter(feather)
         else:
             self.approach_righter(feather)
