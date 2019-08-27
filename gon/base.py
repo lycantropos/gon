@@ -68,7 +68,7 @@ class Vector:
         >>> not zero_vector
         True
         """
-        return bool(self._x and self._y)
+        return bool(self._x or self._y)
 
     @property
     def x(self) -> Scalar:
