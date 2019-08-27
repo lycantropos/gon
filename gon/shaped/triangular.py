@@ -5,6 +5,7 @@ from enum import (IntEnum,
                   unique)
 from itertools import chain
 from operator import attrgetter
+from reprlib import recursive_repr
 from types import MappingProxyType
 from typing import (AbstractSet,
                     DefaultDict,
@@ -86,15 +87,186 @@ def _to_non_strict_convex_hull(sorted_points: Sequence[Point]) -> List[Point]:
     return convex_hull
 
 
+class Feather:
+    __slots__ = ('_start', '_end', '_left', '_right')
+
+    def __init__(self, start: Point, end: Point,
+                 *,
+                 left: Optional['Feather'] = None,
+                 right: Optional['Feather'] = None):
+        self._start = start
+        self._end = end
+        self._left = left
+        self._right = right
+
+    __repr__ = recursive_repr()(generate_repr(__init__))
+
+    @property
+    def start(self) -> Point:
+        return self._start
+
+    @property
+    def end(self) -> Point:
+        return self._end
+
+    @property
+    def left(self) -> Optional['Feather']:
+        return self._left
+
+    @left.setter
+    def left(self, value: 'Feather') -> None:
+        if self._left is None:
+            self._left, value._right = value, self
+            self._right, value._left = value, self
+        else:
+            (self._left._right,
+             value._left, value._right) = value, self._left, self
+            self._left = value
+
+    @property
+    def right(self) -> Optional['Feather']:
+        return self._right
+
+    @right.setter
+    def right(self, value: 'Feather') -> None:
+        if self._right is None:
+            self._right, value._left = value, self
+            self._left, value._right = value, self
+        else:
+            (self._right._left,
+             value._right, value._left) = value, self._right, self
+            self._right = value
+
+    @property
+    def segment(self) -> Segment:
+        return to_segment(self._start, self._end)
+
+    def is_on_the_right_of(self, other: 'Feather') -> bool:
+        return self.orientation_with(other) is Orientation.COUNTERCLOCKWISE
+
+    def is_on_the_left_of(self, other: 'Feather') -> bool:
+        return self.orientation_with(other) is Orientation.CLOCKWISE
+
+    def take_out(self) -> None:
+        self._left._right = self._right
+        self._right._left = self._left
+        self._left = self._right = None
+
+    def orientation_with(self, other: 'Feather') -> Orientation:
+        return self.angle_with(other).orientation
+
+    def angle_with(self, other: 'Feather') -> Angle:
+        return Angle(self._end, self._start, other._end)
+
+
+
+def iter_feathers(start: Feather,
+                  orientation: Orientation = Orientation.COUNTERCLOCKWISE
+                  ) -> Iterable[Feather]:
+    to_next = attrgetter('left' if orientation is Orientation.COUNTERCLOCKWISE
+                         else 'right')
+    feather = start
+    while True:
+        yield feather
+        feather = to_next(feather)
+        if feather is None or feather is start:
+            break
+
+
+class Wing:
+    __slots__ = ('_start', '_current', '_feathers')
+
+    def __init__(self, start: Point,
+                 *,
+                 current: Optional[Feather] = None,
+                 feathers: Optional[Dict[Segment, Feather]] = None):
+        self._start = start
+        self._current = current
+        if feathers is None:
+            feathers = {}
+        self._feathers = feathers
+
+    __repr__ = generate_repr(__init__)
+
+    @property
+    def start(self) -> Point:
+        return self._start
+
+    @property
+    def current(self) -> Feather:
+        return self._current
+
+    @property
+    def feathers(self) -> Dict[Segment, Feather]:
+        return self._feathers
+
+    def iter_edges(self) -> Iterable[Segment]:
+        return (feather.segment for feather in iter_feathers(self._current))
+
+    def insert(self, end: Point) -> None:
+        feather = Feather(self._start, end)
+        self._feathers[feather.segment] = feather
+        if self._current is None:
+            self._current = feather
+        elif feather.is_on_the_left_of(self._current):
+            if self._current.left is not None:
+                self.approach_lefter(feather)
+            self._current.left = feather
+            self._current = feather
+        else:
+            if self._current.right is not None:
+                self.approach_righter(feather)
+            self._current.right = feather
+            self._current = feather
+
+    def remove(self, end: Point) -> None:
+        feather = Feather(self._start, end)
+        del self._feathers[feather.segment]
+        if feather.is_on_the_left_of(self._current):
+            self.approach_lefter(feather)
+        else:
+            self.approach_righter(feather)
+        target_feather = self._current
+        self._current = target_feather.left or target_feather.right
+        target_feather.take_out()
+
+    def approach_righter(self, feather: Feather) -> None:
+        angle = feather.angle_with(self._current)
+        while True:
+            next_angle = feather.angle_with(self._current.right)
+            if next_angle > angle:
+                break
+            self.step_to_right()
+            angle = next_angle
+
+    def approach_lefter(self, feather: Feather) -> None:
+        angle = self._current.angle_with(feather)
+        while True:
+            next_angle = self._current.left.angle_with(feather)
+            if next_angle > angle:
+                break
+            self.step_to_left()
+            angle = next_angle
+
+    def step_to_right(self) -> None:
+        self._current = self._current.right
+
+    def step_to_left(self) -> None:
+        self._current = self._current.left
+
+
 class Triangulation:
     def __init__(self, points: Sequence[Point],
                  *,
-                 linkage: Optional[DefaultDict[Point, Set[Point]]] = None
-                 ) -> None:
+                 linkage: Optional[DefaultDict[Point, Set[Point]]] = None,
+                 wings: Optional[Dict[Point, Wing]] = None) -> None:
         self._points = tuple(points)
         if linkage is None:
             linkage = defaultdict(set)
         self._linkage = linkage
+        if wings is None:
+            wings = {point: Wing(point) for point in points}
+        self._wings = wings
 
     __repr__ = generate_repr(__init__)
 
@@ -103,7 +275,7 @@ class Triangulation:
         return self._points
 
     def to_adjacency(self) -> Dict[Segment, Set[Point]]:
-        return {edge: self._to_non_adjacent_vertices(edge)
+        return {edge: self.to_non_adjacent_vertices(edge)
                 for edge in self.edges}
 
     @property
@@ -111,15 +283,16 @@ class Triangulation:
         return MappingProxyType(self._linkage)
 
     @property
+    def wings(self) -> Mapping[Point, Wing]:
+        return MappingProxyType(self._wings)
+
+    @property
     def edges(self) -> AbstractSet[Segment]:
         return set(self._iter_edges())
 
     def _iter_edges(self) -> Iterable[Segment]:
-        visited = set()
-        for start, connected in self._linkage.items():
-            for end in connected - visited:
-                yield to_segment(start, end)
-            visited.add(start)
+        for wing in self._wings.values():
+            yield from wing.iter_edges()
 
     @cached.property_
     def boundary(self) -> AbstractSet[Segment]:
@@ -132,10 +305,9 @@ class Triangulation:
     def to_triangles_vertices(self) -> List[Vertices]:
         if len(self.points) == 3:
             return [_to_ccw_triangle_vertices(self.points)]
-        adjacency = self.to_adjacency()
         result = {frozenset((edge.start, edge.end, point))
                   for edge in self.inner_edges
-                  for point in adjacency[edge]}
+                  for point in self.to_non_adjacent_vertices(edge)}
         return [_to_ccw_triangle_vertices(tuple(vertices))
                 for vertices in result]
 
@@ -146,6 +318,8 @@ class Triangulation:
     def remove(self, edge: Segment) -> None:
         self._linkage[edge.start].remove(edge.end)
         self._linkage[edge.end].remove(edge.start)
+        self._wings[edge.start].remove(edge.end)
+        self._wings[edge.end].remove(edge.start)
 
     def replace(self, edge: Segment, replacement: Segment) -> None:
         self.remove(edge)
@@ -154,14 +328,24 @@ class Triangulation:
     def _add(self, edge: Segment) -> None:
         self._linkage[edge.start].add(edge.end)
         self._linkage[edge.end].add(edge.start)
+        self._wings[edge.start].insert(edge.end)
+        self._wings[edge.end].insert(edge.start)
 
-    def _to_non_adjacent_vertices(self, edge: Segment) -> Set[Point]:
-        return _to_visible_non_adjacent_vertices(self._linkage[edge.start]
-                                                 & self._linkage[edge.end],
-                                                 edge)
+    def to_non_adjacent_vertices(self, edge: Segment) -> Set[Point]:
+        start_wing = self._wings[edge.start]
+        end_wing = self._wings[edge.end]
+        start_feather = start_wing.feathers[edge]
+        end_feather = end_wing.feathers[edge]
+        candidates = set()
+        if start_feather.left.end == end_feather.right.end:
+            candidates.add(start_feather.left.end)
+        if start_feather.right.end == end_feather.left.end:
+            candidates.add(start_feather.right.end)
+        return _to_visible_non_adjacent_vertices(candidates, edge)
 
 
-def _to_visible_non_adjacent_vertices(candidates, edge):
+def _to_visible_non_adjacent_vertices(candidates: Iterable[Point],
+                                      edge: Segment) -> Set[Point]:
     return {min(points,
                 key=edge.angle_with
                 if orientation is Orientation.COUNTERCLOCKWISE
@@ -236,13 +420,13 @@ def _set_delaunay_criterion(triangulation: Triangulation,
         O(n^2), where
         n -- points count.
     """
-    adjacency = triangulation.to_adjacency()
     if target_edges is None:
         target_edges = set(triangulation.inner_edges)
     while True:
         removed_edges = set()
         for edge in target_edges:
-            first_non_edge_vertex, second_non_edge_vertex = adjacency[edge]
+            first_non_edge_vertex, second_non_edge_vertex = (
+                triangulation.to_non_adjacent_vertices(edge))
             if not _points_form_convex_quadrilateral((edge.start, edge.end,
                                                       first_non_edge_vertex,
                                                       second_non_edge_vertex)):
@@ -259,38 +443,10 @@ def _set_delaunay_criterion(triangulation: Triangulation,
             anti_diagonal = to_segment(first_non_edge_vertex,
                                        second_non_edge_vertex)
             removed_edges.add(edge)
-            _flip_diagonal(edge,
-                           anti_diagonal,
-                           adjacency=adjacency,
-                           triangulation=triangulation)
+            triangulation.replace(edge, anti_diagonal)
         if not removed_edges:
             break
         target_edges.difference_update(removed_edges)
-
-
-def _flip_diagonal(diagonal: Segment, anti_diagonal: Segment,
-                   *,
-                   adjacency: Dict[Segment, Set[Point]],
-                   triangulation: Triangulation) -> None:
-    diagonals_starts = to_segment(diagonal.start, anti_diagonal.start)
-    diagonal_start_anti_diagonal_end = to_segment(diagonal.start,
-                                                  anti_diagonal.end)
-    diagonal_end_anti_diagonal_start = to_segment(diagonal.end,
-                                                  anti_diagonal.start)
-    diagonals_ends = to_segment(diagonal.end, anti_diagonal.end)
-
-    adjacency[diagonals_starts].remove(diagonal.end)
-    adjacency[diagonal_start_anti_diagonal_end].remove(diagonal.end)
-    adjacency[diagonal_end_anti_diagonal_start].remove(diagonal.start)
-    adjacency[diagonals_ends].remove(diagonal.start)
-    del adjacency[diagonal]
-
-    adjacency[diagonals_starts].add(anti_diagonal.end)
-    adjacency[diagonal_start_anti_diagonal_end].add(anti_diagonal.start)
-    adjacency[diagonal_end_anti_diagonal_start].add(anti_diagonal.end)
-    adjacency[diagonals_ends].add(anti_diagonal.start)
-    adjacency[anti_diagonal] = {diagonal.start, diagonal.end}
-    triangulation.replace(diagonal, anti_diagonal)
 
 
 def _split(sequence: Sequence[Domain],
@@ -498,8 +654,8 @@ def _set_boundary(triangulation: Triangulation,
     non_boundary = set(triangulation.boundary) - boundary
     while non_boundary:
         edge = non_boundary.pop()
+        non_edge_vertex, = triangulation.to_non_adjacent_vertices(edge)
         triangulation.remove(edge)
-        non_edge_vertex, = triangulation._to_non_adjacent_vertices(edge)
         candidates = (to_segment(edge.start, non_edge_vertex),
                       to_segment(non_edge_vertex, edge.end))
         non_boundary.update(candidate
@@ -543,7 +699,6 @@ def _resolve_crossings(constraint: Segment,
                        triangulation: Triangulation,
                        *,
                        crossed_edges: Set[Segment]) -> Set[Segment]:
-    adjacency = triangulation.to_adjacency()
     open_constraint = to_interval(constraint.start, constraint.end,
                                   start_inclusive=False,
                                   end_inclusive=False)
@@ -552,7 +707,8 @@ def _resolve_crossings(constraint: Segment,
                           maxlen=len(crossed_edges))
     while crossed_edges:
         edge = crossed_edges.popleft()
-        first_non_edge_vertex, second_non_edge_vertex = adjacency[edge]
+        (first_non_edge_vertex,
+         second_non_edge_vertex) = triangulation.to_non_adjacent_vertices(edge)
         if not _points_form_convex_quadrilateral((edge.start, edge.end,
                                                   first_non_edge_vertex,
                                                   second_non_edge_vertex)):
@@ -560,9 +716,7 @@ def _resolve_crossings(constraint: Segment,
             continue
         anti_diagonal = to_segment(first_non_edge_vertex,
                                    second_non_edge_vertex)
-        _flip_diagonal(edge, anti_diagonal,
-                       adjacency=adjacency,
-                       triangulation=triangulation)
+        triangulation.replace(edge, anti_diagonal)
         if (anti_diagonal.relationship_with(open_constraint)
                 is IntersectionKind.CROSS):
             crossed_edges.append(anti_diagonal)
