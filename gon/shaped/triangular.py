@@ -218,8 +218,7 @@ class Wing:
             self._current = feather
 
     def remove(self, end: Point) -> None:
-        feather = Feather(self._start, end)
-        del self._feathers[feather.segment]
+        del self._feathers[to_segment(self._start, end)]
         if self._current.orientation_with(end) is Orientation.COUNTERCLOCKWISE:
             self.approach_lefter(end)
         else:
