@@ -58,21 +58,6 @@ def _is_point_inside_circumcircle(vertices: Vertices, point: Point) -> bool:
             * first_vector.cross_z(second_vector)) > 0
 
 
-def _incremental_delaunay(points: Iterable[Point],
-                          super_triangle_vertices: Vertices) -> Set[Vertices]:
-    result = {tuple(super_triangle_vertices)}
-    for point in points:
-        invalid_triangles = [vertices
-                             for vertices in result
-                             if _is_point_inside_circumcircle(vertices, point)]
-        result.difference_update(invalid_triangles)
-        result.update(
-                _to_ccw_triangle_vertices((edge.end, edge.start, point))
-                for edge in _to_boundary(invalid_triangles)
-                if edge.orientation_with(point) is not Orientation.COLLINEAR)
-    return result
-
-
 def _to_non_strict_convex_hull(sorted_points: Sequence[Point]) -> List[Point]:
     """
     Builds non-strict convex hull from lexicographically sorted points,
@@ -206,60 +191,24 @@ def _delaunay(points: Sequence[Point]) -> Triangulation:
     return result[0]
 
 
+def _triangulate_two_points(points: Sequence[Point]) -> Triangulation:
+    result = Triangulation(points)
+    result.update([to_segment(*points)])
+    return result
+
+
 def _triangulate_three_points(points: Sequence[Point]) -> Triangulation:
     result = Triangulation(points)
-    result.update(to_edges(points))
-    return result
-
-
-def _triangulate_four_points(points: Sequence[Point]) -> Triangulation:
-    result = Triangulation(points)
-    convex_hull = to_convex_hull(points)
-    if len(convex_hull) == 2:
-        result.update(to_edges(points))
-    elif len(convex_hull) == 3:
-        for vertices in _incremental_delaunay(set(points)
-                                              - set(convex_hull),
-                                              convex_hull):
-            result.update(to_edges(vertices))
+    if Angle(*points).orientation is Orientation.COLLINEAR:
+        edges = [to_segment(start, end) for start, end in pairwise(points)]
     else:
-        *triangle_vertices, rest_vertex = convex_hull
-        if _is_point_inside_circumcircle(triangle_vertices, rest_vertex):
-            convex_hull = convex_hull[::-1]
-        for vertices in (_to_ccw_triangle_vertices(convex_hull[:3]),
-                         _to_ccw_triangle_vertices(convex_hull[2:]
-                                                   + convex_hull[:1])):
-            result.update(to_edges(vertices))
+        edges = list(to_edges(points))
+    result.update(edges)
     return result
 
 
-def _triangulate_five_points(points: Sequence[Point]) -> Triangulation:
-    result = Triangulation(points)
-    convex_hull = to_convex_hull(points)
-    if len(convex_hull) == 2:
-        result.update(to_edges(points))
-    elif len(convex_hull) == 3:
-        for vertices in _incremental_delaunay(set(points) - set(convex_hull),
-                                              convex_hull):
-            result.update(to_edges(vertices))
-    elif len(convex_hull) == 4:
-        extra_point, = set(points) - set(convex_hull)
-        for edge in to_edges(convex_hull):
-            if edge.orientation_with(extra_point) is Orientation.COLLINEAR:
-                continue
-            result.update(to_edges((edge.start, edge.end, extra_point)))
-        _set_delaunay_criterion(result)
-    else:
-        for index in range(1, len(convex_hull) - 1):
-            result.update(to_edges(convex_hull[:1]
-                                   + convex_hull[index:index + 2]))
-        _set_delaunay_criterion(result)
-    return result
-
-
-_initializers = {3: _triangulate_three_points,
-                 4: _triangulate_four_points,
-                 5: _triangulate_five_points}
+_initializers = {2: _triangulate_two_points,
+                 3: _triangulate_three_points}
 
 
 def _initialize_triangulation(points: Sequence[Point]) -> Triangulation:
