@@ -142,8 +142,11 @@ class Feather:
         return to_segment(self._start, self._end)
 
     def take_out(self) -> None:
-        self._left._right = self._right
-        self._right._left = self._left
+        if self._left is not self._right:
+            self._left._right = self._right
+            self._right._left = self._left
+        else:
+            self._left._right = self._left._left = None
         self._left = self._right = None
 
     def orientation_with(self, other: 'Feather') -> Orientation:
