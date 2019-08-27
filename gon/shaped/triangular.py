@@ -157,19 +157,6 @@ class Feather:
         return Angle(self._end, self._start, point)
 
 
-def iter_feathers(start: Feather,
-                  orientation: Orientation = Orientation.COUNTERCLOCKWISE
-                  ) -> Iterable[Feather]:
-    to_next = attrgetter('left' if orientation is Orientation.COUNTERCLOCKWISE
-                         else 'right')
-    feather = start
-    while True:
-        yield feather
-        feather = to_next(feather)
-        if feather is None or feather is start:
-            break
-
-
 class Wing:
     __slots__ = ('_start', '_current', '_feathers')
 
@@ -198,7 +185,7 @@ class Wing:
         return self._feathers
 
     def iter_edges(self) -> Iterable[Segment]:
-        return (feather.segment for feather in iter_feathers(self._current))
+        return (feather.segment for feather in _iter_feathers(self._current))
 
     def insert(self, end: Point) -> None:
         feather = Feather(self._start, end)
@@ -250,6 +237,20 @@ class Wing:
 
     def step_to_left(self) -> None:
         self._current = self._current.left
+
+
+def _iter_feathers(start: Feather,
+                   *,
+                   orientation: Orientation = Orientation.COUNTERCLOCKWISE
+                   ) -> Iterable[Feather]:
+    to_next = attrgetter('left' if orientation is Orientation.COUNTERCLOCKWISE
+                         else 'right')
+    feather = start
+    while True:
+        yield feather
+        feather = to_next(feather)
+        if feather is None or feather is start:
+            break
 
 
 class Triangulation:
