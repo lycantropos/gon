@@ -49,8 +49,8 @@ class Angle:
                  first_ray_point: Point,
                  vertex: Point,
                  second_ray_point: Point) -> None:
-        self._vertex = vertex
         self._first_ray_point = first_ray_point
+        self._vertex = vertex
         self._second_ray_point = second_ray_point
 
     @property
@@ -66,6 +66,12 @@ class Angle:
         return self._second_ray_point
 
     __repr__ = generate_repr(__init__)
+
+    @property
+    def reversed(self) -> 'Angle':
+        return type(self)(self._second_ray_point,
+                          self._vertex,
+                          self._first_ray_point)
 
     def __lt__(self, other: 'Angle') -> bool:
         first_ray_vector = self.first_ray_vector
