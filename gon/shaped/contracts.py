@@ -1,13 +1,11 @@
-from typing import Sequence
-
 from gon.angular import Orientation
-from gon.base import Point
+from .hints import Vertices
 from .utils import (_to_non_neighbours,
                     to_angles,
                     to_edges)
 
 
-def vertices_forms_convex_polygon(vertices: Sequence[Point]) -> bool:
+def vertices_forms_convex_polygon(vertices: Vertices) -> bool:
     if len(vertices) == 3:
         return True
     orientations = (angle.orientation for angle in to_angles(vertices))
@@ -17,12 +15,12 @@ def vertices_forms_convex_polygon(vertices: Sequence[Point]) -> bool:
     return all(orientation == base_orientation for orientation in orientations)
 
 
-def vertices_forms_strict_polygon(vertices: Sequence[Point]) -> bool:
+def vertices_forms_strict_polygon(vertices: Vertices) -> bool:
     return all(angle.orientation is not Orientation.COLLINEAR
                for angle in to_angles(vertices))
 
 
-def self_intersects(vertices: Sequence[Point]) -> bool:
+def self_intersects(vertices: Vertices) -> bool:
     if len(vertices) == 3:
         return False
     edges = tuple(to_edges(vertices))

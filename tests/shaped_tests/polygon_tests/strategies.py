@@ -21,6 +21,7 @@ from gon.shaped import (Polygon,
 from gon.shaped.contracts import (self_intersects,
                                   vertices_forms_convex_polygon,
                                   vertices_forms_strict_polygon)
+from gon.shaped.hints import Vertices
 from gon.shaped.utils import (to_convex_hull,
                               to_edges)
 from tests.strategies import (points_strategies,
@@ -33,7 +34,7 @@ from tests.utils import Strategy
 triangles = triangles_vertices.map(to_polygon)
 
 
-def to_convex_vertices(points: Strategy[Point]) -> Strategy[Sequence[Point]]:
+def to_convex_vertices(points: Strategy[Point]) -> Strategy[Vertices]:
     return (to_non_triangle_vertices_base(points)
             .map(to_convex_hull)
             .filter(lambda vertices: len(vertices) >= 3))
@@ -43,7 +44,7 @@ convex_vertices = (triangles_vertices
                    | points_strategies.flatmap(to_convex_vertices))
 
 
-def to_concave_vertices(points: Strategy[Point]) -> Strategy[Sequence[Point]]:
+def to_concave_vertices(points: Strategy[Point]) -> Strategy[Vertices]:
     return (strategies.lists(points,
                              min_size=4,
                              unique_by=(attrgetter('x'), attrgetter('y')))
@@ -53,13 +54,13 @@ def to_concave_vertices(points: Strategy[Point]) -> Strategy[Sequence[Point]]:
             .filter(negate(vertices_forms_convex_polygon)))
 
 
-def points_to_concave_vertices(points: Sequence[Point]) -> triangular.Vertices:
+def points_to_concave_vertices(points: Sequence[Point]) -> Vertices:
     triangulation = triangular.delaunay(points)
     points_triangles = triangular._to_points_triangles(triangulation)
     boundary = triangular._to_boundary(triangulation)
     boundary_points = set(flatten((edge.start, edge.end) for edge in boundary))
 
-    def is_mouth(triangle_vertices: triangular.Vertices) -> bool:
+    def is_mouth(triangle_vertices: Vertices) -> bool:
         return (sum(vertex in boundary_points
                     for vertex in triangle_vertices) == 2
                 and sum(edge in boundary
@@ -100,7 +101,7 @@ def points_to_concave_vertices(points: Sequence[Point]) -> triangular.Vertices:
     return boundary_to_vertices(boundary)
 
 
-def shrink_collinear_vertices(vertices: Sequence[Point]) -> Sequence[Point]:
+def shrink_collinear_vertices(vertices: Vertices) -> Vertices:
     result = []
     for index, vertex in enumerate(vertices):
         angle = Angle(vertices[index - 1], vertex,
@@ -111,7 +112,7 @@ def shrink_collinear_vertices(vertices: Sequence[Point]) -> Sequence[Point]:
     return result
 
 
-def boundary_to_vertices(boundary: Set[Segment]) -> Sequence[Point]:
+def boundary_to_vertices(boundary: Set[Segment]) -> Vertices:
     connectivity = defaultdict(dict)
     for edge in boundary:
         connectivity[edge.start][edge.end] = edge

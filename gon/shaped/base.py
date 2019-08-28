@@ -26,6 +26,7 @@ from . import triangular
 from .contracts import (self_intersects,
                         vertices_forms_convex_polygon,
                         vertices_forms_strict_polygon)
+from .hints import Vertices
 from .utils import (to_convex_hull,
                     to_edges)
 
@@ -59,7 +60,7 @@ class Polygon(ABC):
 
     @property
     @abstractmethod
-    def vertices(self) -> Sequence[Point]:
+    def vertices(self) -> Vertices:
         """Returns vertices of the polygon."""
 
     @property
@@ -98,7 +99,7 @@ class SimplePolygon(Polygon):
 
     __slots__ = ('_order', '_vertices')
 
-    def __init__(self, vertices: Sequence[Point]) -> None:
+    def __init__(self, vertices: Vertices) -> None:
         self._order, self._vertices = _normalize_vertices(tuple(vertices))
 
     __repr__ = generate_repr(__init__)
@@ -173,7 +174,7 @@ class SimplePolygon(Polygon):
         return hash(self._vertices)
 
     @cached.property_
-    def vertices(self) -> Sequence[Point]:
+    def vertices(self) -> Vertices:
         """
         Returns vertices of the polygon in the original order.
         Original order is the order from polygon's definition.
@@ -301,7 +302,7 @@ def _point_not_inside(point: Point, polygon: Polygon) -> bool:
     return polygon.__contains__(point) is not InclusionKind.INSIDE
 
 
-def to_polygon(vertices: Sequence[Point]) -> Polygon:
+def to_polygon(vertices: Vertices) -> Polygon:
     """
     Based on:
         vertices validation for non-collinear consecutive edges
@@ -327,11 +328,10 @@ def to_polygon(vertices: Sequence[Point]) -> Polygon:
     return SimplePolygon(vertices)
 
 
-def _normalize_vertices(vertices: Sequence[Point]) -> Tuple[Permutation,
-                                                            Sequence[Point]]:
-    order, vertices = zip(*_shift_sequence(tuple(enumerate(vertices)),
-                                           key=compose(attrgetter('x', 'y'),
-                                                       itemgetter(1))))
+def _normalize_vertices(vertices: Vertices) -> Tuple[Permutation, Vertices]:
+    order, vertices = zip(*_rotate_sequence(tuple(enumerate(vertices)),
+                                            key=compose(attrgetter('x', 'y'),
+                                                        itemgetter(1))))
     first_angle = Angle(vertices[-1], vertices[0], vertices[1])
     if first_angle.orientation is not Orientation.CLOCKWISE:
         order, vertices = (order[:1] + order[1:][::-1],
@@ -339,9 +339,9 @@ def _normalize_vertices(vertices: Sequence[Point]) -> Tuple[Permutation,
     return order, vertices
 
 
-def _shift_sequence(sequence: Sequence[Domain],
-                    *,
-                    key: Key = None) -> Sequence[Domain]:
+def _rotate_sequence(sequence: Sequence[Domain],
+                     *,
+                     key: Key = None) -> Sequence[Domain]:
     index_min = to_index_min(sequence,
                              key=key)
     return sequence[index_min:] + sequence[:index_min]
