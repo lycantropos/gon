@@ -114,6 +114,7 @@ class Interval:
     def angle_with(self, point: Point) -> Angle:
         return Angle(self.end, self.start, point)
 
+
 class Segment(Interval):
     def __init__(self, start: Point, end: Point) -> None:
         super().__init__(start, end,
