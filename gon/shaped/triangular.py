@@ -163,7 +163,7 @@ class Wing:
     def __init__(self, start: Point,
                  *,
                  current: Optional[Feather] = None,
-                 feathers: Optional[Dict[Segment, Feather]] = None):
+                 feathers: Optional[Dict[Point, Feather]] = None):
         self._start = start
         self._current = current
         if feathers is None:
@@ -181,7 +181,7 @@ class Wing:
         return self._current
 
     @property
-    def feathers(self) -> Dict[Segment, Feather]:
+    def feathers(self) -> Dict[Point, Feather]:
         return self._feathers
 
     def iter_edges(self) -> Iterable[Segment]:
@@ -189,7 +189,7 @@ class Wing:
 
     def insert(self, end: Point) -> None:
         feather = Feather(self._start, end)
-        self._feathers[feather.segment] = feather
+        self._feathers[end] = feather
         if self._current is None:
             self._current = feather
         elif (self._current.orientation_with(end)
@@ -205,7 +205,7 @@ class Wing:
             self._current = feather
 
     def remove(self, end: Point) -> None:
-        del self._feathers[to_segment(self._start, end)]
+        del self._feathers[end]
         if self._current.orientation_with(end) is Orientation.COUNTERCLOCKWISE:
             self.approach_lefter(end)
         else:
@@ -330,10 +330,8 @@ class Triangulation:
         self._wings[edge.end].insert(edge.start)
 
     def to_non_adjacent_vertices(self, edge: Segment) -> Set[Point]:
-        start_wing = self._wings[edge.start]
-        end_wing = self._wings[edge.end]
-        start_feather = start_wing.feathers[edge]
-        end_feather = end_wing.feathers[edge]
+        start_feather = self._wings[edge.start].feathers[edge.end]
+        end_feather = self._wings[edge.end].feathers[edge.start]
         candidates = set()
         if start_feather.left.end == end_feather.right.end:
             candidates.add(start_feather.left.end)
