@@ -265,10 +265,6 @@ class Triangulation:
     def points(self) -> Sequence[Point]:
         return self._points
 
-    def to_adjacency(self) -> Dict[Segment, Set[Point]]:
-        return {edge: self.to_non_adjacent_vertices(edge)
-                for edge in self.edges}
-
     @property
     def wings(self) -> Mapping[Point, Wing]:
         return MappingProxyType(self._wings)
