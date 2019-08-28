@@ -1,4 +1,3 @@
-import math
 from reprit.base import generate_repr
 
 from .hints import Scalar
@@ -89,15 +88,6 @@ class Vector:
     @property
     def squared_length(self) -> Scalar:
         return self.x ** 2 + self.y ** 2
-
-    @property
-    def length(self) -> Scalar:
-        return math.sqrt(self.squared_length)
-
-    @property
-    def normalized(self) -> 'Vector':
-        length = self.length
-        return Vector(self.x / length, self.y / length)
 
     def cross_z(self, other: 'Vector') -> Scalar:
         """
