@@ -135,10 +135,6 @@ class Feather:
              value._right, value._left) = value, self._right, self
             self._right = value
 
-    @property
-    def segment(self) -> Segment:
-        return to_segment(self._start, self._end)
-
     def take_out(self) -> None:
         if self._left is not self._right:
             self._left._right = self._right
@@ -182,7 +178,8 @@ class Wing:
         return self._feathers
 
     def iter_edges(self) -> Iterable[Segment]:
-        return (feather.segment for feather in _iter_feathers(self._current))
+        return (to_segment(feather.start, feather.end)
+                for feather in _iter_feathers(self._current))
 
     def insert(self, end: Point) -> None:
         feather = Feather(self._start, end)
