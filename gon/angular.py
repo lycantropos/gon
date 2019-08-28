@@ -104,28 +104,6 @@ class Angle:
                                    .cross_z(self.second_ray_vector)))
 
     @property
-    def cosine(self) -> Scalar:
-        first_ray_vector = self.first_ray_vector
-        second_ray_vector = self.second_ray_vector
-        if not (first_ray_vector and second_ray_vector):
-            return 1
-        result = ((first_ray_vector.dot(second_ray_vector)
-                   / math.sqrt(first_ray_vector.squared_length
-                               * second_ray_vector.squared_length)))
-        return max(min(result, 1), -1)
-
-    @property
-    def sine(self) -> Scalar:
-        first_ray_vector = self.first_ray_vector
-        second_ray_vector = self.second_ray_vector
-        if not (first_ray_vector and second_ray_vector):
-            return 0
-        result = ((first_ray_vector.cross_z(second_ray_vector)
-                   / math.sqrt(first_ray_vector.squared_length
-                               * second_ray_vector.squared_length)))
-        return max(min(result, 1), -1)
-
-    @property
     def first_ray_vector(self) -> Vector:
         return Vector.from_points(self.vertex, self._first_ray_point)
 
