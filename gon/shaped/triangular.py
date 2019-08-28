@@ -5,13 +5,12 @@ from enum import (IntEnum,
 from itertools import chain
 from operator import attrgetter
 from reprlib import recursive_repr
-from types import MappingProxyType
 from typing import (AbstractSet,
                     Dict,
                     Iterable,
                     Iterator,
                     List,
-                    Mapping,
+                    MutableMapping,
                     Optional,
                     Sequence,
                     Set,
@@ -35,7 +34,8 @@ from gon.linear import (IntersectionKind,
 from .hints import Vertices
 from .utils import (_to_sub_hull,
                     to_convex_hull,
-                    to_edges)
+                    to_edges,
+                    to_nested_mapping)
 
 
 def _to_ccw_triangle_vertices(vertices: Vertices) -> Vertices:
@@ -253,7 +253,7 @@ def _iter_feathers(start: Feather,
 class Triangulation:
     def __init__(self, points: Sequence[Point],
                  *,
-                 wings: Optional[Dict[Point, Wing]] = None) -> None:
+                 wings: Optional[MutableMapping[Point, Wing]] = None) -> None:
         self._points = tuple(points)
         if wings is None:
             wings = {point: Wing(point) for point in points}
@@ -266,8 +266,8 @@ class Triangulation:
         return self._points
 
     @property
-    def wings(self) -> Mapping[Point, Wing]:
-        return MappingProxyType(self._wings)
+    def wings(self) -> MutableMapping[Point, Wing]:
+        return self._wings
 
     @property
     def edges(self) -> AbstractSet[Segment]:
@@ -438,13 +438,10 @@ class EdgeKind(IntEnum):
 
 
 def _merge(left: Triangulation, right: Triangulation) -> Triangulation:
-    result = Triangulation(left.points + right.points)
-    # operations order matters:
-    # while searching for merging edges
-    # both triangulations gets modified
-    result.update(_to_merging_edges(left, right))
-    result.update(left.edges)
-    result.update(right.edges)
+    merging_edges = list(_to_merging_edges(left, right))
+    result = Triangulation(left.points + right.points,
+                           wings=to_nested_mapping(left.wings, right.wings))
+    result.update(merging_edges)
     return result
 
 
