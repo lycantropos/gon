@@ -507,11 +507,21 @@ def _is_segment_not_below_another(first_segment: Segment,
 def _find_left_candidate(base_edge: Segment,
                          triangulation: Triangulation) -> Optional[Point]:
     def to_potential_candidates() -> Iterator[Point]:
-        angles = [Angle(base_edge.end, base_edge.start, point)
-                  for point in triangulation.linkage[base_edge.start]]
-        heapq.heapify(angles)
-        while angles:
-            yield heapq.heappop(angles).second_ray_point
+        wing = triangulation.wings[base_edge.start]
+        if (wing.current.orientation_with(base_edge.end)
+                is Orientation.COUNTERCLOCKWISE):
+            if wing.current.left is not None:
+                wing.approach_lefter(base_edge.end)
+                assert (wing.current.orientation_with(base_edge.end)
+                        is Orientation.COUNTERCLOCKWISE)
+                wing.step_to_left()
+        else:
+            if wing.current.right is not None:
+                assert (wing.current.orientation_with(base_edge.end)
+                        is Orientation.CLOCKWISE)
+                wing.approach_righter(base_edge.end)
+        for feather in _iter_feathers(wing.current):
+            yield feather.end
 
     potential_candidates = to_potential_candidates()
     potential_candidate = next(potential_candidates, None)
