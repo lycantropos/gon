@@ -34,11 +34,10 @@ from gon.linear import (IntersectionKind,
                         Segment,
                         to_interval,
                         to_segment)
+from .hints import Vertices
 from .utils import (_to_sub_hull,
                     to_convex_hull,
                     to_edges)
-
-Vertices = Sequence[Point]
 
 
 def _to_ccw_triangle_vertices(vertices: Vertices) -> Vertices:
