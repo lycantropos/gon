@@ -291,9 +291,13 @@ class Triangulation:
         return [_to_ccw_triangle_vertices(tuple(vertices))
                 for vertices in result]
 
+    def add(self, edge: Segment) -> None:
+        self._wings[edge.start].insert(edge.end)
+        self._wings[edge.end].insert(edge.start)
+
     def update(self, edges: Iterable[Segment]) -> None:
         for edge in edges:
-            self._add(edge)
+            self.add(edge)
 
     def remove(self, edge: Segment) -> None:
         self._wings[edge.start].remove(edge.end)
@@ -301,11 +305,7 @@ class Triangulation:
 
     def replace(self, edge: Segment, replacement: Segment) -> None:
         self.remove(edge)
-        self._add(replacement)
-
-    def _add(self, edge: Segment) -> None:
-        self._wings[edge.start].insert(edge.end)
-        self._wings[edge.end].insert(edge.start)
+        self.add(replacement)
 
     def to_non_adjacent_vertices(self, edge: Segment) -> Set[Point]:
         start_feather = self._wings[edge.start].feathers[edge.end]
@@ -346,7 +346,7 @@ def _delaunay(points: Sequence[Point]) -> Triangulation:
 
 def _triangulate_two_points(points: Sequence[Point]) -> Triangulation:
     result = Triangulation(points)
-    result.update([to_segment(*points)])
+    result.add(to_segment(*points))
     return result
 
 
