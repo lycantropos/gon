@@ -14,10 +14,16 @@ def test_basic(polygon: Polygon) -> None:
     result = polygon.triangulation
 
     assert isinstance(result, abc.Sequence)
-    assert 0 < len(result) <= (2 * (len(polygon.vertices) - 1)
-                               - len(polygon.convex_hull.vertices))
     assert all(isinstance(element, SimplePolygon)
                for element in result)
+
+
+@given(strategies.polygons)
+def test_sizes(polygon: Polygon) -> None:
+    result = polygon.triangulation
+
+    assert 0 < len(result) <= (2 * (len(polygon.vertices) - 1)
+                               - len(polygon.convex_hull.vertices))
     assert all(len(element.vertices) == 3
                for element in result)
 
