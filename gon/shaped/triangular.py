@@ -549,11 +549,22 @@ def _find_left_candidate(base_edge: Segment,
 def _find_right_candidate(base_edge: Segment,
                           triangulation: Triangulation) -> Optional[Point]:
     def to_potential_candidates() -> Iterator[Point]:
-        angles = [Angle(point, base_edge.end, base_edge.start)
-                  for point in triangulation.linkage[base_edge.end]]
-        heapq.heapify(angles)
-        while angles:
-            yield heapq.heappop(angles).first_ray_point
+        wing = triangulation.wings[base_edge.end]
+        if (wing.current.orientation_with(base_edge.start)
+                is Orientation.CLOCKWISE):
+            if wing.current.right is not None:
+                wing.approach_righter(base_edge.start)
+                assert (wing.current.orientation_with(base_edge.start)
+                        is Orientation.CLOCKWISE)
+                wing.step_to_right()
+        else:
+            if wing.current.left is not None:
+                assert (wing.current.orientation_with(base_edge.start)
+                        is Orientation.COUNTERCLOCKWISE)
+                wing.approach_lefter(base_edge.start)
+        for feather in _iter_feathers(wing.current,
+                                      orientation=Orientation.CLOCKWISE):
+            yield feather.end
 
     potential_candidates = to_potential_candidates()
     potential_candidate = next(potential_candidates, None)
