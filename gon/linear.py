@@ -122,7 +122,7 @@ class Segment(Interval):
                          end_inclusive=True)
 
     @property
-    def reversed(self) -> 'Interval':
+    def reversed(self) -> 'Segment':
         return type(self)(self.end, self.start)
 
     __repr__ = generate_repr(__init__)
