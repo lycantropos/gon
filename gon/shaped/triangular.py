@@ -255,12 +255,8 @@ def _iter_feathers(start: Feather,
 class Triangulation:
     def __init__(self, points: Sequence[Point],
                  *,
-                 linkage: Optional[DefaultDict[Point, Set[Point]]] = None,
                  wings: Optional[Dict[Point, Wing]] = None) -> None:
         self._points = tuple(points)
-        if linkage is None:
-            linkage = defaultdict(set)
-        self._linkage = linkage
         if wings is None:
             wings = {point: Wing(point) for point in points}
         self._wings = wings
@@ -274,10 +270,6 @@ class Triangulation:
     def to_adjacency(self) -> Dict[Segment, Set[Point]]:
         return {edge: self.to_non_adjacent_vertices(edge)
                 for edge in self.edges}
-
-    @property
-    def linkage(self) -> Mapping[Point, Set[Point]]:
-        return MappingProxyType(self._linkage)
 
     @property
     def wings(self) -> Mapping[Point, Wing]:
@@ -313,8 +305,6 @@ class Triangulation:
             self._add(edge)
 
     def remove(self, edge: Segment) -> None:
-        self._linkage[edge.start].remove(edge.end)
-        self._linkage[edge.end].remove(edge.start)
         self._wings[edge.start].remove(edge.end)
         self._wings[edge.end].remove(edge.start)
 
@@ -323,8 +313,6 @@ class Triangulation:
         self._add(replacement)
 
     def _add(self, edge: Segment) -> None:
-        self._linkage[edge.start].add(edge.end)
-        self._linkage[edge.end].add(edge.start)
         self._wings[edge.start].insert(edge.end)
         self._wings[edge.end].insert(edge.start)
 
