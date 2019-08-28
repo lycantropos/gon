@@ -38,8 +38,6 @@ class Point:
     def squared_distance_to(self, destination: 'Point') -> Scalar:
         return Vector.from_points(self, destination).squared_length
 
-    def distance_to(self, destination: 'Point') -> Scalar:
-        return Vector.from_points(self, destination).length
 
 class Vector:
     __slots__ = ('_x', '_y')
