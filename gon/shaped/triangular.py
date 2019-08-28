@@ -1,4 +1,3 @@
-import heapq
 from collections import (defaultdict,
                          deque)
 from enum import (IntEnum,
@@ -8,7 +7,6 @@ from operator import attrgetter
 from reprlib import recursive_repr
 from types import MappingProxyType
 from typing import (AbstractSet,
-                    DefaultDict,
                     Dict,
                     Iterable,
                     Iterator,
