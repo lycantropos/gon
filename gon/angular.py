@@ -91,14 +91,6 @@ class Angle:
         return cosine / sine > other_cosine / other_sine
 
     @property
-    def region(self) -> Region:
-        first_ray_vector = self.first_ray_vector
-        second_ray_vector = self.second_ray_vector
-        cosine = first_ray_vector.dot(second_ray_vector)
-        sine = first_ray_vector.cross_z(second_ray_vector)
-        return _to_region(cosine, sine)
-
-    @property
     def orientation(self) -> Orientation:
         return Orientation(to_sign(self.first_ray_vector
                                    .cross_z(self.second_ray_vector)))
