@@ -55,34 +55,6 @@ def _is_point_inside_circumcircle(vertices: Vertices, point: Point) -> bool:
             * first_vector.cross_z(second_vector)) > 0
 
 
-def _to_non_strict_convex_hull(sorted_points: Sequence[Point]) -> List[Point]:
-    """
-    Builds non-strict convex hull from lexicographically sorted points,
-    i.e. points lying on edges are not filtered out.
-
-    Time complexity:
-        O(n), where
-        n -- points count.
-    """
-
-    def _to_sub_hull(points: Iterable[Point]) -> List[Point]:
-        result = []
-        for point in points:
-            while len(result) >= 2:
-                if (Angle(result[-1], result[-2], point).orientation
-                        is Orientation.CLOCKWISE):
-                    del result[-1]
-                else:
-                    break
-            result.append(point)
-        return result
-
-    lower = _to_sub_hull(sorted_points)
-    upper = _to_sub_hull(reversed(sorted_points))
-    convex_hull = lower[:-1] + upper[:-1]
-    return convex_hull
-
-
 class Feather:
     __slots__ = ('_start', '_end', '_left', '_right')
 
