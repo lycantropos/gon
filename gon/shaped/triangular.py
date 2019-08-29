@@ -274,9 +274,11 @@ class Triangulation:
         for wing in self._wings.values():
             yield from wing.iter_edges()
 
-    @cached.property_
+    @property
     def boundary(self) -> AbstractSet[Segment]:
-        return frozenset(to_edges(_to_non_strict_convex_hull(self._points)))
+        return {edge
+                for edge in self.edges
+                if len(self.to_non_adjacent_vertices(edge)) == 1}
 
     @property
     def inner_edges(self) -> AbstractSet[Segment]:
