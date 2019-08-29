@@ -1,5 +1,4 @@
-from collections import (defaultdict,
-                         deque)
+from collections import deque
 from enum import (IntEnum,
                   unique)
 from itertools import chain
@@ -20,7 +19,6 @@ from lz.hints import Domain
 from lz.iterating import (flatten,
                           grouper,
                           pairwise)
-from memoir import cached
 from reprit.base import generate_repr
 
 from gon.angular import (Angle,
@@ -598,13 +596,6 @@ def _to_next_base_edge(base_edge: Segment,
                         EdgeKind.RIGHT)
 
 
-def _to_boundary(polygons_vertices: Iterable[Vertices]) -> Set[Segment]:
-    result = set()
-    for vertices in polygons_vertices:
-        result.symmetric_difference_update(to_edges(vertices))
-    return result
-
-
 def constrained_delaunay(points: Sequence[Point],
                          *,
                          boundary: Sequence[Segment],
@@ -652,38 +643,6 @@ def _set_boundary(triangulation: Triangulation,
                             if candidate not in boundary)
 
 
-def _to_points_triangles(triangulation: Sequence[Vertices]
-                         ) -> Dict[Point, Set[int]]:
-    result = defaultdict(set)
-    for index, triangle_vertices in enumerate(triangulation):
-        for vertex in triangle_vertices:
-            result[vertex].add(index)
-    result.default_factory = None
-    return result
-
-
-def _to_adjacency(triangulation: Iterable[Vertices]
-                  ) -> Dict[Segment, Set[int]]:
-    result = defaultdict(set)
-    for index, triangle_vertices in enumerate(triangulation):
-        _register_adjacent(index, triangle_vertices,
-                           adjacency=result)
-    result.default_factory = None
-    return result
-
-
-def _to_neighbourhood(triangulation: Sequence[Vertices],
-                      *,
-                      adjacency: Dict[Segment, Set[int]]
-                      ) -> Dict[int, Set[int]]:
-    result = defaultdict(set)
-    for index, triangle_vertices in enumerate(triangulation):
-        for edge in to_edges(triangle_vertices):
-            result[index].update(adjacency[edge] - {index})
-    result.default_factory = None
-    return result
-
-
 def _resolve_crossings(constraint: Segment,
                        triangulation: Triangulation,
                        *,
@@ -729,45 +688,3 @@ def _find_crossed_edges(constraint: Segment,
             for edge in triangulation.inner_edges
             if edge.relationship_with(open_constraint)
             is IntersectionKind.CROSS}
-
-
-def _update_triangulation(src_edge: Segment, dst_edge: Segment,
-                          *,
-                          adjacency: Dict[Segment, Set[int]],
-                          triangulation: List[Vertices]) -> None:
-    first_vertices, second_vertices = _to_replacements(src_edge, dst_edge)
-    first_adjacent, second_adjacent = adjacency[src_edge]
-    triangulation[first_adjacent] = first_vertices
-    triangulation[second_adjacent] = second_vertices
-
-
-def _update_adjacency(src_edge: Segment, dst_edge: Segment,
-                      *,
-                      adjacency: Dict[Segment, Set[int]]) -> None:
-    (first_triangle_vertices,
-     second_triangle_vertices) = _to_replacements(src_edge, dst_edge)
-    adjacents = adjacency[src_edge]
-    first_adjacent, second_adjacent = adjacents
-    for edge in to_edges(first_triangle_vertices):
-        adjacency[edge] -= adjacents
-    for edge in to_edges(second_triangle_vertices):
-        adjacency[edge] -= adjacents
-    _register_adjacent(first_adjacent, first_triangle_vertices,
-                       adjacency=adjacency)
-    _register_adjacent(second_adjacent, second_triangle_vertices,
-                       adjacency=adjacency)
-
-
-def _to_replacements(src_edge: Segment,
-                     dst_edge: Segment) -> Tuple[Vertices, Vertices]:
-    return (_to_ccw_triangle_vertices((dst_edge.start, dst_edge.end,
-                                       src_edge.start)),
-            _to_ccw_triangle_vertices((dst_edge.start, dst_edge.end,
-                                       src_edge.end)))
-
-
-def _register_adjacent(index: int, triangle_vertices: Vertices,
-                       *,
-                       adjacency: Dict[Segment, Set[int]]) -> None:
-    for edge in to_edges(triangle_vertices):
-        adjacency[edge].add(index)

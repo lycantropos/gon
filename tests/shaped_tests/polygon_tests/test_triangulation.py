@@ -1,10 +1,13 @@
 from collections import abc
+from typing import (Iterable,
+                    Set)
 
 from hypothesis import given
 
+from gon.linear import Segment
 from gon.shaped import (Polygon,
                         SimplePolygon)
-from gon.shaped.triangular import _to_boundary
+from gon.shaped.hints import Vertices
 from gon.shaped.utils import to_edges
 from . import strategies
 
@@ -38,6 +41,13 @@ def test_triangle(triangle: Polygon) -> None:
 
 @given(strategies.polygons)
 def test_boundary(polygon: Polygon) -> None:
-    assert (_to_boundary(triangle.vertices
-                         for triangle in polygon.triangulation)
+    assert (to_boundary(triangle.vertices
+                        for triangle in polygon.triangulation)
             == set(to_edges(polygon.vertices)))
+
+
+def to_boundary(polygons_vertices: Iterable[Vertices]) -> Set[Segment]:
+    result = set()
+    for vertices in polygons_vertices:
+        result.symmetric_difference_update(to_edges(vertices))
+    return result
