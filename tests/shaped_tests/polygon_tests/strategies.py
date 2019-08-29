@@ -5,7 +5,8 @@ from typing import (Sequence,
                     Tuple)
 
 from hypothesis import strategies
-from lz.iterating import flatten
+from lz.iterating import (first,
+                          flatten)
 from lz.logical import negate
 
 from gon.angular import (Angle,
@@ -55,49 +56,43 @@ def to_concave_vertices(points: Strategy[Point]) -> Strategy[Vertices]:
 
 
 def points_to_concave_vertices(points: Sequence[Point]) -> Vertices:
-    triangulation = triangular.delaunay(points)
-    points_triangles = triangular._to_points_triangles(triangulation)
-    boundary = triangular._to_boundary(triangulation)
+    triangulation = triangular._delaunay(points)
+    boundary = set(triangulation.boundary)
     boundary_points = set(flatten((edge.start, edge.end) for edge in boundary))
+    adjacency = {edge: triangulation.to_non_adjacent_vertices(edge)
+                 for edge in triangulation.edges}
+    reversed_adjacency = defaultdict(set)
+    for edge, non_adjacent_vertices in adjacency.items():
+        for vertex in non_adjacent_vertices:
+            reversed_adjacency[vertex].add(edge)
 
-    def is_mouth(triangle_vertices: Vertices) -> bool:
-        return (sum(vertex in boundary_points
-                    for vertex in triangle_vertices) == 2
-                and sum(edge in boundary
-                        for edge in to_edges(triangle_vertices)) == 1)
+    def is_mouth(edge: Segment) -> bool:
+        return _is_mouth(triangulation.to_non_adjacent_vertices(edge))
 
-    mouths = {index: triangle
-              for index, triangle in enumerate(triangulation)
-              if is_mouth(triangle)}
-    neighbourhood = triangular._to_neighbourhood(
-            triangulation,
-            adjacency=triangular._to_adjacency(triangulation))
+    def _is_mouth(non_adjacent_vertices: Set[Point]) -> bool:
+        return (len(non_adjacent_vertices) == 1
+                and not (non_adjacent_vertices & boundary_points))
+
+    mouths = {edge: first(non_adjacent_vertices)
+              for edge, non_adjacent_vertices in adjacency.items()
+              if _is_mouth(non_adjacent_vertices)}
     for _ in range(len(points) - len(boundary)):
         try:
-            index, triangle_vertices = mouths.popitem()
+            edge, non_adjacent_vertex = mouths.popitem()
         except KeyError:
             break
-        mouth_vertex = next(vertex
-                            for vertex in triangle_vertices
-                            if vertex not in boundary_points)
-        edges = set(to_edges(triangle_vertices))
-        boundary_points.update(triangle_vertices)
-        boundary.symmetric_difference_update(edges)
-        for connected in points_triangles[mouth_vertex]:
-            connected_triangle_vertices = triangulation[connected]
-            if is_mouth(connected_triangle_vertices):
-                mouths[connected] = concave_vertices
-            else:
-                mouths.pop(connected, None)
-            for vertex in set(connected_triangle_vertices) - {mouth_vertex}:
-                points_triangles[vertex].discard(index)
-        for neighbour in neighbourhood[index]:
-            neighbour_vertices = triangulation[neighbour]
-            if is_mouth(neighbour_vertices):
-                mouths[neighbour] = neighbour_vertices
-            else:
-                mouths.pop(neighbour, None)
-            neighbourhood[neighbour].remove(index)
+        triangulation.remove(edge)
+        boundary.remove(edge)
+        new_boundary_edges = (to_segment(edge.start, non_adjacent_vertex),
+                              to_segment(non_adjacent_vertex, edge.end))
+        boundary.update(new_boundary_edges)
+        boundary_points.add(non_adjacent_vertex)
+        mouths.update((edge,
+                       first(triangulation.to_non_adjacent_vertices(edge)))
+                      for edge in new_boundary_edges
+                      if is_mouth(edge))
+        for edge in reversed_adjacency[non_adjacent_vertex]:
+            mouths.pop(edge, None)
     return boundary_to_vertices(boundary)
 
 
