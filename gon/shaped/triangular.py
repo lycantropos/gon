@@ -278,7 +278,7 @@ class Triangulation:
     def delete(self, edge: QuadEdge) -> None:
         if edge is self.right_edge or edge.opposite is self.right_edge:
             self._right_edge = self._right_edge.right_from_end.opposite
-        elif edge is self.left_edge or edge.opposite is self.left_edge:
+        if edge is self.left_edge or edge.opposite is self.left_edge:
             self._left_edge = self._left_edge.left_from_start
         edge.delete()
 
