@@ -525,6 +525,7 @@ def _set_boundary(triangulation: Triangulation,
                     if _edge_to_segment(edge) not in boundary_segments}
     while non_boundary:
         edge = non_boundary.pop()
+        non_boundary.remove(edge.opposite)
         candidates = triangulation.to_neighbours(edge)
         triangulation.delete(edge)
         non_boundary.update(candidate
