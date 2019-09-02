@@ -1,298 +1,286 @@
 from collections import deque
-from enum import (IntEnum,
-                  unique)
 from itertools import chain
 from operator import attrgetter
-from reprlib import recursive_repr
-from typing import (AbstractSet,
-                    Dict,
-                    Iterable,
-                    Iterator,
+from typing import (Iterable,
                     List,
-                    MutableMapping,
                     Optional,
                     Sequence,
-                    Set,
-                    Tuple)
+                    Set)
 
 from lz.hints import Domain
-from lz.iterating import (flatten,
-                          grouper,
-                          pairwise)
+from lz.iterating import flatten
 from reprit.base import generate_repr
 
 from gon.angular import (Angle,
                          Orientation)
-from gon.base import (Point,
-                      Vector)
+from gon.base import Point
 from gon.linear import (IntersectionKind,
                         Segment,
                         to_interval,
                         to_segment)
+from .contracts import is_point_inside_circumcircle
 from .hints import Vertices
-from .utils import (_to_sub_hull,
-                    to_convex_hull,
-                    to_edges,
-                    to_nested_mapping)
+from .utils import to_convex_hull
 
 
-def _to_ccw_triangle_vertices(vertices: Vertices) -> Vertices:
-    if Angle(*vertices).orientation is not Orientation.CLOCKWISE:
-        vertices = vertices[::-1]
-    return vertices
+class QuadEdge:
+    __slots__ = ('_start', '_rotated', '_left_from_start')
 
-
-def _is_point_inside_circumcircle(vertices: Vertices, point: Point) -> bool:
-    first_vertex, second_vertex, third_vertex = vertices
-    first_vector = Vector.from_points(point, first_vertex)
-    second_vector = Vector.from_points(point, second_vertex)
-    third_vector = Vector.from_points(point, third_vertex)
-    return (first_vector.squared_length
-            * second_vector.cross_z(third_vector)
-            - second_vector.squared_length
-            * first_vector.cross_z(third_vector)
-            + third_vector.squared_length
-            * first_vector.cross_z(second_vector)) > 0
-
-
-class Feather:
-    __slots__ = ('_start', '_end', '_left', '_right')
-
-    def __init__(self, start: Point, end: Point,
-                 *,
-                 left: Optional['Feather'] = None,
-                 right: Optional['Feather'] = None):
+    def __init__(self,
+                 start: Optional[Point] = None,
+                 left_from_start: Optional['QuadEdge'] = None,
+                 rotated: Optional['QuadEdge'] = None) -> None:
         self._start = start
-        self._end = end
-        self._left = left
-        self._right = right
+        self._left_from_start = left_from_start
+        self._rotated = rotated
 
-    __repr__ = recursive_repr()(generate_repr(__init__))
+    def __repr__(self) -> str:
+        return (type(self).__qualname__
+                + '(' + 'start=' + repr(self.start) + ', '
+                + 'end=' + repr(self.end) + ')')
 
     @property
     def start(self) -> Point:
+        """
+        aka "Org" in L. Guibas and J. Stolfi notation.
+        """
         return self._start
 
     @property
     def end(self) -> Point:
-        return self._end
+        """
+        aka "Dest" in L. Guibas and J. Stolfi notation.
+        """
+        return self.opposite.start
 
     @property
-    def left(self) -> Optional['Feather']:
-        return self._left
+    def rotated(self) -> 'QuadEdge':
+        """
+        aka "Rot" in L. Guibas and J. Stolfi notation.
+        """
+        return self._rotated
 
-    @left.setter
-    def left(self, value: 'Feather') -> None:
-        if self._left is None:
-            self._left, value._right = value, self
-            self._right, value._left = value, self
-        else:
-            (self._left._right,
-             value._left, value._right) = value, self._left, self
-            self._left = value
+    @rotated.setter
+    def rotated(self, value: 'QuadEdge') -> None:
+        self._rotated = value
 
     @property
-    def right(self) -> Optional['Feather']:
-        return self._right
+    def opposite(self) -> 'QuadEdge':
+        """
+        aka "Sym" in L. Guibas and J. Stolfi notation.
+        """
+        return self.rotated.rotated
 
-    @right.setter
-    def right(self, value: 'Feather') -> None:
-        if self._right is None:
-            self._right, value._left = value, self
-            self._left, value._right = value, self
-        else:
-            (self._right._left,
-             value._right, value._left) = value, self._right, self
-            self._right = value
+    @property
+    def left_from_start(self) -> 'QuadEdge':
+        """
+        aka "Onext" in L. Guibas and J. Stolfi notation.
+        """
+        return self._left_from_start
 
-    def take_out(self) -> None:
-        if self._left is not self._right:
-            self._left._right = self._right
-            self._right._left = self._left
-        else:
-            self._left._right = self._left._left = None
-        self._left = self._right = None
+    @left_from_start.setter
+    def left_from_start(self, value: 'QuadEdge') -> None:
+        self._left_from_start = value
+
+    @property
+    def right_from_start(self) -> 'QuadEdge':
+        """
+        aka "Oprev" in L. Guibas and J. Stolfi notation.
+        """
+        return self.rotated.left_from_start.rotated
+
+    @property
+    def left_in_start(self) -> 'QuadEdge':
+        """
+        aka "Lprev" in L. Guibas and J. Stolfi notation.
+        """
+        return self.left_from_start.opposite
+
+    @property
+    def right_in_start(self) -> 'QuadEdge':
+        """
+        aka "Rprev" in L. Guibas and J. Stolfi notation.
+        """
+        return self.right_from_start.opposite
+
+    @property
+    def right_from_end(self) -> 'QuadEdge':
+        """
+        aka "Rprev" in L. Guibas and J. Stolfi notation.
+        """
+        return self.opposite.left_from_start
+
+    @property
+    def left_from_end(self) -> 'QuadEdge':
+        """
+        aka "Lnext" in L. Guibas and J. Stolfi notation.
+        """
+        return self.rotated.opposite.left_from_start.rotated
+
+    @classmethod
+    def factory(cls, start: Point, end: Point) -> 'QuadEdge':
+        result, opposite = cls(start), cls(end)
+        rotated, triple_rotated = cls(), cls()
+        result.left_from_start = result
+        opposite.left_from_start = opposite
+        rotated.left_from_start = triple_rotated
+        triple_rotated.left_from_start = rotated
+        result.rotated = rotated
+        rotated.rotated = opposite
+        opposite.rotated = triple_rotated
+        triple_rotated.rotated = result
+        return result
+
+    def splice(self, other: 'QuadEdge') -> None:
+        alpha = self.left_from_start.rotated
+        beta = other.left_from_start.rotated
+        self.left_from_start, other.left_from_start = (other.left_from_start,
+                                                       self.left_from_start)
+        alpha.left_from_start, beta.left_from_start = (beta.left_from_start,
+                                                       alpha.left_from_start)
+
+    def swap(self) -> None:
+        side = self.right_from_start
+        opposite = self.opposite
+        opposite_side = opposite.right_from_start
+        self.splice(side)
+        opposite.splice(opposite_side)
+        self.splice(side.left_from_end)
+        opposite.splice(opposite_side.left_from_end)
+        self._start = side.end
+        opposite._start = opposite_side.end
+
+    def connect(self, other: 'QuadEdge') -> 'QuadEdge':
+        result = QuadEdge.factory(self.end, other.start)
+        result.splice(self.left_from_end)
+        result.opposite.splice(other)
+        return result
+
+    def delete(self) -> None:
+        self.splice(self.right_from_start)
+        self.opposite.splice(self.opposite.right_from_start)
+
+    def angle_with(self, point: Point) -> Angle:
+        return Angle(self.end, self.start, point)
 
     def orientation_with(self, point: Point) -> Orientation:
         return self.angle_with(point).orientation
 
-    def angle_with(self, point: Point) -> Angle:
-        return Angle(self._end, self._start, point)
-
-
-class Wing:
-    __slots__ = ('_start', '_current', '_feathers')
-
-    def __init__(self, start: Point,
-                 *,
-                 current: Optional[Feather] = None,
-                 feathers: Optional[Dict[Point, Feather]] = None):
-        self._start = start
-        self._current = current
-        if feathers is None:
-            feathers = {}
-        self._feathers = feathers
-
-    __repr__ = generate_repr(__init__)
-
-    @property
-    def start(self) -> Point:
-        return self._start
-
-    @property
-    def current(self) -> Feather:
-        return self._current
-
-    @property
-    def feathers(self) -> Dict[Point, Feather]:
-        return self._feathers
-
-    def iter_edges(self) -> Iterable[Segment]:
-        return (to_segment(feather.start, feather.end)
-                for feather in _iter_feathers(self._current))
-
-    def insert(self, end: Point) -> None:
-        feather = Feather(self._start, end)
-        self._feathers[end] = feather
-        if self._current is None:
-            self._current = feather
-        elif (self._current.orientation_with(end)
-              is Orientation.COUNTERCLOCKWISE):
-            if self._current.left is not None:
-                self.approach_lefter(end)
-            self._current.left = feather
-            self._current = feather
-        else:
-            if self._current.right is not None:
-                self.approach_righter(end)
-            self._current.right = feather
-            self._current = feather
-
-    def remove(self, end: Point) -> None:
-        target_feather = self._feathers.pop(end)
-        self._current = target_feather.left or target_feather.right
-        target_feather.take_out()
-
-    def approach_righter(self, point: Point) -> None:
-        angle = self._current.angle_with(point).reversed
-        while True:
-            next_angle = self._current.right.angle_with(point).reversed
-            if next_angle > angle:
-                break
-            self.step_to_right()
-            angle = next_angle
-
-    def approach_lefter(self, point: Point) -> None:
-        angle = self._current.angle_with(point)
-        while True:
-            next_angle = self._current.left.angle_with(point)
-            if next_angle > angle:
-                break
-            self.step_to_left()
-            angle = next_angle
-
-    def step_to_right(self) -> None:
-        self._current = self._current.right
-
-    def step_to_left(self) -> None:
-        self._current = self._current.left
-
-
-def _iter_feathers(start: Feather,
-                   *,
-                   orientation: Orientation = Orientation.COUNTERCLOCKWISE
-                   ) -> Iterable[Feather]:
-    to_next = attrgetter('left' if orientation is Orientation.COUNTERCLOCKWISE
-                         else 'right')
-    feather = start
-    while True:
-        yield feather
-        feather = to_next(feather)
-        if feather is None or feather is start:
-            break
-
 
 class Triangulation:
-    def __init__(self, points: Sequence[Point],
-                 *,
-                 wings: Optional[MutableMapping[Point, Wing]] = None) -> None:
-        self._points = tuple(points)
-        if wings is None:
-            wings = {point: Wing(point) for point in points}
-        self._wings = wings
+    __slots__ = ('_left_edge', '_right_edge')
+
+    def __init__(self, left_edge: QuadEdge, right_edge: QuadEdge) -> None:
+        self._left_edge = left_edge
+        self._right_edge = right_edge
 
     __repr__ = generate_repr(__init__)
 
     @property
-    def points(self) -> Sequence[Point]:
-        return self._points
+    def left_edge(self) -> QuadEdge:
+        return self._left_edge
 
     @property
-    def wings(self) -> MutableMapping[Point, Wing]:
-        return self._wings
+    def right_edge(self) -> QuadEdge:
+        return self._right_edge
 
-    @property
-    def edges(self) -> AbstractSet[Segment]:
-        return set(self._iter_edges())
+    def merge_with(self, other: 'Triangulation') -> 'Triangulation':
+        _merge(self._find_base_edge(other))
+        return Triangulation(self._left_edge, other._right_edge)
 
-    def _iter_edges(self) -> Iterable[Segment]:
-        for wing in self._wings.values():
-            yield from wing.iter_edges()
-
-    @property
-    def boundary(self) -> AbstractSet[Segment]:
-        return {edge
-                for edge in self.edges
-                if len(self.to_non_adjacent_vertices(edge)) == 1}
-
-    @property
-    def inner_edges(self) -> AbstractSet[Segment]:
-        return self.edges - self.boundary
+    def _find_base_edge(self, other: 'Triangulation') -> QuadEdge:
+        while True:
+            if (self._right_edge.orientation_with(other._left_edge.start)
+                    is Orientation.COUNTERCLOCKWISE):
+                self._right_edge = self._right_edge.left_from_end
+            elif (other._left_edge.orientation_with(self._right_edge.start)
+                  is Orientation.CLOCKWISE):
+                other._left_edge = other._left_edge.right_from_end
+            else:
+                break
+        base_edge = other._left_edge.opposite.connect(self._right_edge)
+        if self._right_edge.start == self._left_edge.start:
+            self._left_edge = base_edge.opposite
+        if other._left_edge.start == other._right_edge.start:
+            other._right_edge = base_edge
+        return base_edge
 
     def to_triangles_vertices(self) -> List[Vertices]:
-        if len(self.points) == 3:
-            return [_to_ccw_triangle_vertices(self.points)]
-        result = {frozenset((edge.start, edge.end, point))
-                  for edge in self.inner_edges
-                  for point in self.to_non_adjacent_vertices(edge)}
-        return [_to_ccw_triangle_vertices(tuple(vertices))
-                for vertices in result]
+        return list(self._to_triangles_vertices())
 
-    def add(self, edge: Segment) -> None:
-        self._wings[edge.start].insert(edge.end)
-        self._wings[edge.end].insert(edge.start)
-
-    def update(self, edges: Iterable[Segment]) -> None:
+    def _to_triangles_vertices(self) -> Iterable[Vertices]:
+        visited_vertices_sets = set()
+        edges = self.to_edges()
+        edges_endpoints = {frozenset((edge.start, edge.end)) for edge in edges}
         for edge in edges:
-            self.add(edge)
+            if (edge.orientation_with(edge.left_from_start.end)
+                    is Orientation.COUNTERCLOCKWISE):
+                vertices = (edge.start, edge.end, edge.left_from_start.end)
+                vertices_set = frozenset(vertices)
+                if vertices_set not in visited_vertices_sets:
+                    if (frozenset((edge.end, edge.left_from_start.end))
+                            not in edges_endpoints):
+                        continue
+                    visited_vertices_sets.add(vertices_set)
+                    yield vertices
 
-    def remove(self, edge: Segment) -> None:
-        self._wings[edge.start].remove(edge.end)
-        self._wings[edge.end].remove(edge.start)
+    @staticmethod
+    def to_non_adjacent_vertices(edge: QuadEdge) -> Set[Point]:
+        return {neighbour.end
+                for neighbour in Triangulation._to_incidents(edge)}
 
-    def replace(self, edge: Segment, replacement: Segment) -> None:
-        self.remove(edge)
-        self.add(replacement)
+    def to_edges(self) -> Set[QuadEdge]:
+        result = {self.right_edge, self.left_edge}
+        queue = [self.right_edge.left_from_start,
+                 self.right_edge.left_from_end,
+                 self.right_edge.right_from_start,
+                 self.right_edge.right_from_end]
+        while queue:
+            edge = queue.pop()
+            if edge not in result:
+                result.update((edge, edge.opposite))
+                queue.extend((edge.left_from_start, edge.left_from_end,
+                              edge.right_from_start, edge.right_from_end))
+        return result
 
-    def to_non_adjacent_vertices(self, edge: Segment) -> Set[Point]:
-        start_feather = self._wings[edge.start].feathers[edge.end]
-        end_feather = self._wings[edge.end].feathers[edge.start]
-        candidates = set()
-        if start_feather.left.end == end_feather.right.end:
-            candidates.add(start_feather.left.end)
-        if start_feather.right.end == end_feather.left.end:
-            candidates.add(start_feather.right.end)
-        return {min(points,
-                    key=edge.angle_with
-                    if orientation is Orientation.COUNTERCLOCKWISE
-                    else edge.reversed.angle_with)
-                for (orientation,
-                     points) in grouper(edge.orientation_with)(candidates)
-                if orientation is not Orientation.COLLINEAR}
+    def to_boundary_edges(self) -> Set[QuadEdge]:
+        result = set()
+        start = self.right_edge
+        edge = start
+        while True:
+            result.update((edge, edge.opposite))
+            if edge.left_in_start is start:
+                break
+            edge = edge.left_in_start
+        return result
 
+    def to_inner_edges(self) -> Set[QuadEdge]:
+        return self.to_edges() - self.to_boundary_edges()
 
-def delaunay(points: Sequence[Point]) -> List[Vertices]:
-    return _delaunay(points).to_triangles_vertices()
+    @staticmethod
+    def to_neighbours(edge: QuadEdge) -> Set[QuadEdge]:
+        return set(Triangulation._to_neighbours(edge))
+
+    @staticmethod
+    def _to_neighbours(edge: QuadEdge) -> Iterable[QuadEdge]:
+        yield from Triangulation._to_incidents(edge)
+        yield from Triangulation._to_incidents(edge.opposite)
+
+    @staticmethod
+    def _to_incidents(edge: QuadEdge) -> Iterable[QuadEdge]:
+        if (edge.orientation_with(edge.right_from_start.end)
+                is Orientation.CLOCKWISE):
+            yield edge.right_from_start
+        if (edge.orientation_with(edge.left_from_start.end)
+                is Orientation.COUNTERCLOCKWISE):
+            yield edge.left_from_start
+
+    def delete(self, edge: QuadEdge) -> None:
+        if edge is self.right_edge or edge.opposite is self.right_edge:
+            self._right_edge = self._right_edge.right_from_end.opposite
+        elif edge is self.left_edge or edge.opposite is self.left_edge:
+            self._left_edge = self._left_edge.left_from_start
+        edge.delete()
 
 
 def _delaunay(points: Sequence[Point]) -> Triangulation:
@@ -305,84 +293,10 @@ def _delaunay(points: Sequence[Point]) -> Triangulation:
     result = [_initialize_triangulation(points) for points in result]
     while len(result) > 1:
         parts_to_merge_count = len(result) // 2 * 2
-        result = ([_merge(result[offset], result[offset + 1])
+        result = ([result[offset].merge_with(result[offset + 1])
                    for offset in range(0, parts_to_merge_count, 2)]
                   + result[parts_to_merge_count:])
     return result[0]
-
-
-def _triangulate_two_points(points: Sequence[Point]) -> Triangulation:
-    result = Triangulation(points)
-    result.add(to_segment(*points))
-    return result
-
-
-def _triangulate_three_points(points: Sequence[Point]) -> Triangulation:
-    result = Triangulation(points)
-    if Angle(*points).orientation is Orientation.COLLINEAR:
-        edges = [to_segment(start, end) for start, end in pairwise(points)]
-    else:
-        edges = list(to_edges(points))
-    result.update(edges)
-    return result
-
-
-_initializers = {2: _triangulate_two_points,
-                 3: _triangulate_three_points}
-
-
-def _initialize_triangulation(points: Sequence[Point]) -> Triangulation:
-    try:
-        initializer = _initializers[len(points)]
-    except KeyError:
-        raise ValueError('Unsupported points count: '
-                         'should be one of {expected_counts}, '
-                         'but found {actual_count}.'
-                         .format(expected_counts=
-                                 ', '.join(map(str, _initializers)),
-                                 actual_count=len(points)))
-    else:
-        return initializer(points)
-
-
-def _set_delaunay_criterion(triangulation: Triangulation,
-                            *,
-                            target_edges: Optional[AbstractSet[Segment]] = None
-                            ) -> None:
-    """
-    Straightforward flip algorithm.
-
-    Time complexity:
-        O(n^2), where
-        n -- points count.
-    """
-    if target_edges is None:
-        target_edges = set(triangulation.inner_edges)
-    while True:
-        removed_edges = set()
-        for edge in target_edges:
-            first_non_edge_vertex, second_non_edge_vertex = (
-                triangulation.to_non_adjacent_vertices(edge))
-            if not _points_form_convex_quadrilateral((edge.start, edge.end,
-                                                      first_non_edge_vertex,
-                                                      second_non_edge_vertex)):
-                continue
-            if not (_is_point_inside_circumcircle(
-                    _to_ccw_triangle_vertices((first_non_edge_vertex,
-                                               edge.start, edge.end)),
-                    second_non_edge_vertex)
-                    or _is_point_inside_circumcircle(
-                            _to_ccw_triangle_vertices((second_non_edge_vertex,
-                                                       edge.start, edge.end)),
-                            first_non_edge_vertex)):
-                continue
-            anti_diagonal = to_segment(first_non_edge_vertex,
-                                       second_non_edge_vertex)
-            removed_edges.add(edge)
-            triangulation.replace(edge, anti_diagonal)
-        if not removed_edges:
-            break
-        target_edges.difference_update(removed_edges)
 
 
 def _split(sequence: Sequence[Domain],
@@ -394,173 +308,142 @@ def _split(sequence: Sequence[Domain],
             for number in range(size)]
 
 
-@unique
-class EdgeKind(IntEnum):
-    LEFT = -1
-    UNKNOWN = 0
-    RIGHT = 1
+def _triangulate_two_points(sorted_points: Sequence[Point]) -> Triangulation:
+    first_edge = QuadEdge.factory(*sorted_points)
+    return Triangulation(first_edge, first_edge.opposite)
 
 
-def _merge(left: Triangulation, right: Triangulation) -> Triangulation:
-    merging_edges = list(_to_merging_edges(left, right))
-    result = Triangulation(left.points + right.points,
-                           wings=to_nested_mapping(left.wings, right.wings))
-    result.update(merging_edges)
-    return result
-
-
-def _to_merging_edges(left: Triangulation,
-                      right: Triangulation) -> Iterable[Segment]:
-    base_edge, previous_edge_type = (_find_base_edge(left, right),
-                                     EdgeKind.UNKNOWN)
-    while base_edge is not None:
-        yield base_edge
-        base_edge, previous_edge_type = _to_next_base_edge(base_edge,
-                                                           previous_edge_type,
-                                                           left, right)
-
-
-def _find_base_edge(left: Triangulation, right: Triangulation) -> Segment:
-    candidates = iter(
-            set(to_edges(_to_sub_hull(left.points + right.points)))
-            - set(to_edges(_to_sub_hull(left.points)))
-            - set(to_edges(_to_sub_hull(right.points))))
-    result = next(candidates)
-    for candidate in candidates:
-        if _is_segment_not_below_another(result, candidate):
-            result = candidate
-    return result
-
-
-def _is_segment_not_below_another(first_segment: Segment,
-                                  second_segment: Segment) -> bool:
-    if first_segment.start.x > first_segment.end.x:
-        first_segment = first_segment.reversed
-    return (first_segment.orientation_with(second_segment.start)
-            is not Orientation.COUNTERCLOCKWISE
-            and first_segment.orientation_with(second_segment.end)
-            is not Orientation.COUNTERCLOCKWISE)
-
-
-def _find_left_candidate(base_edge: Segment,
-                         triangulation: Triangulation) -> Optional[Point]:
-    def to_potential_candidates() -> Iterator[Point]:
-        wing = triangulation.wings[base_edge.start]
-        if (wing.current.orientation_with(base_edge.end)
-                is Orientation.COUNTERCLOCKWISE):
-            if wing.current.left is not None:
-                wing.approach_lefter(base_edge.end)
-                assert (wing.current.orientation_with(base_edge.end)
-                        is Orientation.COUNTERCLOCKWISE)
-                wing.step_to_left()
-        else:
-            if wing.current.right is not None:
-                assert (wing.current.orientation_with(base_edge.end)
-                        is Orientation.CLOCKWISE)
-                wing.approach_righter(base_edge.end)
-        for feather in _iter_feathers(wing.current):
-            yield feather.end
-
-    potential_candidates = to_potential_candidates()
-    potential_candidate = next(potential_candidates, None)
-    if potential_candidate is None:
-        return potential_candidate
-    while True:
-        if (base_edge.orientation_with(potential_candidate)
-                is not Orientation.COUNTERCLOCKWISE):
-            return None
-        next_potential_candidate = next(potential_candidates, None)
-        if next_potential_candidate is None:
-            return potential_candidate
-        elif _is_point_inside_circumcircle(
-                _to_ccw_triangle_vertices((base_edge.start,
-                                           base_edge.end,
-                                           potential_candidate)),
-                next_potential_candidate):
-            triangulation.remove(to_segment(base_edge.start,
-                                            potential_candidate))
-            potential_candidate = next_potential_candidate
-        else:
-            return potential_candidate
-
-
-def _find_right_candidate(base_edge: Segment,
-                          triangulation: Triangulation) -> Optional[Point]:
-    def to_potential_candidates() -> Iterator[Point]:
-        wing = triangulation.wings[base_edge.end]
-        if (wing.current.orientation_with(base_edge.start)
-                is Orientation.CLOCKWISE):
-            if wing.current.right is not None:
-                wing.approach_righter(base_edge.start)
-                assert (wing.current.orientation_with(base_edge.start)
-                        is Orientation.CLOCKWISE)
-                wing.step_to_right()
-        else:
-            if wing.current.left is not None:
-                assert (wing.current.orientation_with(base_edge.start)
-                        is Orientation.COUNTERCLOCKWISE)
-                wing.approach_lefter(base_edge.start)
-        for feather in _iter_feathers(wing.current,
-                                      orientation=Orientation.CLOCKWISE):
-            yield feather.end
-
-    potential_candidates = to_potential_candidates()
-    potential_candidate = next(potential_candidates, None)
-    if potential_candidate is None:
-        return potential_candidate
-    while True:
-        if (base_edge.orientation_with(potential_candidate)
-                is not Orientation.COUNTERCLOCKWISE):
-            return None
-        next_potential_candidate = next(potential_candidates, None)
-        if next_potential_candidate is None:
-            return potential_candidate
-        elif _is_point_inside_circumcircle(
-                _to_ccw_triangle_vertices((base_edge.start,
-                                           base_edge.end,
-                                           potential_candidate)),
-                next_potential_candidate):
-            triangulation.remove(to_segment(potential_candidate,
-                                            base_edge.end))
-            potential_candidate = next_potential_candidate
-        else:
-            return potential_candidate
-
-
-def _to_next_base_edge(base_edge: Segment,
-                       previous_edge_kind: EdgeKind,
-                       left: Triangulation,
-                       right: Triangulation
-                       ) -> Tuple[Optional[Segment], EdgeKind]:
-    left_candidate = _find_left_candidate(base_edge, left)
-    right_candidate = _find_right_candidate(base_edge, right)
-    if left_candidate is None:
-        if right_candidate is None:
-            return None, EdgeKind.UNKNOWN
-        return to_segment(base_edge.start, right_candidate), EdgeKind.RIGHT
+def _triangulate_three_points(sorted_points: Sequence[Point]) -> Triangulation:
+    left_point, mid_point, right_point = sorted_points
+    first_edge, second_edge = (QuadEdge.factory(left_point, mid_point),
+                               QuadEdge.factory(mid_point, right_point))
+    first_edge.opposite.splice(second_edge)
+    orientation = Angle(left_point, mid_point, right_point).orientation
+    if orientation is Orientation.COUNTERCLOCKWISE:
+        third_edge = second_edge.connect(first_edge)
+        return Triangulation(third_edge.opposite, third_edge)
+    elif orientation is Orientation.CLOCKWISE:
+        second_edge.connect(first_edge)
+        return Triangulation(first_edge, second_edge.opposite)
     else:
-        if right_candidate is None:
-            return to_segment(left_candidate, base_edge.end), EdgeKind.LEFT
-        elif previous_edge_kind is EdgeKind.LEFT:
-            if not _is_point_inside_circumcircle(
-                    _to_ccw_triangle_vertices((base_edge.start,
-                                               base_edge.end,
-                                               right_candidate)),
-                    left_candidate):
-                return (to_segment(base_edge.start, right_candidate),
-                        EdgeKind.RIGHT)
+        return Triangulation(first_edge, second_edge.opposite)
+
+
+_initializers = {2: _triangulate_two_points,
+                 3: _triangulate_three_points}
+
+
+def _initialize_triangulation(points: Sequence[Point]) -> Triangulation:
+    try:
+        initializer = _initializers[len(points)]
+    except KeyError:
+        expected_counts = ', '.join(map(str, _initializers))
+        raise ValueError('Unsupported points count: '
+                         'should be one of {expected_counts}, '
+                         'but found {actual_count}.'
+                         .format(expected_counts=expected_counts,
+                                 actual_count=len(points)))
+    else:
+        return initializer(points)
+
+
+def _merge(base_edge: QuadEdge) -> None:
+    while True:
+        left_candidate = _to_left_candidate(base_edge)
+        right_candidate = _to_right_candidate(base_edge)
+        left_candidate_is_on_the_right = (
+                base_edge.orientation_with(left_candidate.end)
+                is Orientation.CLOCKWISE)
+        right_candidate_is_on_the_right = (
+                base_edge.orientation_with(right_candidate.end)
+                is Orientation.CLOCKWISE)
+        if not (left_candidate_is_on_the_right
+                or right_candidate_is_on_the_right):
+            break
+        left_triangle_vertices = (left_candidate.end, base_edge.end,
+                                  base_edge.start)
+        right_triangle_vertices = (base_edge.end, base_edge.start,
+                                   right_candidate.end)
+        if not left_candidate_is_on_the_right:
+            if (is_point_inside_circumcircle(right_triangle_vertices,
+                                             right_candidate.left_from_end.end)
+                    and (right_candidate.left_from_end.end
+                         not in right_triangle_vertices)):
+                base_edge = right_candidate.connect(base_edge.opposite)
+                base_edge.delete()
             else:
-                return to_segment(left_candidate, base_edge.end), EdgeKind.LEFT
+                base_edge = right_candidate.connect(base_edge.opposite)
+        elif not right_candidate_is_on_the_right:
+            if (is_point_inside_circumcircle(left_triangle_vertices,
+                                             left_candidate.right_from_end.end)
+                    and left_candidate.right_from_end.end
+                    not in left_triangle_vertices):
+                base_edge = base_edge.opposite.connect(left_candidate.opposite)
+                base_edge.delete()
+            else:
+                base_edge = base_edge.opposite.connect(left_candidate.opposite)
+        elif is_point_inside_circumcircle(right_triangle_vertices,
+                                          left_candidate.end):
+            if (is_point_inside_circumcircle(left_triangle_vertices,
+                                             right_candidate.end)
+                    or (is_point_inside_circumcircle(
+                            left_triangle_vertices,
+                            left_candidate.right_from_end.end)
+                        and (left_candidate.right_from_end.end
+                             not in left_triangle_vertices))):
+                base_edge = base_edge.opposite.connect(left_candidate.opposite)
+                base_edge.delete()
+            else:
+                base_edge = base_edge.opposite.connect(left_candidate.opposite)
         else:
-            if not (_is_point_inside_circumcircle(
-                    _to_ccw_triangle_vertices((base_edge.start,
-                                               base_edge.end,
-                                               left_candidate)),
-                    right_candidate)):
-                return to_segment(left_candidate, base_edge.end), EdgeKind.LEFT
+            if (is_point_inside_circumcircle(right_triangle_vertices,
+                                             right_candidate.left_from_end.end)
+                    and (right_candidate.left_from_end.end
+                         not in right_triangle_vertices)):
+                base_edge = right_candidate.connect(base_edge.opposite)
+                base_edge.delete()
             else:
-                return (to_segment(base_edge.start, right_candidate),
-                        EdgeKind.RIGHT)
+                base_edge = right_candidate.connect(base_edge.opposite)
+
+
+def _to_left_candidate(base_edge: QuadEdge) -> QuadEdge:
+    result = base_edge.opposite.left_from_start
+    if base_edge.orientation_with(result.end) is Orientation.CLOCKWISE:
+        while (is_point_inside_circumcircle((base_edge.end, base_edge.start,
+                                             result.end),
+                                            result.left_from_start.end)
+               and result.left_from_start.end not in (base_edge.end,
+                                                      base_edge.start,
+                                                      result.end)
+               and (base_edge.orientation_with(result.left_from_start.end)
+                    is Orientation.CLOCKWISE)):
+            next_left_candidate = result.left_from_start
+            result.delete()
+            result = next_left_candidate
+    return result
+
+
+def _to_right_candidate(base_edge: QuadEdge) -> QuadEdge:
+    result = base_edge.right_from_start
+    if base_edge.orientation_with(result.end) is Orientation.CLOCKWISE:
+        while (is_point_inside_circumcircle((base_edge.end, base_edge.start,
+                                             result.end),
+                                            result.right_from_start.end)
+               and result.right_from_start.end not in (base_edge.end,
+                                                       base_edge.start,
+                                                       result.end)
+               and base_edge.orientation_with(result.right_from_start.end)
+               is Orientation.CLOCKWISE):
+            next_right_candidate = result.right_from_start
+            result.delete()
+            result = next_right_candidate
+    return result
+
+
+def delaunay(points: Sequence[Point]) -> List[Vertices]:
+    return (_delaunay(sorted(points,
+                             key=attrgetter('x', 'y')))
+            .to_triangles_vertices())
 
 
 def constrained_delaunay(points: Sequence[Point],
@@ -569,23 +452,26 @@ def constrained_delaunay(points: Sequence[Point],
                          extra_constraints: Optional[Iterable[Segment]] = None
                          ) -> List[Vertices]:
     result = _delaunay(points)
-    if not extra_constraints and all(edge in result.boundary
+    initial_boundary_segments = frozenset(map(_edge_to_segment,
+                                              result.to_boundary_edges()))
+    if not extra_constraints and all(edge in initial_boundary_segments
                                      for edge in boundary):
         return result.to_triangles_vertices()
     _set_constraints(result,
                      constraints=(boundary if extra_constraints is None
                                   else chain(boundary, extra_constraints)))
     _set_boundary(result,
-                  boundary=boundary)
+                  boundary_segments=boundary)
     return result.to_triangles_vertices()
 
 
 def _set_constraints(triangulation: Triangulation,
                      *,
                      constraints: Iterable[Segment]) -> None:
-    triangulation_edges = frozenset(triangulation.edges)
+    triangulation_segments = set(map(_edge_to_segment,
+                                     triangulation.to_edges()))
     for constraint in constraints:
-        if constraint in triangulation_edges:
+        if constraint in triangulation_segments:
             continue
         crossed_edges = _find_crossed_edges(constraint, triangulation)
         new_edges = _resolve_crossings(constraint, triangulation,
@@ -594,26 +480,63 @@ def _set_constraints(triangulation: Triangulation,
                                 target_edges=new_edges - {constraint})
 
 
+def _set_delaunay_criterion(triangulation: Triangulation,
+                            *,
+                            target_edges: Optional[Set[QuadEdge]] = None
+                            ) -> None:
+    """
+    Straightforward flip algorithm.
+
+    Time complexity:
+        O(n^2), where
+        n -- points count.
+    """
+    if target_edges is None:
+        target_edges = set(triangulation.to_inner_edges())
+    while True:
+        swapped_edges = set()
+        for edge in target_edges:
+            if not _points_form_convex_quadrilateral(
+                    (edge.start, edge.end,
+                     edge.left_from_start.end,
+                     edge.right_from_start.end)):
+                continue
+            if not (is_point_inside_circumcircle(
+                    (edge.start, edge.end, edge.left_from_start.end),
+                    edge.right_from_start.end)
+                    or is_point_inside_circumcircle(
+                            (edge.end, edge.start,
+                             edge.right_from_start.end),
+                            edge.left_from_start.end)):
+                continue
+            edge.swap()
+            swapped_edges.add(edge)
+        if not swapped_edges:
+            break
+        target_edges.difference_update(swapped_edges)
+
+
 def _set_boundary(triangulation: Triangulation,
                   *,
-                  boundary: Sequence[Segment]) -> None:
-    boundary = frozenset(boundary)
-    non_boundary = set(triangulation.boundary) - boundary
+                  boundary_segments: Sequence[Segment]) -> None:
+    boundary_segments = frozenset(boundary_segments)
+    non_boundary = {edge
+                    for edge in triangulation.to_boundary_edges()
+                    if _edge_to_segment(edge) not in boundary_segments}
     while non_boundary:
         edge = non_boundary.pop()
-        non_edge_vertex, = triangulation.to_non_adjacent_vertices(edge)
-        triangulation.remove(edge)
-        candidates = (to_segment(edge.start, non_edge_vertex),
-                      to_segment(non_edge_vertex, edge.end))
+        candidates = triangulation.to_neighbours(edge)
+        triangulation.delete(edge)
         non_boundary.update(candidate
                             for candidate in candidates
-                            if candidate not in boundary)
+                            if _edge_to_segment(candidate)
+                            not in boundary_segments)
 
 
 def _resolve_crossings(constraint: Segment,
                        triangulation: Triangulation,
                        *,
-                       crossed_edges: Set[Segment]) -> Set[Segment]:
+                       crossed_edges: Set[QuadEdge]) -> Set[QuadEdge]:
     open_constraint = to_interval(constraint.start, constraint.end,
                                   start_inclusive=False,
                                   end_inclusive=False)
@@ -629,15 +552,24 @@ def _resolve_crossings(constraint: Segment,
                                                   second_non_edge_vertex)):
             crossed_edges.append(edge)
             continue
-        anti_diagonal = to_segment(first_non_edge_vertex,
-                                   second_non_edge_vertex)
-        triangulation.replace(edge, anti_diagonal)
-        if (anti_diagonal.relationship_with(open_constraint)
+        edge.swap()
+        if (_edge_to_segment(edge).relationship_with(open_constraint)
                 is IntersectionKind.CROSS):
-            crossed_edges.append(anti_diagonal)
+            crossed_edges.append(edge)
         else:
-            result.add(anti_diagonal)
+            result.add(edge)
     return result
+
+
+def _find_crossed_edges(constraint: Segment,
+                        triangulation: Triangulation) -> Set[QuadEdge]:
+    open_constraint = to_interval(constraint.start, constraint.end,
+                                  start_inclusive=False,
+                                  end_inclusive=False)
+    return {edge
+            for edge in triangulation.to_inner_edges()
+            if _edge_to_segment(edge).relationship_with(open_constraint)
+            is IntersectionKind.CROSS}
 
 
 def _points_form_convex_quadrilateral(points: Sequence[Point]) -> bool:
@@ -646,12 +578,5 @@ def _points_form_convex_quadrilateral(points: Sequence[Point]) -> bool:
             and all(vertex in points for vertex in vertices))
 
 
-def _find_crossed_edges(constraint: Segment,
-                        triangulation: Triangulation) -> Set[Segment]:
-    open_constraint = to_interval(constraint.start, constraint.end,
-                                  start_inclusive=False,
-                                  end_inclusive=False)
-    return {edge
-            for edge in triangulation.inner_edges
-            if edge.relationship_with(open_constraint)
-            is IntersectionKind.CROSS}
+def _edge_to_segment(edge: QuadEdge) -> Segment:
+    return to_segment(edge.start, edge.end)

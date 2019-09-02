@@ -1,19 +1,15 @@
 from collections import defaultdict
-from operator import attrgetter
 from typing import (Sequence,
                     Set,
                     Tuple)
 
 from hypothesis import strategies
-from lz.iterating import (first,
-                          flatten)
+from lz.iterating import first
 from lz.logical import negate
 
 from gon.angular import (Angle,
                          Orientation)
-from gon.base import (Point,
-                      Vector)
-from gon.hints import Scalar
+from gon.base import Point
 from gon.linear import (Segment,
                         to_segment)
 from gon.shaped import (Polygon,
@@ -30,7 +26,9 @@ from tests.strategies import (points_strategies,
                               segment_to_scalars,
                               to_non_triangle_vertices_base,
                               triangles_vertices)
-from tests.utils import Strategy
+from tests.utils import (Strategy,
+                         points_do_not_lie_on_the_same_line,
+                         unique_everseen)
 
 triangles = triangles_vertices.map(to_polygon)
 
@@ -48,7 +46,8 @@ convex_vertices = (triangles_vertices
 def to_concave_vertices(points: Strategy[Point]) -> Strategy[Vertices]:
     return (strategies.lists(points,
                              min_size=4,
-                             unique_by=(attrgetter('x'), attrgetter('y')))
+                             unique=True)
+            .filter(points_do_not_lie_on_the_same_line)
             .map(points_to_concave_vertices)
             .filter(bool)
             .filter(vertices_forms_strict_polygon)
@@ -57,54 +56,38 @@ def to_concave_vertices(points: Strategy[Point]) -> Strategy[Vertices]:
 
 def points_to_concave_vertices(points: Sequence[Point]) -> Vertices:
     triangulation = triangular._delaunay(points)
-    boundary = set(triangulation.boundary)
-    boundary_points = set(flatten((edge.start, edge.end) for edge in boundary))
-    adjacency = {edge: triangulation.to_non_adjacent_vertices(edge)
-                 for edge in triangulation.edges}
-    reversed_adjacency = defaultdict(set)
-    for edge, non_adjacent_vertices in adjacency.items():
-        for vertex in non_adjacent_vertices:
-            reversed_adjacency[vertex].add(edge)
+    boundary = triangulation.to_boundary_edges()
 
-    def is_mouth(edge: Segment) -> bool:
-        return _is_mouth(triangulation.to_non_adjacent_vertices(edge))
+    def is_mouth(edge: triangular.QuadEdge) -> bool:
+        neighbours = triangulation.to_neighbours(edge)
+        return len(neighbours) == 2 and not (neighbours & boundary)
 
-    def _is_mouth(non_adjacent_vertices: Set[Point]) -> bool:
-        return (len(non_adjacent_vertices) == 1
-                and not (non_adjacent_vertices & boundary_points))
+    mouths = {edge: triangulation.to_neighbours(edge)
+              for edge in unique_everseen(boundary,
+                                          key=triangular._edge_to_segment)
+              if is_mouth(edge)}
 
-    mouths = {edge: first(non_adjacent_vertices)
-              for edge, non_adjacent_vertices in adjacency.items()
-              if _is_mouth(non_adjacent_vertices)}
     for _ in range(len(points) - len(boundary)):
         try:
-            edge, non_adjacent_vertex = mouths.popitem()
+            edge, neighbours = mouths.popitem()
         except KeyError:
             break
-        triangulation.remove(edge)
         boundary.remove(edge)
-        new_boundary_edges = (to_segment(edge.start, non_adjacent_vertex),
-                              to_segment(non_adjacent_vertex, edge.end))
-        boundary.update(new_boundary_edges)
-        boundary_points.add(non_adjacent_vertex)
-        mouths.update((edge,
-                       first(triangulation.to_non_adjacent_vertices(edge)))
-                      for edge in new_boundary_edges
+        boundary.remove(edge.opposite)
+        triangulation.delete(edge)
+        boundary.update(neighbours)
+        mouths.update((edge, triangulation.to_neighbours(edge))
+                      for edge in neighbours
                       if is_mouth(edge))
-        for edge in reversed_adjacency[non_adjacent_vertex]:
-            mouths.pop(edge, None)
-    return boundary_to_vertices(boundary)
-
-
-def shrink_collinear_vertices(vertices: Vertices) -> Vertices:
-    result = []
-    for index, vertex in enumerate(vertices):
-        angle = Angle(vertices[index - 1], vertex,
-                      vertices[(index + 1) % len(vertices)])
-        if angle.orientation is Orientation.COLLINEAR:
-            continue
-        result.append(vertex)
-    return result
+        start = edge = first(neighbours).opposite
+        while edge.left_from_start is not start:
+            mouths.pop(edge.left_from_end, None)
+            mouths.pop(edge.left_from_end.opposite, None)
+            mouths.pop(edge.right_from_end, None)
+            mouths.pop(edge.right_from_end.opposite, None)
+            edge = edge.left_from_start
+    return boundary_to_vertices({to_segment(edge.start, edge.end)
+                                 for edge in boundary})
 
 
 def boundary_to_vertices(boundary: Set[Segment]) -> Vertices:
@@ -123,19 +106,12 @@ def boundary_to_vertices(boundary: Set[Segment]) -> Vertices:
     return shrink_collinear_vertices(result)
 
 
-def squared_distance_to_point(segment: Segment,
-                              *,
-                              point: Point) -> Scalar:
-    if not (Angle(point, segment.start, segment.end).is_acute
-            and Angle(point, segment.end, segment.start).is_acute):
-        return min(point.squared_distance_to(segment.start),
-                   point.squared_distance_to(segment.end))
-    segment_vector = Vector.from_points(segment.start, segment.end)
-    return ((segment_vector.y * point.x
-             - segment_vector.x * point.y
-             + segment.end.x * segment.start.y
-             - segment.end.y * segment.start.x) ** 2
-            / segment_vector.squared_length)
+def shrink_collinear_vertices(vertices: Vertices) -> Vertices:
+    return [vertex
+            for index, vertex in enumerate(vertices)
+            if Angle(vertices[index - 1], vertex,
+                     vertices[(index + 1) % len(vertices)]).orientation
+            is not Orientation.COLLINEAR]
 
 
 concave_vertices = (points_strategies.flatmap(to_concave_vertices)
