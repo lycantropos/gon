@@ -5,8 +5,8 @@ from hypothesis import given
 
 from gon.base import Point
 from gon.shaped.hints import Vertices
-from gon.shaped.triangular import (_is_point_inside_circumcircle,
-                                   delaunay)
+from gon.shaped.triangular import delaunay
+from gon.shaped.contracts import is_point_inside_circumcircle
 from gon.shaped.utils import to_convex_hull
 from . import strategies
 
@@ -34,7 +34,7 @@ def test_sizes(points: Sequence[Point]) -> None:
 def test_delaunay_criterion(points: Sequence[Point]) -> None:
     result = delaunay(points)
 
-    assert all(not any(_is_point_inside_circumcircle(triangle_vertices, point)
+    assert all(not any(is_point_inside_circumcircle(triangle_vertices, point)
                        for triangle_vertices in result)
                for point in points)
 
@@ -58,7 +58,7 @@ def test_step(next_points: Sequence[Point]) -> None:
     assert len(result) <= len(next_result) + 2
     assert all(not is_triangle_in_triangulation(triangle_vertices, next_result)
                for triangle_vertices in result
-               if _is_point_inside_circumcircle(triangle_vertices, next_point))
+               if is_point_inside_circumcircle(triangle_vertices, next_point))
 
 
 def is_triangle_in_triangulation(triangle_vertices: Vertices,

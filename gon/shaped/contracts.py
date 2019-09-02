@@ -1,4 +1,6 @@
 from gon.angular import Orientation
+from gon.base import (Point,
+                      Vector)
 from .hints import Vertices
 from .utils import (_to_non_neighbours,
                     to_angles,
@@ -31,3 +33,16 @@ def self_intersects(vertices: Vertices) -> bool:
                for non_neighbour in _to_non_neighbours(index, edges)):
             return True
     return False
+
+
+def is_point_inside_circumcircle(vertices: Vertices, point: Point) -> bool:
+    first_vertex, second_vertex, third_vertex = vertices
+    first_vector = Vector.from_points(point, first_vertex)
+    second_vector = Vector.from_points(point, second_vertex)
+    third_vector = Vector.from_points(point, third_vertex)
+    return (first_vector.squared_length
+            * second_vector.cross_z(third_vector)
+            - second_vector.squared_length
+            * first_vector.cross_z(third_vector)
+            + third_vector.squared_length
+            * first_vector.cross_z(second_vector)) > 0
