@@ -1,4 +1,3 @@
-import math
 from enum import (IntEnum,
                   unique)
 
@@ -67,12 +66,6 @@ class Angle:
 
     __repr__ = generate_repr(__init__)
 
-    @property
-    def reversed(self) -> 'Angle':
-        return type(self)(self._second_ray_point,
-                          self._vertex,
-                          self._first_ray_point)
-
     def __lt__(self, other: 'Angle') -> bool:
         first_ray_vector = self.first_ray_vector
         second_ray_vector = self.second_ray_vector
@@ -103,41 +96,6 @@ class Angle:
     def second_ray_vector(self):
         return Vector.from_points(self.vertex, self._second_ray_point)
 
-    @property
-    def is_acute(self) -> bool:
-        return self.kind == AngleKind.ACUTE
-
-    @property
-    def is_right(self) -> bool:
-        return self.kind == AngleKind.RIGHT
-
-    @property
-    def is_obtuse(self) -> bool:
-        return self.kind == AngleKind.OBTUSE
-
-    @property
-    def kind(self) -> AngleKind:
-        """
-        Based on:
-            "law of cosines" (aka "cosine formula").
-
-        Reference:
-            https://en.wikipedia.org/wiki/Law_of_cosines
-
-        Time complexity:
-            O(1)
-
-        >>> angle = Angle(Point(1, 0), Point(0, 0), Point(0, 1))
-        >>> angle.kind == AngleKind.RIGHT
-        True
-        """
-        return AngleKind(to_sign(
-                self.vertex.squared_distance_to(self._first_ray_point)
-                - self._first_ray_point.squared_distance_to(
-                        self._second_ray_point)
-                + self.vertex.squared_distance_to(
-                        self._second_ray_point)))
-
 
 def _to_region(cosine: Scalar, sine: Scalar) -> Region:
     if cosine > 0:
@@ -159,14 +117,3 @@ def _to_region(cosine: Scalar, sine: Scalar) -> Region:
             return Fixed.HALF_PI_RADIAN
         else:
             return Fixed.ONE_AND_A_HALF_RADIAN
-
-
-def to_squared_sine(angle: Angle) -> Scalar:
-    first_ray_vector = angle.first_ray_vector
-    second_ray_vector = angle.second_ray_vector
-    area_sine = first_ray_vector.cross_z(second_ray_vector)
-    if not area_sine:
-        return 0
-    return (area_sine ** 2
-            / (first_ray_vector.squared_length
-               * second_ray_vector.squared_length))
