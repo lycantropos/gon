@@ -5,6 +5,7 @@ from typing import (Hashable,
 from hypothesis.searchstrategy import SearchStrategy
 from lz.hints import (Domain,
                       Map)
+from lz.replication import replicator
 
 from gon.angular import Orientation
 from gon.base import Point
@@ -42,3 +43,6 @@ def unique_everseen(iterable: Iterable[Domain],
 def points_do_not_lie_on_the_same_line(points: Sequence[Point]) -> bool:
     return any(angle.orientation is not Orientation.COLLINEAR
                for angle in to_angles(points))
+
+
+triplicate = replicator(3)
