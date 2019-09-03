@@ -1,27 +1,13 @@
-from collections import ChainMap
 from operator import attrgetter
 from typing import (Iterable,
                     List,
-                    MutableMapping,
                     Sequence)
-
-from lz.functional import flatmap
 
 from gon.angular import (Angle,
                          Orientation)
 from gon.base import Point
 from gon.linear import (Segment,
                         to_segment)
-
-
-def to_nested_mapping(*mappings: MutableMapping) -> MutableMapping:
-    def flatten(mapping: MutableMapping) -> Iterable[MutableMapping]:
-        if isinstance(mapping, ChainMap):
-            yield from mapping.maps
-        else:
-            yield mapping
-
-    return ChainMap(*flatmap(flatten, mappings))
 
 
 def to_angles(vertices: Sequence[Point]) -> Iterable[Angle]:
