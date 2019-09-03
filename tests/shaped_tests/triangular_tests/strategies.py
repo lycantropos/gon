@@ -1,5 +1,4 @@
 from functools import partial
-from operator import attrgetter
 
 from hypothesis import strategies
 from lz.functional import compose
@@ -10,9 +9,7 @@ from tests.strategies import (scalars_strategies,
 from tests.utils import points_do_not_lie_on_the_same_line
 
 scalars_to_points_lists = partial(strategies.lists,
-                                  unique_by=(attrgetter('x'),
-                                             attrgetter('y')))
-
+                                  unique=True)
 points_lists = (scalars_strategies
                 .flatmap(compose(partial(scalars_to_points_lists,
                                          min_size=3),
