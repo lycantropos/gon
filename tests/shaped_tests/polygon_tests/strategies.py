@@ -19,6 +19,7 @@ from gon.shaped.contracts import (self_intersects,
                                   vertices_forms_convex_polygon,
                                   vertices_forms_strict_polygon)
 from gon.shaped.hints import Vertices
+from gon.shaped.subdivisional import QuadEdge
 from gon.shaped.utils import (to_convex_hull,
                               to_edges)
 from tests.strategies import (points_strategies,
@@ -58,7 +59,7 @@ def points_to_concave_vertices(points: Sequence[Point]) -> Vertices:
     triangulation = triangular._delaunay(points)
     boundary = triangulation.to_boundary_edges()
 
-    def is_mouth(edge: triangular.QuadEdge) -> bool:
+    def is_mouth(edge: QuadEdge) -> bool:
         neighbours = triangulation.to_neighbours(edge)
         return len(neighbours) == 2 and not (neighbours & boundary)
 
