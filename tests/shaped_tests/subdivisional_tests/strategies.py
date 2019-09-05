@@ -54,5 +54,6 @@ points_triplets = (scalars_strategies
                                     scalars_to_points)))
 quad_edges_with_points = (points_triplets
                           .map(lambda points_triplet:
-                               (points_to_quad_edge(points_triplet[:2]),
+                               (QuadEdge.factory(points_triplet[0],
+                                                 points_triplet[1]),
                                 points_triplet[2])))
