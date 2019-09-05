@@ -207,50 +207,15 @@ def _merge(base_edge: QuadEdge) -> None:
         if not (left_candidate_is_on_the_right
                 or right_candidate_is_on_the_right):
             break
-        left_triangle_vertices = (left_candidate.end, base_edge.end,
-                                  base_edge.start)
-        right_triangle_vertices = (base_edge.end, base_edge.start,
-                                   right_candidate.end)
-        if not left_candidate_is_on_the_right:
-            if (is_point_inside_circumcircle(right_triangle_vertices,
-                                             right_candidate.left_from_end.end)
-                    and (right_candidate.left_from_end.end
-                         not in right_triangle_vertices)):
-                base_edge = right_candidate.connect(base_edge.opposite)
-                base_edge.delete()
-            else:
-                base_edge = right_candidate.connect(base_edge.opposite)
-        elif not right_candidate_is_on_the_right:
-            if (is_point_inside_circumcircle(left_triangle_vertices,
-                                             left_candidate.right_from_end.end)
-                    and left_candidate.right_from_end.end
-                    not in left_triangle_vertices):
-                base_edge = base_edge.opposite.connect(left_candidate.opposite)
-                base_edge.delete()
-            else:
-                base_edge = base_edge.opposite.connect(left_candidate.opposite)
-        elif is_point_inside_circumcircle(right_triangle_vertices,
-                                          left_candidate.end):
-            if (is_point_inside_circumcircle(left_triangle_vertices,
-                                             right_candidate.end)
-                    or (is_point_inside_circumcircle(
-                            left_triangle_vertices,
-                            left_candidate.right_from_end.end)
-                        and (left_candidate.right_from_end.end
-                             not in left_triangle_vertices))):
-                base_edge = base_edge.opposite.connect(left_candidate.opposite)
-                base_edge.delete()
-            else:
-                base_edge = base_edge.opposite.connect(left_candidate.opposite)
+        if (not left_candidate_is_on_the_right
+                or right_candidate_is_on_the_right
+                and is_point_inside_circumcircle((left_candidate.end,
+                                                  base_edge.end,
+                                                  base_edge.start),
+                                                 right_candidate.end)):
+            base_edge = right_candidate.connect(base_edge.opposite)
         else:
-            if (is_point_inside_circumcircle(right_triangle_vertices,
-                                             right_candidate.left_from_end.end)
-                    and (right_candidate.left_from_end.end
-                         not in right_triangle_vertices)):
-                base_edge = right_candidate.connect(base_edge.opposite)
-                base_edge.delete()
-            else:
-                base_edge = right_candidate.connect(base_edge.opposite)
+            base_edge = base_edge.opposite.connect(left_candidate.opposite)
 
 
 def _to_left_candidate(base_edge: QuadEdge) -> QuadEdge:
