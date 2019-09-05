@@ -101,15 +101,17 @@ class Triangulation:
         return result
 
     def to_boundary_edges(self) -> Set[QuadEdge]:
-        result = set()
-        start = self.right_edge
+        return set(flatten((edge, edge.opposite)
+                           for edge in self._to_boundary_edges()))
+
+    def _to_boundary_edges(self) -> Iterable[QuadEdge]:
+        start = self.left_edge
         edge = start
         while True:
-            result.update((edge, edge.opposite))
-            if edge.left_in_start is start:
+            yield edge
+            if edge.right_from_end is start:
                 break
-            edge = edge.left_in_start
-        return result
+            edge = edge.right_from_end
 
     def to_inner_edges(self) -> Set[QuadEdge]:
         return self.to_edges() - self.to_boundary_edges()

@@ -1,6 +1,4 @@
-from collections import defaultdict
 from typing import (Sequence,
-                    Set,
                     Tuple)
 
 from hypothesis import strategies
@@ -11,14 +9,11 @@ from lz.logical import negate
 from gon.angular import (Angle,
                          Orientation)
 from gon.base import Point
-from gon.linear import (Segment,
-                        to_segment)
 from gon.shaped import (Polygon,
                         to_polygon,
                         triangular)
 from gon.shaped.contracts import (self_intersects,
-                                  vertices_forms_convex_polygon,
-                                  vertices_forms_strict_polygon)
+                                  vertices_forms_convex_polygon)
 from gon.shaped.hints import Vertices
 from gon.shaped.subdivisional import QuadEdge
 from gon.shaped.utils import (to_convex_hull,
@@ -52,8 +47,6 @@ def to_concave_vertices(points: Strategy[Point]) -> Strategy[Vertices]:
                              unique=True)
             .filter(points_do_not_lie_on_the_same_line)
             .map(points_to_concave_vertices)
-            .filter(bool)
-            .filter(vertices_forms_strict_polygon)
             .filter(negate(vertices_forms_convex_polygon)))
 
 
@@ -70,7 +63,7 @@ def points_to_concave_vertices(points: Sequence[Point]) -> Vertices:
                                           key=triangular._edge_to_segment)
               if is_mouth(edge)}
 
-    for _ in range(len(points) - len(boundary)):
+    for _ in range(len(points) - len(boundary) // 2):
         try:
             edge, neighbours = mouths.popitem()
         except KeyError:
@@ -88,24 +81,9 @@ def points_to_concave_vertices(points: Sequence[Point]) -> Vertices:
             mouths.pop(edge.left_from_end.opposite, None)
             mouths.pop(edge.right_from_end, None)
             mouths.pop(edge.right_from_end.opposite, None)
-    return boundary_to_vertices({to_segment(edge.start, edge.end)
-                                 for edge in boundary})
-
-
-def boundary_to_vertices(boundary: Set[Segment]) -> Vertices:
-    connectivity = defaultdict(dict)
-    for edge in boundary:
-        connectivity[edge.start][edge.end] = edge
-        connectivity[edge.end][edge.start] = to_segment(edge.end, edge.start)
-    edge = min(boundary,
-               key=lambda edge: min(edge.start.x, edge.end.x))
-    result = [edge.start]
-    for _ in range(len(boundary) - 1):
-        edge = next(candidate
-                    for endpoint, candidate in connectivity[edge.end].items()
-                    if endpoint != edge.start)
-        result.append(edge.start)
-    return shrink_collinear_vertices(result)
+    boundary_endpoints = [edge.start
+                          for edge in triangulation._to_boundary_edges()]
+    return shrink_collinear_vertices(boundary_endpoints)
 
 
 def shrink_collinear_vertices(vertices: Vertices) -> Vertices:
@@ -118,7 +96,7 @@ def shrink_collinear_vertices(vertices: Vertices) -> Vertices:
 
 concave_vertices = (points_strategies.flatmap(to_concave_vertices)
                     .filter(negate(self_intersects)))
-vertices = convex_vertices | concave_vertices
+vertices = concave_vertices | convex_vertices
 polygons = vertices.map(to_polygon)
 
 
