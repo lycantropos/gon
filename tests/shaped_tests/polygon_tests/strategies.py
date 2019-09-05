@@ -4,7 +4,8 @@ from typing import (Sequence,
                     Tuple)
 
 from hypothesis import strategies
-from lz.iterating import first
+from lz.iterating import (first,
+                          flatten)
 from lz.logical import negate
 
 from gon.angular import (Angle,
@@ -28,6 +29,7 @@ from tests.strategies import (points_strategies,
                               to_non_triangle_vertices_base,
                               triangles_vertices)
 from tests.utils import (Strategy,
+                         edge_to_ring,
                          points_do_not_lie_on_the_same_line,
                          unique_everseen)
 
@@ -76,17 +78,16 @@ def points_to_concave_vertices(points: Sequence[Point]) -> Vertices:
         boundary.remove(edge)
         boundary.remove(edge.opposite)
         triangulation.delete(edge)
-        boundary.update(neighbours)
+        boundary.update(flatten((neighbour, neighbour.opposite)
+                                for neighbour in neighbours))
         mouths.update((edge, triangulation.to_neighbours(edge))
                       for edge in neighbours
                       if is_mouth(edge))
-        start = edge = first(neighbours).opposite
-        while edge.left_from_start is not start:
+        for edge in edge_to_ring(first(neighbours).opposite):
             mouths.pop(edge.left_from_end, None)
             mouths.pop(edge.left_from_end.opposite, None)
             mouths.pop(edge.right_from_end, None)
             mouths.pop(edge.right_from_end.opposite, None)
-            edge = edge.left_from_start
     return boundary_to_vertices({to_segment(edge.start, edge.end)
                                  for edge in boundary})
 
