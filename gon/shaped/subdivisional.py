@@ -14,7 +14,7 @@ class QuadEdge:
         https://en.wikipedia.org/wiki/Quad-edge
         http://www.sccg.sk/~samuelcik/dgs/quad_edge.pdf
     """
-    __slots__ = ('_start', '_rotated', '_left_from_start')
+    __slots__ = ('_start', '_left_from_start', '_rotated')
 
     def __init__(self,
                  start: Optional[Point] = None,
