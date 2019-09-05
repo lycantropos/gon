@@ -191,17 +191,7 @@ _initializers = {2: _triangulate_two_points,
 
 
 def _initialize_triangulation(points: Sequence[Point]) -> Triangulation:
-    try:
-        initializer = _initializers[len(points)]
-    except KeyError:
-        expected_counts = ', '.join(map(str, _initializers))
-        raise ValueError('Unsupported points count: '
-                         'should be one of {expected_counts}, '
-                         'but found {actual_count}.'
-                         .format(expected_counts=expected_counts,
-                                 actual_count=len(points)))
-    else:
-        return initializer(points)
+    return _initializers[len(points)](points)
 
 
 def _merge(base_edge: QuadEdge) -> None:
