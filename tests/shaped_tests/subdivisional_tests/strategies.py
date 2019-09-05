@@ -33,6 +33,21 @@ quad_edges = (scalars_strategies
                                scalars_to_points))
               .filter(points_do_not_lie_on_the_same_line)
               .flatmap(points_to_quad_edge))
+
+
+def points_to_quad_edge_with_neighbours(points: Sequence[Point]
+                                        ) -> Strategy[QuadEdge]:
+    triangulation = _delaunay(points)
+    return strategies.sampled_from(list(triangulation.to_inner_edges()))
+
+
+quad_edges_with_neighbours = (scalars_strategies
+                              .flatmap(compose(partial(strategies.lists,
+                                                       min_size=4,
+                                                       unique=True),
+                                               scalars_to_points))
+                              .filter(points_do_not_lie_on_the_same_line)
+                              .flatmap(points_to_quad_edge_with_neighbours))
 points_triplets = (scalars_strategies
                    .flatmap(compose(pack(strategies.tuples),
                                     triplicate,

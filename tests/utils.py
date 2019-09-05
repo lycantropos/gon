@@ -1,6 +1,7 @@
 from typing import (Hashable,
                     Iterable,
-                    Sequence)
+                    Sequence,
+                    Tuple)
 
 from hypothesis.searchstrategy import SearchStrategy
 from lz.hints import (Domain,
@@ -9,6 +10,7 @@ from lz.replication import replicator
 
 from gon.angular import Orientation
 from gon.base import Point
+from gon.shaped.subdivisional import QuadEdge
 from gon.shaped.utils import to_angles
 
 Strategy = SearchStrategy
@@ -40,9 +42,22 @@ def unique_everseen(iterable: Iterable[Domain],
                 yield element
 
 
+triplicate = replicator(3)
+
+
 def points_do_not_lie_on_the_same_line(points: Sequence[Point]) -> bool:
     return any(angle.orientation is not Orientation.COLLINEAR
                for angle in to_angles(points))
 
 
-triplicate = replicator(3)
+def edge_to_relatives_endpoints(edge: QuadEdge) -> Tuple[Point, ...]:
+    return tuple(relative.end for relative in edge_to_ring(edge))
+
+
+def edge_to_ring(edge: QuadEdge) -> Iterable[QuadEdge]:
+    start = edge
+    while True:
+        yield edge
+        edge = edge.left_from_start
+        if edge is start:
+            break
