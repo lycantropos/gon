@@ -22,3 +22,8 @@ def test_transitivity(left_quad_edge: QuadEdge,
                       right_quad_edge: QuadEdge) -> None:
     assert implication(left_quad_edge == mid_quad_edge == right_quad_edge,
                        left_quad_edge == right_quad_edge)
+
+
+@given(strategies.quad_edges)
+def test_non_quad_edge_argument(quad_edge: QuadEdge) -> None:
+    assert quad_edge != object()
