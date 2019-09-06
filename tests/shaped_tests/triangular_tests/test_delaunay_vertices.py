@@ -4,6 +4,7 @@ from typing import Sequence
 from hypothesis import given
 
 from gon.base import Point
+from gon.shaped import triangular
 from gon.shaped.contracts import is_point_inside_circumcircle
 from gon.shaped.hints import Vertices
 from gon.shaped.triangular import delaunay_vertices
