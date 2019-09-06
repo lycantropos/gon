@@ -78,10 +78,10 @@ def to_boundary(polygons_vertices: Iterable[Vertices]) -> Set[Segment]:
 
 
 def shrink_collinear_segments(segments: Set[Segment]) -> None:
-    points_segments = defaultdict(list)
+    points_segments = defaultdict(set)
     for segment in segments:
-        points_segments[segment.start].append(segment)
-        points_segments[segment.end].append(segment)
+        points_segments[segment.start].add(segment)
+        points_segments[segment.end].add(segment.reversed)
     for point, point_segments in points_segments.items():
         first_segment, second_segment = point_segments
         if (first_segment.orientation_with(second_segment.start)
@@ -89,7 +89,16 @@ def shrink_collinear_segments(segments: Set[Segment]) -> None:
                 is Orientation.COLLINEAR):
             segments.remove(first_segment)
             segments.remove(second_segment)
-            segments.add(to_segment(*({first_segment.start, first_segment.end,
-                                       second_segment.start,
-                                       second_segment.end}
-                                      - {point})))
+            replacement = to_segment(first_segment.end, second_segment.end)
+            replace_segment(points_segments[first_segment.end],
+                            first_segment, replacement)
+            replace_segment(points_segments[second_segment.end],
+                            second_segment, replacement.reversed)
+            segments.add(replacement)
+
+
+def replace_segment(segments: Set[Segment],
+                    source: Segment,
+                    target: Segment) -> None:
+    segments.remove(source)
+    segments.add(target)
