@@ -1,6 +1,8 @@
+from collections import defaultdict
 from typing import (Hashable,
                     Iterable,
                     Sequence,
+                    Set,
                     Tuple)
 
 from hypothesis.searchstrategy import SearchStrategy
@@ -10,8 +12,12 @@ from lz.replication import replicator
 
 from gon.angular import Orientation
 from gon.base import Point
+from gon.linear import (Segment,
+                        to_segment)
+from gon.shaped.hints import Vertices
 from gon.shaped.subdivisional import QuadEdge
-from gon.shaped.utils import to_angles
+from gon.shaped.utils import (to_angles,
+                              to_edges)
 
 Strategy = SearchStrategy
 
@@ -61,3 +67,29 @@ def edge_to_ring(edge: QuadEdge) -> Iterable[QuadEdge]:
         edge = edge.left_from_start
         if edge is start:
             break
+
+
+def to_boundary(polygons_vertices: Iterable[Vertices]) -> Set[Segment]:
+    result = set()
+    for vertices in polygons_vertices:
+        result.symmetric_difference_update(to_edges(vertices))
+    shrink_collinear_segments(result)
+    return result
+
+
+def shrink_collinear_segments(segments: Set[Segment]) -> None:
+    points_segments = defaultdict(list)
+    for segment in segments:
+        points_segments[segment.start].append(segment)
+        points_segments[segment.end].append(segment)
+    for point, point_segments in points_segments.items():
+        first_segment, second_segment = point_segments
+        if (first_segment.orientation_with(second_segment.start)
+                is first_segment.orientation_with(second_segment.end)
+                is Orientation.COLLINEAR):
+            segments.remove(first_segment)
+            segments.remove(second_segment)
+            segments.add(to_segment(*({first_segment.start, first_segment.end,
+                                       second_segment.start,
+                                       second_segment.end}
+                                      - {point})))

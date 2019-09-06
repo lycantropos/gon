@@ -4,10 +4,12 @@ from typing import Sequence
 from hypothesis import given
 
 from gon.base import Point
+from gon.shaped.contracts import is_point_inside_circumcircle
 from gon.shaped.hints import Vertices
 from gon.shaped.triangular import delaunay
-from gon.shaped.contracts import is_point_inside_circumcircle
-from gon.shaped.utils import to_convex_hull
+from gon.shaped.utils import (to_convex_hull,
+                              to_edges)
+from tests.utils import to_boundary
 from . import strategies
 
 
@@ -37,6 +39,13 @@ def test_delaunay_criterion(points: Sequence[Point]) -> None:
     assert all(not any(is_point_inside_circumcircle(triangle_vertices, point)
                        for triangle_vertices in result)
                for point in points)
+
+
+@given(strategies.points_lists)
+def test_boundary(points: Sequence[Point]) -> None:
+    result = delaunay(points)
+
+    assert to_boundary(result) == set(to_edges(to_convex_hull(points)))
 
 
 @given(strategies.triangles_vertices)
