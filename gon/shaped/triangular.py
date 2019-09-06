@@ -7,6 +7,7 @@ from typing import (Iterable,
                     Sequence,
                     Set)
 
+from lz.functional import compose
 from lz.hints import Domain
 from lz.iterating import flatten
 from reprit.base import generate_repr
@@ -142,7 +143,7 @@ class Triangulation:
         edge.delete()
 
 
-def _delaunay(points: Sequence[Point]) -> Triangulation:
+def delaunay(points: Sequence[Point]) -> Triangulation:
     result = [tuple(sorted(points,
                            key=attrgetter('x', 'y')))]
     while max(map(len, result)) > max(_initializers):
@@ -254,29 +255,29 @@ def _to_right_candidate(base_edge: QuadEdge) -> QuadEdge:
     return result
 
 
-def delaunay(points: Sequence[Point]) -> List[Vertices]:
-    return (_delaunay(sorted(points,
-                             key=attrgetter('x', 'y')))
-            .to_triangles_vertices())
-
-
 def constrained_delaunay(points: Sequence[Point],
                          *,
                          boundary: Sequence[Segment],
                          extra_constraints: Optional[Iterable[Segment]] = None
-                         ) -> List[Vertices]:
-    result = _delaunay(points)
+                         ) -> Triangulation:
+    result = delaunay(points)
     initial_boundary_segments = frozenset(map(_edge_to_segment,
                                               result.to_boundary_edges()))
     if not extra_constraints and all(edge in initial_boundary_segments
                                      for edge in boundary):
-        return result.to_triangles_vertices()
+        return result
     _set_constraints(result,
                      constraints=(boundary if extra_constraints is None
                                   else chain(boundary, extra_constraints)))
     _set_boundary(result,
                   boundary_segments=boundary)
-    return result.to_triangles_vertices()
+    return result
+
+
+delaunay_vertices = compose(Triangulation.to_triangles_vertices,
+                            delaunay)
+constrained_delaunay_vertices = compose(Triangulation.to_triangles_vertices,
+                                        constrained_delaunay)
 
 
 def _set_constraints(triangulation: Triangulation,

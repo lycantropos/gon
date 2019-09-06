@@ -7,8 +7,8 @@ from lz.functional import (compose,
 from lz.replication import duplicate
 
 from gon.base import Point
+from gon.shaped import triangular
 from gon.shaped.subdivisional import QuadEdge
-from gon.shaped.triangular import _delaunay
 from tests.strategies import (scalars_strategies,
                               scalars_to_points)
 from tests.utils import (Strategy,
@@ -22,7 +22,7 @@ points_pairs = (scalars_strategies
 
 
 def points_to_quad_edge(points: Sequence[Point]) -> Strategy[QuadEdge]:
-    triangulation = _delaunay(points)
+    triangulation = triangular.delaunay(points)
     return strategies.sampled_from(list(triangulation.to_edges()))
 
 
@@ -37,7 +37,7 @@ quad_edges = (scalars_strategies
 
 def points_to_quad_edge_with_neighbours(points: Sequence[Point]
                                         ) -> Strategy[QuadEdge]:
-    triangulation = _delaunay(points)
+    triangulation = triangular.delaunay(points)
     return strategies.sampled_from(list(triangulation.to_inner_edges()))
 
 
