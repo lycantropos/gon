@@ -51,7 +51,7 @@ def to_concave_vertices(points: Strategy[Point]) -> Strategy[Vertices]:
 
 
 def points_to_concave_vertices(points: Sequence[Point]) -> Vertices:
-    triangulation = triangular._delaunay(points)
+    triangulation = triangular.delaunay(points)
     boundary = triangulation.to_boundary_edges()
 
     def is_mouth(edge: QuadEdge) -> bool:
