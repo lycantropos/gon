@@ -46,12 +46,41 @@ def to_concave_vertices(points: Strategy[Point]) -> Strategy[Vertices]:
                              min_size=4,
                              unique=True)
             .filter(points_do_not_lie_on_the_same_line)
-            .map(points_to_concave_vertices)
-            .filter(negate(vertices_forms_convex_polygon)))
+            .map(triangular.delaunay)
+            .flatmap(to_triangulation_with_swappable_edges)
+            .map(swap_edges)
+            .map(triangulation_to_concave_vertices)
+            .filter(negate(vertices_forms_convex_polygon))
+            .filter(negate(self_intersects)))
 
 
-def points_to_concave_vertices(points: Sequence[Point]) -> Vertices:
-    triangulation = triangular.delaunay(points)
+def to_triangulation_with_swappable_edges(
+        triangulation: triangular.Triangulation
+) -> Strategy[Tuple[triangular.Triangulation, Sequence[QuadEdge]]]:
+    swappable_edges = strategies.sampled_from(
+            [edge
+             for edge in triangulation.to_edges()
+             if triangulation.to_neighbours(edge) == 4])
+    return strategies.tuples(strategies.just(triangulation),
+                             strategies.lists(swappable_edges,
+                                              unique=True))
+
+
+def swap_edges(
+        triangulation_with_swappable_edges: Tuple[triangular.Triangulation,
+                                                  Sequence[QuadEdge]]
+) -> triangular.Triangulation:
+    triangulation, swappable_edges = triangulation_with_swappable_edges
+    for edge in swappable_edges:
+        assert edge != triangulation.left_edge
+        assert edge != triangulation.right_edge
+        assert triangulation.to_neighbours(edge) == 4
+        edge.swap()
+    return triangulation
+
+
+def triangulation_to_concave_vertices(triangulation: triangular.Triangulation
+                                      ) -> Vertices:
     boundary = triangulation.to_boundary_edges()
 
     def is_mouth(edge: QuadEdge) -> bool:
@@ -62,7 +91,8 @@ def points_to_concave_vertices(points: Sequence[Point]) -> Vertices:
               for edge in unique_everseen(boundary,
                                           key=triangular._edge_to_segment)
               if is_mouth(edge)}
-
+    points = set(flatten((edge.start, edge.end)
+                         for edge in triangulation.to_edges()))
     for _ in range(len(points) - len(boundary) // 2):
         try:
             edge, neighbours = mouths.popitem()
@@ -87,28 +117,37 @@ def points_to_concave_vertices(points: Sequence[Point]) -> Vertices:
 
 
 def shrink_collinear_vertices(vertices: Vertices) -> Vertices:
-    return [vertex
-            for index, vertex in enumerate(vertices)
-            if Angle(vertices[index - 1], vertex,
-                     vertices[(index + 1) % len(vertices)]).orientation
-            is not Orientation.COLLINEAR]
+    result = [vertices[0], vertices[1]]
+    for vertex in vertices[2:]:
+        while (len(result) > 2 and
+               Angle(result[-2], result[-1], vertex).orientation
+               is Orientation.COLLINEAR):
+            del result[-1]
+        result.append(vertex)
+    for index in range(len(result)):
+        if index >= len(result):
+            break
+        if (Angle(result[index - 2], result[index - 1],
+                  result[index]).orientation
+                is Orientation.COLLINEAR):
+            del result[index - 1]
+    return result
 
 
-concave_vertices = (points_strategies.flatmap(to_concave_vertices)
-                    .filter(negate(self_intersects)))
+concave_vertices = points_strategies.flatmap(to_concave_vertices)
 vertices = concave_vertices | convex_vertices
 polygons = vertices.map(to_polygon)
 
 
-def to_polygon_with_points(polygon: Polygon
-                           ) -> Strategy[Tuple[Polygon, Point]]:
+def to_polygons_with_points(polygon: Polygon
+                            ) -> Strategy[Tuple[Polygon, Point]]:
     scalars = strategies.one_of(list(map(segment_to_scalars,
                                          to_edges(polygon.vertices))))
     return strategies.tuples(strategies.just(polygon),
                              scalars_to_points(scalars))
 
 
-polygons_with_points = polygons.flatmap(to_polygon_with_points)
+polygons_with_points = polygons.flatmap(to_polygons_with_points)
 
 
 def to_polygon_with_vertices_indices(polygon: Polygon
