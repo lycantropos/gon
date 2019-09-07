@@ -241,14 +241,11 @@ def _to_right_candidate(base_edge: QuadEdge) -> QuadEdge:
         while (is_point_inside_circumcircle((base_edge.end, base_edge.start,
                                              result.end),
                                             result.right_from_start.end)
-               and result.right_from_start.end not in (base_edge.end,
-                                                       base_edge.start,
-                                                       result.end)
-               and base_edge.orientation_with(result.right_from_start.end)
-               is Orientation.CLOCKWISE):
-            next_right_candidate = result.right_from_start
+               and (base_edge.orientation_with(result.right_from_start.end)
+                    is Orientation.CLOCKWISE)):
+            next_candidate = result.right_from_start
             result.delete()
-            result = next_right_candidate
+            result = next_candidate
     return result
 
 
