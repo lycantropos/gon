@@ -201,51 +201,46 @@ def _merge(base_edge: QuadEdge) -> None:
     while True:
         left_candidate = _to_left_candidate(base_edge)
         right_candidate = _to_right_candidate(base_edge)
-        left_candidate_is_on_the_right = (
-                base_edge.orientation_with(left_candidate.end)
-                is Orientation.CLOCKWISE)
-        right_candidate_is_on_the_right = (
-                base_edge.orientation_with(right_candidate.end)
-                is Orientation.CLOCKWISE)
-        if not (left_candidate_is_on_the_right
-                or right_candidate_is_on_the_right):
+        if left_candidate is right_candidate is None:
             break
-        if (not left_candidate_is_on_the_right
-                or right_candidate_is_on_the_right
-                and is_point_inside_circumcircle((left_candidate.end,
-                                                  base_edge.end,
-                                                  base_edge.start),
-                                                 right_candidate.end)):
+        elif (left_candidate is None
+              or right_candidate is not None
+              and is_point_inside_circumcircle((left_candidate.end,
+                                                base_edge.end,
+                                                base_edge.start),
+                                               right_candidate.end)):
             base_edge = right_candidate.connect(base_edge.opposite)
         else:
             base_edge = base_edge.opposite.connect(left_candidate.opposite)
 
 
-def _to_left_candidate(base_edge: QuadEdge) -> QuadEdge:
+def _to_left_candidate(base_edge: QuadEdge) -> Optional[QuadEdge]:
     result = base_edge.opposite.left_from_start
-    if base_edge.orientation_with(result.end) is Orientation.CLOCKWISE:
-        while (is_point_inside_circumcircle((base_edge.end, base_edge.start,
-                                             result.end),
-                                            result.left_from_start.end)
-               and (base_edge.orientation_with(result.left_from_start.end)
-                    is Orientation.CLOCKWISE)):
-            next_candidate = result.left_from_start
-            result.delete()
-            result = next_candidate
+    if base_edge.orientation_with(result.end) is not Orientation.CLOCKWISE:
+        return None
+    while (is_point_inside_circumcircle((base_edge.end, base_edge.start,
+                                         result.end),
+                                        result.left_from_start.end)
+           and (base_edge.orientation_with(result.left_from_start.end)
+                is Orientation.CLOCKWISE)):
+        next_candidate = result.left_from_start
+        result.delete()
+        result = next_candidate
     return result
 
 
-def _to_right_candidate(base_edge: QuadEdge) -> QuadEdge:
+def _to_right_candidate(base_edge: QuadEdge) -> Optional[QuadEdge]:
     result = base_edge.right_from_start
-    if base_edge.orientation_with(result.end) is Orientation.CLOCKWISE:
-        while (is_point_inside_circumcircle((base_edge.end, base_edge.start,
-                                             result.end),
-                                            result.right_from_start.end)
-               and (base_edge.orientation_with(result.right_from_start.end)
-                    is Orientation.CLOCKWISE)):
-            next_candidate = result.right_from_start
-            result.delete()
-            result = next_candidate
+    if base_edge.orientation_with(result.end) is not Orientation.CLOCKWISE:
+        return None
+    while (is_point_inside_circumcircle((base_edge.end, base_edge.start,
+                                         result.end),
+                                        result.right_from_start.end)
+           and (base_edge.orientation_with(result.right_from_start.end)
+                is Orientation.CLOCKWISE)):
+        next_candidate = result.right_from_start
+        result.delete()
+        result = next_candidate
     return result
 
 
