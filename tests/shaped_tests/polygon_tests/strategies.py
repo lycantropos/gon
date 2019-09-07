@@ -57,12 +57,13 @@ def to_concave_vertices(points: Strategy[Point]) -> Strategy[Vertices]:
 def to_triangulation_with_swappable_edges(
         triangulation: triangular.Triangulation
 ) -> Strategy[Tuple[triangular.Triangulation, Sequence[QuadEdge]]]:
-    swappable_edges = strategies.sampled_from(
-            [edge
-             for edge in triangulation.to_edges()
-             if triangulation.to_neighbours(edge) == 4])
+    swappable_edges = [edge for edge in triangulation.to_edges() if
+                       triangulation.to_neighbours(edge) == 4]
+    edges_to_swap = (strategies.sampled_from(swappable_edges)
+                     if swappable_edges
+                     else strategies.nothing())
     return strategies.tuples(strategies.just(triangulation),
-                             strategies.lists(swappable_edges,
+                             strategies.lists(edges_to_swap,
                                               unique=True))
 
 
