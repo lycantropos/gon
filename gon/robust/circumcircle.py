@@ -63,35 +63,25 @@ def determinant_adapt(first_vertex: Point,
     cdx_bdy, cdx_bdy_tail = two_product(cdx, bdy)
     bc[3], bc[2], bc[1], bc[0] = two_two_diff(bdx_cdy, bdx_cdy_tail,
                                               cdx_bdy, cdx_bdy_tail)
-
-    axbc = scale_expansion(bc, adx)
-    axxbc = scale_expansion(axbc, adx)
-    aybc = scale_expansion(bc, ady)
-    ayybc = scale_expansion(aybc, ady)
-    a_det = sum_expansions(axxbc, ayybc)
+    axbc, aybc = scale_expansion(bc, adx), scale_expansion(bc, ady)
+    a_det = sum_expansions(scale_expansion(axbc, adx),
+                           scale_expansion(aybc, ady))
 
     cdx_ady, cdx_ady_tail = two_product(cdx, ady)
     adx_cdy, adx_cdy_tail = two_product(adx, cdy)
-
     ca[3], ca[2], ca[1], ca[0] = two_two_diff(cdx_ady, cdx_ady_tail,
                                               adx_cdy, adx_cdy_tail)
-
-    bxca = scale_expansion(ca, bdx)
-    bxxca = scale_expansion(bxca, bdx)
-    byca = scale_expansion(ca, bdy)
-    byyca = scale_expansion(byca, bdy)
-    b_det = sum_expansions(bxxca, byyca)
+    bxca, byca = scale_expansion(ca, bdx), scale_expansion(ca, bdy)
+    b_det = sum_expansions(scale_expansion(bxca, bdx),
+                           scale_expansion(byca, bdy))
 
     adx_bdy, adx_bdy_tail = two_product(adx, bdy)
     bdx_ady, bdx_ady_tail = two_product(bdx, ady)
     ab[3], ab[2], ab[1], ab[0] = two_two_diff(adx_bdy, adx_bdy_tail,
                                               bdx_ady, bdx_ady_tail)
-
-    cxab = scale_expansion(ab, cdx)
-    cxxab = scale_expansion(cxab, cdx)
-    cyab = scale_expansion(ab, cdy)
-    cyyab = scale_expansion(cyab, cdy)
-    c_det = sum_expansions(cxxab, cyyab)
+    cxab, cyab = scale_expansion(ab, cdx), scale_expansion(ab, cdy)
+    c_det = sum_expansions(scale_expansion(cxab, cdx),
+                           scale_expansion(cyab, cdy))
 
     result_expansion = sum_expansions(sum_expansions(a_det, b_det), c_det)
 
