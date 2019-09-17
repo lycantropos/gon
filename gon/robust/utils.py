@@ -4,11 +4,11 @@ from typing import (Sequence,
 from .bounds import splitter
 
 
-def fast_two_sum(a: float, b: float) -> Tuple[float, float]:
-    x = a + b
-    b_virtual = x - a
-    y = b - b_virtual
-    return x, y
+def fast_two_sum(left: float, right: float) -> Tuple[float, float]:
+    result = left + right
+    right_virtual = result - left
+    tail = right - right_virtual
+    return result, tail
 
 
 def two_sum(a: float, b: float) -> Tuple[float, float]:
