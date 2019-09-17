@@ -1,7 +1,7 @@
 from typing import (Sequence,
                     Tuple)
 
-from .bounds import splitter
+from . import bounds
 
 
 def fast_two_sum(left: float, right: float) -> Tuple[float, float]:
@@ -21,7 +21,9 @@ def two_sum(left: float, right: float) -> Tuple[float, float]:
     return result, tail
 
 
-def split(value: float) -> Tuple[float, float]:
+def split(value: float,
+          *,
+          splitter: float = bounds.splitter) -> Tuple[float, float]:
     c = splitter * value
     result_hi = c - (c - value)
     result_lo = value - result_hi
