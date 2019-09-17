@@ -31,13 +31,13 @@ def split(a: float) -> Tuple[float, float]:
 
 def two_product_presplit(a: float, b: float,
                          bhi: float, blo: float) -> Tuple[float, float]:
-    x = a * b
+    result = a * b
     ahi, alo = split(a)
-    err1 = x - ahi * bhi
+    err1 = result - ahi * bhi
     err2 = err1 - alo * bhi
     err3 = err2 - ahi * blo
-    y = alo * blo - err3
-    return x, y
+    tail = alo * blo - err3
+    return result, tail
 
 
 def two_product(a: float, b: float) -> Tuple[float, float]:
