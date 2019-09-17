@@ -27,7 +27,7 @@ class Point:
     __repr__ = generate_repr(__init__)
 
     def __hash__(self) -> int:
-        return hash((self._x, self._y, self._x + self._y))
+        return hash((self._x, self._y, self._x + self._y, self._x - self._y))
 
     def __eq__(self, other: 'Point') -> bool:
         if not isinstance(other, Point):
