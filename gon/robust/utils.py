@@ -80,23 +80,17 @@ def two_one_diff(left: float, left_tail: float,
     return x2, x1, x0
 
 
-def two_diff(a: float, b: float):
-    x = a - b
-    b_virtual = a - x
-    a_virtual = x + b_virtual
-    b_roundoff = b_virtual - b
-    a_roundoff = a - a_virtual
-    y = a_roundoff + b_roundoff
-    return x, y
+def two_diff(left: float, right: float) -> Tuple[float, float]:
+    result = left - right
+    return result, two_diff_tail(left, right, result)
 
 
-def two_diff_tail(a: float, b: float, x: float) -> float:
-    b_virtual = a - x
-    a_virtual = x + b_virtual
-    b_roundoff = b_virtual - b
-    a_roundoff = a - a_virtual
-    y = a_roundoff + b_roundoff
-    return y
+def two_diff_tail(left: float, right: float, diff: float) -> float:
+    right_virtual = left - diff
+    left_virtual = diff + right_virtual
+    right_roundoff = right_virtual - right
+    left_roundoff = left - left_virtual
+    return left_roundoff + right_roundoff
 
 
 def square(a: float) -> Tuple[float, float]:
