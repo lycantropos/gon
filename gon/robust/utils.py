@@ -194,13 +194,14 @@ def scale_expansion(expansion: Expansion, scalar: float) -> Expansion:
     """
     Multiplies an expansion by a scalar with zero components elimination.
     """
+    expansion = iter(expansion)
     scalar_hi, scalar_lo = split(scalar)
-    q, hh = two_product_presplit(expansion[0], scalar,
+    q, hh = two_product_presplit(next(expansion), scalar,
                                  scalar_hi, scalar_lo)
     result = []
     if hh:
         result.append(hh)
-    for element in expansion[1:]:
+    for element in expansion:
         product1, product0 = two_product_presplit(element, scalar,
                                                   scalar_hi, scalar_lo)
         sum_, hh = two_sum(q, product0)
