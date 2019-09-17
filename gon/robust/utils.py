@@ -21,12 +21,11 @@ def two_sum(left: float, right: float) -> Tuple[float, float]:
     return result, tail
 
 
-def split(a: float) -> Tuple[float, float]:
-    c = splitter * a
-    abig = c - a
-    ahi = c - abig
-    alo = a - ahi
-    return ahi, alo
+def split(value: float) -> Tuple[float, float]:
+    c = splitter * value
+    result_hi = c - (c - value)
+    result_lo = value - result_hi
+    return result_hi, result_lo
 
 
 def two_product_presplit(a: float, b: float,
