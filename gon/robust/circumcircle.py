@@ -43,42 +43,27 @@ def determinant_adapt(first_vertex: Point,
                       third_vertex: Point,
                       point: Point,
                       permanent: float) -> float:
-    aa = [0.0] * 4
-    ab = [0.0] * 4
-    bb = [0.0] * 4
-    bc = [0.0] * 4
-    ca = [0.0] * 4
-    cc = [0.0] * 4
-    u = [0.0] * 4
-    v = [0.0] * 4
-    abtt = [0.0] * 4
-    bctt = [0.0] * 4
-    catt = [0.0] * 4
-
     adx, ady = first_vertex.x - point.x, first_vertex.y - point.y
     bdx, bdy = second_vertex.x - point.x, second_vertex.y - point.y
     cdx, cdy = third_vertex.x - point.x, third_vertex.y - point.y
 
     bdx_cdy, bdx_cdy_tail = two_product(bdx, cdy)
     cdx_bdy, cdx_bdy_tail = two_product(cdx, bdy)
-    bc[3], bc[2], bc[1], bc[0] = two_two_diff(bdx_cdy, bdx_cdy_tail,
-                                              cdx_bdy, cdx_bdy_tail)
+    bc = two_two_diff(bdx_cdy, bdx_cdy_tail, cdx_bdy, cdx_bdy_tail)
     axbc, aybc = scale_expansion(bc, adx), scale_expansion(bc, ady)
     a_det = sum_expansions(scale_expansion(axbc, adx),
                            scale_expansion(aybc, ady))
 
     cdx_ady, cdx_ady_tail = two_product(cdx, ady)
     adx_cdy, adx_cdy_tail = two_product(adx, cdy)
-    ca[3], ca[2], ca[1], ca[0] = two_two_diff(cdx_ady, cdx_ady_tail,
-                                              adx_cdy, adx_cdy_tail)
+    ca = two_two_diff(cdx_ady, cdx_ady_tail, adx_cdy, adx_cdy_tail)
     bxca, byca = scale_expansion(ca, bdx), scale_expansion(ca, bdy)
     b_det = sum_expansions(scale_expansion(bxca, bdx),
                            scale_expansion(byca, bdy))
 
     adx_bdy, adx_bdy_tail = two_product(adx, bdy)
     bdx_ady, bdx_ady_tail = two_product(bdx, ady)
-    ab[3], ab[2], ab[1], ab[0] = two_two_diff(adx_bdy, adx_bdy_tail,
-                                              bdx_ady, bdx_ady_tail)
+    ab = two_two_diff(adx_bdy, adx_bdy_tail, bdx_ady, bdx_ady_tail)
     cxab, cyab = scale_expansion(ab, cdx), scale_expansion(ab, cdy)
     c_det = sum_expansions(scale_expansion(cxab, cdx),
                            scale_expansion(cyab, cdy))
@@ -121,23 +106,27 @@ def determinant_adapt(first_vertex: Point,
     if det >= error_bound or -det >= error_bound:
         return det
 
+    aa = (0.0,) * 4
+    bb = (0.0,) * 4
+    cc = (0.0,) * 4
+
     if bdx_tail or bdy_tail or cdx_tail or cdy_tail:
         adx_squared, adx_squared_tail = square(adx)
         ady_squared, ady_squared_tail = square(ady)
-        aa[3], aa[2], aa[1], aa[0] = two_two_sum(adx_squared, adx_squared_tail,
-                                                 ady_squared, ady_squared_tail)
+        aa = two_two_sum(adx_squared, adx_squared_tail,
+                         ady_squared, ady_squared_tail)
 
     if adx_tail or ady_tail or cdx_tail or cdy_tail:
         bdx_squared, bdx_squared_tail = square(bdx)
         bdy_squared, bdy_squared_tail = square(bdy)
-        bb[3], bb[2], bb[1], bb[0] = two_two_sum(bdx_squared, bdx_squared_tail,
-                                                 bdy_squared, bdy_squared_tail)
+        bb = two_two_sum(bdx_squared, bdx_squared_tail,
+                         bdy_squared, bdy_squared_tail)
 
     if adx_tail or ady_tail or bdx_tail or bdy_tail:
         cdx_squared, cdx_squared_tail = square(cdx)
         cdy_squared, cdy_squared_tail = square(cdy)
-        cc[3], cc[2], cc[1], cc[0] = two_two_sum(cdx_squared, cdx_squared_tail,
-                                                 cdy_squared, cdy_squared_tail)
+        cc = two_two_sum(cdx_squared, cdx_squared_tail,
+                         cdy_squared, cdy_squared_tail)
 
     if adx_tail:
         axtbc = scale_expansion(bc, adx_tail)
@@ -209,23 +198,21 @@ def determinant_adapt(first_vertex: Point,
         if bdx_tail or bdy_tail or cdx_tail or cdy_tail:
             ti, ti_tail = two_product(bdx_tail, cdy)
             tj, tj_tail = two_product(bdx, cdy_tail)
-            u[3], u[2], u[1], u[0] = two_two_sum(ti, ti_tail, tj, tj_tail)
+            u = two_two_sum(ti, ti_tail, tj, tj_tail)
 
             negate = -bdy
             ti, ti_tail = two_product(cdx_tail, negate)
             negate = -bdy_tail
             tj, tj_tail = two_product(cdx, negate)
-            v[3], v[2], v[1], v[0] = two_two_sum(ti, ti_tail, tj, tj_tail)
+            v = two_two_sum(ti, ti_tail, tj, tj_tail)
 
             bct = sum_expansions(u, v)
 
             ti, ti_tail = two_product(bdx_tail, cdy_tail)
             tj, tj_tail = two_product(cdx_tail, bdy_tail)
-            bctt[3], bctt[2], bctt[1], bctt[0] = two_two_diff(ti, ti_tail,
-                                                              tj, tj_tail)
+            bctt = two_two_diff(ti, ti_tail, tj, tj_tail)
         else:
-            bct = [0.0]
-            bctt = [0.0]
+            bct = bctt = (0.0,)
 
         if adx_tail:
             temp16a = scale_expansion(axtbc, adx_tail)
@@ -271,21 +258,19 @@ def determinant_adapt(first_vertex: Point,
         if adx_tail or ady_tail or cdx_tail or cdy_tail:
             ti, ti_tail = two_product(cdx_tail, ady)
             tj, tj_tail = two_product(cdx, ady_tail)
-            u[3], u[2], u[1], u[0] = two_two_sum(ti, ti_tail, tj, tj_tail)
+            u = two_two_sum(ti, ti_tail, tj, tj_tail)
             negate = -cdy
             ti, ti_tail = two_product(adx_tail, negate)
             negate = -cdy_tail
             tj, tj_tail = two_product(adx, negate)
-            v[3], v[2], v[1], v[0] = two_two_sum(ti, ti_tail, tj, tj_tail)
+            v = two_two_sum(ti, ti_tail, tj, tj_tail)
             cat = sum_expansions(u, v)
 
             ti, ti_tail = two_product(cdx_tail, ady_tail)
             tj, tj_tail = two_product(adx_tail, cdy_tail)
-            catt[3], catt[2], catt[1], catt[0] = two_two_diff(ti, ti_tail, tj,
-                                                              tj_tail)
+            catt = two_two_diff(ti, ti_tail, tj, tj_tail)
         else:
-            cat = [0.0]
-            catt = [0.0]
+            cat = catt = (0.0,)
 
         if bdx_tail:
             temp16a = scale_expansion(bxtca, bdx_tail)
@@ -330,22 +315,20 @@ def determinant_adapt(first_vertex: Point,
         if adx_tail or ady_tail or bdx_tail or bdy_tail:
             ti, ti_tail = two_product(adx_tail, bdy)
             tj, tj_tail = two_product(adx, bdy_tail)
-            u[3], u[2], u[1], u[0] = two_two_sum(ti, ti_tail, tj, tj_tail)
+            u = two_two_sum(ti, ti_tail, tj, tj_tail)
             negate = -ady
             ti, ti_tail = two_product(bdx_tail, negate)
             negate = -ady_tail
             tj, tj_tail = two_product(bdx, negate)
-            v[3], v[2], v[1], v[0] = two_two_sum(ti, ti_tail, tj, tj_tail)
+            v = two_two_sum(ti, ti_tail, tj, tj_tail)
 
             abt = sum_expansions(u, v)
 
             ti, ti_tail = two_product(adx_tail, bdy_tail)
             tj, tj_tail = two_product(bdx_tail, ady_tail)
-            abtt[3], abtt[2], abtt[1], abtt[0] = two_two_diff(ti, ti_tail,
-                                                              tj, tj_tail)
+            abtt = two_two_diff(ti, ti_tail, tj, tj_tail)
         else:
-            abt = [0.0]
-            abtt = [0.0]
+            abt = abtt = (0.0,)
 
         if cdx_tail:
             temp16a = scale_expansion(cxtab, cdx_tail)
