@@ -11,14 +11,14 @@ def fast_two_sum(left: float, right: float) -> Tuple[float, float]:
     return result, tail
 
 
-def two_sum(a: float, b: float) -> Tuple[float, float]:
-    x = (a + b)
-    b_virtual = x - a
-    a_virtual = x - b_virtual
-    b_roundoff = b - b_virtual
-    a_roundoff = a - a_virtual
-    y = a_roundoff + b_roundoff
-    return x, y
+def two_sum(left: float, right: float) -> Tuple[float, float]:
+    result = left + right
+    right_virtual = result - left
+    left_virtual = result - right_virtual
+    right_roundoff = right - right_virtual
+    left_roundoff = left - left_virtual
+    tail = left_roundoff + right_roundoff
+    return result, tail
 
 
 def split(a: float) -> Tuple[float, float]:
