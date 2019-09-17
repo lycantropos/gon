@@ -13,38 +13,28 @@ def determinant(first_vertex: Point,
                 second_vertex: Point,
                 third_vertex: Point,
                 point: Point) -> float:
-    adx = first_vertex.x - point.x
-    bdx = second_vertex.x - point.x
-    cdx = third_vertex.x - point.x
-    ady = first_vertex.y - point.y
-    bdy = second_vertex.y - point.y
-    cdy = third_vertex.y - point.y
+    adx, ady = first_vertex.x - point.x, first_vertex.y - point.y
+    bdx, bdy = second_vertex.x - point.x, second_vertex.y - point.y
+    cdx, cdy = third_vertex.x - point.x, third_vertex.y - point.y
 
-    bdxcdy = bdx * cdy
-    cdxbdy = cdx * bdy
-    alift = adx * adx + ady * ady
+    adx_bdy, adx_cdy = adx * bdy, adx * cdy
+    bdx_ady, bdx_cdy = bdx * ady, bdx * cdy
+    cdx_ady, cdx_bdy = cdx * ady, cdx * bdy
 
-    cdxady = cdx * ady
-    adxcdy = adx * cdy
-    blift = bdx * bdx + bdy * bdy
+    a_lift = adx * adx + ady * ady
+    b_lift = bdx * bdx + bdy * bdy
+    c_lift = cdx * cdx + cdy * cdy
 
-    adxbdy = adx * bdy
-    bdxady = bdx * ady
-    clift = cdx * cdx + cdy * cdy
-
-    det = (alift * (bdxcdy - cdxbdy)
-           + blift * (cdxady - adxcdy)
-           + clift * (adxbdy - bdxady))
-    permanent = ((abs(bdxcdy) + abs(cdxbdy)) * alift
-                 + (abs(cdxady) + abs(adxcdy)) * blift
-                 + (abs(adxbdy) + abs(bdxady)) * clift)
+    det = (a_lift * (bdx_cdy - cdx_bdy)
+           + b_lift * (cdx_ady - adx_cdy)
+           + c_lift * (adx_bdy - bdx_ady))
+    permanent = ((abs(bdx_cdy) + abs(cdx_bdy)) * a_lift
+                 + (abs(cdx_ady) + abs(adx_cdy)) * b_lift
+                 + (abs(adx_bdy) + abs(bdx_ady)) * c_lift)
     error_bound = bounds.to_circumcircle_error_a(permanent)
-    if (det > error_bound) or (-det > error_bound):
+    if det > error_bound or -det > error_bound:
         return det
-    return determinant_adapt(first_vertex,
-                             second_vertex,
-                             third_vertex,
-                             point,
+    return determinant_adapt(first_vertex, second_vertex, third_vertex, point,
                              permanent)
 
 
