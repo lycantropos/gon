@@ -50,10 +50,11 @@ def two_product(left: float, right: float) -> Tuple[float, float]:
     return result, tail
 
 
-def two_two_diff(a1: float, a0: float,
-                 b1: float, b0: float) -> Tuple[float, float, float, float]:
-    _j, _0, x0 = two_one_diff(a1, a0, b0)
-    x3, x2, x1 = two_one_diff(_j, _0, b1)
+def two_two_diff(left: float, left_tail: float,
+                 right: float, right_tail: float
+                 ) -> Tuple[float, float, float, float]:
+    _j, _0, x0 = two_one_diff(left, left_tail, right_tail)
+    x3, x2, x1 = two_one_diff(_j, _0, right)
     return x3, x2, x1, x0
 
 
