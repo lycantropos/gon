@@ -75,19 +75,19 @@ def determinant_adapt(first_coordinates: Point,
     if (det >= error_bound) or (-det >= error_bound):
         return det
 
-    s1, s0 = two_product(acx_tail, bcy)
-    t1, t0 = two_product(acy_tail, bcx)
+    s, s_tail = two_product(acx_tail, bcy)
+    t, t_tail = two_product(acy_tail, bcx)
     u = [0] * 4
-    u[3], u[2], u[1], u[0] = two_two_diff(s1, s0, t1, t0)
+    u[3], u[2], u[1], u[0] = two_two_diff(s, s_tail, t, t_tail)
 
     c1 = sum_expansions(b, u)
 
-    s1, s0 = two_product(acx, bcy_tail)
-    t1, t0 = two_product(acy, bcx_tail)
-    u[3], u[2], u[1], u[0] = two_two_diff(s1, s0, t1, t0)
+    s, s_tail = two_product(acx, bcy_tail)
+    t, t_tail = two_product(acy, bcx_tail)
+    u[3], u[2], u[1], u[0] = two_two_diff(s, s_tail, t, t_tail)
     c2 = sum_expansions(c1, u)
 
-    s1, s0 = two_product(acx_tail, bcy_tail)
-    t1, t0 = two_product(acy_tail, bcx_tail)
-    u[3], u[2], u[1], u[0] = two_two_diff(s1, s0, t1, t0)
+    s, s_tail = two_product(acx_tail, bcy_tail)
+    t, t_tail = two_product(acy_tail, bcx_tail)
+    u[3], u[2], u[1], u[0] = two_two_diff(s, s_tail, t, t_tail)
     return sum_expansions(c2, u)[-1]
