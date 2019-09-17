@@ -40,8 +40,6 @@ def determinant_adapt(first_coordinates: Point,
                       second_coordinates: Point,
                       third_coordinates: Point,
                       det_sum: float) -> float:
-    b = [0] * 4
-
     acx = first_coordinates.x - third_coordinates.x
     bcx = second_coordinates.x - third_coordinates.x
     acy = first_coordinates.y - third_coordinates.y
@@ -50,9 +48,7 @@ def determinant_adapt(first_coordinates: Point,
     det_left, det_left_tail = two_product(acx, bcy)
     det_right, det_right_tail = two_product(acy, bcx)
 
-    b[3], b[2], b[1], b[0] = two_two_diff(det_left, det_left_tail,
-                                          det_right, det_right_tail)
-
+    b = two_two_diff(det_left, det_left_tail, det_right, det_right_tail)
     det = sum(b)
     error_bound = bounds.to_counterclockwise_error_b(det_sum)
     if (det >= error_bound) or (-det >= error_bound):
@@ -77,17 +73,15 @@ def determinant_adapt(first_coordinates: Point,
 
     s, s_tail = two_product(acx_tail, bcy)
     t, t_tail = two_product(acy_tail, bcx)
-    u = [0] * 4
-    u[3], u[2], u[1], u[0] = two_two_diff(s, s_tail, t, t_tail)
-
+    u = two_two_diff(s, s_tail, t, t_tail)
     c1 = sum_expansions(b, u)
 
     s, s_tail = two_product(acx, bcy_tail)
     t, t_tail = two_product(acy, bcx_tail)
-    u[3], u[2], u[1], u[0] = two_two_diff(s, s_tail, t, t_tail)
+    u = two_two_diff(s, s_tail, t, t_tail)
     c2 = sum_expansions(c1, u)
 
     s, s_tail = two_product(acx_tail, bcy_tail)
     t, t_tail = two_product(acy_tail, bcx_tail)
-    u[3], u[2], u[1], u[0] = two_two_diff(s, s_tail, t, t_tail)
+    u = two_two_diff(s, s_tail, t, t_tail)
     return sum_expansions(c2, u)[-1]
