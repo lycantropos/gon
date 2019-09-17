@@ -40,15 +40,15 @@ def two_product_presplit(a: float, b: float,
     return result, tail
 
 
-def two_product(a: float, b: float) -> Tuple[float, float]:
-    x = a * b
-    a_hi, a_lo = split(a)
-    b_hi, b_lo = split(b)
-    first_error = x - a_hi * b_hi
-    second_error = first_error - a_lo * b_hi
-    third_error = second_error - a_hi * b_lo
-    y = a_lo * b_lo - third_error
-    return x, y
+def two_product(left: float, right: float) -> Tuple[float, float]:
+    result = left * right
+    left_hi, left_lo = split(left)
+    right_hi, right_lo = split(right)
+    first_error = result - left_hi * right_hi
+    second_error = first_error - left_lo * right_hi
+    third_error = second_error - left_hi * right_lo
+    tail = left_lo * right_lo - third_error
+    return result, tail
 
 
 def two_two_diff(a1: float, a0: float,
