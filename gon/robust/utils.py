@@ -93,13 +93,13 @@ def two_diff_tail(left: float, right: float, diff: float) -> float:
     return left_roundoff + right_roundoff
 
 
-def square(a: float) -> Tuple[float, float]:
-    x = a * a
-    ahi, alo = split(a)
-    err1 = x - ahi * ahi
-    err3 = err1 - (ahi + ahi) * alo
-    y = alo * alo - err3
-    return x, y
+def square(value: float) -> Tuple[float, float]:
+    result = value * value
+    value_hi, value_lo = split(value)
+    first_error = result - value_hi * value_hi
+    second_error = first_error - (value_hi + value_hi) * value_lo
+    tail = value_lo * value_lo - second_error
+    return result, tail
 
 
 Expansion = Sequence[float]
