@@ -4,7 +4,8 @@ from enum import (IntEnum,
                   unique)
 from operator import (attrgetter,
                       itemgetter)
-from typing import (Sequence,
+from typing import (Iterable,
+                    Sequence,
                     Tuple)
 
 from lz.functional import compose
@@ -218,8 +219,16 @@ class SimplePolygon(Polygon):
         >>> polygon.area == 4
         True
         """
-        return abs(sum(edge.start.x * edge.end.y - edge.start.y * edge.end.x
-                       for edge in to_edges(self._vertices))) / 2
+        minuends_proper_fractions, minuends_improper_fractions = (
+            _split_fractions(edge.start.x * edge.end.y
+                             for edge in to_edges(self._vertices)))
+        subtrahends_proper_fractions, subtrahends_improper_fractions = (
+            _split_fractions(edge.start.y * edge.end.x
+                             for edge in to_edges(self._vertices)))
+        return abs((sum(minuends_improper_fractions)
+                    - sum(subtrahends_improper_fractions))
+                   + (sum(minuends_proper_fractions)
+                      - sum(subtrahends_proper_fractions))) / 2
 
     @cached.property_
     def convex_hull(self) -> Polygon:
@@ -287,6 +296,17 @@ class SimplePolygon(Polygon):
                 for vertices in triangular.constrained_delaunay_vertices(
                     self._vertices,
                     boundary=tuple(to_edges(self._vertices)))]
+
+
+def _split_fractions(components: Iterable[Scalar]
+                     ) -> Tuple[Iterable[Scalar], Iterable[Scalar]]:
+    proper_fractions, improper_fractions = [], []
+    for component in components:
+        if abs(component) < 1:
+            proper_fractions.append(component)
+        else:
+            improper_fractions.append(component)
+    return proper_fractions, improper_fractions
 
 
 def _is_point_to_the_left_of_line(point: Point, line_segment: Segment) -> bool:
