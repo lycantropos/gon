@@ -22,6 +22,7 @@ def test_determinism(point: Point) -> None:
 
 @given(strategies.points, strategies.points)
 @example(Point(-1.0, -1.0), Point(2.0, 2.0))
+@example(Point(0.0, 0.0), Point(0.0, 0.5))
 def test_connection_with_equality(left_point: Point,
                                   right_point: Point) -> None:
     assert equivalence(left_point == right_point,
