@@ -29,7 +29,7 @@ def determinant(vertex: Point,
         return det
 
     error_bound = bounds.to_counterclockwise_error_a(det_sum)
-    if (det >= error_bound) or (-det >= error_bound):
+    if det >= error_bound or -det >= error_bound:
         return det
 
     return determinant_adapt(vertex, first_ray_point,
