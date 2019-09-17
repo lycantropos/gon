@@ -73,9 +73,10 @@ def two_one_sum(left: float, left_tail: float,
     return x2, x1, x0
 
 
-def two_one_diff(a1: float, a0: float, b: float) -> Tuple[float, float, float]:
-    _i, x0 = two_diff(a0, b)
-    x2, x1 = two_sum(a1, _i)
+def two_one_diff(left: float, left_tail: float,
+                 right: float) -> Tuple[float, float, float]:
+    _i, x0 = two_diff(left_tail, right)
+    x2, x1 = two_sum(left, _i)
     return x2, x1, x0
 
 
