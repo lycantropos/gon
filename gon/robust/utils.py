@@ -66,9 +66,10 @@ def two_two_sum(left: float, left_tail: float,
     return x3, x2, x1, x0
 
 
-def two_one_sum(a1: float, a0: float, b: float) -> Tuple[float, float, float]:
-    _i, x0 = two_sum(a0, b)
-    x2, x1 = two_sum(a1, _i)
+def two_one_sum(left: float, left_tail: float,
+                right: float) -> Tuple[float, float, float]:
+    _i, x0 = two_sum(left_tail, right)
+    x2, x1 = two_sum(left, _i)
     return x2, x1, x0
 
 
