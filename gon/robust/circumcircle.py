@@ -55,433 +55,344 @@ def determinant_adapt(first_vertex: Point,
     bctt = [0.0] * 4
     catt = [0.0] * 4
 
-    adx = first_vertex.x - point.x
-    bdx = second_vertex.x - point.x
-    cdx = third_vertex.x - point.x
-    ady = first_vertex.y - point.y
-    bdy = second_vertex.y - point.y
-    cdy = third_vertex.y - point.y
+    adx, ady = first_vertex.x - point.x, first_vertex.y - point.y
+    bdx, bdy = second_vertex.x - point.x, second_vertex.y - point.y
+    cdx, cdy = third_vertex.x - point.x, third_vertex.y - point.y
 
-    bdxcdy1, bdxcdy0 = two_product(bdx, cdy)
-    cdxbdy1, cdxbdy0 = two_product(cdx, bdy)
-    bc[3], bc[2], bc[1], bc[0] = two_two_diff(bdxcdy1, bdxcdy0,
-                                              cdxbdy1, cdxbdy0)
+    bdx_cdy, bdx_cdy_tail = two_product(bdx, cdy)
+    cdx_bdy, cdx_bdy_tail = two_product(cdx, bdy)
+    bc[3], bc[2], bc[1], bc[0] = two_two_diff(bdx_cdy, bdx_cdy_tail,
+                                              cdx_bdy, cdx_bdy_tail)
 
     axbc = scale_expansion(bc, adx)
     axxbc = scale_expansion(axbc, adx)
     aybc = scale_expansion(bc, ady)
     ayybc = scale_expansion(aybc, ady)
-    adet = sum_expansions(axxbc, ayybc)
+    a_det = sum_expansions(axxbc, ayybc)
 
-    cdxady1, cdxady0 = two_product(cdx, ady)
-    adxcdy1, adxcdy0 = two_product(adx, cdy)
+    cdx_ady, cdx_ady_tail = two_product(cdx, ady)
+    adx_cdy, adx_cdy_tail = two_product(adx, cdy)
 
-    ca[3], ca[2], ca[1], ca[0] = two_two_diff(cdxady1, cdxady0,
-                                              adxcdy1, adxcdy0)
+    ca[3], ca[2], ca[1], ca[0] = two_two_diff(cdx_ady, cdx_ady_tail,
+                                              adx_cdy, adx_cdy_tail)
 
     bxca = scale_expansion(ca, bdx)
     bxxca = scale_expansion(bxca, bdx)
     byca = scale_expansion(ca, bdy)
     byyca = scale_expansion(byca, bdy)
-    bdet = sum_expansions(bxxca, byyca)
+    b_det = sum_expansions(bxxca, byyca)
 
-    adxbdy1, adxbdy0 = two_product(adx, bdy)
-    bdxady1, bdxady0 = two_product(bdx, ady)
-    ab[3], ab[2], ab[1], ab[0] = two_two_diff(adxbdy1, adxbdy0,
-                                              bdxady1, bdxady0)
+    adx_bdy, adx_bdy_tail = two_product(adx, bdy)
+    bdx_ady, bdx_ady_tail = two_product(bdx, ady)
+    ab[3], ab[2], ab[1], ab[0] = two_two_diff(adx_bdy, adx_bdy_tail,
+                                              bdx_ady, bdx_ady_tail)
 
     cxab = scale_expansion(ab, cdx)
     cxxab = scale_expansion(cxab, cdx)
     cyab = scale_expansion(ab, cdy)
     cyyab = scale_expansion(cyab, cdy)
-    cdet = sum_expansions(cxxab, cyyab)
+    c_det = sum_expansions(cxxab, cyyab)
 
-    abdet = sum_expansions(adet, bdet)
-    fin1 = sum_expansions(abdet, cdet)
+    result_expansion = sum_expansions(sum_expansions(a_det, b_det), c_det)
 
-    det = sum(fin1)
+    det = sum(result_expansion)
     error_bound = bounds.to_circumcircle_error_b(permanent)
-    if (det >= error_bound) or (-det >= error_bound):
+    if det >= error_bound or -det >= error_bound:
         return det
 
-    adxtail = two_diff_tail(first_vertex.x, point.x,
-                            adx)
-    adytail = two_diff_tail(first_vertex.y, point.y,
-                            ady)
-    bdxtail = two_diff_tail(second_vertex.x, point.x,
-                            bdx)
-    bdytail = two_diff_tail(second_vertex.y, point.y,
-                            bdy)
-    cdxtail = two_diff_tail(third_vertex.x, point.x,
-                            cdx)
-    cdytail = two_diff_tail(third_vertex.y, point.y,
-                            cdy)
+    adx_tail = two_diff_tail(first_vertex.x, point.x, adx)
+    ady_tail = two_diff_tail(first_vertex.y, point.y, ady)
+    bdx_tail = two_diff_tail(second_vertex.x, point.x, bdx)
+    bdy_tail = two_diff_tail(second_vertex.y, point.y, bdy)
+    cdx_tail = two_diff_tail(third_vertex.x, point.x, cdx)
+    cdy_tail = two_diff_tail(third_vertex.y, point.y, cdy)
 
-    if ((adxtail == 0.0) and (bdxtail == 0.0) and (cdxtail == 0.0)
-            and (adytail == 0.0) and (bdytail == 0.0) and (cdytail == 0.0)):
+    if (not adx_tail and not ady_tail
+            and not bdx_tail and not bdy_tail
+            and not cdx_tail and not cdy_tail):
         return det
 
     error_bound = (bounds.to_circumcircle_error_c(permanent)
                    + bounds.to_determinant_error(det))
 
-    det += (((adx * adx + ady * ady) * ((bdx * cdytail + cdy * bdxtail)
-                                        - (bdy * cdxtail + cdx * bdytail))
-             + 2.0 * (adx * adxtail + ady * adytail) * (bdx * cdy - bdy * cdx))
-            + ((bdx * bdx + bdy * bdy) * ((cdx * adytail + ady * cdxtail)
-                                          - (cdy * adxtail + adx * cdytail))
-               + 2.0 * (bdx * bdxtail + bdy * bdytail) * (
-                       cdx * ady - cdy * adx))
-            + ((cdx * cdx + cdy * cdy) * ((adx * bdytail + bdy * adxtail)
-                                          - (ady * bdxtail + bdx * adytail))
-               + 2.0 * (cdx * cdxtail + cdy * cdytail) * (
-                       adx * bdy - ady * bdx)))
+    det += (((adx * adx + ady * ady) * ((bdx * cdy_tail + cdy * bdx_tail)
+                                        - (bdy * cdx_tail + cdx * bdy_tail))
+             + 2.0 * (adx * adx_tail + ady * ady_tail)
+             * (bdx * cdy - bdy * cdx))
+            + ((bdx * bdx + bdy * bdy) * ((cdx * ady_tail + ady * cdx_tail)
+                                          - (cdy * adx_tail + adx * cdy_tail))
+               + 2.0 * (bdx * bdx_tail + bdy * bdy_tail)
+               * (cdx * ady - cdy * adx))
+            + ((cdx * cdx + cdy * cdy) * ((adx * bdy_tail + bdy * adx_tail)
+                                          - (ady * bdx_tail + bdx * ady_tail))
+               + 2.0 * (cdx * cdx_tail + cdy * cdy_tail)
+               * (adx * bdy - ady * bdx)))
 
-    if (det >= error_bound) or (-det >= error_bound):
+    if det >= error_bound or -det >= error_bound:
         return det
 
-    finnow = fin1
+    if bdx_tail or bdy_tail or cdx_tail or cdy_tail:
+        adx_squared, adx_squared_tail = square(adx)
+        ady_squared, ady_squared_tail = square(ady)
+        aa[3], aa[2], aa[1], aa[0] = two_two_sum(adx_squared, adx_squared_tail,
+                                                 ady_squared, ady_squared_tail)
 
-    if ((bdxtail != 0.0) or (bdytail != 0.0)
-            or (cdxtail != 0.0) or (cdytail != 0.0)):
-        adxadx1, adxadx0 = square(adx)
-        adyady1, adyady0 = square(ady)
-        aa[3], aa[2], aa[1], aa[0] = two_two_sum(adxadx1, adxadx0,
-                                                 adyady1, adyady0)
+    if adx_tail or ady_tail or cdx_tail or cdy_tail:
+        bdx_squared, bdx_squared_tail = square(bdx)
+        bdy_squared, bdy_squared_tail = square(bdy)
+        bb[3], bb[2], bb[1], bb[0] = two_two_sum(bdx_squared, bdx_squared_tail,
+                                                 bdy_squared, bdy_squared_tail)
 
-    if ((cdxtail != 0.0) or (cdytail != 0.0)
-            or (adxtail != 0.0) or (adytail != 0.0)):
-        bdxbdx1, bdxbdx0 = square(bdx)
-        bdybdy1, bdybdy0 = square(bdy)
-        bb[3], bb[2], bb[1], bb[0] = two_two_sum(bdxbdx1, bdxbdx0,
-                                                 bdybdy1, bdybdy0)
+    if adx_tail or ady_tail or bdx_tail or bdy_tail:
+        cdx_squared, cdx_squared_tail = square(cdx)
+        cdy_squared, cdy_squared_tail = square(cdy)
+        cc[3], cc[2], cc[1], cc[0] = two_two_sum(cdx_squared, cdx_squared_tail,
+                                                 cdy_squared, cdy_squared_tail)
 
-    if ((adxtail != 0.0) or (adytail != 0.0)
-            or (bdxtail != 0.0) or (bdytail != 0.0)):
-        cdxcdx1, cdxcdx0 = square(cdx)
-        cdycdy1, cdycdy0 = square(cdy)
-        cc[3], cc[2], cc[1], cc[0] = two_two_sum(cdxcdx1, cdxcdx0,
-                                                 cdycdy1, cdycdy0)
-
-    if adxtail != 0.0:
-        axtbc = scale_expansion(bc, adxtail)
+    if adx_tail:
+        axtbc = scale_expansion(bc, adx_tail)
         temp16a = scale_expansion(axtbc, 2.0 * adx)
-
-        axtcc = scale_expansion(cc, adxtail)
+        axtcc = scale_expansion(cc, adx_tail)
         temp16b = scale_expansion(axtcc, bdy)
-
-        axtbb = scale_expansion(bb, adxtail)
+        axtbb = scale_expansion(bb, adx_tail)
         temp16c = scale_expansion(axtbb, -cdy)
-
         temp32a = sum_expansions(temp16a, temp16b)
         temp48 = sum_expansions(temp16c, temp32a)
-        finother = sum_expansions(finnow, temp48)
-        finnow, finother = finother, finnow
+        result_expansion = sum_expansions(result_expansion, temp48)
 
-    if adytail != 0.0:
-        aytbc = scale_expansion(bc, adytail)
+    if ady_tail:
+        aytbc = scale_expansion(bc, ady_tail)
         temp16a = scale_expansion(aytbc, 2.0 * ady)
-
-        aytbb = scale_expansion(bb, adytail)
-
+        aytbb = scale_expansion(bb, ady_tail)
         temp16b = scale_expansion(aytbb, cdx)
-
-        aytcc = scale_expansion(cc, adytail)
-
+        aytcc = scale_expansion(cc, ady_tail)
         temp16c = scale_expansion(aytcc, -bdx)
-
         temp32a = sum_expansions(temp16a, temp16b)
         temp48 = sum_expansions(temp16c, temp32a)
+        result_expansion = sum_expansions(result_expansion, temp48)
 
-        finother = sum_expansions(finnow,
-                                  temp48)
-        finnow, finother = finother, finnow
-
-    if bdxtail != 0.0:
-        bxtca = scale_expansion(ca, bdxtail)
-
+    if bdx_tail:
+        bxtca = scale_expansion(ca, bdx_tail)
         temp16a = scale_expansion(bxtca, 2.0 * bdx)
-
-        bxtaa = scale_expansion(aa, bdxtail)
+        bxtaa = scale_expansion(aa, bdx_tail)
         temp16b = scale_expansion(bxtaa, cdy)
-
-        bxtcc = scale_expansion(cc, bdxtail)
+        bxtcc = scale_expansion(cc, bdx_tail)
         temp16c = scale_expansion(bxtcc, -ady)
-
         temp32a = sum_expansions(temp16a, temp16b)
         temp48 = sum_expansions(temp16c, temp32a)
-        finother = sum_expansions(finnow,
-                                  temp48)
-        finnow, finother = finother, finnow
+        result_expansion = sum_expansions(result_expansion, temp48)
 
-    if bdytail != 0.0:
-        bytca = scale_expansion(ca, bdytail)
-
+    if bdy_tail:
+        bytca = scale_expansion(ca, bdy_tail)
         temp16a = scale_expansion(bytca, 2.0 * bdy)
-
-        bytcc = scale_expansion(cc, bdytail)
+        bytcc = scale_expansion(cc, bdy_tail)
         temp16b = scale_expansion(bytcc, adx)
-
-        bytaa = scale_expansion(aa, bdytail)
+        bytaa = scale_expansion(aa, bdy_tail)
         temp16c = scale_expansion(bytaa, -cdx)
-
         temp32a = sum_expansions(temp16a, temp16b)
         temp48 = sum_expansions(temp16c, temp32a)
-        finother = sum_expansions(finnow,
-                                  temp48)
-        finnow, finother = finother, finnow
+        result_expansion = sum_expansions(result_expansion, temp48)
 
-    if cdxtail != 0.0:
-        cxtab = scale_expansion(ab, cdxtail)
-
+    if cdx_tail:
+        cxtab = scale_expansion(ab, cdx_tail)
         temp16a = scale_expansion(cxtab, 2.0 * cdx)
-
-        cxtbb = scale_expansion(bb, cdxtail)
+        cxtbb = scale_expansion(bb, cdx_tail)
         temp16b = scale_expansion(cxtbb, ady)
-
-        cxtaa = scale_expansion(aa, cdxtail)
+        cxtaa = scale_expansion(aa, cdx_tail)
         temp16c = scale_expansion(cxtaa, -bdy)
-
         temp32a = sum_expansions(temp16a, temp16b)
         temp48 = sum_expansions(temp16c, temp32a)
-        finother = sum_expansions(finnow,
-                                  temp48)
-        finnow, finother = finother, finnow
+        result_expansion = sum_expansions(result_expansion, temp48)
 
-    if cdytail != 0.0:
-        cytab = scale_expansion(ab, cdytail)
-
+    if cdy_tail:
+        cytab = scale_expansion(ab, cdy_tail)
         temp16a = scale_expansion(cytab, 2.0 * cdy)
-
-        cytaa = scale_expansion(aa, cdytail)
+        cytaa = scale_expansion(aa, cdy_tail)
         temp16b = scale_expansion(cytaa, bdx)
-
-        cytbb = scale_expansion(bb, cdytail)
+        cytbb = scale_expansion(bb, cdy_tail)
         temp16c = scale_expansion(cytbb, -adx)
-
         temp32a = sum_expansions(temp16a, temp16b)
         temp48 = sum_expansions(temp16c, temp32a)
-        finother = sum_expansions(finnow,
-                                  temp48)
-        finnow, finother = finother, finnow
+        result_expansion = sum_expansions(result_expansion, temp48)
 
-    if (adxtail != 0.0) or (adytail != 0.0):
-        if ((bdxtail != 0.0) or (bdytail != 0.0)
-                or (cdxtail != 0.0) or (cdytail != 0.0)):
-            ti1, ti0 = two_product(bdxtail, cdy)
-            tj1, tj0 = two_product(bdx, cdytail)
-            u[3], u[2], u[1], u[0] = two_two_sum(ti1, ti0, tj1, tj0)
+    if adx_tail or ady_tail:
+        if bdx_tail or bdy_tail or cdx_tail or cdy_tail:
+            ti, ti_tail = two_product(bdx_tail, cdy)
+            tj, tj_tail = two_product(bdx, cdy_tail)
+            u[3], u[2], u[1], u[0] = two_two_sum(ti, ti_tail, tj, tj_tail)
 
             negate = -bdy
-            ti1, ti0 = two_product(cdxtail, negate)
-            negate = -bdytail
-            tj1, tj0 = two_product(cdx, negate)
-            v[3], v[2], v[1], v[0] = two_two_sum(ti1, ti0, tj1, tj0)
+            ti, ti_tail = two_product(cdx_tail, negate)
+            negate = -bdy_tail
+            tj, tj_tail = two_product(cdx, negate)
+            v[3], v[2], v[1], v[0] = two_two_sum(ti, ti_tail, tj, tj_tail)
 
             bct = sum_expansions(u, v)
 
-            ti1, ti0 = two_product(bdxtail, cdytail)
-            tj1, tj0 = two_product(cdxtail, bdytail)
-            bctt[3], bctt[2], bctt[1], bctt[0] = two_two_diff(ti1, ti0, tj1,
-                                                              tj0)
+            ti, ti_tail = two_product(bdx_tail, cdy_tail)
+            tj, tj_tail = two_product(cdx_tail, bdy_tail)
+            bctt[3], bctt[2], bctt[1], bctt[0] = two_two_diff(ti, ti_tail,
+                                                              tj, tj_tail)
         else:
             bct = [0.0]
             bctt = [0.0]
 
-        if adxtail != 0.0:
-            temp16a = scale_expansion(axtbc, adxtail)
-            axtbct = scale_expansion(bct, adxtail)
-
+        if adx_tail:
+            temp16a = scale_expansion(axtbc, adx_tail)
+            axtbct = scale_expansion(bct, adx_tail)
             temp32a = scale_expansion(axtbct, 2.0 * adx)
             temp48 = sum_expansions(temp16a, temp32a)
-            finother = sum_expansions(finnow, temp48)
-            finnow, finother = finother, finnow
+            result_expansion = sum_expansions(result_expansion, temp48)
 
-            if bdytail != 0.0:
-                temp8 = scale_expansion(cc, adxtail)
+            if bdy_tail:
+                temp8 = scale_expansion(cc, adx_tail)
+                temp16a = scale_expansion(temp8, bdy_tail)
+                result_expansion = sum_expansions(result_expansion, temp16a)
 
-                temp16a = scale_expansion(temp8, bdytail)
-                finother = sum_expansions(finnow, temp16a)
-                finnow, finother = finother, finnow
+            if cdy_tail:
+                temp8 = scale_expansion(bb, -adx_tail)
+                temp16a = scale_expansion(temp8, cdy_tail)
+                result_expansion = sum_expansions(result_expansion, temp16a)
 
-            if cdytail != 0.0:
-                temp8 = scale_expansion(bb, -adxtail)
-                temp16a = scale_expansion(temp8, cdytail)
-                finother = sum_expansions(finnow, temp16a)
-                finnow, finother = finother, finnow
-
-            temp32a = scale_expansion(axtbct, adxtail)
-            axtbctt = scale_expansion(bctt, adxtail)
-
+            temp32a = scale_expansion(axtbct, adx_tail)
+            axtbctt = scale_expansion(bctt, adx_tail)
             temp16a = scale_expansion(axtbctt, 2.0 * adx)
-
-            temp16b = scale_expansion(axtbctt, adxtail)
+            temp16b = scale_expansion(axtbctt, adx_tail)
             temp32b = sum_expansions(temp16a, temp16b)
             temp64 = sum_expansions(temp32a, temp32b)
-            finother = sum_expansions(finnow, temp64)
-            finnow, finother = finother, finnow
+            result_expansion = sum_expansions(result_expansion, temp64)
 
-        if adytail != 0.0:
-            temp16a = scale_expansion(aytbc, adytail)
-            aytbct = scale_expansion(bct, adytail)
-
+        if ady_tail:
+            temp16a = scale_expansion(aytbc, ady_tail)
+            aytbct = scale_expansion(bct, ady_tail)
             temp32a = scale_expansion(aytbct, 2.0 * ady)
             temp48 = sum_expansions(temp16a, temp32a)
-            finother = sum_expansions(finnow, temp48)
-            finnow, finother = finother, finnow
+            result_expansion = sum_expansions(result_expansion, temp48)
 
-            temp32a = scale_expansion(aytbct, adytail)
-            aytbctt = scale_expansion(bctt, adytail)
-
+            temp32a = scale_expansion(aytbct, ady_tail)
+            aytbctt = scale_expansion(bctt, ady_tail)
             temp16a = scale_expansion(aytbctt, 2.0 * ady)
-
-            temp16b = scale_expansion(aytbctt, adytail)
+            temp16b = scale_expansion(aytbctt, ady_tail)
             temp32b = sum_expansions(temp16a, temp16b)
             temp64 = sum_expansions(temp32a, temp32b)
-            finother = sum_expansions(finnow, temp64)
-            finnow, finother = finother, finnow
+            result_expansion = sum_expansions(result_expansion, temp64)
 
-    if (bdxtail != 0.0) or (bdytail != 0.0):
-        if ((cdxtail != 0.0) or (cdytail != 0.0)
-                or (adxtail != 0.0) or (adytail != 0.0)):
-            ti1, ti0 = two_product(cdxtail, ady)
-            tj1, tj0 = two_product(cdx, adytail)
-            u[3], u[2], u[1], u[0] = two_two_sum(ti1, ti0, tj1, tj0)
+    if bdx_tail or bdy_tail:
+        if adx_tail or ady_tail or cdx_tail or cdy_tail:
+            ti, ti_tail = two_product(cdx_tail, ady)
+            tj, tj_tail = two_product(cdx, ady_tail)
+            u[3], u[2], u[1], u[0] = two_two_sum(ti, ti_tail, tj, tj_tail)
             negate = -cdy
-            ti1, ti0 = two_product(adxtail, negate)
-            negate = -cdytail
-            tj1, tj0 = two_product(adx, negate)
-            v[3], v[2], v[1], v[0] = two_two_sum(ti1, ti0, tj1, tj0)
+            ti, ti_tail = two_product(adx_tail, negate)
+            negate = -cdy_tail
+            tj, tj_tail = two_product(adx, negate)
+            v[3], v[2], v[1], v[0] = two_two_sum(ti, ti_tail, tj, tj_tail)
             cat = sum_expansions(u, v)
 
-            ti1, ti0 = two_product(cdxtail, adytail)
-            tj1, tj0 = two_product(adxtail, cdytail)
-            catt[3], catt[2], catt[1], catt[0] = two_two_diff(ti1, ti0, tj1,
-                                                              tj0)
+            ti, ti_tail = two_product(cdx_tail, ady_tail)
+            tj, tj_tail = two_product(adx_tail, cdy_tail)
+            catt[3], catt[2], catt[1], catt[0] = two_two_diff(ti, ti_tail, tj,
+                                                              tj_tail)
         else:
             cat = [0.0]
             catt = [0.0]
 
-        if bdxtail != 0.0:
-            temp16a = scale_expansion(bxtca, bdxtail)
-            bxtcat = scale_expansion(cat, bdxtail)
-
+        if bdx_tail:
+            temp16a = scale_expansion(bxtca, bdx_tail)
+            bxtcat = scale_expansion(cat, bdx_tail)
             temp32a = scale_expansion(bxtcat, 2.0 * bdx)
             temp48 = sum_expansions(temp16a, temp32a)
-            finother = sum_expansions(finnow, temp48)
-            finnow, finother = finother, finnow
-            if cdytail != 0.0:
-                temp8 = scale_expansion(aa, bdxtail)
-                temp16a = scale_expansion(temp8, cdytail)
-                finother = sum_expansions(finnow, temp16a)
-                finnow, finother = finother, finnow
+            result_expansion = sum_expansions(result_expansion, temp48)
 
-            if adytail != 0.0:
-                temp8 = scale_expansion(cc, -bdxtail)
-                temp16a = scale_expansion(temp8, adytail)
-                finother = sum_expansions(finnow, temp16a)
-                finnow, finother = finother, finnow
+            if cdy_tail:
+                temp8 = scale_expansion(aa, bdx_tail)
+                temp16a = scale_expansion(temp8, cdy_tail)
+                result_expansion = sum_expansions(result_expansion, temp16a)
 
-            temp32a = scale_expansion(bxtcat, bdxtail)
-            bxtcatt = scale_expansion(catt, bdxtail)
+            if ady_tail:
+                temp8 = scale_expansion(cc, -bdx_tail)
+                temp16a = scale_expansion(temp8, ady_tail)
+                result_expansion = sum_expansions(result_expansion, temp16a)
 
+            temp32a = scale_expansion(bxtcat, bdx_tail)
+            bxtcatt = scale_expansion(catt, bdx_tail)
             temp16a = scale_expansion(bxtcatt, 2.0 * bdx)
-
-            temp16b = scale_expansion(bxtcatt, bdxtail)
+            temp16b = scale_expansion(bxtcatt, bdx_tail)
             temp32b = sum_expansions(temp16a, temp16b)
             temp64 = sum_expansions(temp32a, temp32b)
-            finother = sum_expansions(finnow, temp64)
-            finnow, finother = finother, finnow
+            result_expansion = sum_expansions(result_expansion, temp64)
 
-        if bdytail != 0.0:
-            temp16a = scale_expansion(bytca, bdytail)
-            bytcat = scale_expansion(cat, bdytail)
-
+        if bdy_tail:
+            temp16a = scale_expansion(bytca, bdy_tail)
+            bytcat = scale_expansion(cat, bdy_tail)
             temp32a = scale_expansion(bytcat, 2.0 * bdy)
             temp48 = sum_expansions(temp16a, temp32a)
-            finother = sum_expansions(finnow, temp48)
-            finnow, finother = finother, finnow
-
-            temp32a = scale_expansion(bytcat, bdytail)
-            bytcatt = scale_expansion(catt, bdytail)
-
+            result_expansion = sum_expansions(result_expansion, temp48)
+            temp32a = scale_expansion(bytcat, bdy_tail)
+            bytcatt = scale_expansion(catt, bdy_tail)
             temp16a = scale_expansion(bytcatt, 2.0 * bdy)
-
-            temp16b = scale_expansion(bytcatt, bdytail)
+            temp16b = scale_expansion(bytcatt, bdy_tail)
             temp32b = sum_expansions(temp16a, temp16b)
             temp64 = sum_expansions(temp32a, temp32b)
-            finother = sum_expansions(finnow, temp64)
-            finnow, finother = finother, finnow
+            result_expansion = sum_expansions(result_expansion, temp64)
 
-    if (cdxtail != 0.0) or (cdytail != 0.0):
-        if ((adxtail != 0.0) or (adytail != 0.0)
-                or (bdxtail != 0.0) or (bdytail != 0.0)):
-            ti1, ti0 = two_product(adxtail, bdy)
-            tj1, tj0 = two_product(adx, bdytail)
-            u[3], u[2], u[1], u[0] = two_two_sum(ti1, ti0, tj1, tj0)
+    if cdx_tail or cdy_tail:
+        if adx_tail or ady_tail or bdx_tail or bdy_tail:
+            ti, ti_tail = two_product(adx_tail, bdy)
+            tj, tj_tail = two_product(adx, bdy_tail)
+            u[3], u[2], u[1], u[0] = two_two_sum(ti, ti_tail, tj, tj_tail)
             negate = -ady
-            ti1, ti0 = two_product(bdxtail, negate)
-            negate = -adytail
-            tj1, tj0 = two_product(bdx, negate)
-            v[3], v[2], v[1], v[0] = two_two_sum(ti1, ti0, tj1, tj0)
+            ti, ti_tail = two_product(bdx_tail, negate)
+            negate = -ady_tail
+            tj, tj_tail = two_product(bdx, negate)
+            v[3], v[2], v[1], v[0] = two_two_sum(ti, ti_tail, tj, tj_tail)
 
             abt = sum_expansions(u, v)
 
-            ti1, ti0 = two_product(adxtail, bdytail)
-            tj1, tj0 = two_product(bdxtail, adytail)
-            abtt[3], abtt[2], abtt[1], abtt[0] = two_two_diff(ti1, ti0,
-                                                              tj1, tj0)
+            ti, ti_tail = two_product(adx_tail, bdy_tail)
+            tj, tj_tail = two_product(bdx_tail, ady_tail)
+            abtt[3], abtt[2], abtt[1], abtt[0] = two_two_diff(ti, ti_tail,
+                                                              tj, tj_tail)
         else:
             abt = [0.0]
             abtt = [0.0]
 
-        if cdxtail != 0.0:
-            temp16a = scale_expansion(cxtab, cdxtail)
-            cxtabt = scale_expansion(abt, cdxtail)
-
+        if cdx_tail:
+            temp16a = scale_expansion(cxtab, cdx_tail)
+            cxtabt = scale_expansion(abt, cdx_tail)
             temp32a = scale_expansion(cxtabt, 2.0 * cdx)
             temp48 = sum_expansions(temp16a, temp32a)
-            finother = sum_expansions(finnow, temp48)
-            finnow, finother = finother, finnow
-            if adytail != 0.0:
-                temp8 = scale_expansion(bb, cdxtail)
-                temp16a = scale_expansion(temp8, adytail)
-                finother = sum_expansions(finnow, temp16a)
-                finnow, finother = finother, finnow
+            result_expansion = sum_expansions(result_expansion, temp48)
 
-            if bdytail != 0.0:
-                temp8 = scale_expansion(aa, -cdxtail)
-                temp16a = scale_expansion(temp8, bdytail)
-                finother = sum_expansions(finnow, temp16a)
-                finnow, finother = finother, finnow
+            if ady_tail:
+                temp8 = scale_expansion(bb, cdx_tail)
+                temp16a = scale_expansion(temp8, ady_tail)
+                result_expansion = sum_expansions(result_expansion, temp16a)
 
-            temp32a = scale_expansion(cxtabt, cdxtail)
-            cxtabtt = scale_expansion(abtt, cdxtail)
+            if bdy_tail:
+                temp8 = scale_expansion(aa, -cdx_tail)
+                temp16a = scale_expansion(temp8, bdy_tail)
+                result_expansion = sum_expansions(result_expansion, temp16a)
 
+            temp32a = scale_expansion(cxtabt, cdx_tail)
+            cxtabtt = scale_expansion(abtt, cdx_tail)
             temp16a = scale_expansion(cxtabtt, 2.0 * cdx)
-
-            temp16b = scale_expansion(cxtabtt, cdxtail)
+            temp16b = scale_expansion(cxtabtt, cdx_tail)
             temp32b = sum_expansions(temp16a, temp16b)
             temp64 = sum_expansions(temp32a, temp32b)
-            finother = sum_expansions(finnow, temp64)
-            finnow, finother = finother, finnow
+            result_expansion = sum_expansions(result_expansion, temp64)
 
-        if cdytail != 0.0:
-            temp16a = scale_expansion(cytab, cdytail)
-            cytabt = scale_expansion(abt, cdytail)
-
+        if cdy_tail:
+            temp16a = scale_expansion(cytab, cdy_tail)
+            cytabt = scale_expansion(abt, cdy_tail)
             temp32a = scale_expansion(cytabt, 2.0 * cdy)
             temp48 = sum_expansions(temp16a, temp32a)
-            finother = sum_expansions(finnow, temp48)
-            finnow, finother = finother, finnow
-
-            temp32a = scale_expansion(cytabt, cdytail)
-            cytabtt = scale_expansion(abtt, cdytail)
-
+            result_expansion = sum_expansions(result_expansion, temp48)
+            temp32a = scale_expansion(cytabt, cdy_tail)
+            cytabtt = scale_expansion(abtt, cdy_tail)
             temp16a = scale_expansion(cytabtt, 2.0 * cdy)
-            temp16b = scale_expansion(cytabtt, cdytail)
+            temp16b = scale_expansion(cytabtt, cdy_tail)
             temp32b = sum_expansions(temp16a, temp16b)
             temp64 = sum_expansions(temp32a, temp32b)
-            finother = sum_expansions(finnow, temp64)
-            finnow, finother = finother, finnow
-
-    return finnow[-1]
+            result_expansion = sum_expansions(result_expansion, temp64)
+    return result_expansion[-1]
