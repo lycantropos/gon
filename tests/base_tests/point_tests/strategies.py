@@ -8,3 +8,4 @@ from tests.strategies import (points,
 valid_coordinates = scalars_strategies.flatmap(identity)
 invalid_coordinates = strategies.sampled_from([math.nan, math.inf, -math.inf])
 points = points
+non_points = strategies.builds(object)
