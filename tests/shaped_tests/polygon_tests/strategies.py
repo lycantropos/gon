@@ -50,6 +50,7 @@ def to_concave_vertices(points: Strategy[Point]) -> Strategy[Vertices]:
             .flatmap(to_triangulation_with_swappable_edges)
             .map(swap_edges)
             .map(triangulation_to_concave_vertices)
+            .filter(lambda vertices: len(vertices) > 2)
             .filter(negate(vertices_forms_convex_polygon))
             .filter(negate(self_intersects)))
 
@@ -132,7 +133,7 @@ def shrink_collinear_vertices(vertices: Vertices) -> Vertices:
             del result[-1]
         result.append(vertex)
     for index in range(len(result)):
-        while (index < len(result)
+        while (max(index, 2) < len(result)
                and Angle(result[index - 2], result[index - 1],
                          result[index]).orientation
                is Orientation.COLLINEAR):
