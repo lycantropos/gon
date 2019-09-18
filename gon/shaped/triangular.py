@@ -280,8 +280,11 @@ def _set_constraints(triangulation: Triangulation,
         crossed_edges = _find_crossed_edges(constraint, triangulation)
         new_edges = _resolve_crossings(constraint, triangulation,
                                        crossed_edges=crossed_edges)
-        _set_delaunay_criterion(triangulation,
-                                target_edges=new_edges - {constraint})
+        _set_delaunay_criterion(
+                triangulation,
+                target_edges={edge
+                              for edge in new_edges
+                              if _edge_to_segment(edge) != constraint})
 
 
 def _set_delaunay_criterion(triangulation: Triangulation,
@@ -371,10 +374,11 @@ def _find_crossed_edges(constraint: Segment,
     open_constraint = to_interval(constraint.start, constraint.end,
                                   start_inclusive=False,
                                   end_inclusive=False)
-    return {edge
-            for edge in triangulation.to_inner_edges()
-            if _edge_to_segment(edge).relationship_with(open_constraint)
-            is IntersectionKind.CROSS}
+    return set({_edge_to_segment(edge): edge
+                for edge in triangulation.to_inner_edges()
+                if _edge_to_segment(edge).relationship_with(open_constraint)
+                is IntersectionKind.CROSS}
+               .values())
 
 
 def _points_form_convex_quadrilateral(points: Sequence[Point]) -> bool:
