@@ -1,7 +1,7 @@
 from hypothesis import given
 
 from gon.shaped.subdivisional import QuadEdge
-from tests.utils import equivalence
+from tests.utils import implication
 from . import strategies
 
 
@@ -22,5 +22,5 @@ def test_determinism(quad_edge: QuadEdge) -> None:
 @given(strategies.quad_edges, strategies.quad_edges)
 def test_connection_with_equality(left_quad_edge: QuadEdge,
                                   right_quad_edge: QuadEdge) -> None:
-    assert equivalence(left_quad_edge == right_quad_edge,
+    assert implication(left_quad_edge == right_quad_edge,
                        hash(left_quad_edge) == hash(right_quad_edge))
