@@ -21,8 +21,7 @@ from gon.hints import (Permutation,
                        Scalar)
 from gon.linear import Segment
 from gon.utils import (inverse_permutation,
-                       to_index_min,
-                       to_sign)
+                       to_index_min)
 from . import triangular
 from .contracts import (self_intersects,
                         vertices_forms_convex_polygon,
@@ -310,11 +309,11 @@ def _split_fractions(components: Iterable[Scalar]
 
 
 def _is_point_to_the_left_of_line(point: Point, line_segment: Segment) -> bool:
-    y_diff = line_segment.end.y - line_segment.start.y
-    return ((point.x - line_segment.end.x) * abs(y_diff)
-            < ((line_segment.end.x - line_segment.start.x)
-               * (point.y - line_segment.end.y)
-               * to_sign(y_diff)))
+    if line_segment.start.y == line_segment.end.y:
+        return False
+    return ((line_segment.end.y > line_segment.start.y)
+            is (line_segment.orientation_with(point)
+                is Orientation.COUNTERCLOCKWISE))
 
 
 def _point_not_inside(point: Point, polygon: Polygon) -> bool:
