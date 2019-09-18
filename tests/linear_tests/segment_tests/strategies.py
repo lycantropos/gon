@@ -21,6 +21,7 @@ points_to_segments = compose(methodcaller(Strategy.map.__name__,
                              pack(strategies.tuples),
                              duplicate)
 segments = points_strategies.flatmap(points_to_segments)
+non_segments = strategies.builds(object)
 
 
 def to_segment_with_points(segment: Segment
