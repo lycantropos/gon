@@ -1,7 +1,7 @@
 from hypothesis import given
 
 from gon.linear import Segment
-from tests.utils import equivalence
+from tests.utils import implication
 from . import strategies
 
 
@@ -22,7 +22,7 @@ def test_determinism(segment: Segment) -> None:
 @given(strategies.segments, strategies.segments)
 def test_connection_with_equality(left_segment: Segment,
                                   right_segment: Segment) -> None:
-    assert equivalence(left_segment == right_segment,
+    assert implication(left_segment == right_segment,
                        hash(left_segment) == hash(right_segment))
 
 
