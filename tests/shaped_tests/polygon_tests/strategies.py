@@ -18,9 +18,9 @@ from gon.shaped.hints import Vertices
 from gon.shaped.subdivisional import QuadEdge
 from gon.shaped.utils import (to_convex_hull,
                               to_edges)
-from tests.strategies import (points_strategies,
+from tests.strategies import (interval_to_scalars,
+                              points_strategies,
                               scalars_to_points,
-                              segment_to_scalars,
                               to_non_triangle_vertices_base,
                               triangles_vertices)
 from tests.utils import (Strategy,
@@ -148,7 +148,7 @@ polygons = vertices.map(to_polygon)
 
 def to_polygons_with_points(polygon: Polygon
                             ) -> Strategy[Tuple[Polygon, Point]]:
-    scalars = strategies.one_of(list(map(segment_to_scalars,
+    scalars = strategies.one_of(list(map(interval_to_scalars,
                                          to_edges(polygon.vertices))))
     return strategies.tuples(strategies.just(polygon),
                              scalars_to_points(scalars))
