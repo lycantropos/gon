@@ -1,19 +1,13 @@
 from enum import (IntEnum,
                   unique)
 from functools import partial
-from operator import (le,
-                      lt)
-from types import MappingProxyType
-from typing import (Callable,
-                    Mapping,
-                    Union)
+from typing import Union
 
 from reprit.base import generate_repr
 
 from .angular import (Angle,
                       Orientation)
 from .base import Point
-from .hints import Scalar
 
 
 @unique
@@ -148,30 +142,12 @@ to_segment = partial(to_interval,
                      end_inclusive=True)
 
 
-def _in_interval(point: Point, interval: Interval,
-                 *,
-                 flags_predicates: Mapping[bool,
-                                           Callable[[Scalar, Scalar], bool]]
-                 = MappingProxyType({False: lt,
-                                     True: le})
-                 ) -> bool:
-    start_predicate = flags_predicates[interval.start_inclusive]
-    end_predicate = flags_predicates[interval.end_inclusive]
-    ((left_x, _, left_x_predicate),
-     (right_x, _, right_x_predicate)) = sorted([(interval.start.x,
-                                                 interval.start.y,
-                                                 start_predicate),
-                                                (interval.end.x,
-                                                 interval.end.y,
-                                                 end_predicate)])
-    ((bottom_y, _, bottom_y_predicate),
-     (top_y, _, top_y_predicate)) = sorted([(interval.start.y,
-                                             interval.start.x,
-                                             start_predicate),
-                                            (interval.end.y,
-                                             interval.end.x,
-                                             end_predicate)])
-    return (left_x_predicate(left_x, point.x)
-            and right_x_predicate(point.x, right_x)
-            and bottom_y_predicate(bottom_y, point.y)
-            and top_y_predicate(point.y, top_y))
+def _in_interval(point: Point, interval: Interval) -> bool:
+    if point == interval.start:
+        return interval.start_inclusive
+    elif point == interval.end:
+        return interval.end_inclusive
+    else:
+        left_x, right_x = sorted([interval.start.x, interval.end.x])
+        bottom_y, top_y = sorted([interval.start.y, interval.end.y])
+        return left_x <= point.x <= right_x and bottom_y <= point.y <= top_y
