@@ -316,10 +316,6 @@ def _is_point_to_the_left_of_line(point: Point, line_segment: Segment) -> bool:
                 is Orientation.COUNTERCLOCKWISE))
 
 
-def _point_not_inside(point: Point, polygon: Polygon) -> bool:
-    return polygon.__contains__(point) is not InclusionKind.INSIDE
-
-
 def to_polygon(vertices: Vertices) -> Polygon:
     """
     Based on:
