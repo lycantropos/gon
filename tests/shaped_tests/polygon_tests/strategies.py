@@ -144,6 +144,7 @@ def shrink_collinear_vertices(vertices: Vertices) -> Vertices:
 concave_vertices = points_strategies.flatmap(to_concave_vertices)
 vertices = concave_vertices | convex_vertices
 polygons = vertices.map(to_polygon)
+non_polygons = strategies.builds(object)
 
 
 def to_polygons_with_points(polygon: Polygon
