@@ -79,6 +79,8 @@ class Interval:
         return self.relationship_with(other) is not IntersectionKind.NONE
 
     def relationship_with(self, other: 'Interval') -> IntersectionKind:
+        if self == other:
+            return IntersectionKind.OVERLAP
         self_start_orientation = other.orientation_with(self.start)
         if (self.start_inclusive
                 and self_start_orientation is Orientation.COLLINEAR
