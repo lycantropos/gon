@@ -57,8 +57,17 @@ def to_concave_vertices(points: Strategy[Point]) -> Strategy[Vertices]:
 def to_triangulation_with_swappable_edges(
         triangulation: triangular.Triangulation
 ) -> Strategy[Tuple[triangular.Triangulation, Sequence[QuadEdge]]]:
-    swappable_edges = [edge for edge in triangulation.to_edges() if
-                       triangulation.to_neighbours(edge) == 4]
+    def neighbours_form_convex_quadrilateral(edge: QuadEdge) -> bool:
+        return triangular._points_form_convex_quadrilateral(
+                list(unique_everseen(flatten(
+                        (edge.start, edge.end)
+                        for edge in triangulation.to_neighbours(edge)))))
+
+    swappable_edges = list(unique_everseen(
+            [edge
+             for edge in triangulation.to_edges()
+             if neighbours_form_convex_quadrilateral(edge)],
+            key=triangular._edge_to_segment))
     edges_to_swap = (strategies.sampled_from(swappable_edges)
                      if swappable_edges
                      else strategies.nothing())
@@ -73,9 +82,6 @@ def swap_edges(
 ) -> triangular.Triangulation:
     triangulation, swappable_edges = triangulation_with_swappable_edges
     for edge in swappable_edges:
-        assert edge != triangulation.left_edge
-        assert edge != triangulation.right_edge
-        assert triangulation.to_neighbours(edge) == 4
         edge.swap()
     return triangulation
 
@@ -126,11 +132,10 @@ def shrink_collinear_vertices(vertices: Vertices) -> Vertices:
             del result[-1]
         result.append(vertex)
     for index in range(len(result)):
-        if index >= len(result):
-            break
-        if (Angle(result[index - 2], result[index - 1],
-                  result[index]).orientation
-                is Orientation.COLLINEAR):
+        while (index < len(result)
+               and Angle(result[index - 2], result[index - 1],
+                         result[index]).orientation
+               is Orientation.COLLINEAR):
             del result[index - 1]
     return result
 
