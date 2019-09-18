@@ -62,6 +62,8 @@ class Interval:
     __repr__ = generate_repr(__init__)
 
     def __eq__(self, other: 'Interval') -> bool:
+        if not isinstance(other, Interval):
+            return NotImplemented
         return (self._start_inclusive is other._start_inclusive
                 and self._end_inclusive is other._end_inclusive
                 and self._start == other._start
