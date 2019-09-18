@@ -1,8 +1,7 @@
-from hypothesis import (example,
-                        given)
+from hypothesis import given
 
 from gon.linear import Point
-from tests.utils import equivalence
+from tests.utils import implication
 from . import strategies
 
 
@@ -21,9 +20,7 @@ def test_determinism(point: Point) -> None:
 
 
 @given(strategies.points, strategies.points)
-@example(Point(-1.0, -1.0), Point(2.0, 2.0))
-@example(Point(0.0, 0.0), Point(0.0, 0.5))
 def test_connection_with_equality(left_point: Point,
                                   right_point: Point) -> None:
-    assert equivalence(left_point == right_point,
+    assert implication(left_point == right_point,
                        hash(left_point) == hash(right_point))
