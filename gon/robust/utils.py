@@ -30,14 +30,15 @@ def split(value: float,
     return result_hi, result_lo
 
 
-def two_product_presplit(a: float, b: float,
-                         bhi: float, blo: float) -> Tuple[float, float]:
-    result = a * b
-    ahi, alo = split(a)
-    err1 = result - ahi * bhi
-    err2 = err1 - alo * bhi
-    err3 = err2 - ahi * blo
-    tail = alo * blo - err3
+def two_product_presplit(left: float,
+                         right: float, right_hi: float, right_lo: float
+                         ) -> Tuple[float, float]:
+    result = left * right
+    left_hi, left_lo = split(left)
+    first_error = result - left_hi * right_hi
+    second_error = first_error - left_lo * right_hi
+    third_error = second_error - left_hi * right_lo
+    tail = left_lo * right_lo - third_error
     return result, tail
 
 
