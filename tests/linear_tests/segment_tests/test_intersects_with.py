@@ -24,7 +24,6 @@ def test_symmetry(segments_pair: Tuple[Segment, Segment]) -> None:
 def test_independence_from_ends_order(segments_pair: Tuple[Segment, Segment]
                                       ) -> None:
     segment, other_segment = segments_pair
-    reversed_segment = Segment(segment.end, segment.start)
 
     assert implication(segment.intersects_with(other_segment),
-                       reversed_segment.intersects_with(other_segment))
+                       segment.reversed.intersects_with(other_segment))
