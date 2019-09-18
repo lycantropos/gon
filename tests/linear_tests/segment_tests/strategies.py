@@ -9,9 +9,9 @@ from lz.replication import duplicate
 
 from gon.base import Point
 from gon.linear import Segment
-from tests.strategies import (points_strategies,
-                              scalars_to_points,
-                              segment_to_scalars)
+from tests.strategies import (interval_to_scalars,
+                              points_strategies,
+                              scalars_to_points)
 from tests.utils import Strategy
 
 points_to_segments = compose(methodcaller(Strategy.map.__name__,
@@ -27,7 +27,7 @@ non_segments = strategies.builds(object)
 def to_segment_with_points(segment: Segment
                            ) -> Strategy[Tuple[Segment, Point]]:
     return strategies.tuples(strategies.just(segment),
-                             scalars_to_points(segment_to_scalars(segment)))
+                             scalars_to_points(interval_to_scalars(segment)))
 
 
 segments_with_points = segments.flatmap(to_segment_with_points)
