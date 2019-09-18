@@ -4,7 +4,7 @@ from hypothesis import given
 
 from gon.shaped import (Polygon,
                         to_polygon)
-from tests.utils import equivalence
+from tests.utils import implication
 from . import strategies
 
 
@@ -25,7 +25,7 @@ def test_determinism(polygon: Polygon) -> None:
 @given(strategies.polygons, strategies.polygons)
 def test_connection_with_equality(left_polygon: Polygon,
                                   right_polygon: Polygon) -> None:
-    assert equivalence(left_polygon == right_polygon,
+    assert implication(left_polygon == right_polygon,
                        hash(left_polygon) == hash(right_polygon))
 
 
