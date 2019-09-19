@@ -36,14 +36,14 @@ def determinant(vertex: Point,
                              second_ray_point, det_sum)
 
 
-def determinant_adapt(first_coordinates: Point,
-                      second_coordinates: Point,
-                      third_coordinates: Point,
+def determinant_adapt(vertex: Point,
+                      first_ray_point: Point,
+                      second_ray_point: Point,
                       det_sum: float) -> float:
-    acx = first_coordinates.x - third_coordinates.x
-    bcx = second_coordinates.x - third_coordinates.x
-    acy = first_coordinates.y - third_coordinates.y
-    bcy = second_coordinates.y - third_coordinates.y
+    acx = vertex.x - second_ray_point.x
+    bcx = first_ray_point.x - second_ray_point.x
+    acy = vertex.y - second_ray_point.y
+    bcy = first_ray_point.y - second_ray_point.y
 
     det_left, det_left_tail = two_product(acx, bcy)
     det_right, det_right_tail = two_product(acy, bcx)
@@ -54,13 +54,11 @@ def determinant_adapt(first_coordinates: Point,
     if (det >= error_bound) or (-det >= error_bound):
         return det
 
-    acx_tail = two_diff_tail(first_coordinates.x, third_coordinates.x, acx)
-    bcx_tail = two_diff_tail(second_coordinates.x, third_coordinates.x, bcx)
-    acy_tail = two_diff_tail(first_coordinates.y, third_coordinates.y, acy)
-    bcy_tail = two_diff_tail(second_coordinates.y, third_coordinates.y, bcy)
-
-    if ((acx_tail == 0.0) and (acy_tail == 0.0)
-            and (bcx_tail == 0.0) and (bcy_tail == 0.0)):
+    acx_tail = two_diff_tail(vertex.x, second_ray_point.x, acx)
+    bcx_tail = two_diff_tail(first_ray_point.x, second_ray_point.x, bcx)
+    acy_tail = two_diff_tail(vertex.y, second_ray_point.y, acy)
+    bcy_tail = two_diff_tail(first_ray_point.y, second_ray_point.y, bcy)
+    if not acx_tail and not acy_tail and not bcx_tail and not bcy_tail:
         return det
 
     error_bound = (bounds.to_counterclockwise_error_c(det_sum)
