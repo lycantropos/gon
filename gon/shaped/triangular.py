@@ -280,17 +280,12 @@ def _set_constraints(triangulation: Triangulation,
         crossed_edges = _find_crossed_edges(constraint, triangulation)
         new_edges = _resolve_crossings(constraint, triangulation,
                                        crossed_edges=crossed_edges)
-        _set_delaunay_criterion(
-                triangulation,
-                target_edges={edge
-                              for edge in new_edges
-                              if _edge_to_segment(edge) != constraint})
+        _set_delaunay_criterion({edge
+                                 for edge in new_edges
+                                 if _edge_to_segment(edge) != constraint})
 
 
-def _set_delaunay_criterion(triangulation: Triangulation,
-                            *,
-                            target_edges: Optional[Set[QuadEdge]] = None
-                            ) -> None:
+def _set_delaunay_criterion(target_edges: Set[QuadEdge]) -> None:
     """
     Straightforward flip algorithm.
 
@@ -298,8 +293,6 @@ def _set_delaunay_criterion(triangulation: Triangulation,
         O(n^2), where
         n -- points count.
     """
-    if target_edges is None:
-        target_edges = set(triangulation.to_inner_edges())
     while True:
         swapped_edges = set()
         for edge in target_edges:
