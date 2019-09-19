@@ -2,10 +2,10 @@ from abc import (ABC,
                  abstractmethod)
 from enum import (IntEnum,
                   unique)
+from functools import reduce
 from operator import (attrgetter,
                       itemgetter)
-from typing import (Iterable,
-                    Sequence,
+from typing import (Sequence,
                     Tuple)
 
 from lz.functional import compose
@@ -20,6 +20,10 @@ from gon.base import Point
 from gon.hints import (Permutation,
                        Scalar)
 from gon.linear import Segment
+from gon.robust.utils import (Expansion,
+                              sum_expansions,
+                              two_product,
+                              two_two_diff)
 from gon.utils import (inverse_permutation,
                        to_index_min)
 from . import triangular
@@ -218,16 +222,9 @@ class SimplePolygon(Polygon):
         >>> polygon.area == 4
         True
         """
-        minuends_proper_fractions, minuends_improper_fractions = (
-            _split_fractions(edge.start.x * edge.end.y
-                             for edge in to_edges(self._vertices)))
-        subtrahends_proper_fractions, subtrahends_improper_fractions = (
-            _split_fractions(edge.start.y * edge.end.x
-                             for edge in to_edges(self._vertices)))
-        return abs((sum(minuends_improper_fractions)
-                    - sum(subtrahends_improper_fractions))
-                   + (sum(minuends_proper_fractions)
-                      - sum(subtrahends_proper_fractions))) / 2
+        expansions = [_edge_to_endpoints_cross_product_z(edge)
+                      for edge in to_edges(self._vertices)]
+        return abs(reduce(sum_expansions, expansions)[-1]) / 2
 
     @cached.property_
     def convex_hull(self) -> Polygon:
@@ -297,15 +294,15 @@ class SimplePolygon(Polygon):
                     boundary=tuple(to_edges(self._vertices)))]
 
 
-def _split_fractions(components: Iterable[Scalar]
-                     ) -> Tuple[Iterable[Scalar], Iterable[Scalar]]:
-    proper_fractions, improper_fractions = [], []
-    for component in components:
-        if abs(component) < 1:
-            proper_fractions.append(component)
-        else:
-            improper_fractions.append(component)
-    return proper_fractions, improper_fractions
+def _edge_to_endpoints_cross_product_z(edge: Segment) -> Expansion:
+    start_x_end_y, start_x_end_y_tail = two_product(edge.start.x,
+                                                    edge.end.y)
+    start_y_end_x, start_y_end_x_tail = two_product(edge.start.y,
+                                                    edge.end.x)
+    if not start_x_end_y_tail and not start_y_end_x_tail:
+        return 0, 0, 0, start_x_end_y - start_y_end_x
+    return two_two_diff(start_x_end_y, start_x_end_y_tail,
+                        start_y_end_x, start_y_end_x_tail)
 
 
 def _is_point_to_the_left_of_line(point: Point, line_segment: Segment) -> bool:
