@@ -1,5 +1,4 @@
 import os
-from datetime import timedelta
 
 from hypothesis import (HealthCheck,
                         settings)
@@ -10,6 +9,6 @@ settings.register_profile('default',
                           max_examples=(25
                                         if on_travis_ci or on_azure_pipelines
                                         else settings.default.max_examples),
-                          deadline=timedelta(seconds=10),
+                          deadline=None,
                           suppress_health_check=[HealthCheck.filter_too_much,
                                                  HealthCheck.too_slow])
