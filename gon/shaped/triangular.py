@@ -144,6 +144,16 @@ class Triangulation:
 
 
 def delaunay(points: Sequence[Point]) -> Triangulation:
+    """
+    Returns Delaunay triangulation of the points.
+
+    Reference:
+        http://www.sccg.sk/~samuelcik/dgs/quad_edge.pdf
+
+    Time complexity:
+        O(n * log n), where
+        n -- polygon's vertices count.
+    """
     result = [tuple(sorted(points,
                            key=attrgetter('x', 'y')))]
     while max(map(len, result)) > max(_initializers):
