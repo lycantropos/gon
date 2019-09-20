@@ -285,8 +285,19 @@ class SimplePolygon(Polygon):
             https://www.newcastle.edu.au/__data/assets/pdf_file/0019/22519/23_A-fast-algortithm-for-generating-constrained-Delaunay-triangulations.pdf
 
         Time complexity:
-            O(n * log n), where
+            O(n * log n) for convex polygons,
+            O(n^2) for concave polygons, where
             n -- polygon's vertices count.
+
+        >>> polygon = SimplePolygon([Point(-1, -1), Point(1, -1),
+        ...                          Point(1, 1), Point(-1, 1)])
+        >>> set(polygon.triangulation) == {SimplePolygon([Point(-1, 1),
+        ...                                               Point(1, -1),
+        ...                                               Point(1, 1)]),
+        ...                                SimplePolygon([Point(-1, 1),
+        ...                                               Point(-1, -1),
+        ...                                               Point(1, -1)])}
+        True
         """
         return [SimplePolygon(vertices)
                 for vertices in triangular.constrained_delaunay_vertices(
