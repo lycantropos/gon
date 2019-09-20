@@ -22,8 +22,9 @@ def to_same_points(points: Strategy[Point]) -> Strategy[Sequence[Point]]:
             .map(list))
 
 
-invalid_vertices = (points_strategies.flatmap(partial(strategies.lists,
-                                                      max_size=2))
-                    | points_strategies.flatmap(to_same_points)
-                    | invalid_vertices.filter(self_intersects)
-                    | invalid_vertices.filter(negate(vertices_forms_strict_polygon)))
+invalid_vertices = (
+        points_strategies.flatmap(partial(strategies.lists,
+                                          max_size=2))
+        | points_strategies.flatmap(to_same_points)
+        | invalid_vertices.filter(self_intersects)
+        | invalid_vertices.filter(negate(vertices_forms_strict_polygon)))
