@@ -259,7 +259,7 @@ def constrained_delaunay(points: Sequence[Point],
                      constraints=(boundary if extra_constraints is None
                                   else chain(boundary, extra_constraints)))
     _set_boundary(result,
-                  boundary_segments=boundary)
+                  boundary=boundary)
     return result
 
 
@@ -318,11 +318,11 @@ def _set_delaunay_criterion(target_edges: Set[QuadEdge]) -> None:
 
 def _set_boundary(triangulation: Triangulation,
                   *,
-                  boundary_segments: Sequence[Segment]) -> None:
-    boundary_segments = frozenset(boundary_segments)
+                  boundary: Sequence[Segment]) -> None:
+    boundary = frozenset(boundary)
     non_boundary = {edge
                     for edge in triangulation.to_boundary_edges()
-                    if _edge_to_segment(edge) not in boundary_segments}
+                    if _edge_to_segment(edge) not in boundary}
     while non_boundary:
         edge = non_boundary.pop()
         non_boundary.remove(edge.opposite)
@@ -331,7 +331,7 @@ def _set_boundary(triangulation: Triangulation,
         non_boundary.update(flatten((candidate, candidate.opposite)
                                     for candidate in candidates
                                     if _edge_to_segment(candidate)
-                                    not in boundary_segments))
+                                    not in boundary))
 
 
 def _resolve_crossings(constraint: Segment,
