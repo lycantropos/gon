@@ -282,6 +282,7 @@ class SimplePolygon(Polygon):
             constrained Delaunay triangulation.
 
         Reference:
+            http://www.sccg.sk/~samuelcik/dgs/quad_edge.pdf
             https://www.newcastle.edu.au/__data/assets/pdf_file/0019/22519/23_A-fast-algortithm-for-generating-constrained-Delaunay-triangulations.pdf
 
         Time complexity:
