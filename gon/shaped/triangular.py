@@ -12,6 +12,7 @@ from lz.hints import Domain
 from lz.iterating import flatten
 from reprit.base import generate_repr
 
+from gon import documentation
 from gon.angular import (Angle,
                          Orientation)
 from gon.base import Point
@@ -143,17 +144,11 @@ class Triangulation:
         edge.delete()
 
 
+@documentation.setup(docstring='Returns Delaunay triangulation of the points.',
+                     reference='http://tiny.cc/delaunay_triangulation',
+                     time_complexity='O(n * log n), where\n'
+                                     'n -- polygon\'s vertices count')
 def delaunay(points: Sequence[Point]) -> Triangulation:
-    """
-    Returns Delaunay triangulation of the points.
-
-    Reference:
-        http://www.sccg.sk/~samuelcik/dgs/quad_edge.pdf
-
-    Time complexity:
-        O(n * log n), where
-        n -- polygon's vertices count.
-    """
     result = [tuple(sorted(points,
                            key=attrgetter('x', 'y')))]
     while max(map(len, result)) > max(_initializers):
@@ -254,22 +249,17 @@ def _to_right_candidate(base_edge: QuadEdge) -> Optional[QuadEdge]:
     return result
 
 
+@documentation.setup(docstring='Returns constrained Delaunay triangulation '
+                               'of the points.',
+                     reference='http://tiny.cc/constrained_delaunay',
+                     time_complexity='O(n * log n) for convex polygons,\n'
+                                     'O(n^2) for concave polygons, where\n'
+                                     'n -- polygon\'s vertices count')
 def constrained_delaunay(points: Sequence[Point],
                          *,
                          boundary: Sequence[Segment],
                          extra_constraints: Optional[Iterable[Segment]] = None
                          ) -> Triangulation:
-    """
-    Returns constrained Delaunay triangulation of the points.
-
-    Reference:
-        https://www.newcastle.edu.au/__data/assets/pdf_file/0019/22519/23_A-fast-algortithm-for-generating-constrained-Delaunay-triangulations.pdf
-
-    Time complexity:
-        O(n * log n) for convex polygons,
-        O(n^2) for concave polygons, where
-        n -- polygon's vertices count.
-    """
     result = delaunay(points)
     initial_boundary_segments = frozenset(map(_edge_to_segment,
                                               result.to_boundary_edges()))
@@ -306,14 +296,10 @@ def _set_constraints(triangulation: Triangulation,
                                  if _edge_to_segment(edge) != constraint})
 
 
+@documentation.setup(docstring='Straightforward flip algorithm.',
+                     time_complexity='O(n^2), where\n'
+                                     'n -- points count')
 def _set_delaunay_criterion(target_edges: Set[QuadEdge]) -> None:
-    """
-    Straightforward flip algorithm.
-
-    Time complexity:
-        O(n^2), where
-        n -- points count.
-    """
     while True:
         swapped_edges = set()
         for edge in target_edges:
