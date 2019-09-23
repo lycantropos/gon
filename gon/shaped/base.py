@@ -14,6 +14,7 @@ from lz.sorting import Key
 from memoir import cached
 from reprit.base import generate_repr
 
+from gon import documentation
 from gon.angular import (Angle,
                          Orientation)
 from gon.base import Point
@@ -42,14 +43,9 @@ class InclusionKind(IntEnum):
     ON_BOUNDARY = 2
 
 
+@documentation.setup(docstring='Polygons interface.',
+                     reference='http://tiny.cc/n_gon')
 class Polygon(ABC):
-    """
-    Polygons interface.
-
-    Reference:
-        https://en.wikipedia.org/wiki/Polygon
-    """
-
     @abstractmethod
     def __contains__(self, point: Point) -> InclusionKind:
         """Checks if the point lies inside the polygon or on its boundary."""
@@ -88,19 +84,13 @@ class Polygon(ABC):
         """Returns triangulation of the polygon."""
 
 
+@documentation.setup(docstring='Sorts vertices by lexicographical order '
+                               'and rotates to establish '
+                               'counter-clockwise orientation.',
+                     reference='http://tiny.cc/simple_polygon',
+                     time_complexity='O(n), where\n'
+                                     'n -- vertices count')
 class SimplePolygon(Polygon):
-    """
-    Sorts vertices by lexicographical order
-    and rotates to establish counter-clockwise orientation.
-
-    Reference:
-        https://en.wikipedia.org/wiki/Simple_polygon
-
-    Time complexity:
-        O(n), where
-        n -- vertices count.
-    """
-
     __slots__ = ('_order', '_vertices')
 
     def __init__(self, vertices: Vertices) -> None:
@@ -108,20 +98,14 @@ class SimplePolygon(Polygon):
 
     __repr__ = generate_repr(__init__)
 
+    @documentation.setup(docstring='Checks if the point lies '
+                                   'inside the polygon or on its boundary.',
+                         origin='"PNPOLY" ray-casting algorithm',
+                         reference='http://tiny.cc/pnpoly',
+                         time_complexity='O(n), where\n'
+                                         'n -- polygon\'s vertices count')
     def __contains__(self, point: Point) -> InclusionKind:
         """
-        Checks if the point lies inside the polygon or on its boundary.
-
-        Based on:
-            "PNPOLY" ray-casting algorithm.
-
-        Reference:
-            https://wrf.ecse.rpi.edu//Research/Short_Notes/pnpoly.html
-
-        Time complexity:
-            O(n), where
-            n -- polygon's vertices count.
-
         >>> polygon = SimplePolygon([Point(-1, -1), Point(1, -1),
         ...                          Point(1, 1), Point(-1, 1)])
         >>> Point(1, 1) in polygon
@@ -142,15 +126,13 @@ class SimplePolygon(Polygon):
                 result = not result
         return InclusionKind(result)
 
+    @documentation.setup(docstring='Checks if polygons are equal.',
+                         time_complexity=
+                         'O(min(m, n)), where\n'
+                         'm -- polygon\'s vertices count,\n'
+                         'n -- compared polygon\'s vertices count')
     def __eq__(self, other: Polygon) -> bool:
         """
-        Checks if polygons are equal.
-
-        Time complexity:
-            O(min(m, n)), where
-            m -- polygon's vertices count,
-            n -- compared polygon's vertices count.
-
         >>> polygon = SimplePolygon([Point(-1, -1), Point(1, -1),
         ...                          Point(1, 1), Point(-1, 1)])
         >>> polygon == polygon
@@ -162,14 +144,11 @@ class SimplePolygon(Polygon):
             return False
         return self._vertices == other._vertices
 
+    @documentation.setup(docstring='Returns hash value of the polygon.',
+                         time_complexity='O(n), where\n'
+                                         'n -- polygon\'s vertices count')
     def __hash__(self) -> int:
         """
-        Returns hash value of the polygon.
-
-        Time complexity:
-            O(n), where
-            n -- polygon's vertices count.
-
         >>> polygon = SimplePolygon([Point(-1, -1), Point(1, -1),
         ...                          Point(1, 1), Point(-1, 1)])
         >>> hash(polygon) == hash(polygon)
@@ -178,22 +157,17 @@ class SimplePolygon(Polygon):
         return hash(self._vertices)
 
     @cached.property_
+    @documentation.setup(docstring='Returns vertices of the polygon '
+                                   'in the original order.\n'
+                                   'Original order is the order '
+                                   'from polygon\'s definition.',
+                         origin='inversion of vertices\' permutation'
+                                'produced during polygon\'s creation',
+                         reference='http://tiny.cc/inverse_permutation',
+                         time_complexity='O(n), where\n'
+                                         'n -- polygon\'s vertices count')
     def vertices(self) -> Vertices:
         """
-        Returns vertices of the polygon in the original order.
-        Original order is the order from polygon's definition.
-
-        Based on:
-            inversion of vertices' permutation
-            produced during polygon's creation.
-
-        Reference:
-            http://mathworld.wolfram.com/InversePermutation.html
-
-        Time complexity:
-            O(n), where
-            n -- polygon's vertices count.
-
         >>> vertices = [Point(-1, -1), Point(1, -1), Point(1, 1), Point(-1, 1)]
         >>> polygon = SimplePolygon(vertices)
         >>> all(actual == original
@@ -203,20 +177,13 @@ class SimplePolygon(Polygon):
         return itemgetter(*inverse_permutation(self._order))(self._vertices)
 
     @cached.property_
+    @documentation.setup(docstring='Returns area of the polygon.',
+                         origin='"Shoelace formula"',
+                         reference='http://tiny.cc/shoelace_formula',
+                         time_complexity='O(n), where\n'
+                                         'n -- polygon\'s vertices count')
     def area(self) -> Scalar:
         """
-        Returns area of the polygon.
-
-        Based on:
-            "Shoelace formula".
-
-        Reference:
-            https://en.wikipedia.org/wiki/Shoelace_formula
-
-        Time complexity:
-            O(n), where
-            n -- polygon's vertices count.
-
         >>> polygon = SimplePolygon([Point(-1, -1), Point(1, -1),
         ...                          Point(1, 1), Point(-1, 1)])
         >>> polygon.area == 4
@@ -227,20 +194,13 @@ class SimplePolygon(Polygon):
         return abs(reduce(sum_expansions, expansions)[-1]) / 2
 
     @cached.property_
+    @documentation.setup(docstring='Returns convex hull of the polygon.',
+                         origin='"Monotone chain" (aka "Andrew\'s algorithm")',
+                         reference='http://tiny.cc/convex_hull',
+                         time_complexity='O(n * log n), where\n'
+                                         'n -- polygon\'s vertices count')
     def convex_hull(self) -> Polygon:
         """
-        Returns convex hull of the polygon.
-
-        Based on:
-            "Monotone chain" (aka "Andrew's algorithm").
-
-        Reference:
-            https://en.wikibooks.org/wiki/Algorithm_Implementation/Geometry/Convex_hull/Monotone_chain
-
-        Time complexity:
-            O(n * log n), where
-            n -- polygon's vertices count.
-
         >>> polygon = SimplePolygon([Point(-1, -1), Point(1, -1),
         ...                          Point(1, 1), Point(-1, 1)])
         >>> polygon.convex_hull == polygon
@@ -251,21 +211,14 @@ class SimplePolygon(Polygon):
         return SimplePolygon(to_convex_hull(self._vertices))
 
     @cached.property_
+    @documentation.setup(docstring='Checks if the polygon is convex.',
+                         origin='property that each internal angle '
+                                'of convex polygon is less than 180 degrees',
+                         reference='http://tiny.cc/convex_polygon',
+                         time_complexity='O(n), where\n'
+                                         'n -- polygon\'s vertices count')
     def is_convex(self) -> bool:
         """
-        Checks if the polygon is convex.
-
-        Based on:
-            property that each internal angle of convex polygon
-            is less than 180 degrees.
-
-        Reference:
-            https://en.wikipedia.org/wiki/Convex_polygon
-
-        Time complexity:
-            O(n), where
-            n -- polygon's vertices count.
-
         >>> polygon = SimplePolygon([Point(-1, -1), Point(1, -1),
         ...                          Point(1, 1), Point(-1, 1)])
         >>> polygon.is_convex
@@ -274,22 +227,15 @@ class SimplePolygon(Polygon):
         return vertices_forms_convex_polygon(self._vertices)
 
     @property
+    @documentation.setup(docstring='Returns triangulation of the polygon.',
+                         origin='constrained Delaunay triangulation',
+                         reference='http://tiny.cc/delaunay_triangulation\n'
+                                   'http://tiny.cc/constrained_delaunay',
+                         time_complexity='O(n * log n) for convex polygons,\n'
+                                         'O(n^2) for concave polygons, where\n'
+                                         'n -- polygon\'s vertices count')
     def triangulation(self) -> Sequence[Polygon]:
         """
-        Returns triangulation of the polygon.
-
-        Based on:
-            constrained Delaunay triangulation.
-
-        Reference:
-            http://www.sccg.sk/~samuelcik/dgs/quad_edge.pdf
-            https://www.newcastle.edu.au/__data/assets/pdf_file/0019/22519/23_A-fast-algortithm-for-generating-constrained-Delaunay-triangulations.pdf
-
-        Time complexity:
-            O(n * log n) for convex polygons,
-            O(n^2) for concave polygons, where
-            n -- polygon's vertices count.
-
         >>> polygon = SimplePolygon([Point(-1, -1), Point(1, -1),
         ...                          Point(1, 1), Point(-1, 1)])
         >>> set(polygon.triangulation) == {SimplePolygon([Point(-1, 1),
@@ -325,19 +271,15 @@ def _is_point_to_the_left_of_line(point: Point, line_segment: Segment) -> bool:
                 is Orientation.COUNTERCLOCKWISE))
 
 
+@documentation.setup(docstring='Creates polygon from given vertices.',
+                     origin='vertices validation '
+                            'for non-collinear consecutive edges '
+                            '& checking of self-intersection',
+                     reference='http://tiny.cc/n_gon',
+                     time_complexity='O(n^2), where\n'
+                                     'n -- vertices count')
 def to_polygon(vertices: Vertices) -> Polygon:
     """
-    Based on:
-        vertices validation for non-collinear consecutive edges
-        & checking of self-intersection.
-
-    Reference:
-        https://en.wikipedia.org/wiki/Polygon
-
-    Time complexity:
-        O(n^2), where
-        n -- vertices count.
-
     >>> to_polygon([Point(-1, -1), Point(1, -1), Point(1, 1), Point(-1, 1)])
     SimplePolygon((Point(-1, -1), Point(1, -1), Point(1, 1), Point(-1, 1)))
     """
