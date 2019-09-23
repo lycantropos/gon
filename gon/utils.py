@@ -32,16 +32,6 @@ triplewise = slider(3)
 
 
 def inverse_permutation(permutation: Permutation) -> Permutation:
-    """
-    Based on:
-        permutation of indices with values.
-
-    Reference:
-        http://mathworld.wolfram.com/InversePermutation.html
-
-    Time complexity:
-        O(n)
-    """
     result = [None] * len(permutation)
     for index, element in enumerate(permutation):
         result[element] = index
