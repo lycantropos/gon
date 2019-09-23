@@ -1,8 +1,7 @@
 import importlib
 import pkgutil
 from types import ModuleType
-from typing import (Any,
-                    Iterable,
+from typing import (Iterable,
                     Optional)
 
 import requests
@@ -17,7 +16,7 @@ def test_callables(monkeypatch: MonkeyPatch) -> None:
     def documentation_setup(documented: documentation.Documented = None,
                             *,
                             reference: Optional[str] = None,
-                            **_: Any) -> documentation.Documented:
+                            **_) -> documentation.Documented:
         assert (reference is None
                 or all(requests.get(link,
                                     headers={'User-Agent': 'test'}).ok
