@@ -25,31 +25,30 @@ def split(value: float,
           *,
           splitter: float = bounds.splitter) -> Tuple[float, float]:
     c = splitter * value
-    result_hi = c - (c - value)
-    result_lo = value - result_hi
-    return result_hi, result_lo
+    result_high = c - (c - value)
+    result_low = value - result_high
+    return result_low, result_high
 
 
-def two_product_presplit(left: float,
-                         right: float, right_hi: float, right_lo: float
-                         ) -> Tuple[float, float]:
+def two_product_presplit(left: float, right: float, right_low: float,
+                         right_high: float) -> Tuple[float, float]:
     result = left * right
-    left_hi, left_lo = split(left)
-    first_error = result - left_hi * right_hi
-    second_error = first_error - left_lo * right_hi
-    third_error = second_error - left_hi * right_lo
-    tail = left_lo * right_lo - third_error
+    left_low, left_high = split(left)
+    first_error = result - left_high * right_high
+    second_error = first_error - left_low * right_high
+    third_error = second_error - left_high * right_low
+    tail = left_low * right_low - third_error
     return result, tail
 
 
 def two_product(left: float, right: float) -> Tuple[float, float]:
     result = left * right
-    left_hi, left_lo = split(left)
-    right_hi, right_lo = split(right)
-    first_error = result - left_hi * right_hi
-    second_error = first_error - left_lo * right_hi
-    third_error = second_error - left_hi * right_lo
-    tail = left_lo * right_lo - third_error
+    left_low, left_high = split(left)
+    right_low, right_high = split(right)
+    first_error = result - left_high * right_high
+    second_error = first_error - left_low * right_high
+    third_error = second_error - left_high * right_low
+    tail = left_low * right_low - third_error
     return result, tail
 
 
@@ -98,10 +97,10 @@ def two_diff_tail(left: float, right: float, diff: float) -> float:
 
 def square(value: float) -> Tuple[float, float]:
     result = value * value
-    value_hi, value_lo = split(value)
-    first_error = result - value_hi * value_hi
-    second_error = first_error - (value_hi + value_hi) * value_lo
-    tail = value_lo * value_lo - second_error
+    value_low, value_high = split(value)
+    first_error = result - value_high * value_high
+    second_error = first_error - (value_high + value_high) * value_low
+    tail = value_low * value_low - second_error
     return result, tail
 
 
@@ -195,15 +194,15 @@ def scale_expansion(expansion: Expansion, scalar: float) -> Expansion:
     Multiplies an expansion by a scalar with zero components elimination.
     """
     expansion = iter(expansion)
-    scalar_hi, scalar_lo = split(scalar)
+    scalar_low, scalar_high = split(scalar)
     q, hh = two_product_presplit(next(expansion), scalar,
-                                 scalar_hi, scalar_lo)
+                                 scalar_low, scalar_high)
     result = []
     if hh:
         result.append(hh)
     for element in expansion:
         product1, product0 = two_product_presplit(element, scalar,
-                                                  scalar_hi, scalar_lo)
+                                                  scalar_low, scalar_high)
         sum_, hh = two_sum(q, product0)
         if hh:
             result.append(hh)
