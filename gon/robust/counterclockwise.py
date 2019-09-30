@@ -1,6 +1,7 @@
 from gon.base import Point
 from . import bounds
-from .utils import (sum_expansions,
+from .utils import (Expansion,
+                    sum_expansions,
                     two_diff_tail,
                     two_product,
                     two_two_diff)
@@ -9,77 +10,101 @@ from .utils import (sum_expansions,
 def determinant(vertex: Point,
                 first_ray_point: Point,
                 second_ray_point: Point) -> float:
-    det_left = ((vertex.x - second_ray_point.x)
-                * (first_ray_point.y - second_ray_point.y))
-    det_right = ((vertex.y - second_ray_point.y)
-                 * (first_ray_point.x - second_ray_point.x))
-    det = det_left - det_right
+    minuend = ((first_ray_point.x - vertex.x)
+               * (second_ray_point.y - vertex.y))
+    subtrahend = ((first_ray_point.y - vertex.y)
+                  * (second_ray_point.x - vertex.x))
+    result = minuend - subtrahend
 
-    if det_left > 0.0:
-        if det_right <= 0.0:
-            return det
+    if minuend > 0:
+        if subtrahend <= 0:
+            return result
         else:
-            det_sum = det_left + det_right
-    elif det_left < 0.0:
-        if det_right >= 0.0:
-            return det
+            moduli_sum = minuend + subtrahend
+    elif minuend < 0.0:
+        if subtrahend >= 0.0:
+            return result
         else:
-            det_sum = -det_left - det_right
+            moduli_sum = -minuend - subtrahend
     else:
-        return det
+        return result
 
-    error_bound = bounds.to_counterclockwise_error_a(det_sum)
-    if det >= error_bound or -det >= error_bound:
-        return det
+    error_bound = bounds.to_counterclockwise_error_a(moduli_sum)
+    if result >= error_bound or -result >= error_bound:
+        return result
 
-    return determinant_adapt(vertex, first_ray_point,
-                             second_ray_point, det_sum)
+    return determinant_adapt(vertex, first_ray_point, second_ray_point,
+                             moduli_sum)
 
 
 def determinant_adapt(vertex: Point,
                       first_ray_point: Point,
                       second_ray_point: Point,
-                      det_sum: float) -> float:
-    acx = vertex.x - second_ray_point.x
-    bcx = first_ray_point.x - second_ray_point.x
-    acy = vertex.y - second_ray_point.y
-    bcy = first_ray_point.y - second_ray_point.y
+                      moduli_sum: float) -> float:
+    minuend_multiplier_x = first_ray_point.x - vertex.x
+    minuend_multiplier_y = second_ray_point.y - vertex.y
+    subtrahend_multiplier_x = second_ray_point.x - vertex.x
+    subtrahend_multiplier_y = first_ray_point.y - vertex.y
 
-    det_left, det_left_tail = two_product(acx, bcy)
-    det_right, det_right_tail = two_product(acy, bcx)
+    minuend, minuend_tail = two_product(minuend_multiplier_x,
+                                        minuend_multiplier_y)
+    subtrahend, subtrahend_tail = two_product(subtrahend_multiplier_y,
+                                              subtrahend_multiplier_x)
 
-    b = two_two_diff(det_left, det_left_tail, det_right, det_right_tail)
-    det = sum(b)
-    error_bound = bounds.to_counterclockwise_error_b(det_sum)
-    if (det >= error_bound) or (-det >= error_bound):
-        return det
+    result_expansion = two_two_diff(minuend, minuend_tail,
+                                    subtrahend, subtrahend_tail)
+    result = sum(result_expansion)
+    error_bound = bounds.to_counterclockwise_error_b(moduli_sum)
+    if (result >= error_bound) or (-result >= error_bound):
+        return result
 
-    acx_tail = two_diff_tail(vertex.x, second_ray_point.x, acx)
-    bcx_tail = two_diff_tail(first_ray_point.x, second_ray_point.x, bcx)
-    acy_tail = two_diff_tail(vertex.y, second_ray_point.y, acy)
-    bcy_tail = two_diff_tail(first_ray_point.y, second_ray_point.y, bcy)
-    if not acx_tail and not acy_tail and not bcx_tail and not bcy_tail:
-        return det
+    minuend_multiplier_x_tail = two_diff_tail(first_ray_point.x, vertex.x,
+                                              minuend_multiplier_x)
+    subtrahend_multiplier_x_tail = two_diff_tail(second_ray_point.x, vertex.x,
+                                                 subtrahend_multiplier_x)
+    subtrahend_multiplier_y_tail = two_diff_tail(first_ray_point.y, vertex.y,
+                                                 subtrahend_multiplier_y)
+    minuend_multiplier_y_tail = two_diff_tail(second_ray_point.y, vertex.y,
+                                              minuend_multiplier_y)
+    if (not minuend_multiplier_x_tail
+            and not minuend_multiplier_y_tail
+            and not subtrahend_multiplier_x_tail
+            and not subtrahend_multiplier_y_tail):
+        return result
 
-    error_bound = (bounds.to_counterclockwise_error_c(det_sum)
-                   + bounds.to_determinant_error(det))
-    det += ((acx * bcy_tail + bcy * acx_tail)
-            - (acy * bcx_tail + bcx * acy_tail))
+    error_bound = (bounds.to_counterclockwise_error_c(moduli_sum)
+                   + bounds.to_determinant_error(result))
+    result += ((minuend_multiplier_x * minuend_multiplier_y_tail
+                + minuend_multiplier_y * minuend_multiplier_x_tail)
+               - (subtrahend_multiplier_y * subtrahend_multiplier_x_tail
+                  + subtrahend_multiplier_x * subtrahend_multiplier_y_tail))
+    if (result >= error_bound) or (-result >= error_bound):
+        return result
 
-    if (det >= error_bound) or (-det >= error_bound):
-        return det
+    result_expansion = sum_expansions(
+            result_expansion, to_cross_product(minuend_multiplier_x_tail,
+                                               minuend_multiplier_y,
+                                               subtrahend_multiplier_x,
+                                               subtrahend_multiplier_y_tail))
+    result_expansion = sum_expansions(
+            result_expansion, to_cross_product(minuend_multiplier_x,
+                                               minuend_multiplier_y_tail,
+                                               subtrahend_multiplier_x_tail,
+                                               subtrahend_multiplier_y))
+    result_expansion = sum_expansions(
+            result_expansion, to_cross_product(minuend_multiplier_x_tail,
+                                               minuend_multiplier_y_tail,
+                                               subtrahend_multiplier_x_tail,
+                                               subtrahend_multiplier_y_tail))
+    return result_expansion[-1]
 
-    s, s_tail = two_product(acx_tail, bcy)
-    t, t_tail = two_product(acy_tail, bcx)
-    u = two_two_diff(s, s_tail, t, t_tail)
-    c1 = sum_expansions(b, u)
 
-    s, s_tail = two_product(acx, bcy_tail)
-    t, t_tail = two_product(acy, bcx_tail)
-    u = two_two_diff(s, s_tail, t, t_tail)
-    c2 = sum_expansions(c1, u)
-
-    s, s_tail = two_product(acx_tail, bcy_tail)
-    t, t_tail = two_product(acy_tail, bcx_tail)
-    u = two_two_diff(s, s_tail, t, t_tail)
-    return sum_expansions(c2, u)[-1]
+def to_cross_product(minuend_multiplier_x: float,
+                     minuend_multiplier_y: float,
+                     subtrahend_multiplier_x: float,
+                     subtrahend_multiplier_y: float) -> Expansion:
+    minuend, minuend_tail = two_product(minuend_multiplier_x,
+                                        minuend_multiplier_y)
+    subtrahend, subtrahend_tail = two_product(subtrahend_multiplier_y,
+                                              subtrahend_multiplier_x)
+    return two_two_diff(minuend, minuend_tail, subtrahend, subtrahend_tail)

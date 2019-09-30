@@ -28,19 +28,20 @@ def to_determinant_error(determinant: Scalar) -> Scalar:
     return (3 + 8 * local_epsilon) * local_epsilon * abs(determinant)
 
 
-def to_counterclockwise_error_a(det_sum: Scalar) -> Scalar:
-    local_epsilon = type(det_sum)(epsilon)
-    return local_epsilon * (3 + 16 * local_epsilon) * det_sum
+def to_counterclockwise_error_a(moduli_sum: Scalar) -> Scalar:
+    local_epsilon = type(moduli_sum)(epsilon)
+    return local_epsilon * (3 + 16 * local_epsilon) * moduli_sum
 
 
-def to_counterclockwise_error_b(det_sum: Scalar) -> Scalar:
-    local_epsilon = type(det_sum)(epsilon)
-    return local_epsilon * (2 + 12 * local_epsilon) * det_sum
+def to_counterclockwise_error_b(moduli_sum: Scalar) -> Scalar:
+    local_epsilon = type(moduli_sum)(epsilon)
+    return local_epsilon * (2 + 12 * local_epsilon) * moduli_sum
 
 
-def to_counterclockwise_error_c(det_sum: Scalar) -> Scalar:
-    local_epsilon = type(det_sum)(epsilon)
-    return local_epsilon * local_epsilon * (9 + 64 * local_epsilon) * det_sum
+def to_counterclockwise_error_c(moduli_sum: Scalar) -> Scalar:
+    local_epsilon = type(moduli_sum)(epsilon)
+    return (local_epsilon * local_epsilon * (9 + 64 * local_epsilon)
+            * moduli_sum)
 
 
 def to_circumcircle_error_a(permanent: Scalar) -> Scalar:
