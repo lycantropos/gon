@@ -25,27 +25,27 @@ def signed_length(vertex: Point,
         if second_addend >= 0:
             return result
         else:
-            moduli_sum = first_addend - second_addend
+            upper_bound = first_addend - second_addend
     elif first_addend < 0:
         if second_addend <= 0:
             return result
         else:
-            moduli_sum = -first_addend + second_addend
+            upper_bound = -first_addend + second_addend
     else:
         return result
 
-    error_bound = bounds.to_counterclockwise_error_a(moduli_sum)
+    error_bound = bounds.to_signed_measure_first_error(upper_bound)
     if result >= error_bound or -result >= error_bound:
         return result
 
     return _adjusted_signed_length(vertex, first_ray_point, second_ray_point,
-                                   moduli_sum)
+                                   upper_bound)
 
 
 def _adjusted_signed_length(vertex: Point,
                             first_ray_point: Point,
                             second_ray_point: Point,
-                            moduli_sum: Scalar) -> Scalar:
+                            upper_bound: Scalar) -> Scalar:
     left_addend_first_multiplier = first_ray_point.x - vertex.x
     left_addend_second_multiplier = second_ray_point.x - vertex.x
     right_addend_first_multiplier = first_ray_point.y - vertex.y
@@ -59,7 +59,7 @@ def _adjusted_signed_length(vertex: Point,
     result_expansion = two_two_sum(left_addend, left_addend_tail,
                                    right_addend, right_addend_tail)
     result = sum(result_expansion)
-    error_bound = bounds.to_counterclockwise_error_b(moduli_sum)
+    error_bound = bounds.to_signed_measure_second_error(upper_bound)
     if (result >= error_bound) or (-result >= error_bound):
         return result
 
@@ -77,7 +77,7 @@ def _adjusted_signed_length(vertex: Point,
             and not right_addend_second_multiplier_tail):
         return result
 
-    error_bound = (bounds.to_counterclockwise_error_c(moduli_sum)
+    error_bound = (bounds.to_signed_measure_third_error(upper_bound)
                    + bounds.to_determinant_error(result))
     result += ((left_addend_first_multiplier
                 * left_addend_second_multiplier_tail

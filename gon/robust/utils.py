@@ -216,3 +216,17 @@ def scale_expansion(expansion: Expansion, scalar: Scalar) -> Expansion:
     if accumulator or not result:
         result.append(accumulator)
     return result
+
+
+def to_cross_product(minuend_multiplier_x: Scalar,
+                     minuend_multiplier_y: Scalar,
+                     subtrahend_multiplier_x: Scalar,
+                     subtrahend_multiplier_y: Scalar) -> Expansion:
+    """
+    Returns expansion of vectors' planar cross product.
+    """
+    minuend, minuend_tail = two_product(minuend_multiplier_x,
+                                        minuend_multiplier_y)
+    subtrahend, subtrahend_tail = two_product(subtrahend_multiplier_y,
+                                              subtrahend_multiplier_x)
+    return two_two_diff(minuend, minuend_tail, subtrahend, subtrahend_tail)
