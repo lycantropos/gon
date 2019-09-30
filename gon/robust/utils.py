@@ -15,9 +15,9 @@ def two_sum(left: float, right: float) -> Tuple[float, float]:
     result = left + right
     right_virtual = result - left
     left_virtual = result - right_virtual
-    right_roundoff = right - right_virtual
-    left_roundoff = left - left_virtual
-    tail = left_roundoff + right_roundoff
+    right_tail = right - right_virtual
+    left_tail = left - left_virtual
+    tail = left_tail + right_tail
     return result, tail
 
 
