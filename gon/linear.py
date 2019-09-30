@@ -168,7 +168,7 @@ class Interval:
               and _in_interval(other.end, self)):
             if other_start_orientation is Orientation.COLLINEAR:
                 if other.end == self.start:
-                    if (Angle(other.end, other.start, self.end).kind
+                    if (Angle(other.start, other.end, self.end).kind
                             is AngleKind.ACUTE):
                         return IntersectionKind.OVERLAP
                     elif other.end_inclusive:
@@ -176,7 +176,7 @@ class Interval:
                     else:
                         return IntersectionKind.NONE
                 elif other.end == self.end:
-                    if (Angle(other.end, other.start, self.start).kind
+                    if (Angle(other.start, other.end, self.start).kind
                             is AngleKind.ACUTE):
                         return IntersectionKind.OVERLAP
                     elif other.end_inclusive:
