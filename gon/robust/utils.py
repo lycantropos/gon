@@ -64,9 +64,10 @@ def two_two_diff(left: Scalar, left_tail: Scalar,
 def two_two_sum(left: Scalar, left_tail: Scalar,
                 right: Scalar, right_tail: Scalar
                 ) -> Tuple[Scalar, Scalar, Scalar, Scalar]:
-    _j, _0, x0 = two_one_sum(left, left_tail, right_tail)
-    x3, x2, x1 = two_one_sum(_j, _0, right)
-    return x0, x1, x2, x3
+    interim, interim_tail, third_tail = two_one_sum(left, left_tail,
+                                                    right_tail)
+    result, first_tail, second_tail = two_one_sum(interim, interim_tail, right)
+    return third_tail, second_tail, first_tail, result
 
 
 def two_one_sum(left: Scalar, left_tail: Scalar,
