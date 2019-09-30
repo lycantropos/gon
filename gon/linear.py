@@ -6,6 +6,7 @@ from typing import Union
 from reprit.base import generate_repr
 
 from .angular import (Angle,
+                      AngleKind,
                       Orientation)
 from .base import Point
 
@@ -82,29 +83,114 @@ class Interval:
         if self == other:
             return IntersectionKind.OVERLAP
         self_start_orientation = other.orientation_with(self.start)
-        if (self.start_inclusive
-                and self_start_orientation is Orientation.COLLINEAR
-                and _in_interval(self.start, other)):
-            return IntersectionKind.OVERLAP
         self_end_orientation = other.orientation_with(self.end)
-        if (self.end_inclusive
-                and self_end_orientation is Orientation.COLLINEAR
-                and _in_interval(self.end, other)):
-            return IntersectionKind.OVERLAP
+        if (self_start_orientation is Orientation.COLLINEAR
+                and _in_interval(self.start, other)):
+            if self_end_orientation is Orientation.COLLINEAR:
+                if self.start == other.start:
+                    if (Angle(self.end, self.start, other.end).kind
+                            is AngleKind.ACUTE):
+                        return IntersectionKind.OVERLAP
+                    elif self.start_inclusive:
+                        return IntersectionKind.CROSS
+                    else:
+                        return IntersectionKind.NONE
+                elif self.start == other.end:
+                    if (Angle(self.end, self.start, other.start).kind
+                            is AngleKind.ACUTE):
+                        return IntersectionKind.OVERLAP
+                    elif self.start_inclusive:
+                        return IntersectionKind.CROSS
+                    else:
+                        return IntersectionKind.NONE
+                else:
+                    return IntersectionKind.OVERLAP
+            elif self.start_inclusive:
+                return IntersectionKind.CROSS
+            else:
+                return IntersectionKind.NONE
+        elif (self_end_orientation is Orientation.COLLINEAR
+              and _in_interval(self.end, other)):
+            if self_start_orientation is Orientation.COLLINEAR:
+                if self.end == other.start:
+                    if (Angle(self.start, self.end, other.end).kind
+                            is AngleKind.ACUTE):
+                        return IntersectionKind.OVERLAP
+                    elif self.end_inclusive:
+                        return IntersectionKind.CROSS
+                    else:
+                        return IntersectionKind.NONE
+                elif self.end == other.end:
+                    if (Angle(self.start, self.end, other.start).kind
+                            is AngleKind.ACUTE):
+                        return IntersectionKind.OVERLAP
+                    elif self.end_inclusive:
+                        return IntersectionKind.CROSS
+                    else:
+                        return IntersectionKind.NONE
+                else:
+                    return IntersectionKind.OVERLAP
+            elif self.end_inclusive:
+                return IntersectionKind.CROSS
+            else:
+                return IntersectionKind.NONE
         other_start_orientation = self.orientation_with(other.start)
-        if (other.start_inclusive
-                and other_start_orientation is Orientation.COLLINEAR
-                and _in_interval(other.start, self)):
-            return IntersectionKind.OVERLAP
         other_end_orientation = self.orientation_with(other.end)
         if (self_start_orientation * self_end_orientation < 0
                 and other_start_orientation * other_end_orientation < 0):
             return IntersectionKind.CROSS
-        if (other.end_inclusive
-                and other_end_orientation is Orientation.COLLINEAR
-                and _in_interval(other.end, self)):
-            return IntersectionKind.OVERLAP
-        return IntersectionKind.NONE
+        elif (other_start_orientation is Orientation.COLLINEAR
+              and _in_interval(other.start, self)):
+            if other_end_orientation is Orientation.COLLINEAR:
+                if other.start == self.start:
+                    if (Angle(other.end, other.start, self.end).kind
+                            is AngleKind.ACUTE):
+                        return IntersectionKind.OVERLAP
+                    elif other.start_inclusive:
+                        return IntersectionKind.CROSS
+                    else:
+                        return IntersectionKind.NONE
+                elif other.start == self.end:
+                    if (Angle(other.end, other.start, self.start).kind
+                            is AngleKind.ACUTE):
+                        return IntersectionKind.OVERLAP
+                    elif other.start_inclusive:
+                        return IntersectionKind.CROSS
+                    else:
+                        return IntersectionKind.NONE
+                else:
+                    return IntersectionKind.OVERLAP
+            elif other.start_inclusive:
+                return IntersectionKind.CROSS
+            else:
+                return IntersectionKind.NONE
+        elif (other_end_orientation is Orientation.COLLINEAR
+              and _in_interval(other.end, self)):
+            if other_start_orientation is Orientation.COLLINEAR:
+                if other.end == self.start:
+                    if (Angle(other.end, other.start, self.end).kind
+                            is AngleKind.ACUTE):
+                        return IntersectionKind.OVERLAP
+                    elif other.end_inclusive:
+                        return IntersectionKind.CROSS
+                    else:
+                        return IntersectionKind.NONE
+                elif other.end == self.end:
+                    if (Angle(other.end, other.start, self.start).kind
+                            is AngleKind.ACUTE):
+                        return IntersectionKind.OVERLAP
+                    elif other.end_inclusive:
+                        return IntersectionKind.CROSS
+                    else:
+                        return IntersectionKind.NONE
+                else:
+                    return IntersectionKind.OVERLAP
+            elif other.end_inclusive:
+                return IntersectionKind.CROSS
+            else:
+                return IntersectionKind.NONE
+        else:
+            return IntersectionKind.NONE
 
     def orientation_with(self, point: Point) -> Orientation:
         return self.angle_with(point).orientation
@@ -150,6 +236,10 @@ def _in_interval(point: Point, interval: Interval) -> bool:
     elif point == interval.end:
         return interval.end_inclusive
     else:
-        left_x, right_x = sorted([interval.start.x, interval.end.x])
-        bottom_y, top_y = sorted([interval.start.y, interval.end.y])
+        left_x, right_x = ((interval.start.x, interval.end.x)
+                           if interval.start.x < interval.end.x
+                           else (interval.end.x, interval.start.x))
+        bottom_y, top_y = ((interval.start.y, interval.end.y)
+                           if interval.start.y < interval.end.y
+                           else (interval.end.y, interval.start.y))
         return left_x <= point.x <= right_x and bottom_y <= point.y <= top_y
