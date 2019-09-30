@@ -25,8 +25,8 @@ def two_sum(left: Scalar, right: Scalar) -> Tuple[Scalar, Scalar]:
 def split(value: Scalar,
           *,
           splitter: Scalar = bounds.splitter) -> Tuple[Scalar, Scalar]:
-    c = splitter * value
-    result_high = c - (c - value)
+    base = splitter * value
+    result_high = base - (base - value)
     result_low = value - result_high
     return result_low, result_high
 
