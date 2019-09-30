@@ -9,37 +9,10 @@ from .utils import to_sign
 
 
 @unique
-class AngleKind(IntEnum):
-    OBTUSE = -1
-    RIGHT = 0
-    ACUTE = 1
-
-
-@unique
 class Orientation(IntEnum):
     CLOCKWISE = -1
     COLLINEAR = 0
     COUNTERCLOCKWISE = 1
-
-
-class Region(IntEnum):
-    pass
-
-
-@unique
-class Fixed(Region):
-    ZERO_RADIAN = 0
-    HALF_PI_RADIAN = 2
-    PI_RADIAN = 4
-    ONE_AND_A_HALF_RADIAN = 6
-
-
-@unique
-class Quadrant(Region):
-    FIRST = 1
-    SECOND = 3
-    THIRD = 5
-    FOURTH = 7
 
 
 class Angle:
