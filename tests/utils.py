@@ -12,7 +12,8 @@ from lz.replication import replicator
 
 from gon.angular import Orientation
 from gon.base import Point
-from gon.linear import (Segment,
+from gon.linear import (Interval,
+                        Segment,
                         to_segment)
 from gon.shaped.hints import Vertices
 from gon.shaped.subdivisional import QuadEdge
@@ -110,3 +111,15 @@ def is_non_origin_point(point: Point) -> bool:
 
 def reflect_point(point: Point) -> Point:
     return Point(-point.x, -point.y)
+
+
+def reflect_interval(interval: Interval) -> Interval:
+    return Interval(reflect_point(interval.start), reflect_point(interval.end),
+                    start_inclusive=interval.start_inclusive,
+                    end_inclusive=interval.end_inclusive)
+
+
+def inverse_inclusion(interval: Interval) -> Interval:
+    return Interval(interval.start, interval.end,
+                    start_inclusive=not interval.start_inclusive,
+                    end_inclusive=not interval.end_inclusive)
