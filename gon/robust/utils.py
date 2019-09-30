@@ -196,20 +196,20 @@ def scale_expansion(expansion: Expansion, scalar: Scalar) -> Expansion:
     """
     expansion = iter(expansion)
     scalar_low, scalar_high = split(scalar)
-    q, hh = two_product_presplit(next(expansion), scalar,
-                                 scalar_low, scalar_high)
+    accumulator, tail = two_product_presplit(next(expansion), scalar,
+                                             scalar_low, scalar_high)
     result = []
-    if hh:
-        result.append(hh)
+    if tail:
+        result.append(tail)
     for element in expansion:
-        product1, product0 = two_product_presplit(element, scalar,
-                                                  scalar_low, scalar_high)
-        sum_, hh = two_sum(q, product0)
-        if hh:
-            result.append(hh)
-        q, hh = fast_two_sum(product1, sum_)
-        if hh:
-            result.append(hh)
-    if q or not result:
-        result.append(q)
+        product, product_tail = two_product_presplit(element, scalar,
+                                                     scalar_low, scalar_high)
+        interim, tail = two_sum(accumulator, product_tail)
+        if tail:
+            result.append(tail)
+        accumulator, tail = fast_two_sum(product, interim)
+        if tail:
+            result.append(tail)
+    if accumulator or not result:
+        result.append(accumulator)
     return result
