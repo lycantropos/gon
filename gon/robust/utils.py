@@ -1,17 +1,18 @@
 from typing import (Sequence,
                     Tuple)
 
+from gon.hints import Scalar
 from . import bounds
 
 
-def fast_two_sum(left: float, right: float) -> Tuple[float, float]:
+def fast_two_sum(left: Scalar, right: Scalar) -> Tuple[Scalar, Scalar]:
     result = left + right
     right_virtual = result - left
     tail = right - right_virtual
     return result, tail
 
 
-def two_sum(left: float, right: float) -> Tuple[float, float]:
+def two_sum(left: Scalar, right: Scalar) -> Tuple[Scalar, Scalar]:
     result = left + right
     right_virtual = result - left
     left_virtual = result - right_virtual
@@ -21,17 +22,17 @@ def two_sum(left: float, right: float) -> Tuple[float, float]:
     return result, tail
 
 
-def split(value: float,
+def split(value: Scalar,
           *,
-          splitter: float = bounds.splitter) -> Tuple[float, float]:
+          splitter: Scalar = bounds.splitter) -> Tuple[Scalar, Scalar]:
     c = splitter * value
     result_high = c - (c - value)
     result_low = value - result_high
     return result_low, result_high
 
 
-def two_product_presplit(left: float, right: float, right_low: float,
-                         right_high: float) -> Tuple[float, float]:
+def two_product_presplit(left: Scalar, right: Scalar, right_low: Scalar,
+                         right_high: Scalar) -> Tuple[Scalar, Scalar]:
     result = left * right
     left_low, left_high = split(left)
     first_error = result - left_high * right_high
@@ -41,7 +42,7 @@ def two_product_presplit(left: float, right: float, right_low: float,
     return result, tail
 
 
-def two_product(left: float, right: float) -> Tuple[float, float]:
+def two_product(left: Scalar, right: Scalar) -> Tuple[Scalar, Scalar]:
     result = left * right
     left_low, left_high = split(left)
     right_low, right_high = split(right)
@@ -52,50 +53,50 @@ def two_product(left: float, right: float) -> Tuple[float, float]:
     return result, tail
 
 
-def two_two_diff(left: float, left_tail: float,
-                 right: float, right_tail: float
-                 ) -> Tuple[float, float, float, float]:
+def two_two_diff(left: Scalar, left_tail: Scalar,
+                 right: Scalar, right_tail: Scalar
+                 ) -> Tuple[Scalar, Scalar, Scalar, Scalar]:
     _j, _0, x0 = two_one_diff(left, left_tail, right_tail)
     x3, x2, x1 = two_one_diff(_j, _0, right)
     return x0, x1, x2, x3
 
 
-def two_two_sum(left: float, left_tail: float,
-                right: float, right_tail: float
-                ) -> Tuple[float, float, float, float]:
+def two_two_sum(left: Scalar, left_tail: Scalar,
+                right: Scalar, right_tail: Scalar
+                ) -> Tuple[Scalar, Scalar, Scalar, Scalar]:
     _j, _0, x0 = two_one_sum(left, left_tail, right_tail)
     x3, x2, x1 = two_one_sum(_j, _0, right)
     return x0, x1, x2, x3
 
 
-def two_one_sum(left: float, left_tail: float,
-                right: float) -> Tuple[float, float, float]:
+def two_one_sum(left: Scalar, left_tail: Scalar,
+                right: Scalar) -> Tuple[Scalar, Scalar, Scalar]:
     _i, x0 = two_sum(left_tail, right)
     x2, x1 = two_sum(left, _i)
     return x2, x1, x0
 
 
-def two_one_diff(left: float, left_tail: float,
-                 right: float) -> Tuple[float, float, float]:
+def two_one_diff(left: Scalar, left_tail: Scalar,
+                 right: Scalar) -> Tuple[Scalar, Scalar, Scalar]:
     _i, x0 = two_diff(left_tail, right)
     x2, x1 = two_sum(left, _i)
     return x2, x1, x0
 
 
-def two_diff(left: float, right: float) -> Tuple[float, float]:
+def two_diff(left: Scalar, right: Scalar) -> Tuple[Scalar, Scalar]:
     result = left - right
     return result, two_diff_tail(left, right, result)
 
 
-def two_diff_tail(left: float, right: float, diff: float) -> float:
+def two_diff_tail(left: Scalar, right: Scalar, diff: Scalar) -> Scalar:
     right_virtual = left - diff
     left_virtual = diff + right_virtual
-    right_roundoff = right_virtual - right
-    left_roundoff = left - left_virtual
-    return left_roundoff + right_roundoff
+    right_error = right_virtual - right
+    left_error = left - left_virtual
+    return left_error + right_error
 
 
-def square(value: float) -> Tuple[float, float]:
+def square(value: Scalar) -> Tuple[Scalar, Scalar]:
     result = value * value
     value_low, value_high = split(value)
     first_error = result - value_high * value_high
@@ -104,7 +105,7 @@ def square(value: float) -> Tuple[float, float]:
     return result, tail
 
 
-Expansion = Sequence[float]
+Expansion = Sequence[Scalar]
 
 
 def sum_expansions(left_expansion: Expansion,
@@ -189,7 +190,7 @@ def sum_expansions(left_expansion: Expansion,
     return result
 
 
-def scale_expansion(expansion: Expansion, scalar: float) -> Expansion:
+def scale_expansion(expansion: Expansion, scalar: Scalar) -> Expansion:
     """
     Multiplies an expansion by a scalar with zero components elimination.
     """
