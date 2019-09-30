@@ -4,7 +4,7 @@ from enum import (IntEnum,
 from reprit.base import generate_repr
 
 from .base import Point
-from .robust import counterclockwise
+from .robust import parallelogram
 from .utils import to_sign
 
 
@@ -40,7 +40,7 @@ class Angle:
 
     @property
     def orientation(self) -> Orientation:
-        determinant = counterclockwise.determinant(self._vertex,
-                                                   self._first_ray_point,
-                                                   self._second_ray_point)
-        return Orientation(to_sign(determinant))
+        return Orientation(to_sign(
+                parallelogram.signed_area(self._vertex,
+                                          self._first_ray_point,
+                                          self._second_ray_point)))

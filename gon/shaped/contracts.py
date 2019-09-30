@@ -1,6 +1,6 @@
 from gon.angular import Orientation
 from gon.base import Point
-from gon.robust import circumcircle
+from gon.robust import cocircular
 from .hints import Vertices
 from .utils import (_to_non_neighbours,
                     to_angles,
@@ -36,4 +36,4 @@ def self_intersects(vertices: Vertices) -> bool:
 
 
 def is_point_inside_circumcircle(vertices: Vertices, point: Point) -> bool:
-    return circumcircle.determinant(*vertices, point) > 0
+    return cocircular.determinant(*vertices, point) > 0

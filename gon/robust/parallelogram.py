@@ -1,4 +1,5 @@
 from gon.base import Point
+from gon.hints import Scalar
 from . import bounds
 from .utils import (Expansion,
                     sum_expansions,
@@ -7,9 +8,13 @@ from .utils import (Expansion,
                     two_two_diff)
 
 
-def determinant(vertex: Point,
+def signed_area(vertex: Point,
                 first_ray_point: Point,
-                second_ray_point: Point) -> float:
+                second_ray_point: Point) -> Scalar:
+    """
+    Calculates signed area of parallelogram
+    built on segments of rays with common vertex.
+    """
     minuend = ((first_ray_point.x - vertex.x)
                * (second_ray_point.y - vertex.y))
     subtrahend = ((first_ray_point.y - vertex.y)
@@ -33,14 +38,14 @@ def determinant(vertex: Point,
     if result >= error_bound or -result >= error_bound:
         return result
 
-    return determinant_adapt(vertex, first_ray_point, second_ray_point,
-                             moduli_sum)
+    return _adjusted_signed_area(vertex, first_ray_point, second_ray_point,
+                                 moduli_sum)
 
 
-def determinant_adapt(vertex: Point,
-                      first_ray_point: Point,
-                      second_ray_point: Point,
-                      moduli_sum: float) -> float:
+def _adjusted_signed_area(vertex: Point,
+                          first_ray_point: Point,
+                          second_ray_point: Point,
+                          moduli_sum: Scalar) -> Scalar:
     minuend_multiplier_x = first_ray_point.x - vertex.x
     minuend_multiplier_y = second_ray_point.y - vertex.y
     subtrahend_multiplier_x = second_ray_point.x - vertex.x
@@ -82,27 +87,27 @@ def determinant_adapt(vertex: Point,
         return result
 
     result_expansion = sum_expansions(
-            result_expansion, to_cross_product(minuend_multiplier_x_tail,
-                                               minuend_multiplier_y,
-                                               subtrahend_multiplier_x,
-                                               subtrahend_multiplier_y_tail))
+            result_expansion, _to_cross_product(minuend_multiplier_x_tail,
+                                                minuend_multiplier_y,
+                                                subtrahend_multiplier_x,
+                                                subtrahend_multiplier_y_tail))
     result_expansion = sum_expansions(
-            result_expansion, to_cross_product(minuend_multiplier_x,
-                                               minuend_multiplier_y_tail,
-                                               subtrahend_multiplier_x_tail,
-                                               subtrahend_multiplier_y))
+            result_expansion, _to_cross_product(minuend_multiplier_x,
+                                                minuend_multiplier_y_tail,
+                                                subtrahend_multiplier_x_tail,
+                                                subtrahend_multiplier_y))
     result_expansion = sum_expansions(
-            result_expansion, to_cross_product(minuend_multiplier_x_tail,
-                                               minuend_multiplier_y_tail,
-                                               subtrahend_multiplier_x_tail,
-                                               subtrahend_multiplier_y_tail))
+            result_expansion, _to_cross_product(minuend_multiplier_x_tail,
+                                                minuend_multiplier_y_tail,
+                                                subtrahend_multiplier_x_tail,
+                                                subtrahend_multiplier_y_tail))
     return result_expansion[-1]
 
 
-def to_cross_product(minuend_multiplier_x: float,
-                     minuend_multiplier_y: float,
-                     subtrahend_multiplier_x: float,
-                     subtrahend_multiplier_y: float) -> Expansion:
+def _to_cross_product(minuend_multiplier_x: Scalar,
+                      minuend_multiplier_y: Scalar,
+                      subtrahend_multiplier_x: Scalar,
+                      subtrahend_multiplier_y: Scalar) -> Expansion:
     minuend, minuend_tail = two_product(minuend_multiplier_x,
                                         minuend_multiplier_y)
     subtrahend, subtrahend_tail = two_product(subtrahend_multiplier_y,

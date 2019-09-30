@@ -1,4 +1,5 @@
 from gon.base import Point
+from gon.hints import Scalar
 from . import bounds
 from .utils import (scale_expansion,
                     square,
@@ -12,7 +13,11 @@ from .utils import (scale_expansion,
 def determinant(first_vertex: Point,
                 second_vertex: Point,
                 third_vertex: Point,
-                point: Point) -> float:
+                point: Point) -> Scalar:
+    """
+    Calculates determinant of linear equations' system
+    for checking if points lie on the same circle.
+    """
     adx, ady = first_vertex.x - point.x, first_vertex.y - point.y
     bdx, bdy = second_vertex.x - point.x, second_vertex.y - point.y
     cdx, cdy = third_vertex.x - point.x, third_vertex.y - point.y
@@ -42,7 +47,7 @@ def determinant_adapt(first_vertex: Point,
                       second_vertex: Point,
                       third_vertex: Point,
                       point: Point,
-                      permanent: float) -> float:
+                      permanent: Scalar) -> Scalar:
     adx, ady = first_vertex.x - point.x, first_vertex.y - point.y
     bdx, bdy = second_vertex.x - point.x, second_vertex.y - point.y
     cdx, cdy = third_vertex.x - point.x, third_vertex.y - point.y
@@ -70,10 +75,10 @@ def determinant_adapt(first_vertex: Point,
 
     result_expansion = sum_expansions(sum_expansions(a_det, b_det), c_det)
 
-    det = sum(result_expansion)
+    result = sum(result_expansion)
     error_bound = bounds.to_circumcircle_error_b(permanent)
-    if det >= error_bound or -det >= error_bound:
-        return det
+    if result >= error_bound or -result >= error_bound:
+        return result
 
     adx_tail = two_diff_tail(first_vertex.x, point.x, adx)
     ady_tail = two_diff_tail(first_vertex.y, point.y, ady)
@@ -85,30 +90,33 @@ def determinant_adapt(first_vertex: Point,
     if (not adx_tail and not ady_tail
             and not bdx_tail and not bdy_tail
             and not cdx_tail and not cdy_tail):
-        return det
+        return result
 
     error_bound = (bounds.to_circumcircle_error_c(permanent)
-                   + bounds.to_determinant_error(det))
+                   + bounds.to_determinant_error(result))
 
-    det += (((adx * adx + ady * ady) * ((bdx * cdy_tail + cdy * bdx_tail)
-                                        - (bdy * cdx_tail + cdx * bdy_tail))
-             + 2.0 * (adx * adx_tail + ady * ady_tail)
-             * (bdx * cdy - bdy * cdx))
-            + ((bdx * bdx + bdy * bdy) * ((cdx * ady_tail + ady * cdx_tail)
-                                          - (cdy * adx_tail + adx * cdy_tail))
-               + 2.0 * (bdx * bdx_tail + bdy * bdy_tail)
-               * (cdx * ady - cdy * adx))
-            + ((cdx * cdx + cdy * cdy) * ((adx * bdy_tail + bdy * adx_tail)
-                                          - (ady * bdx_tail + bdx * ady_tail))
-               + 2.0 * (cdx * cdx_tail + cdy * cdy_tail)
-               * (adx * bdy - ady * bdx)))
+    result += (((adx * adx + ady * ady)
+                * ((bdx * cdy_tail + cdy * bdx_tail)
+                   - (bdy * cdx_tail + cdx * bdy_tail))
+                + 2 * (adx * adx_tail + ady * ady_tail)
+                * (bdx * cdy - bdy * cdx))
+               + ((bdx * bdx + bdy * bdy)
+                  * ((cdx * ady_tail + ady * cdx_tail)
+                     - (cdy * adx_tail + adx * cdy_tail))
+                  + 2 * (bdx * bdx_tail + bdy * bdy_tail)
+                  * (cdx * ady - cdy * adx))
+               + ((cdx * cdx + cdy * cdy)
+                  * ((adx * bdy_tail + bdy * adx_tail)
+                     - (ady * bdx_tail + bdx * ady_tail))
+                  + 2 * (cdx * cdx_tail + cdy * cdy_tail)
+                  * (adx * bdy - ady * bdx)))
 
-    if det >= error_bound or -det >= error_bound:
-        return det
+    if result >= error_bound or -result >= error_bound:
+        return result
 
-    aa = (0.0,) * 4
-    bb = (0.0,) * 4
-    cc = (0.0,) * 4
+    aa = (0,) * 4
+    bb = (0,) * 4
+    cc = (0,) * 4
 
     if bdx_tail or bdy_tail or cdx_tail or cdy_tail:
         adx_squared, adx_squared_tail = square(adx)
@@ -130,7 +138,7 @@ def determinant_adapt(first_vertex: Point,
 
     if adx_tail:
         axtbc = scale_expansion(bc, adx_tail)
-        temp16a = scale_expansion(axtbc, 2.0 * adx)
+        temp16a = scale_expansion(axtbc, 2 * adx)
         axtcc = scale_expansion(cc, adx_tail)
         temp16b = scale_expansion(axtcc, bdy)
         axtbb = scale_expansion(bb, adx_tail)
@@ -141,7 +149,7 @@ def determinant_adapt(first_vertex: Point,
 
     if ady_tail:
         aytbc = scale_expansion(bc, ady_tail)
-        temp16a = scale_expansion(aytbc, 2.0 * ady)
+        temp16a = scale_expansion(aytbc, 2 * ady)
         aytbb = scale_expansion(bb, ady_tail)
         temp16b = scale_expansion(aytbb, cdx)
         aytcc = scale_expansion(cc, ady_tail)
@@ -152,7 +160,7 @@ def determinant_adapt(first_vertex: Point,
 
     if bdx_tail:
         bxtca = scale_expansion(ca, bdx_tail)
-        temp16a = scale_expansion(bxtca, 2.0 * bdx)
+        temp16a = scale_expansion(bxtca, 2 * bdx)
         bxtaa = scale_expansion(aa, bdx_tail)
         temp16b = scale_expansion(bxtaa, cdy)
         bxtcc = scale_expansion(cc, bdx_tail)
@@ -163,7 +171,7 @@ def determinant_adapt(first_vertex: Point,
 
     if bdy_tail:
         bytca = scale_expansion(ca, bdy_tail)
-        temp16a = scale_expansion(bytca, 2.0 * bdy)
+        temp16a = scale_expansion(bytca, 2 * bdy)
         bytcc = scale_expansion(cc, bdy_tail)
         temp16b = scale_expansion(bytcc, adx)
         bytaa = scale_expansion(aa, bdy_tail)
@@ -174,7 +182,7 @@ def determinant_adapt(first_vertex: Point,
 
     if cdx_tail:
         cxtab = scale_expansion(ab, cdx_tail)
-        temp16a = scale_expansion(cxtab, 2.0 * cdx)
+        temp16a = scale_expansion(cxtab, 2 * cdx)
         cxtbb = scale_expansion(bb, cdx_tail)
         temp16b = scale_expansion(cxtbb, ady)
         cxtaa = scale_expansion(aa, cdx_tail)
@@ -185,7 +193,7 @@ def determinant_adapt(first_vertex: Point,
 
     if cdy_tail:
         cytab = scale_expansion(ab, cdy_tail)
-        temp16a = scale_expansion(cytab, 2.0 * cdy)
+        temp16a = scale_expansion(cytab, 2 * cdy)
         cytaa = scale_expansion(aa, cdy_tail)
         temp16b = scale_expansion(cytaa, bdx)
         cytbb = scale_expansion(bb, cdy_tail)
@@ -212,12 +220,12 @@ def determinant_adapt(first_vertex: Point,
             tj, tj_tail = two_product(cdx_tail, bdy_tail)
             bctt = two_two_diff(ti, ti_tail, tj, tj_tail)
         else:
-            bct = bctt = (0.0,)
+            bct = bctt = (0,)
 
         if adx_tail:
             temp16a = scale_expansion(axtbc, adx_tail)
             axtbct = scale_expansion(bct, adx_tail)
-            temp32a = scale_expansion(axtbct, 2.0 * adx)
+            temp32a = scale_expansion(axtbct, 2 * adx)
             temp48 = sum_expansions(temp16a, temp32a)
             result_expansion = sum_expansions(result_expansion, temp48)
 
@@ -233,7 +241,7 @@ def determinant_adapt(first_vertex: Point,
 
             temp32a = scale_expansion(axtbct, adx_tail)
             axtbctt = scale_expansion(bctt, adx_tail)
-            temp16a = scale_expansion(axtbctt, 2.0 * adx)
+            temp16a = scale_expansion(axtbctt, 2 * adx)
             temp16b = scale_expansion(axtbctt, adx_tail)
             temp32b = sum_expansions(temp16a, temp16b)
             temp64 = sum_expansions(temp32a, temp32b)
@@ -242,13 +250,13 @@ def determinant_adapt(first_vertex: Point,
         if ady_tail:
             temp16a = scale_expansion(aytbc, ady_tail)
             aytbct = scale_expansion(bct, ady_tail)
-            temp32a = scale_expansion(aytbct, 2.0 * ady)
+            temp32a = scale_expansion(aytbct, 2 * ady)
             temp48 = sum_expansions(temp16a, temp32a)
             result_expansion = sum_expansions(result_expansion, temp48)
 
             temp32a = scale_expansion(aytbct, ady_tail)
             aytbctt = scale_expansion(bctt, ady_tail)
-            temp16a = scale_expansion(aytbctt, 2.0 * ady)
+            temp16a = scale_expansion(aytbctt, 2 * ady)
             temp16b = scale_expansion(aytbctt, ady_tail)
             temp32b = sum_expansions(temp16a, temp16b)
             temp64 = sum_expansions(temp32a, temp32b)
@@ -270,12 +278,12 @@ def determinant_adapt(first_vertex: Point,
             tj, tj_tail = two_product(adx_tail, cdy_tail)
             catt = two_two_diff(ti, ti_tail, tj, tj_tail)
         else:
-            cat = catt = (0.0,)
+            cat = catt = (0,)
 
         if bdx_tail:
             temp16a = scale_expansion(bxtca, bdx_tail)
             bxtcat = scale_expansion(cat, bdx_tail)
-            temp32a = scale_expansion(bxtcat, 2.0 * bdx)
+            temp32a = scale_expansion(bxtcat, 2 * bdx)
             temp48 = sum_expansions(temp16a, temp32a)
             result_expansion = sum_expansions(result_expansion, temp48)
 
@@ -291,7 +299,7 @@ def determinant_adapt(first_vertex: Point,
 
             temp32a = scale_expansion(bxtcat, bdx_tail)
             bxtcatt = scale_expansion(catt, bdx_tail)
-            temp16a = scale_expansion(bxtcatt, 2.0 * bdx)
+            temp16a = scale_expansion(bxtcatt, 2 * bdx)
             temp16b = scale_expansion(bxtcatt, bdx_tail)
             temp32b = sum_expansions(temp16a, temp16b)
             temp64 = sum_expansions(temp32a, temp32b)
@@ -300,12 +308,12 @@ def determinant_adapt(first_vertex: Point,
         if bdy_tail:
             temp16a = scale_expansion(bytca, bdy_tail)
             bytcat = scale_expansion(cat, bdy_tail)
-            temp32a = scale_expansion(bytcat, 2.0 * bdy)
+            temp32a = scale_expansion(bytcat, 2 * bdy)
             temp48 = sum_expansions(temp16a, temp32a)
             result_expansion = sum_expansions(result_expansion, temp48)
             temp32a = scale_expansion(bytcat, bdy_tail)
             bytcatt = scale_expansion(catt, bdy_tail)
-            temp16a = scale_expansion(bytcatt, 2.0 * bdy)
+            temp16a = scale_expansion(bytcatt, 2 * bdy)
             temp16b = scale_expansion(bytcatt, bdy_tail)
             temp32b = sum_expansions(temp16a, temp16b)
             temp64 = sum_expansions(temp32a, temp32b)
@@ -328,12 +336,12 @@ def determinant_adapt(first_vertex: Point,
             tj, tj_tail = two_product(bdx_tail, ady_tail)
             abtt = two_two_diff(ti, ti_tail, tj, tj_tail)
         else:
-            abt = abtt = (0.0,)
+            abt = abtt = (0,)
 
         if cdx_tail:
             temp16a = scale_expansion(cxtab, cdx_tail)
             cxtabt = scale_expansion(abt, cdx_tail)
-            temp32a = scale_expansion(cxtabt, 2.0 * cdx)
+            temp32a = scale_expansion(cxtabt, 2 * cdx)
             temp48 = sum_expansions(temp16a, temp32a)
             result_expansion = sum_expansions(result_expansion, temp48)
 
@@ -349,7 +357,7 @@ def determinant_adapt(first_vertex: Point,
 
             temp32a = scale_expansion(cxtabt, cdx_tail)
             cxtabtt = scale_expansion(abtt, cdx_tail)
-            temp16a = scale_expansion(cxtabtt, 2.0 * cdx)
+            temp16a = scale_expansion(cxtabtt, 2 * cdx)
             temp16b = scale_expansion(cxtabtt, cdx_tail)
             temp32b = sum_expansions(temp16a, temp16b)
             temp64 = sum_expansions(temp32a, temp32b)
@@ -358,12 +366,12 @@ def determinant_adapt(first_vertex: Point,
         if cdy_tail:
             temp16a = scale_expansion(cytab, cdy_tail)
             cytabt = scale_expansion(abt, cdy_tail)
-            temp32a = scale_expansion(cytabt, 2.0 * cdy)
+            temp32a = scale_expansion(cytabt, 2 * cdy)
             temp48 = sum_expansions(temp16a, temp32a)
             result_expansion = sum_expansions(result_expansion, temp48)
             temp32a = scale_expansion(cytabt, cdy_tail)
             cytabtt = scale_expansion(abtt, cdy_tail)
-            temp16a = scale_expansion(cytabtt, 2.0 * cdy)
+            temp16a = scale_expansion(cytabtt, 2 * cdy)
             temp16b = scale_expansion(cytabtt, cdy_tail)
             temp32b = sum_expansions(temp16a, temp16b)
             temp64 = sum_expansions(temp32a, temp32b)
