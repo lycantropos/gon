@@ -15,22 +15,22 @@ def signed_length(vertex: Point,
     Calculates signed length of projection
     built for segments of rays with common vertex.
     """
-    minuend = ((first_ray_point.x - vertex.x)
-               * (second_ray_point.y - vertex.y))
-    subtrahend = ((first_ray_point.y - vertex.y)
-                  * (second_ray_point.x - vertex.x))
-    result = minuend - subtrahend
+    first_addend = ((first_ray_point.x - vertex.x)
+                    * (second_ray_point.x - vertex.x))
+    second_addend = ((first_ray_point.y - vertex.y)
+                     * (second_ray_point.y - vertex.y))
+    result = first_addend + second_addend
 
-    if minuend > 0:
-        if subtrahend <= 0:
+    if first_addend > 0:
+        if second_addend >= 0:
             return result
         else:
-            moduli_sum = minuend + subtrahend
-    elif minuend < 0.0:
-        if subtrahend >= 0.0:
+            moduli_sum = first_addend - second_addend
+    elif first_addend < 0:
+        if second_addend <= 0:
             return result
         else:
-            moduli_sum = -minuend - subtrahend
+            moduli_sum = -first_addend + second_addend
     else:
         return result
 
