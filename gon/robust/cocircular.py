@@ -1,379 +1,472 @@
 from gon.base import Point
 from gon.hints import Scalar
 from . import bounds
-from .utils import (scale_expansion,
+from .utils import (Expansion,
+                    scale_expansion,
                     square,
                     sum_expansions,
+                    to_cross_product,
                     two_diff_tail,
                     two_product,
                     two_two_diff,
                     two_two_sum)
 
 
-def determinant(first_vertex: Point,
-                second_vertex: Point,
-                third_vertex: Point,
-                point: Point) -> Scalar:
+def determinant(first_point: Point, second_point: Point,
+                third_point: Point, fourth_point: Point) -> Scalar:
     """
     Calculates determinant of linear equations' system
-    for checking if points lie on the same circle.
+    for checking if four points lie on the same circle.
     """
-    adx, ady = first_vertex.x - point.x, first_vertex.y - point.y
-    bdx, bdy = second_vertex.x - point.x, second_vertex.y - point.y
-    cdx, cdy = third_vertex.x - point.x, third_vertex.y - point.y
+    first_vector_x, first_vector_y = (first_point.x - fourth_point.x,
+                                      first_point.y - fourth_point.y)
+    second_vector_x, second_vector_y = (second_point.x - fourth_point.x,
+                                        second_point.y - fourth_point.y)
+    third_vector_x, third_vector_y = (third_point.x - fourth_point.x,
+                                      third_point.y - fourth_point.y)
 
-    adx_bdy, adx_cdy = adx * bdy, adx * cdy
-    bdx_ady, bdx_cdy = bdx * ady, bdx * cdy
-    cdx_ady, cdx_bdy = cdx * ady, cdx * bdy
+    first_point_squared_distance = (first_vector_x * first_vector_x
+                                    + first_vector_y * first_vector_y)
+    second_point_squared_distance = (second_vector_x * second_vector_x
+                                     + second_vector_y * second_vector_y)
+    third_point_squared_distance = (third_vector_x * third_vector_x
+                                    + third_vector_y * third_vector_y)
 
-    a_lift = adx * adx + ady * ady
-    b_lift = bdx * bdx + bdy * bdy
-    c_lift = cdx * cdx + cdy * cdy
+    first_vector_x_second_vector_y = first_vector_x * second_vector_y
+    first_vector_x_third_vector_y = first_vector_x * third_vector_y
+    second_vector_x_first_vector_y = second_vector_x * first_vector_y
+    second_vector_x_third_vector_y = second_vector_x * third_vector_y
+    third_vector_x_first_vector_y = third_vector_x * first_vector_y
+    third_vector_x_second_vector_y = third_vector_x * second_vector_y
 
-    det = (a_lift * (bdx_cdy - cdx_bdy)
-           + b_lift * (cdx_ady - adx_cdy)
-           + c_lift * (adx_bdy - bdx_ady))
-    permanent = ((abs(bdx_cdy) + abs(cdx_bdy)) * a_lift
-                 + (abs(cdx_ady) + abs(adx_cdy)) * b_lift
-                 + (abs(adx_bdy) + abs(bdx_ady)) * c_lift)
-    error_bound = bounds.to_circumcircle_error_a(permanent)
-    if det > error_bound or -det > error_bound:
-        return det
-    return determinant_adapt(first_vertex, second_vertex, third_vertex, point,
-                             permanent)
+    result = (first_point_squared_distance
+              * (second_vector_x_third_vector_y
+                 - third_vector_x_second_vector_y)
+              + second_point_squared_distance
+              * (third_vector_x_first_vector_y
+                 - first_vector_x_third_vector_y)
+              + third_point_squared_distance
+              * (first_vector_x_second_vector_y
+                 - second_vector_x_first_vector_y))
+    upper_bound = (first_point_squared_distance
+                   * (abs(second_vector_x_third_vector_y)
+                      + abs(third_vector_x_second_vector_y))
+                   + second_point_squared_distance
+                   * (abs(third_vector_x_first_vector_y)
+                      + abs(first_vector_x_third_vector_y))
+                   + third_point_squared_distance
+                   * (abs(first_vector_x_second_vector_y)
+                      + abs(second_vector_x_first_vector_y)))
+    error_bound = bounds.to_cocircular_first_error(upper_bound)
+    if result > error_bound or -result > error_bound:
+        return result
+    return _adjusted_determinant(first_point, second_point,
+                                 third_point, fourth_point,
+                                 upper_bound)
 
 
-def determinant_adapt(first_vertex: Point,
-                      second_vertex: Point,
-                      third_vertex: Point,
-                      point: Point,
-                      permanent: Scalar) -> Scalar:
-    adx, ady = first_vertex.x - point.x, first_vertex.y - point.y
-    bdx, bdy = second_vertex.x - point.x, second_vertex.y - point.y
-    cdx, cdy = third_vertex.x - point.x, third_vertex.y - point.y
+def _adjusted_determinant(first_point: Point,
+                          second_point: Point,
+                          third_point: Point,
+                          fourth_point: Point,
+                          upper_bound: Scalar) -> Scalar:
+    first_vector_x, first_vector_y = (first_point.x - fourth_point.x,
+                                      first_point.y - fourth_point.y)
+    second_vector_x, second_vector_y = (second_point.x - fourth_point.x,
+                                        second_point.y - fourth_point.y)
+    third_vector_x, third_vector_y = (third_point.x - fourth_point.x,
+                                      third_point.y - fourth_point.y)
 
-    bdx_cdy, bdx_cdy_tail = two_product(bdx, cdy)
-    cdx_bdy, cdx_bdy_tail = two_product(cdx, bdy)
-    bc = two_two_diff(bdx_cdy, bdx_cdy_tail, cdx_bdy, cdx_bdy_tail)
-    axbc, aybc = scale_expansion(bc, adx), scale_expansion(bc, ady)
-    a_det = sum_expansions(scale_expansion(axbc, adx),
-                           scale_expansion(aybc, ady))
+    second_third_vectors_cross_product = to_cross_product(
+            second_vector_x, third_vector_y, third_vector_x, second_vector_y)
+    first_addend = _to_first_addend(first_vector_x, first_vector_y,
+                                    second_third_vectors_cross_product)
 
-    cdx_ady, cdx_ady_tail = two_product(cdx, ady)
-    adx_cdy, adx_cdy_tail = two_product(adx, cdy)
-    ca = two_two_diff(cdx_ady, cdx_ady_tail, adx_cdy, adx_cdy_tail)
-    bxca, byca = scale_expansion(ca, bdx), scale_expansion(ca, bdy)
-    b_det = sum_expansions(scale_expansion(bxca, bdx),
-                           scale_expansion(byca, bdy))
+    third_first_vectors_cross_product = to_cross_product(
+            third_vector_x, first_vector_y, first_vector_x, third_vector_y)
+    second_addend = _to_first_addend(second_vector_x, second_vector_y,
+                                     third_first_vectors_cross_product)
 
-    adx_bdy, adx_bdy_tail = two_product(adx, bdy)
-    bdx_ady, bdx_ady_tail = two_product(bdx, ady)
-    ab = two_two_diff(adx_bdy, adx_bdy_tail, bdx_ady, bdx_ady_tail)
-    cxab, cyab = scale_expansion(ab, cdx), scale_expansion(ab, cdy)
-    c_det = sum_expansions(scale_expansion(cxab, cdx),
-                           scale_expansion(cyab, cdy))
+    first_second_vectors_cross_product = to_cross_product(
+            first_vector_x, second_vector_y, second_vector_x, first_vector_y)
+    third_addend = _to_first_addend(third_vector_x, third_vector_y,
+                                    first_second_vectors_cross_product)
 
-    result_expansion = sum_expansions(sum_expansions(a_det, b_det), c_det)
-
+    result_expansion = sum_expansions(sum_expansions(first_addend,
+                                                     second_addend),
+                                      third_addend)
     result = sum(result_expansion)
-    error_bound = bounds.to_circumcircle_error_b(permanent)
+    error_bound = bounds.to_cocircular_second_error(upper_bound)
     if result >= error_bound or -result >= error_bound:
         return result
 
-    adx_tail = two_diff_tail(first_vertex.x, point.x, adx)
-    ady_tail = two_diff_tail(first_vertex.y, point.y, ady)
-    bdx_tail = two_diff_tail(second_vertex.x, point.x, bdx)
-    bdy_tail = two_diff_tail(second_vertex.y, point.y, bdy)
-    cdx_tail = two_diff_tail(third_vertex.x, point.x, cdx)
-    cdy_tail = two_diff_tail(third_vertex.y, point.y, cdy)
+    first_vector_x_tail = two_diff_tail(first_point.x, fourth_point.x,
+                                        first_vector_x)
+    first_vector_y_tail = two_diff_tail(first_point.y, fourth_point.y,
+                                        first_vector_y)
+    second_vector_x_tail = two_diff_tail(second_point.x, fourth_point.x,
+                                         second_vector_x)
+    second_vector_y_tail = two_diff_tail(second_point.y, fourth_point.y,
+                                         second_vector_y)
+    third_vector_x_tail = two_diff_tail(third_point.x, fourth_point.x,
+                                        third_vector_x)
+    third_vector_y_tail = two_diff_tail(third_point.y, fourth_point.y,
+                                        third_vector_y)
 
-    if (not adx_tail and not ady_tail
-            and not bdx_tail and not bdy_tail
-            and not cdx_tail and not cdy_tail):
+    if (not first_vector_x_tail and not first_vector_y_tail
+            and not second_vector_x_tail and not second_vector_y_tail
+            and not third_vector_x_tail and not third_vector_y_tail):
         return result
 
-    error_bound = (bounds.to_circumcircle_error_c(permanent)
+    error_bound = (bounds.to_cocircular_third_error(upper_bound)
                    + bounds.to_determinant_error(result))
-
-    result += (((adx * adx + ady * ady)
-                * ((bdx * cdy_tail + cdy * bdx_tail)
-                   - (bdy * cdx_tail + cdx * bdy_tail))
-                + 2 * (adx * adx_tail + ady * ady_tail)
-                * (bdx * cdy - bdy * cdx))
-               + ((bdx * bdx + bdy * bdy)
-                  * ((cdx * ady_tail + ady * cdx_tail)
-                     - (cdy * adx_tail + adx * cdy_tail))
-                  + 2 * (bdx * bdx_tail + bdy * bdy_tail)
-                  * (cdx * ady - cdy * adx))
-               + ((cdx * cdx + cdy * cdy)
-                  * ((adx * bdy_tail + bdy * adx_tail)
-                     - (ady * bdx_tail + bdx * ady_tail))
-                  + 2 * (cdx * cdx_tail + cdy * cdy_tail)
-                  * (adx * bdy - ady * bdx)))
-
+    result += (_to_second_addend(first_vector_x, first_vector_x_tail,
+                                 first_vector_y, first_vector_y_tail,
+                                 second_vector_x, second_vector_x_tail,
+                                 second_vector_y, second_vector_y_tail,
+                                 third_vector_x, third_vector_x_tail,
+                                 third_vector_y, third_vector_y_tail)
+               + _to_second_addend(second_vector_x, second_vector_x_tail,
+                                   second_vector_y, second_vector_y_tail,
+                                   third_vector_x, third_vector_x_tail,
+                                   third_vector_y, third_vector_y_tail,
+                                   first_vector_x, first_vector_x_tail,
+                                   first_vector_y, first_vector_y_tail)
+               + _to_second_addend(third_vector_x, third_vector_x_tail,
+                                   third_vector_y, third_vector_y_tail,
+                                   first_vector_x, first_vector_x_tail,
+                                   first_vector_y, first_vector_y_tail,
+                                   second_vector_x, second_vector_x_tail,
+                                   second_vector_y, second_vector_y_tail))
     if result >= error_bound or -result >= error_bound:
         return result
 
-    aa = (0,) * 4
-    bb = (0,) * 4
-    cc = (0,) * 4
+    if (second_vector_x_tail or second_vector_y_tail
+            or third_vector_x_tail or third_vector_y_tail):
+        first_vector_squared_length = _to_squared_length(first_vector_x,
+                                                         first_vector_y)
+    else:
+        first_vector_squared_length = (0,) * 4
 
-    if bdx_tail or bdy_tail or cdx_tail or cdy_tail:
-        adx_squared, adx_squared_tail = square(adx)
-        ady_squared, ady_squared_tail = square(ady)
-        aa = two_two_sum(adx_squared, adx_squared_tail,
-                         ady_squared, ady_squared_tail)
+    if (first_vector_x_tail or first_vector_y_tail
+            or third_vector_x_tail or third_vector_y_tail):
+        second_vector_squared_length = _to_squared_length(second_vector_x,
+                                                          second_vector_y)
+    else:
+        second_vector_squared_length = (0,) * 4
 
-    if adx_tail or ady_tail or cdx_tail or cdy_tail:
-        bdx_squared, bdx_squared_tail = square(bdx)
-        bdy_squared, bdy_squared_tail = square(bdy)
-        bb = two_two_sum(bdx_squared, bdx_squared_tail,
-                         bdy_squared, bdy_squared_tail)
+    if (first_vector_x_tail or first_vector_y_tail
+            or second_vector_x_tail or second_vector_y_tail):
+        third_vector_squared_length = _to_squared_length(third_vector_x,
+                                                         third_vector_y)
+    else:
+        third_vector_squared_length = (0,) * 4
 
-    if adx_tail or ady_tail or bdx_tail or bdy_tail:
-        cdx_squared, cdx_squared_tail = square(cdx)
-        cdy_squared, cdy_squared_tail = square(cdy)
-        cc = two_two_sum(cdx_squared, cdx_squared_tail,
-                         cdy_squared, cdy_squared_tail)
-
-    if adx_tail:
-        axtbc = scale_expansion(bc, adx_tail)
-        temp16a = scale_expansion(axtbc, 2 * adx)
-        axtcc = scale_expansion(cc, adx_tail)
-        temp16b = scale_expansion(axtcc, bdy)
-        axtbb = scale_expansion(bb, adx_tail)
-        temp16c = scale_expansion(axtbb, -cdy)
+    if first_vector_x_tail:
+        axtbc = scale_expansion(second_third_vectors_cross_product,
+                                first_vector_x_tail)
+        temp16a = scale_expansion(axtbc, 2 * first_vector_x)
+        axtcc = scale_expansion(third_vector_squared_length,
+                                first_vector_x_tail)
+        temp16b = scale_expansion(axtcc, second_vector_y)
+        axtbb = scale_expansion(second_vector_squared_length,
+                                first_vector_x_tail)
+        temp16c = scale_expansion(axtbb, -third_vector_y)
         temp32a = sum_expansions(temp16a, temp16b)
         temp48 = sum_expansions(temp16c, temp32a)
         result_expansion = sum_expansions(result_expansion, temp48)
 
-    if ady_tail:
-        aytbc = scale_expansion(bc, ady_tail)
-        temp16a = scale_expansion(aytbc, 2 * ady)
-        aytbb = scale_expansion(bb, ady_tail)
-        temp16b = scale_expansion(aytbb, cdx)
-        aytcc = scale_expansion(cc, ady_tail)
-        temp16c = scale_expansion(aytcc, -bdx)
+    if first_vector_y_tail:
+        aytbc = scale_expansion(second_third_vectors_cross_product,
+                                first_vector_y_tail)
+        temp16a = scale_expansion(aytbc, 2 * first_vector_y)
+        aytbb = scale_expansion(second_vector_squared_length,
+                                first_vector_y_tail)
+        temp16b = scale_expansion(aytbb, third_vector_x)
+        aytcc = scale_expansion(third_vector_squared_length,
+                                first_vector_y_tail)
+        temp16c = scale_expansion(aytcc, -second_vector_x)
         temp32a = sum_expansions(temp16a, temp16b)
         temp48 = sum_expansions(temp16c, temp32a)
         result_expansion = sum_expansions(result_expansion, temp48)
 
-    if bdx_tail:
-        bxtca = scale_expansion(ca, bdx_tail)
-        temp16a = scale_expansion(bxtca, 2 * bdx)
-        bxtaa = scale_expansion(aa, bdx_tail)
-        temp16b = scale_expansion(bxtaa, cdy)
-        bxtcc = scale_expansion(cc, bdx_tail)
-        temp16c = scale_expansion(bxtcc, -ady)
+    if second_vector_x_tail:
+        bxtca = scale_expansion(third_first_vectors_cross_product,
+                                second_vector_x_tail)
+        temp16a = scale_expansion(bxtca, 2 * second_vector_x)
+        bxtaa = scale_expansion(first_vector_squared_length,
+                                second_vector_x_tail)
+        temp16b = scale_expansion(bxtaa, third_vector_y)
+        bxtcc = scale_expansion(third_vector_squared_length,
+                                second_vector_x_tail)
+        temp16c = scale_expansion(bxtcc, -first_vector_y)
         temp32a = sum_expansions(temp16a, temp16b)
         temp48 = sum_expansions(temp16c, temp32a)
         result_expansion = sum_expansions(result_expansion, temp48)
 
-    if bdy_tail:
-        bytca = scale_expansion(ca, bdy_tail)
-        temp16a = scale_expansion(bytca, 2 * bdy)
-        bytcc = scale_expansion(cc, bdy_tail)
-        temp16b = scale_expansion(bytcc, adx)
-        bytaa = scale_expansion(aa, bdy_tail)
-        temp16c = scale_expansion(bytaa, -cdx)
+    if second_vector_y_tail:
+        bytca = scale_expansion(third_first_vectors_cross_product,
+                                second_vector_y_tail)
+        temp16a = scale_expansion(bytca, 2 * second_vector_y)
+        bytcc = scale_expansion(third_vector_squared_length,
+                                second_vector_y_tail)
+        temp16b = scale_expansion(bytcc, first_vector_x)
+        bytaa = scale_expansion(first_vector_squared_length,
+                                second_vector_y_tail)
+        temp16c = scale_expansion(bytaa, -third_vector_x)
         temp32a = sum_expansions(temp16a, temp16b)
         temp48 = sum_expansions(temp16c, temp32a)
         result_expansion = sum_expansions(result_expansion, temp48)
 
-    if cdx_tail:
-        cxtab = scale_expansion(ab, cdx_tail)
-        temp16a = scale_expansion(cxtab, 2 * cdx)
-        cxtbb = scale_expansion(bb, cdx_tail)
-        temp16b = scale_expansion(cxtbb, ady)
-        cxtaa = scale_expansion(aa, cdx_tail)
-        temp16c = scale_expansion(cxtaa, -bdy)
+    if third_vector_x_tail:
+        cxtab = scale_expansion(first_second_vectors_cross_product,
+                                third_vector_x_tail)
+        temp16a = scale_expansion(cxtab, 2 * third_vector_x)
+        cxtbb = scale_expansion(second_vector_squared_length,
+                                third_vector_x_tail)
+        temp16b = scale_expansion(cxtbb, first_vector_y)
+        cxtaa = scale_expansion(first_vector_squared_length,
+                                third_vector_x_tail)
+        temp16c = scale_expansion(cxtaa, -second_vector_y)
         temp32a = sum_expansions(temp16a, temp16b)
         temp48 = sum_expansions(temp16c, temp32a)
         result_expansion = sum_expansions(result_expansion, temp48)
 
-    if cdy_tail:
-        cytab = scale_expansion(ab, cdy_tail)
-        temp16a = scale_expansion(cytab, 2 * cdy)
-        cytaa = scale_expansion(aa, cdy_tail)
-        temp16b = scale_expansion(cytaa, bdx)
-        cytbb = scale_expansion(bb, cdy_tail)
-        temp16c = scale_expansion(cytbb, -adx)
+    if third_vector_y_tail:
+        cytab = scale_expansion(first_second_vectors_cross_product,
+                                third_vector_y_tail)
+        temp16a = scale_expansion(cytab, 2 * third_vector_y)
+        cytaa = scale_expansion(first_vector_squared_length,
+                                third_vector_y_tail)
+        temp16b = scale_expansion(cytaa, second_vector_x)
+        cytbb = scale_expansion(second_vector_squared_length,
+                                third_vector_y_tail)
+        temp16c = scale_expansion(cytbb, -first_vector_x)
         temp32a = sum_expansions(temp16a, temp16b)
         temp48 = sum_expansions(temp16c, temp32a)
         result_expansion = sum_expansions(result_expansion, temp48)
 
-    if adx_tail or ady_tail:
-        if bdx_tail or bdy_tail or cdx_tail or cdy_tail:
-            ti, ti_tail = two_product(bdx_tail, cdy)
-            tj, tj_tail = two_product(bdx, cdy_tail)
+    if first_vector_x_tail or first_vector_y_tail:
+        if (second_vector_x_tail or second_vector_y_tail
+                or third_vector_x_tail or third_vector_y_tail):
+            ti, ti_tail = two_product(second_vector_x_tail, third_vector_y)
+            tj, tj_tail = two_product(second_vector_x, third_vector_y_tail)
             u = two_two_sum(ti, ti_tail, tj, tj_tail)
 
-            negate = -bdy
-            ti, ti_tail = two_product(cdx_tail, negate)
-            negate = -bdy_tail
-            tj, tj_tail = two_product(cdx, negate)
+            negate = -second_vector_y
+            ti, ti_tail = two_product(third_vector_x_tail, negate)
+            negate = -second_vector_y_tail
+            tj, tj_tail = two_product(third_vector_x, negate)
             v = two_two_sum(ti, ti_tail, tj, tj_tail)
 
             bct = sum_expansions(u, v)
 
-            ti, ti_tail = two_product(bdx_tail, cdy_tail)
-            tj, tj_tail = two_product(cdx_tail, bdy_tail)
+            ti, ti_tail = two_product(second_vector_x_tail,
+                                      third_vector_y_tail)
+            tj, tj_tail = two_product(third_vector_x_tail,
+                                      second_vector_y_tail)
             bctt = two_two_diff(ti, ti_tail, tj, tj_tail)
         else:
             bct = bctt = (0,)
 
-        if adx_tail:
-            temp16a = scale_expansion(axtbc, adx_tail)
-            axtbct = scale_expansion(bct, adx_tail)
-            temp32a = scale_expansion(axtbct, 2 * adx)
+        if first_vector_x_tail:
+            temp16a = scale_expansion(axtbc, first_vector_x_tail)
+            axtbct = scale_expansion(bct, first_vector_x_tail)
+            temp32a = scale_expansion(axtbct, 2 * first_vector_x)
             temp48 = sum_expansions(temp16a, temp32a)
             result_expansion = sum_expansions(result_expansion, temp48)
 
-            if bdy_tail:
-                temp8 = scale_expansion(cc, adx_tail)
-                temp16a = scale_expansion(temp8, bdy_tail)
+            if second_vector_y_tail:
+                temp8 = scale_expansion(third_vector_squared_length,
+                                        first_vector_x_tail)
+                temp16a = scale_expansion(temp8, second_vector_y_tail)
                 result_expansion = sum_expansions(result_expansion, temp16a)
 
-            if cdy_tail:
-                temp8 = scale_expansion(bb, -adx_tail)
-                temp16a = scale_expansion(temp8, cdy_tail)
+            if third_vector_y_tail:
+                temp8 = scale_expansion(second_vector_squared_length,
+                                        -first_vector_x_tail)
+                temp16a = scale_expansion(temp8, third_vector_y_tail)
                 result_expansion = sum_expansions(result_expansion, temp16a)
 
-            temp32a = scale_expansion(axtbct, adx_tail)
-            axtbctt = scale_expansion(bctt, adx_tail)
-            temp16a = scale_expansion(axtbctt, 2 * adx)
-            temp16b = scale_expansion(axtbctt, adx_tail)
+            temp32a = scale_expansion(axtbct, first_vector_x_tail)
+            axtbctt = scale_expansion(bctt, first_vector_x_tail)
+            temp16a = scale_expansion(axtbctt, 2 * first_vector_x)
+            temp16b = scale_expansion(axtbctt, first_vector_x_tail)
             temp32b = sum_expansions(temp16a, temp16b)
             temp64 = sum_expansions(temp32a, temp32b)
             result_expansion = sum_expansions(result_expansion, temp64)
 
-        if ady_tail:
-            temp16a = scale_expansion(aytbc, ady_tail)
-            aytbct = scale_expansion(bct, ady_tail)
-            temp32a = scale_expansion(aytbct, 2 * ady)
+        if first_vector_y_tail:
+            temp16a = scale_expansion(aytbc, first_vector_y_tail)
+            aytbct = scale_expansion(bct, first_vector_y_tail)
+            temp32a = scale_expansion(aytbct, 2 * first_vector_y)
             temp48 = sum_expansions(temp16a, temp32a)
             result_expansion = sum_expansions(result_expansion, temp48)
 
-            temp32a = scale_expansion(aytbct, ady_tail)
-            aytbctt = scale_expansion(bctt, ady_tail)
-            temp16a = scale_expansion(aytbctt, 2 * ady)
-            temp16b = scale_expansion(aytbctt, ady_tail)
+            temp32a = scale_expansion(aytbct, first_vector_y_tail)
+            aytbctt = scale_expansion(bctt, first_vector_y_tail)
+            temp16a = scale_expansion(aytbctt, 2 * first_vector_y)
+            temp16b = scale_expansion(aytbctt, first_vector_y_tail)
             temp32b = sum_expansions(temp16a, temp16b)
             temp64 = sum_expansions(temp32a, temp32b)
             result_expansion = sum_expansions(result_expansion, temp64)
 
-    if bdx_tail or bdy_tail:
-        if adx_tail or ady_tail or cdx_tail or cdy_tail:
-            ti, ti_tail = two_product(cdx_tail, ady)
-            tj, tj_tail = two_product(cdx, ady_tail)
+    if second_vector_x_tail or second_vector_y_tail:
+        if (first_vector_x_tail or first_vector_y_tail
+                or third_vector_x_tail or third_vector_y_tail):
+            ti, ti_tail = two_product(third_vector_x_tail, first_vector_y)
+            tj, tj_tail = two_product(third_vector_x, first_vector_y_tail)
             u = two_two_sum(ti, ti_tail, tj, tj_tail)
-            negate = -cdy
-            ti, ti_tail = two_product(adx_tail, negate)
-            negate = -cdy_tail
-            tj, tj_tail = two_product(adx, negate)
+            negate = -third_vector_y
+            ti, ti_tail = two_product(first_vector_x_tail, negate)
+            negate = -third_vector_y_tail
+            tj, tj_tail = two_product(first_vector_x, negate)
             v = two_two_sum(ti, ti_tail, tj, tj_tail)
             cat = sum_expansions(u, v)
 
-            ti, ti_tail = two_product(cdx_tail, ady_tail)
-            tj, tj_tail = two_product(adx_tail, cdy_tail)
+            ti, ti_tail = two_product(third_vector_x_tail, first_vector_y_tail)
+            tj, tj_tail = two_product(first_vector_x_tail, third_vector_y_tail)
             catt = two_two_diff(ti, ti_tail, tj, tj_tail)
         else:
             cat = catt = (0,)
 
-        if bdx_tail:
-            temp16a = scale_expansion(bxtca, bdx_tail)
-            bxtcat = scale_expansion(cat, bdx_tail)
-            temp32a = scale_expansion(bxtcat, 2 * bdx)
+        if second_vector_x_tail:
+            temp16a = scale_expansion(bxtca, second_vector_x_tail)
+            bxtcat = scale_expansion(cat, second_vector_x_tail)
+            temp32a = scale_expansion(bxtcat, 2 * second_vector_x)
             temp48 = sum_expansions(temp16a, temp32a)
             result_expansion = sum_expansions(result_expansion, temp48)
 
-            if cdy_tail:
-                temp8 = scale_expansion(aa, bdx_tail)
-                temp16a = scale_expansion(temp8, cdy_tail)
+            if third_vector_y_tail:
+                temp8 = scale_expansion(first_vector_squared_length,
+                                        second_vector_x_tail)
+                temp16a = scale_expansion(temp8, third_vector_y_tail)
                 result_expansion = sum_expansions(result_expansion, temp16a)
 
-            if ady_tail:
-                temp8 = scale_expansion(cc, -bdx_tail)
-                temp16a = scale_expansion(temp8, ady_tail)
+            if first_vector_y_tail:
+                temp8 = scale_expansion(third_vector_squared_length,
+                                        -second_vector_x_tail)
+                temp16a = scale_expansion(temp8, first_vector_y_tail)
                 result_expansion = sum_expansions(result_expansion, temp16a)
 
-            temp32a = scale_expansion(bxtcat, bdx_tail)
-            bxtcatt = scale_expansion(catt, bdx_tail)
-            temp16a = scale_expansion(bxtcatt, 2 * bdx)
-            temp16b = scale_expansion(bxtcatt, bdx_tail)
+            temp32a = scale_expansion(bxtcat, second_vector_x_tail)
+            bxtcatt = scale_expansion(catt, second_vector_x_tail)
+            temp16a = scale_expansion(bxtcatt, 2 * second_vector_x)
+            temp16b = scale_expansion(bxtcatt, second_vector_x_tail)
             temp32b = sum_expansions(temp16a, temp16b)
             temp64 = sum_expansions(temp32a, temp32b)
             result_expansion = sum_expansions(result_expansion, temp64)
 
-        if bdy_tail:
-            temp16a = scale_expansion(bytca, bdy_tail)
-            bytcat = scale_expansion(cat, bdy_tail)
-            temp32a = scale_expansion(bytcat, 2 * bdy)
+        if second_vector_y_tail:
+            temp16a = scale_expansion(bytca, second_vector_y_tail)
+            bytcat = scale_expansion(cat, second_vector_y_tail)
+            temp32a = scale_expansion(bytcat, 2 * second_vector_y)
             temp48 = sum_expansions(temp16a, temp32a)
             result_expansion = sum_expansions(result_expansion, temp48)
-            temp32a = scale_expansion(bytcat, bdy_tail)
-            bytcatt = scale_expansion(catt, bdy_tail)
-            temp16a = scale_expansion(bytcatt, 2 * bdy)
-            temp16b = scale_expansion(bytcatt, bdy_tail)
+            temp32a = scale_expansion(bytcat, second_vector_y_tail)
+            bytcatt = scale_expansion(catt, second_vector_y_tail)
+            temp16a = scale_expansion(bytcatt, 2 * second_vector_y)
+            temp16b = scale_expansion(bytcatt, second_vector_y_tail)
             temp32b = sum_expansions(temp16a, temp16b)
             temp64 = sum_expansions(temp32a, temp32b)
             result_expansion = sum_expansions(result_expansion, temp64)
 
-    if cdx_tail or cdy_tail:
-        if adx_tail or ady_tail or bdx_tail or bdy_tail:
-            ti, ti_tail = two_product(adx_tail, bdy)
-            tj, tj_tail = two_product(adx, bdy_tail)
+    if third_vector_x_tail or third_vector_y_tail:
+        if (first_vector_x_tail or first_vector_y_tail
+                or second_vector_x_tail or second_vector_y_tail):
+            ti, ti_tail = two_product(first_vector_x_tail, second_vector_y)
+            tj, tj_tail = two_product(first_vector_x, second_vector_y_tail)
             u = two_two_sum(ti, ti_tail, tj, tj_tail)
-            negate = -ady
-            ti, ti_tail = two_product(bdx_tail, negate)
-            negate = -ady_tail
-            tj, tj_tail = two_product(bdx, negate)
+            negate = -first_vector_y
+            ti, ti_tail = two_product(second_vector_x_tail, negate)
+            negate = -first_vector_y_tail
+            tj, tj_tail = two_product(second_vector_x, negate)
             v = two_two_sum(ti, ti_tail, tj, tj_tail)
 
             abt = sum_expansions(u, v)
 
-            ti, ti_tail = two_product(adx_tail, bdy_tail)
-            tj, tj_tail = two_product(bdx_tail, ady_tail)
+            ti, ti_tail = two_product(first_vector_x_tail,
+                                      second_vector_y_tail)
+            tj, tj_tail = two_product(second_vector_x_tail,
+                                      first_vector_y_tail)
             abtt = two_two_diff(ti, ti_tail, tj, tj_tail)
         else:
             abt = abtt = (0,)
 
-        if cdx_tail:
-            temp16a = scale_expansion(cxtab, cdx_tail)
-            cxtabt = scale_expansion(abt, cdx_tail)
-            temp32a = scale_expansion(cxtabt, 2 * cdx)
+        if third_vector_x_tail:
+            temp16a = scale_expansion(cxtab, third_vector_x_tail)
+            cxtabt = scale_expansion(abt, third_vector_x_tail)
+            temp32a = scale_expansion(cxtabt, 2 * third_vector_x)
             temp48 = sum_expansions(temp16a, temp32a)
             result_expansion = sum_expansions(result_expansion, temp48)
 
-            if ady_tail:
-                temp8 = scale_expansion(bb, cdx_tail)
-                temp16a = scale_expansion(temp8, ady_tail)
+            if first_vector_y_tail:
+                temp8 = scale_expansion(second_vector_squared_length,
+                                        third_vector_x_tail)
+                temp16a = scale_expansion(temp8, first_vector_y_tail)
                 result_expansion = sum_expansions(result_expansion, temp16a)
 
-            if bdy_tail:
-                temp8 = scale_expansion(aa, -cdx_tail)
-                temp16a = scale_expansion(temp8, bdy_tail)
+            if second_vector_y_tail:
+                temp8 = scale_expansion(first_vector_squared_length,
+                                        -third_vector_x_tail)
+                temp16a = scale_expansion(temp8, second_vector_y_tail)
                 result_expansion = sum_expansions(result_expansion, temp16a)
 
-            temp32a = scale_expansion(cxtabt, cdx_tail)
-            cxtabtt = scale_expansion(abtt, cdx_tail)
-            temp16a = scale_expansion(cxtabtt, 2 * cdx)
-            temp16b = scale_expansion(cxtabtt, cdx_tail)
+            temp32a = scale_expansion(cxtabt, third_vector_x_tail)
+            cxtabtt = scale_expansion(abtt, third_vector_x_tail)
+            temp16a = scale_expansion(cxtabtt, 2 * third_vector_x)
+            temp16b = scale_expansion(cxtabtt, third_vector_x_tail)
             temp32b = sum_expansions(temp16a, temp16b)
             temp64 = sum_expansions(temp32a, temp32b)
             result_expansion = sum_expansions(result_expansion, temp64)
 
-        if cdy_tail:
-            temp16a = scale_expansion(cytab, cdy_tail)
-            cytabt = scale_expansion(abt, cdy_tail)
-            temp32a = scale_expansion(cytabt, 2 * cdy)
+        if third_vector_y_tail:
+            temp16a = scale_expansion(cytab, third_vector_y_tail)
+            cytabt = scale_expansion(abt, third_vector_y_tail)
+            temp32a = scale_expansion(cytabt, 2 * third_vector_y)
             temp48 = sum_expansions(temp16a, temp32a)
             result_expansion = sum_expansions(result_expansion, temp48)
-            temp32a = scale_expansion(cytabt, cdy_tail)
-            cytabtt = scale_expansion(abtt, cdy_tail)
-            temp16a = scale_expansion(cytabtt, 2 * cdy)
-            temp16b = scale_expansion(cytabtt, cdy_tail)
+            temp32a = scale_expansion(cytabt, third_vector_y_tail)
+            cytabtt = scale_expansion(abtt, third_vector_y_tail)
+            temp16a = scale_expansion(cytabtt, 2 * third_vector_y)
+            temp16b = scale_expansion(cytabtt, third_vector_y_tail)
             temp32b = sum_expansions(temp16a, temp16b)
             temp64 = sum_expansions(temp32a, temp32b)
             result_expansion = sum_expansions(result_expansion, temp64)
     return result_expansion[-1]
+
+
+def _to_first_addend(vector_x: Scalar, vector_y: Scalar,
+                     other_vectors_cross_product: Expansion) -> Expansion:
+    vector_x_other_vectors_cross_product = scale_expansion(
+            other_vectors_cross_product, vector_x)
+    vector_y_other_vectors_cross_product = scale_expansion(
+            other_vectors_cross_product, vector_y)
+    return sum_expansions(scale_expansion(vector_x_other_vectors_cross_product,
+                                          vector_x),
+                          scale_expansion(vector_y_other_vectors_cross_product,
+                                          vector_y))
+
+
+def _to_second_addend(left_vector_x: Scalar, left_vector_x_tail: Scalar,
+                      left_vector_y: Scalar, left_vector_y_tail: Scalar,
+                      mid_vector_x: Scalar, mid_vector_x_tail: Scalar,
+                      mid_vector_y: Scalar, mid_vector_y_tail: Scalar,
+                      right_vector_x: Scalar, right_vector_x_tail: Scalar,
+                      right_vector_y: Scalar, right_vector_y_tail: Scalar
+                      ) -> Scalar:
+    return ((left_vector_x * left_vector_x + left_vector_y * left_vector_y)
+            * ((mid_vector_x * right_vector_y_tail
+                + right_vector_y * mid_vector_x_tail)
+               - (mid_vector_y * right_vector_x_tail
+                  + right_vector_x * mid_vector_y_tail))
+            + 2 * (left_vector_x * left_vector_x_tail
+                   + left_vector_y * left_vector_y_tail)
+            * (mid_vector_x * right_vector_y - mid_vector_y * right_vector_x))
+
+
+def _to_squared_length(vector_x: Scalar, vector_y: Scalar) -> Expansion:
+    vector_x_squared, vector_x_squared_tail = square(vector_x)
+    vector_y_squared, vector_y_squared_tail = square(vector_y)
+    return two_two_sum(vector_x_squared, vector_x_squared_tail,
+                       vector_y_squared, vector_y_squared_tail)

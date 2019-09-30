@@ -1,8 +1,8 @@
 from gon.base import Point
 from gon.hints import Scalar
 from . import bounds
-from .utils import (Expansion,
-                    sum_expansions,
+from .utils import (sum_expansions,
+                    to_cross_product,
                     two_diff_tail,
                     two_product,
                     two_two_diff)
@@ -25,27 +25,27 @@ def signed_area(vertex: Point,
         if subtrahend <= 0:
             return result
         else:
-            moduli_sum = minuend + subtrahend
+            upper_bound = minuend + subtrahend
     elif minuend < 0.0:
         if subtrahend >= 0.0:
             return result
         else:
-            moduli_sum = -minuend - subtrahend
+            upper_bound = -minuend - subtrahend
     else:
         return result
 
-    error_bound = bounds.to_counterclockwise_error_a(moduli_sum)
+    error_bound = bounds.to_signed_measure_first_error(upper_bound)
     if result >= error_bound or -result >= error_bound:
         return result
 
     return _adjusted_signed_area(vertex, first_ray_point, second_ray_point,
-                                 moduli_sum)
+                                 upper_bound)
 
 
 def _adjusted_signed_area(vertex: Point,
                           first_ray_point: Point,
                           second_ray_point: Point,
-                          moduli_sum: Scalar) -> Scalar:
+                          upper_bound: Scalar) -> Scalar:
     minuend_multiplier_x = first_ray_point.x - vertex.x
     minuend_multiplier_y = second_ray_point.y - vertex.y
     subtrahend_multiplier_x = second_ray_point.x - vertex.x
@@ -59,7 +59,7 @@ def _adjusted_signed_area(vertex: Point,
     result_expansion = two_two_diff(minuend, minuend_tail,
                                     subtrahend, subtrahend_tail)
     result = sum(result_expansion)
-    error_bound = bounds.to_counterclockwise_error_b(moduli_sum)
+    error_bound = bounds.to_signed_measure_second_error(upper_bound)
     if (result >= error_bound) or (-result >= error_bound):
         return result
 
@@ -77,7 +77,7 @@ def _adjusted_signed_area(vertex: Point,
             and not subtrahend_multiplier_y_tail):
         return result
 
-    error_bound = (bounds.to_counterclockwise_error_c(moduli_sum)
+    error_bound = (bounds.to_signed_measure_third_error(upper_bound)
                    + bounds.to_determinant_error(result))
     result += ((minuend_multiplier_x * minuend_multiplier_y_tail
                 + minuend_multiplier_y * minuend_multiplier_x_tail)
@@ -87,29 +87,18 @@ def _adjusted_signed_area(vertex: Point,
         return result
 
     result_expansion = sum_expansions(
-            result_expansion, _to_cross_product(minuend_multiplier_x_tail,
-                                                minuend_multiplier_y,
-                                                subtrahend_multiplier_x,
-                                                subtrahend_multiplier_y_tail))
+            result_expansion, to_cross_product(minuend_multiplier_x_tail,
+                                               minuend_multiplier_y,
+                                               subtrahend_multiplier_x,
+                                               subtrahend_multiplier_y_tail))
     result_expansion = sum_expansions(
-            result_expansion, _to_cross_product(minuend_multiplier_x,
-                                                minuend_multiplier_y_tail,
-                                                subtrahend_multiplier_x_tail,
-                                                subtrahend_multiplier_y))
+            result_expansion, to_cross_product(minuend_multiplier_x,
+                                               minuend_multiplier_y_tail,
+                                               subtrahend_multiplier_x_tail,
+                                               subtrahend_multiplier_y))
     result_expansion = sum_expansions(
-            result_expansion, _to_cross_product(minuend_multiplier_x_tail,
-                                                minuend_multiplier_y_tail,
-                                                subtrahend_multiplier_x_tail,
-                                                subtrahend_multiplier_y_tail))
+            result_expansion, to_cross_product(minuend_multiplier_x_tail,
+                                               minuend_multiplier_y_tail,
+                                               subtrahend_multiplier_x_tail,
+                                               subtrahend_multiplier_y_tail))
     return result_expansion[-1]
-
-
-def _to_cross_product(minuend_multiplier_x: Scalar,
-                      minuend_multiplier_y: Scalar,
-                      subtrahend_multiplier_x: Scalar,
-                      subtrahend_multiplier_y: Scalar) -> Expansion:
-    minuend, minuend_tail = two_product(minuend_multiplier_x,
-                                        minuend_multiplier_y)
-    subtrahend, subtrahend_tail = two_product(subtrahend_multiplier_y,
-                                              subtrahend_multiplier_x)
-    return two_two_diff(minuend, minuend_tail, subtrahend, subtrahend_tail)
