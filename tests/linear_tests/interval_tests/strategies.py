@@ -15,8 +15,7 @@ from tests.utils import Strategy
 
 
 def points_to_intervals(points: Strategy[Point]) -> Strategy[Interval]:
-    return (strategies.tuples(points, points)
-            .filter(pack(ne))
+    return (points_to_interval_endpoints(points)
             .flatmap(lambda endpoints:
                      strategies.builds(Interval,
                                        strategies.just(endpoints[0]),
@@ -25,7 +24,38 @@ def points_to_intervals(points: Strategy[Point]) -> Strategy[Interval]:
                                        end_inclusive=strategies.booleans())))
 
 
+def points_to_interval_endpoints(points: Strategy[Point]
+                                 ) -> Strategy[Tuple[Point, Point]]:
+    return strategies.tuples(points, points).filter(pack(ne))
+
+
 intervals = points_strategies.flatmap(points_to_intervals)
+
+
+def points_to_same_quadrant_intervals(points: Strategy[Point]
+                                      ) -> Strategy[Interval]:
+    def endpoints_to_same_quadrant_intervals(endpoints: Tuple[Point, Point]
+                                             ) -> Strategy[Interval]:
+        start, end = endpoints
+        if start.x * end.x < 0:
+            if start.y * end.y < 0:
+                end = Point(-end.x, -end.y)
+            else:
+                end = Point(-end.x, end.y)
+        else:
+            if start.y * end.y < 0:
+                end = Point(end.x, -end.y)
+        return strategies.builds(Interval,
+                                 strategies.just(start), strategies.just(end),
+                                 start_inclusive=strategies.booleans(),
+                                 end_inclusive=strategies.booleans())
+
+    return (points_to_interval_endpoints(points)
+            .flatmap(endpoints_to_same_quadrant_intervals))
+
+
+same_quadrant_intervals = (points_strategies
+                           .flatmap(points_to_same_quadrant_intervals))
 non_intervals = strategies.builds(object)
 
 
