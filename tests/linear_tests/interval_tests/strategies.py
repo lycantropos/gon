@@ -37,18 +37,33 @@ def points_to_same_quadrant_intervals(points: Strategy[Point]
     def endpoints_to_same_quadrant_intervals(endpoints: Tuple[Point, Point]
                                              ) -> Strategy[Interval]:
         start, end = endpoints
-        if start.x * end.x < 0:
-            if start.y * end.y < 0:
-                end = Point(-end.x, -end.y)
+        reflected_start = reflect_to_base_quadrant(start,
+                                                   base=end)
+        reflected_end = reflect_to_base_quadrant(end,
+                                                 base=start)
+        return (strategies.builds(Interval,
+                                  strategies.just(start),
+                                  strategies.just(reflected_end),
+                                  start_inclusive=strategies.booleans(),
+                                  end_inclusive=strategies.booleans())
+                | strategies.builds(Interval,
+                                    strategies.just(reflected_start),
+                                    strategies.just(end),
+                                    start_inclusive=strategies.booleans(),
+                                    end_inclusive=strategies.booleans()))
+
+    def reflect_to_base_quadrant(point: Point,
+                                 *,
+                                 base: Point) -> Point:
+        if base.x * point.x < 0:
+            if base.y * point.y < 0:
+                return Point(-point.x, -point.y)
             else:
-                end = Point(-end.x, end.y)
+                return Point(-point.x, point.y)
+        elif base.y * point.y < 0:
+            return Point(point.x, -point.y)
         else:
-            if start.y * end.y < 0:
-                end = Point(end.x, -end.y)
-        return strategies.builds(Interval,
-                                 strategies.just(start), strategies.just(end),
-                                 start_inclusive=strategies.booleans(),
-                                 end_inclusive=strategies.booleans())
+            return point
 
     return (points_to_interval_endpoints(points)
             .flatmap(endpoints_to_same_quadrant_intervals))
