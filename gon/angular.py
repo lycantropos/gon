@@ -4,8 +4,16 @@ from enum import (IntEnum,
 from reprit.base import generate_repr
 
 from .base import Point
-from .robust import parallelogram
+from .robust import (parallelogram,
+                     projection)
 from .utils import to_sign
+
+
+@unique
+class AngleKind(IntEnum):
+    OBTUSE = -1
+    RIGHT = 0
+    ACUTE = 1
 
 
 @unique
@@ -37,6 +45,13 @@ class Angle:
         return self._second_ray_point
 
     __repr__ = generate_repr(__init__)
+
+    @property
+    def kind(self) -> AngleKind:
+        return AngleKind(to_sign(
+                projection.signed_length(self._vertex,
+                                         self._first_ray_point,
+                                         self._second_ray_point)))
 
     @property
     def orientation(self) -> Orientation:
