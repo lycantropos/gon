@@ -118,14 +118,14 @@ def sum_expansions(left_expansion: Expansion,
     left_element, right_element = left_expansion[0], right_expansion[0]
     left_index = right_index = 0
     if (right_element > left_element) is (right_element > -left_element):
-        q = left_element
+        accumulator = left_element
         left_index += 1
         try:
             left_element = left_expansion[left_index]
         except IndexError:
             pass
     else:
-        q = right_element
+        accumulator = right_element
         right_index += 1
         try:
             right_element = right_expansion[right_index]
@@ -134,59 +134,59 @@ def sum_expansions(left_expansion: Expansion,
     result = []
     if (left_index < left_length) and (right_index < right_length):
         if (right_element > left_element) is (right_element > -left_element):
-            q, hh = fast_two_sum(left_element, q)
+            accumulator, tail = fast_two_sum(left_element, accumulator)
             left_index += 1
             try:
                 left_element = left_expansion[left_index]
             except IndexError:
                 pass
         else:
-            q, hh = fast_two_sum(right_element, q)
+            accumulator, tail = fast_two_sum(right_element, accumulator)
             right_index += 1
             try:
                 right_element = right_expansion[right_index]
             except IndexError:
                 pass
-        if hh:
-            result.append(hh)
+        if tail:
+            result.append(tail)
         while (left_index < left_length) and (right_index < right_length):
             if ((right_element > left_element)
                     is (right_element > -left_element)):
-                q, hh = two_sum(q, left_element)
+                accumulator, tail = two_sum(accumulator, left_element)
                 left_index += 1
                 try:
                     left_element = left_expansion[left_index]
                 except IndexError:
                     pass
             else:
-                q, hh = two_sum(q, right_element)
+                accumulator, tail = two_sum(accumulator, right_element)
                 right_index += 1
                 try:
                     right_element = right_expansion[right_index]
                 except IndexError:
                     pass
-            if hh:
-                result.append(hh)
+            if tail:
+                result.append(tail)
     while left_index < left_length:
-        q, hh = two_sum(q, left_element)
+        accumulator, tail = two_sum(accumulator, left_element)
         left_index += 1
         try:
             left_element = left_expansion[left_index]
         except IndexError:
             pass
-        if hh:
-            result.append(hh)
+        if tail:
+            result.append(tail)
     while right_index < right_length:
-        q, hh = two_sum(q, right_element)
+        accumulator, tail = two_sum(accumulator, right_element)
         right_index += 1
         try:
             right_element = right_expansion[right_index]
         except IndexError:
             pass
-        if hh:
-            result.append(hh)
-    if q or not result:
-        result.append(q)
+        if tail:
+            result.append(tail)
+    if accumulator or not result:
+        result.append(accumulator)
     return result
 
 
