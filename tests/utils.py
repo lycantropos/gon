@@ -105,7 +105,7 @@ def replace_segment(segments: Set[Segment],
 
 
 def is_non_origin_point(point: Point) -> bool:
-    return bool(point.x and point.y)
+    return bool(point.x or point.y)
 
 
 def reflect_point(point: Point) -> Point:
