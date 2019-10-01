@@ -135,3 +135,8 @@ def reflect_angle(angle: Angle) -> Angle:
 def to_origin(point: Point) -> Point:
     origin_coordinate = type(point.x)(0)
     return Point(origin_coordinate, origin_coordinate)
+
+
+def has_opposite_orientations(left_angle: Angle, right_angle: Angle) -> bool:
+    return ((left_angle.orientation is Orientation.COLLINEAR)
+            ^ (right_angle.orientation is not left_angle.orientation))

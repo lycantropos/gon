@@ -2,6 +2,8 @@ from hypothesis import given
 
 from gon.angular import (Angle,
                          Orientation)
+from tests.utils import (has_opposite_orientations,
+                         reflect_angle)
 from . import strategies
 
 
@@ -16,5 +18,11 @@ def test_rays_flip(angle: Angle) -> None:
                           angle.vertex,
                           angle.first_ray_point)
 
-    assert (angle.orientation is Orientation.COLLINEAR
-            or flipped_angle.orientation is not angle.orientation)
+    assert has_opposite_orientations(angle, flipped_angle)
+
+
+@given(strategies.origin_angles)
+def test_origin_angle_reflection(angle: Angle) -> None:
+    reflected_angle = reflect_angle(angle)
+
+    assert angle.orientation is reflected_angle.orientation
