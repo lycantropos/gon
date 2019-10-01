@@ -10,7 +10,8 @@ from lz.hints import (Domain,
                       Map)
 from lz.replication import replicator
 
-from gon.angular import Orientation
+from gon.angular import (Angle,
+                         Orientation)
 from gon.base import Point
 from gon.linear import (Interval,
                         Segment,
@@ -123,3 +124,14 @@ def inverse_inclusion(interval: Interval) -> Interval:
     return Interval(interval.start, interval.end,
                     start_inclusive=not interval.start_inclusive,
                     end_inclusive=not interval.end_inclusive)
+
+
+def reflect_angle(angle: Angle) -> Angle:
+    return Angle(reflect_point(angle.first_ray_point),
+                 reflect_point(angle.vertex),
+                 reflect_point(angle.second_ray_point))
+
+
+def to_origin(point: Point) -> Point:
+    origin_coordinate = type(point.x)(0)
+    return Point(origin_coordinate, origin_coordinate)
