@@ -8,8 +8,8 @@ from .utils import (Expansion,
                     two_two_sum)
 
 
-def signed_length(vertex: Point,
-                  first_ray_point: Point,
+def signed_length(first_ray_point: Point,
+                  vertex: Point,
                   second_ray_point: Point) -> Scalar:
     """
     Calculates signed length of projection
@@ -38,12 +38,12 @@ def signed_length(vertex: Point,
     if result >= error_bound or -result >= error_bound:
         return result
 
-    return _adjusted_signed_length(vertex, first_ray_point, second_ray_point,
+    return _adjusted_signed_length(first_ray_point, vertex, second_ray_point,
                                    upper_bound)
 
 
-def _adjusted_signed_length(vertex: Point,
-                            first_ray_point: Point,
+def _adjusted_signed_length(first_ray_point: Point,
+                            vertex: Point,
                             second_ray_point: Point,
                             upper_bound: Scalar) -> Scalar:
     left_addend_first_multiplier = first_ray_point.x - vertex.x

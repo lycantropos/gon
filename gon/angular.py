@@ -49,8 +49,8 @@ class Angle:
     @property
     def kind(self) -> AngleKind:
         return AngleKind(to_sign(
-                projection.signed_length(self._vertex,
-                                         self._first_ray_point,
+                projection.signed_length(self._first_ray_point,
+                                         self._vertex,
                                          self._second_ray_point)))
 
     @property
