@@ -8,8 +8,8 @@ from .utils import (sum_expansions,
                     two_two_diff)
 
 
-def signed_area(vertex: Point,
-                first_ray_point: Point,
+def signed_area(first_ray_point: Point,
+                vertex: Point,
                 second_ray_point: Point) -> Scalar:
     """
     Calculates signed area of parallelogram
@@ -38,12 +38,12 @@ def signed_area(vertex: Point,
     if result >= error_bound or -result >= error_bound:
         return result
 
-    return _adjusted_signed_area(vertex, first_ray_point, second_ray_point,
+    return _adjusted_signed_area(first_ray_point, vertex, second_ray_point,
                                  upper_bound)
 
 
-def _adjusted_signed_area(vertex: Point,
-                          first_ray_point: Point,
+def _adjusted_signed_area(first_ray_point: Point,
+                          vertex: Point,
                           second_ray_point: Point,
                           upper_bound: Scalar) -> Scalar:
     minuend_multiplier_x = first_ray_point.x - vertex.x
