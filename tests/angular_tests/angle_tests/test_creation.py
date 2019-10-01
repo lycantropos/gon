@@ -11,6 +11,6 @@ def test_basic(points_triplet: Point) -> None:
 
     angle = Angle(first_ray_point, vertex, second_ray_point)
 
-    assert angle.vertex == vertex
-    assert angle.first_ray_point == first_ray_point
-    assert angle.second_ray_point == second_ray_point
+    assert angle.vertex is vertex
+    assert angle.first_ray_point is first_ray_point
+    assert angle.second_ray_point is second_ray_point
