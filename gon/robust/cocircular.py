@@ -101,24 +101,16 @@ def _adjusted_determinant(first_point: Point, second_point: Point,
 
     error_bound = (bounds.to_cocircular_third_error(upper_bound)
                    + bounds.to_determinant_error(result))
-    result += (_to_second_addend(first_dx, first_dx_tail,
-                                 first_dy, first_dy_tail,
-                                 second_dx, second_dx_tail,
-                                 second_dy, second_dy_tail,
-                                 third_dx, third_dx_tail,
-                                 third_dy, third_dy_tail)
-               + _to_second_addend(second_dx, second_dx_tail,
-                                   second_dy, second_dy_tail,
-                                   third_dx, third_dx_tail,
-                                   third_dy, third_dy_tail,
-                                   first_dx, first_dx_tail,
-                                   first_dy, first_dy_tail)
-               + _to_second_addend(third_dx, third_dx_tail,
-                                   third_dy, third_dy_tail,
-                                   first_dx, first_dx_tail,
-                                   first_dy, first_dy_tail,
-                                   second_dx, second_dx_tail,
-                                   second_dy, second_dy_tail))
+    result += (
+            _to_addend(first_dx, first_dx_tail, first_dy, first_dy_tail,
+                       second_dx, second_dx_tail, second_dy, second_dy_tail,
+                       third_dx, third_dx_tail, third_dy, third_dy_tail)
+            + _to_addend(second_dx, second_dx_tail, second_dy, second_dy_tail,
+                         third_dx, third_dx_tail, third_dy, third_dy_tail,
+                         first_dx, first_dx_tail, first_dy, first_dy_tail)
+            + _to_addend(third_dx, third_dx_tail, third_dy, third_dy_tail,
+                         first_dx, first_dx_tail, first_dy, first_dy_tail,
+                         second_dx, second_dx_tail, second_dy, second_dy_tail))
     if result >= error_bound or -result >= error_bound:
         return result
 
@@ -395,13 +387,12 @@ def _multiply_by_squared_length(expansion: Expansion,
                           scale_expansion(scale_expansion(expansion, dy), dy))
 
 
-def _to_second_addend(left_dx: Scalar, left_dx_tail: Scalar,
-                      left_dy: Scalar, left_dy_tail: Scalar,
-                      mid_dx: Scalar, mid_dx_tail: Scalar,
-                      mid_dy: Scalar, mid_dy_tail: Scalar,
-                      right_dx: Scalar, right_dx_tail: Scalar,
-                      right_dy: Scalar, right_dy_tail: Scalar
-                      ) -> Scalar:
+def _to_addend(left_dx: Scalar, left_dx_tail: Scalar,
+               left_dy: Scalar, left_dy_tail: Scalar,
+               mid_dx: Scalar, mid_dx_tail: Scalar,
+               mid_dy: Scalar, mid_dy_tail: Scalar,
+               right_dx: Scalar, right_dx_tail: Scalar,
+               right_dy: Scalar, right_dy_tail: Scalar) -> Scalar:
     return ((left_dx * left_dx + left_dy * left_dy)
             * ((mid_dx * right_dy_tail + right_dy * mid_dx_tail)
                - (mid_dy * right_dx_tail + right_dx * mid_dy_tail))
