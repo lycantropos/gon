@@ -60,7 +60,7 @@ def _adjusted_signed_length(vertex: Point,
                                    right_addend, right_addend_tail)
     result = sum(result_expansion)
     error_bound = bounds.to_signed_measure_second_error(upper_bound)
-    if (result >= error_bound) or (-result >= error_bound):
+    if result >= error_bound or -result >= error_bound:
         return result
 
     left_addend_first_multiplier_tail = two_diff_tail(
@@ -87,7 +87,7 @@ def _adjusted_signed_length(vertex: Point,
                   * right_addend_second_multiplier_tail
                   + right_addend_first_multiplier_tail
                   * right_addend_second_multiplier))
-    if (result >= error_bound) or (-result >= error_bound):
+    if result >= error_bound or -result >= error_bound:
         return result
 
     result_expansion = sum_expansions(

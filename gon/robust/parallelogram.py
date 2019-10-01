@@ -60,7 +60,7 @@ def _adjusted_signed_area(vertex: Point,
                                     subtrahend, subtrahend_tail)
     result = sum(result_expansion)
     error_bound = bounds.to_signed_measure_second_error(upper_bound)
-    if (result >= error_bound) or (-result >= error_bound):
+    if result >= error_bound or -result >= error_bound:
         return result
 
     minuend_multiplier_x_tail = two_diff_tail(first_ray_point.x, vertex.x,
@@ -83,7 +83,7 @@ def _adjusted_signed_area(vertex: Point,
                 + minuend_multiplier_y * minuend_multiplier_x_tail)
                - (subtrahend_multiplier_y * subtrahend_multiplier_x_tail
                   + subtrahend_multiplier_x * subtrahend_multiplier_y_tail))
-    if (result >= error_bound) or (-result >= error_bound):
+    if result >= error_bound or -result >= error_bound:
         return result
 
     result_expansion = sum_expansions(
