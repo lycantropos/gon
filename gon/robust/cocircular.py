@@ -1,4 +1,6 @@
-from typing import Tuple
+from functools import reduce
+from typing import (Iterable,
+                    Tuple)
 
 from gon.base import Point
 from gon.hints import Scalar
@@ -188,30 +190,15 @@ def _adjusted_determinant(first_point: Point, second_point: Point,
             second_third_crossed_tails = second_third_crossed_tails_tail = (0,)
 
         if first_dx_tail:
-            temp16a = scale_expansion(axtbc, first_dx_tail)
-            axtbct = scale_expansion(second_third_crossed_tails, first_dx_tail)
-            temp32a = scale_expansion(axtbct, 2 * first_dx)
-            temp48 = sum_expansions(temp16a, temp32a)
-            result_expansion = sum_expansions(result_expansion, temp48)
-
-            if second_dy_tail:
-                temp8 = scale_expansion(third_squared_length, first_dx_tail)
-                temp16a = scale_expansion(temp8, second_dy_tail)
-                result_expansion = sum_expansions(result_expansion, temp16a)
-
-            if third_dy_tail:
-                temp8 = scale_expansion(second_squared_length, -first_dx_tail)
-                temp16a = scale_expansion(temp8, third_dy_tail)
-                result_expansion = sum_expansions(result_expansion, temp16a)
-
-            temp32a = scale_expansion(axtbct, first_dx_tail)
-            axtbctt = scale_expansion(second_third_crossed_tails_tail,
-                                      first_dx_tail)
-            temp16a = scale_expansion(axtbctt, 2 * first_dx)
-            temp16b = scale_expansion(axtbctt, first_dx_tail)
-            temp32b = sum_expansions(temp16a, temp16b)
-            temp64 = sum_expansions(temp32a, temp32b)
-            result_expansion = sum_expansions(result_expansion, temp64)
+            result_expansion = reduce(
+                    sum_expansions,
+                    _to_dx_extras(axtbc,
+                                  first_dx, first_dx_tail,
+                                  second_dy_tail, second_squared_length,
+                                  third_dy_tail, third_squared_length,
+                                  second_third_crossed_tails,
+                                  second_third_crossed_tails_tail),
+                    result_expansion)
 
         if first_dy_tail:
             temp16a = scale_expansion(aytbc, first_dy_tail)
@@ -240,30 +227,15 @@ def _adjusted_determinant(first_point: Point, second_point: Point,
             third_first_crossed_tails = third_first_crossed_tails_tail = (0,)
 
         if second_dx_tail:
-            temp16a = scale_expansion(bxtca, second_dx_tail)
-            bxtcat = scale_expansion(third_first_crossed_tails, second_dx_tail)
-            temp32a = scale_expansion(bxtcat, 2 * second_dx)
-            temp48 = sum_expansions(temp16a, temp32a)
-            result_expansion = sum_expansions(result_expansion, temp48)
-
-            if third_dy_tail:
-                temp8 = scale_expansion(first_squared_length, second_dx_tail)
-                temp16a = scale_expansion(temp8, third_dy_tail)
-                result_expansion = sum_expansions(result_expansion, temp16a)
-
-            if first_dy_tail:
-                temp8 = scale_expansion(third_squared_length, -second_dx_tail)
-                temp16a = scale_expansion(temp8, first_dy_tail)
-                result_expansion = sum_expansions(result_expansion, temp16a)
-
-            temp32a = scale_expansion(bxtcat, second_dx_tail)
-            bxtcatt = scale_expansion(third_first_crossed_tails_tail,
-                                      second_dx_tail)
-            temp16a = scale_expansion(bxtcatt, 2 * second_dx)
-            temp16b = scale_expansion(bxtcatt, second_dx_tail)
-            temp32b = sum_expansions(temp16a, temp16b)
-            temp64 = sum_expansions(temp32a, temp32b)
-            result_expansion = sum_expansions(result_expansion, temp64)
+            result_expansion = reduce(
+                    sum_expansions,
+                    _to_dx_extras(bxtca,
+                                  second_dx, second_dx_tail,
+                                  third_dy_tail, third_squared_length,
+                                  first_dy_tail, first_squared_length,
+                                  third_first_crossed_tails,
+                                  third_first_crossed_tails_tail),
+                    result_expansion)
 
         if second_dy_tail:
             temp16a = scale_expansion(bytca, second_dy_tail)
@@ -291,30 +263,15 @@ def _adjusted_determinant(first_point: Point, second_point: Point,
             first_second_crossed_tails = first_second_crossed_tails_tail = (0,)
 
         if third_dx_tail:
-            temp16a = scale_expansion(cxtab, third_dx_tail)
-            cxtabt = scale_expansion(first_second_crossed_tails, third_dx_tail)
-            temp32a = scale_expansion(cxtabt, 2 * third_dx)
-            temp48 = sum_expansions(temp16a, temp32a)
-            result_expansion = sum_expansions(result_expansion, temp48)
-
-            if first_dy_tail:
-                temp8 = scale_expansion(second_squared_length, third_dx_tail)
-                temp16a = scale_expansion(temp8, first_dy_tail)
-                result_expansion = sum_expansions(result_expansion, temp16a)
-
-            if second_dy_tail:
-                temp8 = scale_expansion(first_squared_length, -third_dx_tail)
-                temp16a = scale_expansion(temp8, second_dy_tail)
-                result_expansion = sum_expansions(result_expansion, temp16a)
-
-            temp32a = scale_expansion(cxtabt, third_dx_tail)
-            cxtabtt = scale_expansion(first_second_crossed_tails_tail,
-                                      third_dx_tail)
-            temp16a = scale_expansion(cxtabtt, 2 * third_dx)
-            temp16b = scale_expansion(cxtabtt, third_dx_tail)
-            temp32b = sum_expansions(temp16a, temp16b)
-            temp64 = sum_expansions(temp32a, temp32b)
-            result_expansion = sum_expansions(result_expansion, temp64)
+            result_expansion = reduce(
+                    sum_expansions,
+                    _to_dx_extras(cxtab,
+                                  third_dx, third_dx_tail,
+                                  first_dy_tail, first_squared_length,
+                                  second_dy_tail, second_squared_length,
+                                  first_second_crossed_tails,
+                                  first_second_crossed_tails_tail),
+                    result_expansion)
 
         if third_dy_tail:
             temp16a = scale_expansion(cytab, third_dy_tail)
@@ -331,6 +288,33 @@ def _adjusted_determinant(first_point: Point, second_point: Point,
             temp64 = sum_expansions(temp32a, temp32b)
             result_expansion = sum_expansions(result_expansion, temp64)
     return result_expansion[-1]
+
+
+def _to_dx_extras(expansion: Expansion,
+                  dx: Scalar, dx_tail: Scalar,
+                  left_dy_tail: Scalar, left_squared_length: Expansion,
+                  right_dy_tail: Scalar, right_squared_length: Expansion,
+                  left_right_crossed_tails: Expansion,
+                  left_right_crossed_tails_tail: Expansion
+                  ) -> Iterable[Expansion]:
+    dx_tail_left_right_crossed_tails = scale_expansion(
+            left_right_crossed_tails, dx_tail)
+    yield sum_expansions(scale_expansion(expansion, dx_tail),
+                         scale_expansion(dx_tail_left_right_crossed_tails,
+                                         2 * dx))
+    if left_dy_tail:
+        yield scale_expansion(scale_expansion(right_squared_length, dx_tail),
+                              left_dy_tail)
+    if right_dy_tail:
+        yield scale_expansion(scale_expansion(left_squared_length, -dx_tail),
+                              right_dy_tail)
+    first_addend = scale_expansion(dx_tail_left_right_crossed_tails, dx_tail)
+    dx_tail_left_right_crossed_tails_tail = scale_expansion(
+            left_right_crossed_tails_tail, dx_tail)
+    second_addend = sum_expansions(
+            scale_expansion(dx_tail_left_right_crossed_tails_tail, 2 * dx),
+            scale_expansion(dx_tail_left_right_crossed_tails_tail, dx_tail))
+    yield sum_expansions(first_addend, second_addend)
 
 
 def _to_extra(expansion: Expansion,
