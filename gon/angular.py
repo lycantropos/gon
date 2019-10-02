@@ -56,5 +56,7 @@ class Angle:
     @property
     def orientation(self) -> Orientation:
         return Orientation(to_sign(
-                parallelogram.signed_area(self._first_ray_point, self._vertex,
+                parallelogram.signed_area(self._vertex,
+                                          self._first_ray_point,
+                                          self._vertex,
                                           self._second_ray_point)))
