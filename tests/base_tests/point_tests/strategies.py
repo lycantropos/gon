@@ -1,4 +1,5 @@
 import math
+
 from hypothesis import strategies
 from lz.functional import identity
 
