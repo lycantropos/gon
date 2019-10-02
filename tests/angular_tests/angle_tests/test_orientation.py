@@ -12,6 +12,16 @@ def test_alternatives(angle: Angle) -> None:
     assert angle.orientation in Orientation
 
 
+@given(strategies.straight_origin_angles)
+def test_straight_angle(angle: Angle) -> None:
+    assert angle.orientation is Orientation.COLLINEAR
+
+
+@given(strategies.right_origin_angles)
+def test_right_angle(angle: Angle) -> None:
+    assert angle.orientation is not Orientation.COLLINEAR
+
+
 @given(strategies.angles)
 def test_rays_flip(angle: Angle) -> None:
     flipped_angle = Angle(angle.second_ray_point,
