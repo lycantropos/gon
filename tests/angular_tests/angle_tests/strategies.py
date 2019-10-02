@@ -1,5 +1,6 @@
 from functools import partial
-from typing import Tuple, Sequence
+from typing import (Sequence,
+                    Tuple)
 
 from hypothesis import strategies
 from lz.functional import pack
@@ -7,7 +8,9 @@ from lz.functional import pack
 from gon.angular import Angle
 from gon.base import Point
 from tests.strategies import points_strategies
-from tests.utils import to_origin, Strategy, is_non_origin_point
+from tests.utils import (Strategy,
+                         is_non_origin_point,
+                         to_origin)
 
 unique_points_triplets = points_strategies.flatmap(partial(strategies.lists,
                                                            min_size=3,
