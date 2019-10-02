@@ -7,10 +7,13 @@ from lz.functional import pack
 
 from gon.angular import Angle
 from gon.base import Point
-from tests.strategies import points_strategies
+from tests.strategies import (points,
+                              points_strategies)
 from tests.utils import (Strategy,
                          is_non_origin_point,
-                         to_origin)
+                         reflect_point,
+                         to_origin,
+                         to_perpendicular_point)
 
 unique_points_triplets = points_strategies.flatmap(partial(strategies.lists,
                                                            min_size=3,
@@ -36,3 +39,21 @@ def to_non_origin_points_pairs(points: Strategy[Point]
 origin_angles = (points_strategies
                  .flatmap(to_non_origin_points_pairs)
                  .map(to_origin_angles))
+
+
+def to_straight_origin_angles(point: Point) -> Angle:
+    return Angle(point, to_origin(point), reflect_point(point))
+
+
+straight_origin_angles = (points
+                          .filter(is_non_origin_point)
+                          .map(to_straight_origin_angles))
+
+
+def to_right_origin_angle(point: Point) -> Angle:
+    return Angle(point, to_origin(point), to_perpendicular_point(point))
+
+
+right_origin_angles = (points
+                       .filter(is_non_origin_point)
+                       .map(to_right_origin_angle))
