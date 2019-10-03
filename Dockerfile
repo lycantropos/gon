@@ -3,6 +3,8 @@ ARG PYTHON_IMAGE_VERSION
 
 FROM ${PYTHON_IMAGE}:${PYTHON_IMAGE_VERSION}
 
+RUN pip install --upgrade pip setuptools
+
 WORKDIR /opt/gon
 
 COPY gon gon/
@@ -13,5 +15,5 @@ COPY requirements-tests.txt .
 COPY setup.py .
 COPY setup.cfg .
 
-RUN pip install -r requirements.txt .
-RUN pip install -r requirements-tests.txt .
+RUN pip install -r requirements.txt
+RUN pip install -r requirements-tests.txt
