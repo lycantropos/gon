@@ -37,7 +37,7 @@ from .utils import (to_convex_hull,
 
 
 @unique
-class InclusionKind(IntEnum):
+class LocationKind(IntEnum):
     OUTSIDE = 0
     INSIDE = 1
     ON_BOUNDARY = 2
@@ -47,8 +47,15 @@ class InclusionKind(IntEnum):
                      reference='http://tiny.cc/n_gon')
 class Polygon(ABC):
     @abstractmethod
-    def __contains__(self, point: Point) -> InclusionKind:
+    def location_of(self, point: Point) -> LocationKind:
+        """
+        Locates whether the point lies outside the polygon,
+        on its boundary or inside it.
+        """
+
+    def __contains__(self, point: Point) -> bool:
         """Checks if the point lies inside the polygon or on its boundary."""
+        return self.location_of(point) is not LocationKind.OUTSIDE
 
     @abstractmethod
     def __eq__(self, other: 'Polygon') -> bool:
@@ -98,33 +105,34 @@ class SimplePolygon(Polygon):
 
     __repr__ = generate_repr(__init__)
 
-    @documentation.setup(docstring='Checks if the point lies '
-                                   'inside the polygon or on its boundary.',
+    @documentation.setup(docstring='Locates whether the point lies '
+                                   'outside the polygon, on its boundary '
+                                   'or inside it.',
                          origin='"PNPOLY" ray-casting algorithm',
                          reference='http://tiny.cc/pnpoly',
                          time_complexity='O(n), where\n'
                                          'n -- polygon\'s vertices count')
-    def __contains__(self, point: Point) -> InclusionKind:
+    def location_of(self, point: Point) -> LocationKind:
         """
         >>> polygon = SimplePolygon([Point(-1, -1), Point(1, -1),
         ...                          Point(1, 1), Point(-1, 1)])
-        >>> Point(1, 1) in polygon
+        >>> polygon.location_of(Point(1, 1)) is LocationKind.ON_BOUNDARY
         True
-        >>> Point(0, 0) in polygon
+        >>> polygon.location_of(Point(0, 0)) is LocationKind.INSIDE
         True
-        >>> Point(2, 2) in polygon
-        False
-        >>> Point(-2, -2) in polygon
-        False
+        >>> polygon.location_of(Point(2, 2)) is LocationKind.OUTSIDE
+        True
+        >>> polygon.location_of(Point(-2, -2)) is LocationKind.OUTSIDE
+        True
         """
         result = False
         for edge in to_edges(self._vertices):
             if point in edge:
-                return InclusionKind.ON_BOUNDARY
+                return LocationKind.ON_BOUNDARY
             if ((edge.start.y > point.y) is not (edge.end.y > point.y)
                     and _is_point_to_the_left_of_line(point, edge)):
                 result = not result
-        return InclusionKind(result)
+        return LocationKind(result)
 
     @documentation.setup(docstring='Checks if polygons are equal.',
                          time_complexity=
