@@ -7,8 +7,7 @@ from gon.base import Point
 from gon.linear import Interval
 from tests.utils import (equivalence,
                          implication,
-                         is_non_origin_point,
-                         reflect_point)
+                         reflect_interval)
 from . import strategies
 
 
@@ -18,12 +17,13 @@ def test_endpoints(interval: Interval) -> None:
     assert equivalence(interval.end_inclusive, interval.end in interval)
 
 
-@given(strategies.same_quadrant_intervals)
-def test_same_quadrant_interval_reflection(interval: Interval) -> None:
-    assert implication(is_non_origin_point(interval.start),
-                       reflect_point(interval.start) not in interval)
-    assert implication(is_non_origin_point(interval.end),
-                       reflect_point(interval.end) not in interval)
+@given(strategies.intervals)
+def test_reflection(interval: Interval) -> None:
+    reflected_interval = reflect_interval(interval)
+
+    assert equivalence(interval.start_inclusive,
+                       reflected_interval.start in interval)
+    assert reflected_interval.end not in interval
 
 
 @given(strategies.intervals_with_points)
