@@ -6,14 +6,14 @@ from hypothesis import strategies
 from lz.functional import pack
 
 from gon.angular import Angle
-from gon.base import Point
+from gon.base import (Point,
+                      to_perpendicular_point)
 from tests.strategies import (points,
                               points_strategies)
 from tests.utils import (Strategy,
                          is_non_origin_point,
                          reflect_point,
-                         to_origin,
-                         to_perpendicular_point)
+                         to_origin)
 
 unique_points_triplets = points_strategies.flatmap(partial(strategies.lists,
                                                            min_size=3,
