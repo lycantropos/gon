@@ -33,3 +33,8 @@ class Point:
         if not isinstance(other, Point):
             return NotImplemented
         return self._x == other._x and self._y == other._y
+
+
+
+def to_perpendicular_point(point: Point) -> Point:
+    return Point(-point.y, point.x)

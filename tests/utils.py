@@ -137,10 +137,6 @@ def to_origin(point: Point) -> Point:
     return Point(origin_coordinate, origin_coordinate)
 
 
-def to_perpendicular_point(point: Point) -> Point:
-    return Point(-point.y, point.x)
-
-
 def has_opposite_orientations(left_angle: Angle, right_angle: Angle) -> bool:
     return ((left_angle.orientation is Orientation.COLLINEAR)
             ^ (right_angle.orientation is not left_angle.orientation))
