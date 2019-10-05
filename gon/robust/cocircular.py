@@ -132,52 +132,64 @@ def _adjusted_determinant(first_point: Point, second_point: Point,
         third_squared_length = (0,) * 4
 
     if first_dx_tail:
-        axtbc = scale_expansion(second_third_cross_product, first_dx_tail)
+        first_dx_tail_second_third_cross_product = scale_expansion(
+                second_third_cross_product, first_dx_tail)
         result_expansion = sum_expansions(
-                result_expansion, _to_extra(axtbc,
-                                            first_dx, first_dx_tail,
-                                            second_dy, second_squared_length,
-                                            third_dy, third_squared_length))
+                result_expansion,
+                _to_extra(first_dx_tail_second_third_cross_product,
+                          first_dx, first_dx_tail,
+                          second_dy, second_squared_length,
+                          third_dy, third_squared_length))
 
     if first_dy_tail:
-        aytbc = scale_expansion(second_third_cross_product, first_dy_tail)
+        first_dy_tail_second_third_cross_product = scale_expansion(
+                second_third_cross_product, first_dy_tail)
         result_expansion = sum_expansions(
-                result_expansion, _to_extra(aytbc,
-                                            first_dy, first_dy_tail,
-                                            third_dx, third_squared_length,
-                                            second_dx, second_squared_length))
+                result_expansion,
+                _to_extra(first_dy_tail_second_third_cross_product,
+                          first_dy, first_dy_tail,
+                          third_dx, third_squared_length,
+                          second_dx, second_squared_length))
 
     if second_dx_tail:
-        bxtca = scale_expansion(third_first_cross_product, second_dx_tail)
+        second_dx_tail_third_first_cross_product = scale_expansion(
+                third_first_cross_product, second_dx_tail)
         result_expansion = sum_expansions(
-                result_expansion, _to_extra(bxtca,
-                                            second_dx, second_dx_tail,
-                                            third_dy, third_squared_length,
-                                            first_dy, first_squared_length))
+                result_expansion,
+                _to_extra(second_dx_tail_third_first_cross_product,
+                          second_dx, second_dx_tail,
+                          third_dy, third_squared_length,
+                          first_dy, first_squared_length))
 
     if second_dy_tail:
-        bytca = scale_expansion(third_first_cross_product, second_dy_tail)
+        second_dy_tail_third_first_cross_product = scale_expansion(
+                third_first_cross_product, second_dy_tail)
         result_expansion = sum_expansions(
-                result_expansion, _to_extra(bytca,
-                                            second_dy, second_dy_tail,
-                                            first_dx, first_squared_length,
-                                            third_dx, third_squared_length))
+                result_expansion,
+                _to_extra(second_dy_tail_third_first_cross_product,
+                          second_dy, second_dy_tail,
+                          first_dx, first_squared_length,
+                          third_dx, third_squared_length))
 
     if third_dx_tail:
-        cxtab = scale_expansion(first_second_cross_product, third_dx_tail)
+        third_dx_tail_first_second_cross_product = scale_expansion(
+                first_second_cross_product, third_dx_tail)
         result_expansion = sum_expansions(
-                result_expansion, _to_extra(cxtab,
-                                            third_dx, third_dx_tail,
-                                            first_dy, first_squared_length,
-                                            second_dy, second_squared_length))
+                result_expansion,
+                _to_extra(third_dx_tail_first_second_cross_product,
+                          third_dx, third_dx_tail,
+                          first_dy, first_squared_length,
+                          second_dy, second_squared_length))
 
     if third_dy_tail:
-        cytab = scale_expansion(first_second_cross_product, third_dy_tail)
+        third_dy_tail_first_second_cross_product = scale_expansion(
+                first_second_cross_product, third_dy_tail)
         result_expansion = sum_expansions(
-                result_expansion, _to_extra(cytab,
-                                            third_dy, third_dy_tail,
-                                            second_dx, second_squared_length,
-                                            first_dx, first_squared_length))
+                result_expansion,
+                _to_extra(third_dy_tail_first_second_cross_product,
+                          third_dy, third_dy_tail,
+                          second_dx, second_squared_length,
+                          first_dx, first_squared_length))
 
     if first_dx_tail or first_dy_tail:
         if second_dx_tail or second_dy_tail or third_dx_tail or third_dy_tail:
@@ -192,7 +204,7 @@ def _adjusted_determinant(first_point: Point, second_point: Point,
         if first_dx_tail:
             result_expansion = reduce(
                     sum_expansions,
-                    _to_dx_extras(axtbc,
+                    _to_dx_extras(first_dx_tail_second_third_cross_product,
                                   first_dx, first_dx_tail,
                                   second_dy_tail, second_squared_length,
                                   third_dy_tail, third_squared_length,
@@ -203,7 +215,7 @@ def _adjusted_determinant(first_point: Point, second_point: Point,
         if first_dy_tail:
             result_expansion = reduce(
                     sum_expansions,
-                    _to_dy_extras(aytbc,
+                    _to_dy_extras(first_dy_tail_second_third_cross_product,
                                   first_dy, first_dy_tail,
                                   second_third_crossed_tails,
                                   second_third_crossed_tails_tail),
@@ -222,7 +234,7 @@ def _adjusted_determinant(first_point: Point, second_point: Point,
         if second_dx_tail:
             result_expansion = reduce(
                     sum_expansions,
-                    _to_dx_extras(bxtca,
+                    _to_dx_extras(second_dx_tail_third_first_cross_product,
                                   second_dx, second_dx_tail,
                                   third_dy_tail, third_squared_length,
                                   first_dy_tail, first_squared_length,
@@ -233,7 +245,7 @@ def _adjusted_determinant(first_point: Point, second_point: Point,
         if second_dy_tail:
             result_expansion = reduce(
                     sum_expansions,
-                    _to_dy_extras(bytca,
+                    _to_dy_extras(second_dy_tail_third_first_cross_product,
                                   second_dy, second_dy_tail,
                                   third_first_crossed_tails,
                                   third_first_crossed_tails_tail),
@@ -252,7 +264,7 @@ def _adjusted_determinant(first_point: Point, second_point: Point,
         if third_dx_tail:
             result_expansion = reduce(
                     sum_expansions,
-                    _to_dx_extras(cxtab,
+                    _to_dx_extras(third_dx_tail_first_second_cross_product,
                                   third_dx, third_dx_tail,
                                   first_dy_tail, first_squared_length,
                                   second_dy_tail, second_squared_length,
@@ -263,7 +275,7 @@ def _adjusted_determinant(first_point: Point, second_point: Point,
         if third_dy_tail:
             result_expansion = reduce(
                     sum_expansions,
-                    _to_dy_extras(cytab,
+                    _to_dy_extras(third_dy_tail_first_second_cross_product,
                                   third_dy, third_dy_tail,
                                   first_second_crossed_tails,
                                   first_second_crossed_tails_tail),
