@@ -115,7 +115,11 @@ def reflect_point(point: Point) -> Point:
 
 
 def reflect_interval(interval: Interval) -> Interval:
-    return Interval(reflect_point(interval.start), reflect_point(interval.end),
+    return Interval(interval.start,
+                    Point(interval.start.x
+                          - (interval.end.x - interval.start.x),
+                          interval.start.y
+                          - (interval.end.y - interval.start.y)),
                     start_inclusive=interval.start_inclusive,
                     end_inclusive=interval.end_inclusive)
 
