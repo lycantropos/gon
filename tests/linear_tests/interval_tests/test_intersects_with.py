@@ -6,7 +6,6 @@ from gon.linear import Interval
 from tests.utils import (equivalence,
                          implication,
                          inverse_inclusion,
-                         is_non_origin_point,
                          reflect_interval)
 from . import strategies
 
@@ -38,15 +37,9 @@ def test_independence_from_ends_order(intervals_pair: Tuple[Interval, Interval]
                        interval.reversed.intersects_with(other_interval))
 
 
-@given(strategies.same_quadrant_intervals)
-def test_same_quadrant_interval_reflection(interval: Interval) -> None:
+@given(strategies.intervals)
+def test_reflection(interval: Interval) -> None:
     reflected_interval = reflect_interval(interval)
 
-    one_of_endpoints_is_included_origin = (
-            interval.start_inclusive
-            and not is_non_origin_point(interval.start)
-            or interval.end_inclusive
-            and not is_non_origin_point(interval.end))
-
-    assert equivalence(one_of_endpoints_is_included_origin,
+    assert equivalence(interval.start_inclusive,
                        interval.intersects_with(reflected_interval))
