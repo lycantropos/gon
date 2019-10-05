@@ -30,47 +30,6 @@ def points_to_interval_endpoints(points: Strategy[Point]
 
 
 intervals = points_strategies.flatmap(points_to_intervals)
-
-
-def points_to_same_quadrant_intervals(points: Strategy[Point]
-                                      ) -> Strategy[Interval]:
-    def endpoints_to_same_quadrant_intervals(endpoints: Tuple[Point, Point]
-                                             ) -> Strategy[Interval]:
-        start, end = endpoints
-        reflected_start = reflect_to_base_quadrant(start,
-                                                   base=end)
-        reflected_end = reflect_to_base_quadrant(end,
-                                                 base=start)
-        return (strategies.builds(Interval,
-                                  strategies.just(start),
-                                  strategies.just(reflected_end),
-                                  start_inclusive=strategies.booleans(),
-                                  end_inclusive=strategies.booleans())
-                | strategies.builds(Interval,
-                                    strategies.just(reflected_start),
-                                    strategies.just(end),
-                                    start_inclusive=strategies.booleans(),
-                                    end_inclusive=strategies.booleans()))
-
-    def reflect_to_base_quadrant(point: Point,
-                                 *,
-                                 base: Point) -> Point:
-        if base.x * point.x < 0:
-            if base.y * point.y < 0:
-                return Point(-point.x, -point.y)
-            else:
-                return Point(-point.x, point.y)
-        elif base.y * point.y < 0:
-            return Point(point.x, -point.y)
-        else:
-            return point
-
-    return (points_to_interval_endpoints(points)
-            .flatmap(endpoints_to_same_quadrant_intervals))
-
-
-same_quadrant_intervals = (points_strategies
-                           .flatmap(points_to_same_quadrant_intervals))
 non_intervals = strategies.builds(object)
 
 
