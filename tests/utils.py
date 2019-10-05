@@ -13,6 +13,7 @@ from lz.replication import replicator
 from gon.angular import (Angle,
                          Orientation)
 from gon.base import Point
+from gon.hints import Scalar
 from gon.linear import (Interval,
                         Segment,
                         to_segment)
@@ -114,14 +115,21 @@ def reflect_point(point: Point) -> Point:
     return Point(-point.x, -point.y)
 
 
-def reflect_interval(interval: Interval) -> Interval:
+def scale_interval(interval: Interval,
+                   *,
+                   scale: Scalar) -> Interval:
     return Interval(interval.start,
                     Point(interval.start.x
-                          - (interval.end.x - interval.start.x),
+                          + scale * (interval.end.x - interval.start.x),
                           interval.start.y
-                          - (interval.end.y - interval.start.y)),
+                          + scale * (interval.end.y - interval.start.y)),
                     start_inclusive=interval.start_inclusive,
                     end_inclusive=interval.end_inclusive)
+
+
+def reflect_interval(interval: Interval) -> Interval:
+    return scale_interval(interval,
+                          scale=-1)
 
 
 def inverse_inclusion(interval: Interval) -> Interval:
