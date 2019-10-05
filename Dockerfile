@@ -15,5 +15,5 @@ COPY requirements-tests.txt .
 COPY setup.py .
 COPY setup.cfg .
 
-RUN pip install -r requirements.txt
-RUN pip install -r requirements-tests.txt
+RUN pip install --force-reinstall -r requirements.txt
+RUN pip install --force-reinstall -r requirements-tests.txt
