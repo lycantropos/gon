@@ -291,36 +291,41 @@ def _set_constraints(triangulation: Triangulation,
         crossed_edges = _find_crossed_edges(constraint, triangulation)
         new_edges = _resolve_crossings(constraint, triangulation,
                                        crossed_edges=crossed_edges)
-        _set_delaunay_criterion({edge
-                                 for edge in new_edges
-                                 if _edge_to_segment(edge) != constraint})
+        _set_delaunay_criterion(edge
+                                for edge in new_edges
+                                if _edge_to_segment(edge) != constraint)
 
 
 @documentation.setup(docstring='Straightforward flip algorithm.',
                      time_complexity='O(n^2), where\n'
                                      'n -- points count')
-def _set_delaunay_criterion(target_edges: Set[QuadEdge]) -> None:
+def _set_delaunay_criterion(target_edges: Iterable[QuadEdge]) -> None:
+    target_edges = set(target_edges)
     while True:
-        swapped_edges = set()
-        for edge in target_edges:
-            if not _points_form_convex_quadrilateral(
-                    (edge.start, edge.end,
-                     edge.left_from_start.end,
-                     edge.right_from_start.end)):
-                continue
-            if not (is_point_inside_circumcircle(
-                    (edge.start, edge.end, edge.left_from_start.end),
-                    edge.right_from_start.end)
-                    or is_point_inside_circumcircle(
-                            (edge.end, edge.start,
-                             edge.right_from_start.end),
-                            edge.left_from_start.end)):
-                continue
-            edge.swap()
-            swapped_edges.add(edge)
-        if not swapped_edges:
+        edges_to_swap = {edge
+                         for edge in target_edges
+                         if _should_be_swapped(edge)}
+        if not edges_to_swap:
             break
-        target_edges.difference_update(swapped_edges)
+        for edge in edges_to_swap:
+            edge.swap()
+        target_edges.difference_update(edges_to_swap)
+
+
+def _should_be_swapped(edge: QuadEdge) -> bool:
+    return (_points_form_convex_quadrilateral(
+            (edge.start, edge.left_from_start.end,
+             edge.end, edge.right_from_start.end))
+            and _is_non_delaunay(edge))
+
+
+def _is_non_delaunay(edge: QuadEdge) -> bool:
+    return (is_point_inside_circumcircle((edge.start, edge.end,
+                                          edge.left_from_start.end),
+                                         edge.right_from_start.end)
+            or is_point_inside_circumcircle((edge.end, edge.start,
+                                             edge.right_from_start.end),
+                                            edge.left_from_start.end))
 
 
 def _set_boundary(triangulation: Triangulation,
