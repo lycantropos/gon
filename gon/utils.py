@@ -5,7 +5,6 @@ from typing import (Any,
 
 from lz.functional import compose
 from lz.hints import Domain
-from lz.iterating import slider
 from lz.sorting import Key
 
 from .hints import (Permutation,
@@ -26,9 +25,6 @@ def to_index_min(values: Iterable[Domain],
     return min(((value, index)
                 for index, value in enumerate(values)),
                **kwargs)[1]
-
-
-triplewise = slider(3)
 
 
 def inverse_permutation(permutation: Permutation) -> Permutation:
