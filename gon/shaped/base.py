@@ -201,7 +201,7 @@ class SimplePolygon(Polygon):
         """
         expansions = [_edge_to_endpoints_cross_product_z(edge)
                       for edge in to_edges(self._vertices)]
-        return abs(reduce(sum_expansions, expansions)[-1]) / 2
+        return reduce(sum_expansions, expansions)[-1] / 2
 
     @cached.property_
     @documentation.setup(docstring='Returns convex hull of the polygon.',
@@ -263,14 +263,11 @@ class SimplePolygon(Polygon):
 
 
 def _edge_to_endpoints_cross_product_z(edge: Segment) -> Expansion:
-    start_x_end_y, start_x_end_y_tail = two_product(edge.start.x,
-                                                    edge.end.y)
-    start_y_end_x, start_y_end_x_tail = two_product(edge.start.y,
-                                                    edge.end.x)
-    if not start_x_end_y_tail and not start_y_end_x_tail:
-        return 0, 0, 0, start_x_end_y - start_y_end_x
-    return two_two_diff(start_x_end_y, start_x_end_y_tail,
-                        start_y_end_x, start_y_end_x_tail)
+    minuend_y, minuend_tail = two_product(edge.start.x, edge.end.y)
+    subtrahend, subtrahend_tail = two_product(edge.start.y, edge.end.x)
+    return (two_two_diff(minuend_y, minuend_tail, subtrahend, subtrahend_tail)
+            if minuend_tail or subtrahend_tail
+            else (0, 0, 0, minuend_y - subtrahend))
 
 
 @documentation.setup(docstring='Creates polygon from given vertices.',
