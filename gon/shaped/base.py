@@ -150,9 +150,9 @@ class SimplePolygon(Polygon):
         """
         if not isinstance(other, Polygon):
             return NotImplemented
-        if not isinstance(other, SimplePolygon):
-            return False
-        return self._vertices == other._vertices
+        return (self._vertices == other._vertices
+                if isinstance(other, SimplePolygon)
+                else False)
 
     @documentation.setup(docstring='Returns hash value of the polygon.',
                          time_complexity='O(n), where\n'
