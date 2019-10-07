@@ -351,8 +351,8 @@ def _resolve_crossings(constraint: Segment,
                        *,
                        crossed_edges: Set[QuadEdge]) -> Set[QuadEdge]:
     open_constraint = to_interval(constraint.start, constraint.end,
-                                  start_inclusive=False,
-                                  end_inclusive=False)
+                                  with_start=False,
+                                  with_end=False)
     result = set()
     crossed_edges = deque(crossed_edges,
                           maxlen=len(crossed_edges))
@@ -377,8 +377,8 @@ def _resolve_crossings(constraint: Segment,
 def _find_crossed_edges(constraint: Segment,
                         triangulation: Triangulation) -> Set[QuadEdge]:
     open_constraint = to_interval(constraint.start, constraint.end,
-                                  start_inclusive=False,
-                                  end_inclusive=False)
+                                  with_start=False,
+                                  with_end=False)
     return set({_edge_to_segment(edge): edge
                 for edge in triangulation.to_inner_edges()
                 if _edge_to_segment(edge).relationship_with(open_constraint)

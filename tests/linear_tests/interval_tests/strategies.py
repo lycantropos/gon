@@ -26,8 +26,8 @@ def points_to_intervals(points: Strategy[Point]) -> Strategy[Interval]:
                      strategies.builds(Interval,
                                        strategies.just(endpoints[0]),
                                        strategies.just(endpoints[1]),
-                                       start_inclusive=strategies.booleans(),
-                                       end_inclusive=strategies.booleans())))
+                                       with_start=strategies.booleans(),
+                                       with_end=strategies.booleans())))
 
 
 def points_to_interval_endpoints(points: Strategy[Point]
@@ -101,8 +101,8 @@ def to_intervals_pairs(intervals: Strategy[Interval]
                                         / area,
                                         (area_sine * dx + area_cosine * dy)
                                         / area),
-                                  start_inclusive=interval.start_inclusive,
-                                  end_inclusive=interval.end_inclusive)
+                                  with_start=interval.with_start,
+                                  with_end=interval.with_end)
 
     def map_first(map_: Operator[Interval],
                   intervals_pair: Tuple[Interval, Interval]

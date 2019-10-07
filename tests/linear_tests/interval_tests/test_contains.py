@@ -13,15 +13,15 @@ from . import strategies
 
 @given(strategies.intervals)
 def test_endpoints(interval: Interval) -> None:
-    assert equivalence(interval.start_inclusive, interval.start in interval)
-    assert equivalence(interval.end_inclusive, interval.end in interval)
+    assert equivalence(interval.with_start, interval.start in interval)
+    assert equivalence(interval.with_end, interval.end in interval)
 
 
 @given(strategies.intervals)
 def test_reflection(interval: Interval) -> None:
     reflected_interval = reflect_interval(interval)
 
-    assert equivalence(interval.start_inclusive,
+    assert equivalence(interval.with_start,
                        reflected_interval.start in interval)
     assert reflected_interval.end not in interval
 
