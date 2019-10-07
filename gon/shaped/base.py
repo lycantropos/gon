@@ -130,7 +130,9 @@ class SimplePolygon(Polygon):
             if point in edge:
                 return LocationKind.ON_BOUNDARY
             if ((edge.start.y > point.y) is not (edge.end.y > point.y)
-                    and _is_point_to_the_left_of_line(point, edge)):
+                    and ((edge.end.y > edge.start.y)
+                         is (edge.orientation_with(point)
+                             is Orientation.COUNTERCLOCKWISE))):
                 result = not result
         return LocationKind(result)
 
@@ -269,14 +271,6 @@ def _edge_to_endpoints_cross_product_z(edge: Segment) -> Expansion:
         return 0, 0, 0, start_x_end_y - start_y_end_x
     return two_two_diff(start_x_end_y, start_x_end_y_tail,
                         start_y_end_x, start_y_end_x_tail)
-
-
-def _is_point_to_the_left_of_line(point: Point, line_segment: Segment) -> bool:
-    if line_segment.start.y == line_segment.end.y:
-        return False
-    return ((line_segment.end.y > line_segment.start.y)
-            is (line_segment.orientation_with(point)
-                is Orientation.COUNTERCLOCKWISE))
 
 
 @documentation.setup(docstring='Creates polygon from given vertices.',
