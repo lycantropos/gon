@@ -116,20 +116,18 @@ def _adjusted_determinant(first_point: Point, second_point: Point,
     if result >= error_bound or -result >= error_bound:
         return result
 
-    if second_dx_tail or second_dy_tail or third_dx_tail or third_dy_tail:
-        first_squared_length = _to_squared_length(first_dx, first_dy)
-    else:
-        first_squared_length = (0,) * 4
-
-    if first_dx_tail or first_dy_tail or third_dx_tail or third_dy_tail:
-        second_squared_length = _to_squared_length(second_dx, second_dy)
-    else:
-        second_squared_length = (0,) * 4
-
-    if first_dx_tail or first_dy_tail or second_dx_tail or second_dy_tail:
-        third_squared_length = _to_squared_length(third_dx, third_dy)
-    else:
-        third_squared_length = (0,) * 4
+    first_squared_length = (_to_squared_length(first_dx, first_dy)
+                            if (second_dx_tail or second_dy_tail
+                                or third_dx_tail or third_dy_tail)
+                            else (0,) * 4)
+    second_squared_length = (_to_squared_length(second_dx, second_dy)
+                             if (first_dx_tail or first_dy_tail
+                                 or third_dx_tail or third_dy_tail)
+                             else (0,) * 4)
+    third_squared_length = (_to_squared_length(third_dx, third_dy)
+                            if (first_dx_tail or first_dy_tail
+                                or second_dx_tail or second_dy_tail)
+                            else (0,) * 4)
 
     if first_dx_tail:
         first_dx_tail_second_third_cross_product = scale_expansion(
