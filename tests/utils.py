@@ -123,8 +123,8 @@ def scale_interval(interval: Interval,
                           + scale * (interval.end.x - interval.start.x),
                           interval.start.y
                           + scale * (interval.end.y - interval.start.y)),
-                    start_inclusive=interval.start_inclusive,
-                    end_inclusive=interval.end_inclusive)
+                    with_start=interval.with_start,
+                    with_end=interval.with_end)
 
 
 def reflect_interval(interval: Interval) -> Interval:
@@ -134,8 +134,8 @@ def reflect_interval(interval: Interval) -> Interval:
 
 def inverse_inclusion(interval: Interval) -> Interval:
     return Interval(interval.start, interval.end,
-                    start_inclusive=not interval.start_inclusive,
-                    end_inclusive=not interval.end_inclusive)
+                    with_start=not interval.with_start,
+                    with_end=not interval.with_end)
 
 
 def reflect_angle(angle: Angle) -> Angle:

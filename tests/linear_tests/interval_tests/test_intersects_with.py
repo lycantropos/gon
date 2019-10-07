@@ -41,5 +41,5 @@ def test_independence_from_ends_order(intervals_pair: Tuple[Interval, Interval]
 def test_reflection(interval: Interval) -> None:
     reflected_interval = reflect_interval(interval)
 
-    assert equivalence(interval.start_inclusive,
+    assert equivalence(interval.with_start,
                        interval.intersects_with(reflected_interval))

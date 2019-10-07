@@ -42,9 +42,9 @@ def test_independence_from_ends_order(intervals_pair: Tuple[Interval, Interval]
 def test_reflection(interval: Interval) -> None:
     reflected_interval = reflect_interval(interval)
 
-    assert equivalence(interval.start_inclusive,
+    assert equivalence(interval.with_start,
                        interval.relationship_with(reflected_interval)
                        is IntersectionKind.CROSS)
-    assert equivalence(not interval.start_inclusive,
+    assert equivalence(not interval.with_start,
                        interval.relationship_with(reflected_interval)
                        is IntersectionKind.NONE)

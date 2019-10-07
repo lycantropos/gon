@@ -19,18 +19,18 @@ class IntersectionKind(IntEnum):
 
 
 class Interval:
-    __slots__ = ('_start', '_end', '_start_inclusive', '_end_inclusive')
+    __slots__ = ('_start', '_end', '_with_start', '_with_end')
 
     def __init__(self,
                  start: Point,
                  end: Point,
                  *,
-                 start_inclusive: bool,
-                 end_inclusive: bool) -> None:
+                 with_start: bool,
+                 with_end: bool) -> None:
         self._start = start
         self._end = end
-        self._start_inclusive = start_inclusive
-        self._end_inclusive = end_inclusive
+        self._with_start = with_start
+        self._with_end = with_end
 
     @property
     def start(self) -> Point:
@@ -41,36 +41,36 @@ class Interval:
         return self._end
 
     @property
-    def start_inclusive(self) -> bool:
-        return self._start_inclusive
+    def with_start(self) -> bool:
+        return self._with_start
 
     @property
-    def end_inclusive(self) -> bool:
-        return self._end_inclusive
+    def with_end(self) -> bool:
+        return self._with_end
 
     @property
     def reversed(self) -> 'Interval':
         return type(self)(self.end, self.start,
-                          start_inclusive=self.end_inclusive,
-                          end_inclusive=self.start_inclusive)
+                          with_start=self.with_end,
+                          with_end=self.with_start)
 
     __repr__ = generate_repr(__init__)
 
     def __eq__(self, other: 'Interval') -> bool:
         if not isinstance(other, Interval):
             return NotImplemented
-        return (self._start_inclusive is other._start_inclusive
-                and self._end_inclusive is other._end_inclusive
+        return (self._with_start is other._with_start
+                and self._with_end is other._with_end
                 and self._start == other._start
                 and self._end == other._end
-                or self._start_inclusive is other._end_inclusive
-                and self._end_inclusive is other._start_inclusive
+                or self._with_start is other._with_end
+                and self._with_end is other._with_start
                 and self._start == other._end
                 and self._end == other._start)
 
     def __hash__(self) -> int:
-        return hash(frozenset([(self._start, self._start_inclusive),
-                               (self._end, self._end_inclusive)]))
+        return hash(frozenset([(self._start, self._with_start),
+                               (self._end, self._with_end)]))
 
     def __contains__(self, point: Point) -> bool:
         return (self.orientation_with(point) is Orientation.COLLINEAR
@@ -91,7 +91,7 @@ class Interval:
                     if (Angle(self.end, self.start, other.end).kind
                             is AngleKind.ACUTE):
                         return IntersectionKind.OVERLAP
-                    elif self.start_inclusive:
+                    elif self.with_start:
                         return IntersectionKind.CROSS
                     else:
                         return IntersectionKind.NONE
@@ -99,13 +99,13 @@ class Interval:
                     if (Angle(self.end, self.start, other.start).kind
                             is AngleKind.ACUTE):
                         return IntersectionKind.OVERLAP
-                    elif self.start_inclusive:
+                    elif self.with_start:
                         return IntersectionKind.CROSS
                     else:
                         return IntersectionKind.NONE
                 else:
                     return IntersectionKind.OVERLAP
-            elif self.start_inclusive:
+            elif self.with_start:
                 return IntersectionKind.CROSS
             else:
                 return IntersectionKind.NONE
@@ -116,7 +116,7 @@ class Interval:
                     if (Angle(self.start, self.end, other.end).kind
                             is AngleKind.ACUTE):
                         return IntersectionKind.OVERLAP
-                    elif self.end_inclusive:
+                    elif self.with_end:
                         return IntersectionKind.CROSS
                     else:
                         return IntersectionKind.NONE
@@ -124,13 +124,13 @@ class Interval:
                     if (Angle(self.start, self.end, other.start).kind
                             is AngleKind.ACUTE):
                         return IntersectionKind.OVERLAP
-                    elif self.end_inclusive:
+                    elif self.with_end:
                         return IntersectionKind.CROSS
                     else:
                         return IntersectionKind.NONE
                 else:
                     return IntersectionKind.OVERLAP
-            elif self.end_inclusive:
+            elif self.with_end:
                 return IntersectionKind.CROSS
             else:
                 return IntersectionKind.NONE
@@ -146,7 +146,7 @@ class Interval:
                     if (Angle(other.end, other.start, self.end).kind
                             is AngleKind.ACUTE):
                         return IntersectionKind.OVERLAP
-                    elif other.start_inclusive:
+                    elif other.with_start:
                         return IntersectionKind.CROSS
                     else:
                         return IntersectionKind.NONE
@@ -154,13 +154,13 @@ class Interval:
                     if (Angle(other.end, other.start, self.start).kind
                             is AngleKind.ACUTE):
                         return IntersectionKind.OVERLAP
-                    elif other.start_inclusive:
+                    elif other.with_start:
                         return IntersectionKind.CROSS
                     else:
                         return IntersectionKind.NONE
                 else:
                     return IntersectionKind.OVERLAP
-            elif other.start_inclusive:
+            elif other.with_start:
                 return IntersectionKind.CROSS
             else:
                 return IntersectionKind.NONE
@@ -171,7 +171,7 @@ class Interval:
                     if (Angle(other.start, other.end, self.end).kind
                             is AngleKind.ACUTE):
                         return IntersectionKind.OVERLAP
-                    elif other.end_inclusive:
+                    elif other.with_end:
                         return IntersectionKind.CROSS
                     else:
                         return IntersectionKind.NONE
@@ -179,13 +179,13 @@ class Interval:
                     if (Angle(other.start, other.end, self.start).kind
                             is AngleKind.ACUTE):
                         return IntersectionKind.OVERLAP
-                    elif other.end_inclusive:
+                    elif other.with_end:
                         return IntersectionKind.CROSS
                     else:
                         return IntersectionKind.NONE
                 else:
                     return IntersectionKind.OVERLAP
-            elif other.end_inclusive:
+            elif other.with_end:
                 return IntersectionKind.CROSS
             else:
                 return IntersectionKind.NONE
@@ -202,8 +202,8 @@ class Interval:
 class Segment(Interval):
     def __init__(self, start: Point, end: Point) -> None:
         super().__init__(start, end,
-                         start_inclusive=True,
-                         end_inclusive=True)
+                         with_start=True,
+                         with_end=True)
 
     @property
     def reversed(self) -> 'Segment':
@@ -214,27 +214,27 @@ class Segment(Interval):
 
 def to_interval(start: Point, end: Point,
                 *,
-                start_inclusive: bool,
-                end_inclusive: bool) -> Union[Interval, Segment]:
+                with_start: bool,
+                with_end: bool) -> Union[Interval, Segment]:
     if start == end:
         raise ValueError('Degenerate interval found.')
-    if start_inclusive and end_inclusive:
+    if with_start and with_end:
         return Segment(start, end)
     return Interval(start, end,
-                    start_inclusive=start_inclusive,
-                    end_inclusive=end_inclusive)
+                    with_start=with_start,
+                    with_end=with_end)
 
 
 to_segment = partial(to_interval,
-                     start_inclusive=True,
-                     end_inclusive=True)
+                     with_start=True,
+                     with_end=True)
 
 
 def _in_interval(point: Point, interval: Interval) -> bool:
     if point == interval.start:
-        return interval.start_inclusive
+        return interval.with_start
     elif point == interval.end:
-        return interval.end_inclusive
+        return interval.with_end
     else:
         left_x, right_x = ((interval.start.x, interval.end.x)
                            if interval.start.x < interval.end.x
