@@ -72,20 +72,6 @@ class QuadEdge:
         return self.rotated.left_from_start.rotated
 
     @property
-    def left_in_start(self) -> 'QuadEdge':
-        """
-        aka "Lprev" in L. Guibas and J. Stolfi notation.
-        """
-        return self.left_from_start.opposite
-
-    @property
-    def right_in_start(self) -> 'QuadEdge':
-        """
-        aka "Rprev" in L. Guibas and J. Stolfi notation.
-        """
-        return self.right_from_start.opposite
-
-    @property
     def right_from_end(self) -> 'QuadEdge':
         """
         aka "Rprev" in L. Guibas and J. Stolfi notation.
