@@ -1,4 +1,7 @@
+from reprlib import recursive_repr
 from typing import Optional
+
+from reprit.base import generate_repr
 
 from gon.angular import (Angle,
                          Orientation)
@@ -24,10 +27,7 @@ class QuadEdge:
         self._left_from_start = left_from_start
         self._rotated = rotated
 
-    def __repr__(self) -> str:
-        return (type(self).__qualname__
-                + '(' + 'start=' + repr(self.start) + ', '
-                + 'end=' + repr(self.end) + ')')
+    __repr__ = recursive_repr()(generate_repr(__init__))
 
     @property
     def start(self) -> Point:
