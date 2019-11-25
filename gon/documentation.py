@@ -9,7 +9,7 @@ indent = partial(textwrap.indent,
                  prefix=' ' * 4)
 
 
-def setup(documented: Documented = None,
+def setup(documented: Optional[Documented] = None,
           *,
           docstring: str,
           origin: Optional[str] = None,
