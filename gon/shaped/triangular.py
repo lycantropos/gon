@@ -360,17 +360,17 @@ def _resolve_crossings(constraint: Segment,
         edge = crossed_edges.popleft()
         (first_non_edge_vertex,
          second_non_edge_vertex) = triangulation.to_non_adjacent_vertices(edge)
-        if not _points_form_convex_quadrilateral((edge.start, edge.end,
-                                                  first_non_edge_vertex,
-                                                  second_non_edge_vertex)):
-            crossed_edges.append(edge)
-            continue
-        edge.swap()
-        if (_edge_to_segment(edge).relationship_with(open_constraint)
-                is IntersectionKind.CROSS):
-            crossed_edges.append(edge)
+        if _points_form_convex_quadrilateral((edge.start, edge.end,
+                                              first_non_edge_vertex,
+                                              second_non_edge_vertex)):
+            edge.swap()
+            if (_edge_to_segment(edge).relationship_with(open_constraint)
+                    is IntersectionKind.CROSS):
+                crossed_edges.append(edge)
+            else:
+                result.add(edge)
         else:
-            result.add(edge)
+            crossed_edges.append(edge)
     return result
 
 
