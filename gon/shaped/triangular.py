@@ -340,10 +340,10 @@ def _set_boundary(triangulation: Triangulation,
         non_boundary.remove(edge.opposite)
         candidates = triangulation.to_neighbours(edge)
         triangulation.delete(edge)
-        non_boundary.update(flatten((candidate, candidate.opposite)
-                                    for candidate in candidates
-                                    if _edge_to_segment(candidate)
-                                    not in boundary))
+        non_boundary.update(flatten(
+                (candidate, candidate.opposite)
+                for candidate in candidates
+                if _edge_to_segment(candidate) not in boundary))
 
 
 def _resolve_crossings(constraint: Segment,
