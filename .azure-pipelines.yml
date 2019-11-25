@@ -22,7 +22,12 @@ jobs:
         Python37_x64:
           python.version: '3.7'
           python.architecture: 'x64'
-      maxParallel: 6
+        Python38_x86:
+          python.version: '3.8'
+          python.architecture: 'x86'
+        Python38_x64:
+          python.version: '3.8'
+          python.architecture: 'x64'
 
     steps:
       - task: UsePythonVersion@0
@@ -58,9 +63,10 @@ jobs:
           python.version: '3.6'
         Python37:
           python.version: '3.7'
+        Python38:
+          python.version: '3.8'
         PyPy3:
           python.version: 'pypy3'
-      maxParallel: 4
 
     steps:
       - task: UsePythonVersion@0
