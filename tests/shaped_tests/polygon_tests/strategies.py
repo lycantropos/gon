@@ -143,7 +143,17 @@ def shrink_collinear_vertices(vertices: Vertices) -> Vertices:
 
 concave_vertices = points_strategies.flatmap(to_concave_vertices)
 vertices = concave_vertices | convex_vertices
-polygons = vertices.map(to_polygon)
+
+
+def to_tailed_triangles(scale: int) -> Polygon:
+    """Creates specific polygon that increases triangulation code coverage."""
+    return to_polygon([Point(0, 0), Point(scale, 0), Point(3 * scale, -scale),
+                       Point(4 * scale, scale),
+                       Point(2 * scale, 0), Point(scale, 100 * scale)])
+
+
+polygons = (strategies.integers().filter(bool).map(to_tailed_triangles)
+            | vertices.map(to_polygon))
 non_polygons = strategies.builds(object)
 
 
