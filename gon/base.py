@@ -30,9 +30,9 @@ class Point:
         return hash((self._x, self._y))
 
     def __eq__(self, other: 'Point') -> bool:
-        if not isinstance(other, Point):
-            return NotImplemented
-        return self._x == other._x and self._y == other._y
+        return (self._x == other._x and self._y == other._y
+                if isinstance(other, Point)
+                else NotImplemented)
 
 
 def to_perpendicular_point(point: Point) -> Point:
