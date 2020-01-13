@@ -15,5 +15,5 @@ services:
       - ./requirements.txt:/opt/gon/requirements.txt
       - ./requirements-tests.txt:/opt/gon/requirements-tests.txt
       - ./setup.py:/opt/gon/setup.py
-      - ./setup.cfg:/opt/gon/setup.cfg
+      - ./pytest.ini:/opt/gon/pytest.ini
     entrypoint: pytest
