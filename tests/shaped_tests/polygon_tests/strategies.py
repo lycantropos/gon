@@ -22,14 +22,13 @@ from gon.shaped.utils import to_convex_hull
 from tests.strategies import (scalars_strategies,
                               scalars_to_points,
                               scalars_to_triangles_vertices,
-                              to_non_triangle_vertices_base)
+                              to_non_triangle_vertices_base,
+                              triangles_vertices)
 from tests.utils import (Strategy, cleave_in_tuples, edge_to_ring,
                          points_do_not_lie_on_the_same_line, to_pairs,
                          to_triplets, unique_everseen)
 
-triangles = (scalars_strategies
-             .flatmap(scalars_to_triangles_vertices)
-             .map(to_polygon))
+triangles = triangles_vertices.map(to_polygon)
 
 
 def scalars_to_convex_vertices(scalars: Strategy[Scalar]

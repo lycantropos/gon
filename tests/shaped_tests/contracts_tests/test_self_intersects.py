@@ -4,7 +4,7 @@ from hypothesis import given
 
 from gon.base import Point
 from gon.shaped.contracts import self_intersects
-from . import strategies
+from tests import strategies
 
 
 @given(strategies.triangles_vertices)
