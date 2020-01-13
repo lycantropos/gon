@@ -1,7 +1,8 @@
 from collections import defaultdict
 from functools import partial
 from itertools import repeat
-from typing import (Hashable,
+from typing import (Callable,
+                    Hashable,
                     Iterable,
                     Sequence,
                     Set,
@@ -9,8 +10,12 @@ from typing import (Hashable,
 
 from hypothesis import strategies
 from hypothesis.strategies import SearchStrategy
+from lz.functional import (cleave,
+                           compose,
+                           pack)
 from lz.hints import (Domain,
-                      Map)
+                      Map,
+                      Range)
 from lz.replication import replicator
 
 from gon.angular import (Angle,
@@ -68,6 +73,12 @@ to_pairs = partial(to_tuples,
                    size=2)
 to_triplets = partial(to_tuples,
                       size=3)
+
+
+def cleave_in_tuples(*functions: Callable[[Strategy[Domain]], Strategy[Range]]
+                     ) -> Callable[[Strategy[Domain]],
+                                   Strategy[Tuple[Range, ...]]]:
+    return compose(pack(strategies.tuples), cleave(*functions))
 
 
 def points_do_not_lie_on_the_same_line(points: Sequence[Point]) -> bool:
