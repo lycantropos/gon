@@ -1,4 +1,5 @@
-from typing import Any
+from typing import (Any,
+                    Tuple)
 
 from hypothesis import given
 
@@ -12,15 +13,17 @@ def test_reflexivity(point: Point) -> None:
     assert point == point
 
 
-@given(strategies.points, strategies.points)
-def test_symmetry(left_point: Point, right_point: Point) -> None:
+@given(strategies.points_pairs)
+def test_symmetry(points_pair: Tuple[Point, Point]) -> None:
+    left_point, right_point = points_pair
+
     assert implication(left_point == right_point, right_point == left_point)
 
 
-@given(strategies.points, strategies.points, strategies.points)
-def test_transitivity(left_point: Point,
-                      mid_point: Point,
-                      right_point: Point) -> None:
+@given(strategies.points_triplets)
+def test_transitivity(points_triplet: Tuple[Point, Point, Point]) -> None:
+    left_point, mid_point, right_point = points_triplet
+
     assert implication(left_point == mid_point and mid_point == right_point,
                        left_point == right_point)
 
