@@ -1,4 +1,5 @@
-from typing import Any
+from typing import (Any,
+                    Tuple)
 
 from hypothesis import given
 
@@ -12,16 +13,19 @@ def test_reflexivity(segment: Segment) -> None:
     assert segment == segment
 
 
-@given(strategies.segments, strategies.segments)
-def test_symmetry(left_segment: Segment, right_segment: Segment) -> None:
+@given(strategies.segments_pairs)
+def test_symmetry(segments_pair: Tuple[Segment, Segment]) -> None:
+    left_segment, right_segment = segments_pair
+
     assert implication(left_segment == right_segment,
                        right_segment == left_segment)
 
 
-@given(strategies.segments, strategies.segments, strategies.segments)
-def test_transitivity(left_segment: Segment,
-                      mid_segment: Segment,
-                      right_segment: Segment) -> None:
+@given(strategies.segments_triplets)
+def test_transitivity(segments_triplet: Tuple[Segment, Segment, Segment]
+                      ) -> None:
+    left_segment, mid_segment, right_segment = segments_triplet
+
     assert implication(left_segment == mid_segment
                        and mid_segment == right_segment,
                        left_segment == right_segment)
