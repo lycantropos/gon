@@ -2,6 +2,7 @@ from typing import (Sequence,
                     Tuple)
 
 from hypothesis import strategies
+from lz.functional import identity
 from lz.iterating import (first,
                           flatten)
 from lz.logical import negate
@@ -9,6 +10,7 @@ from lz.logical import negate
 from gon.angular import (Angle,
                          Orientation)
 from gon.base import Point
+from gon.hints import Scalar
 from gon.shaped import (Polygon,
                         to_polygon,
                         triangular)
@@ -16,33 +18,31 @@ from gon.shaped.contracts import (self_intersects,
                                   vertices_forms_convex_polygon)
 from gon.shaped.hints import Vertices
 from gon.shaped.subdivisional import QuadEdge
-from gon.shaped.utils import (to_convex_hull,
-                              to_edges)
-from tests.strategies import (interval_to_scalars,
-                              points_strategies,
+from gon.shaped.utils import to_convex_hull
+from tests.strategies import (scalars_strategies,
                               scalars_to_points,
-                              to_non_triangle_vertices_base,
-                              triangles_vertices)
-from tests.utils import (Strategy,
-                         edge_to_ring,
-                         points_do_not_lie_on_the_same_line,
-                         unique_everseen)
+                              scalars_to_triangles_vertices,
+                              to_non_triangle_vertices_base)
+from tests.utils import (Strategy, cleave_in_tuples, edge_to_ring,
+                         points_do_not_lie_on_the_same_line, to_pairs,
+                         to_triplets, unique_everseen)
 
-triangles = triangles_vertices.map(to_polygon)
-
-
-def to_convex_vertices(points: Strategy[Point]) -> Strategy[Vertices]:
-    return (to_non_triangle_vertices_base(points)
-            .map(to_convex_hull)
-            .filter(lambda vertices: len(vertices) >= 3))
+triangles = (scalars_strategies
+             .flatmap(scalars_to_triangles_vertices)
+             .map(to_polygon))
 
 
-convex_vertices = (triangles_vertices
-                   | points_strategies.flatmap(to_convex_vertices))
+def scalars_to_convex_vertices(scalars: Strategy[Scalar]
+                               ) -> Strategy[Vertices]:
+    return (scalars_to_triangles_vertices(scalars)
+            | (to_non_triangle_vertices_base(scalars_to_points(scalars))
+               .map(to_convex_hull)
+               .filter(lambda vertices: len(vertices) >= 3)))
 
 
-def to_concave_vertices(points: Strategy[Point]) -> Strategy[Vertices]:
-    return (strategies.lists(points,
+def scalars_to_concave_vertices(scalars: Strategy[Scalar]
+                                ) -> Strategy[Vertices]:
+    return (strategies.lists(scalars_to_points(scalars),
                              min_size=4,
                              unique=True)
             .filter(points_do_not_lie_on_the_same_line)
@@ -141,8 +141,9 @@ def shrink_collinear_vertices(vertices: Vertices) -> Vertices:
     return result
 
 
-concave_vertices = points_strategies.flatmap(to_concave_vertices)
-vertices = concave_vertices | convex_vertices
+def scalars_to_vertices(scalars: Strategy[Scalar]) -> Strategy[Vertices]:
+    return (scalars_to_convex_vertices(scalars)
+            | scalars_to_concave_vertices(scalars))
 
 
 def to_tailed_triangles(scale: int) -> Polygon:
@@ -152,20 +153,19 @@ def to_tailed_triangles(scale: int) -> Polygon:
                        Point(2 * scale, 0), Point(scale, 100 * scale)])
 
 
-polygons = (strategies.integers().filter(bool).map(to_tailed_triangles)
-            | vertices.map(to_polygon))
+def scalars_to_polygons(scalars: Strategy[Scalar]) -> Strategy[Polygon]:
+    return (strategies.integers().filter(bool).map(to_tailed_triangles)
+            | scalars_to_vertices(scalars).map(to_polygon))
+
+
+polygons_strategies = scalars_strategies.map(scalars_to_polygons)
+polygons = polygons_strategies.flatmap(identity)
+polygons_pairs = polygons_strategies.flatmap(to_pairs)
+polygons_triplets = polygons_strategies.flatmap(to_triplets)
 non_polygons = strategies.builds(object)
-
-
-def to_polygons_with_points(polygon: Polygon
-                            ) -> Strategy[Tuple[Polygon, Point]]:
-    scalars = strategies.one_of(list(map(interval_to_scalars,
-                                         to_edges(polygon.vertices))))
-    return strategies.tuples(strategies.just(polygon),
-                             scalars_to_points(scalars))
-
-
-polygons_with_points = polygons.flatmap(to_polygons_with_points)
+polygons_with_points = (scalars_strategies
+                        .flatmap(cleave_in_tuples(scalars_to_polygons,
+                                                  scalars_to_points)))
 
 
 def to_polygon_with_vertices_indices(polygon: Polygon

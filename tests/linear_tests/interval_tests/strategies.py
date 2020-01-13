@@ -12,10 +12,10 @@ from lz.hints import Operator
 from gon.base import Point
 from gon.hints import Scalar
 from gon.linear import Interval
-from tests.strategies import (interval_to_scalars,
-                              points_strategies,
+from tests.strategies import (scalars_strategies,
                               scalars_to_points)
 from tests.utils import (Strategy,
+                         cleave_in_tuples,
                          inverse_inclusion,
                          reflect_interval,
                          scale_interval,
@@ -23,8 +23,8 @@ from tests.utils import (Strategy,
                          to_triplets)
 
 
-def points_to_intervals(points: Strategy[Point]) -> Strategy[Interval]:
-    return (points_to_interval_endpoints(points)
+def scalars_to_intervals(scalars: Strategy[Scalar]) -> Strategy[Interval]:
+    return (points_to_interval_endpoints(scalars_to_points(scalars))
             .flatmap(lambda endpoints:
                      strategies.builds(Interval,
                                        strategies.just(endpoints[0]),
@@ -38,20 +38,14 @@ def points_to_interval_endpoints(points: Strategy[Point]
     return strategies.tuples(points, points).filter(pack(ne))
 
 
-intervals_strategies = points_strategies.map(points_to_intervals)
+intervals_strategies = scalars_strategies.map(scalars_to_intervals)
 intervals = intervals_strategies.flatmap(identity)
 intervals_pairs = intervals_strategies.flatmap(to_pairs)
 intervals_triplets = intervals_strategies.flatmap(to_triplets)
 non_intervals = strategies.builds(object)
-
-
-def to_interval_with_points(interval: Interval
-                            ) -> Strategy[Tuple[Interval, Point]]:
-    return strategies.tuples(strategies.just(interval),
-                             scalars_to_points(interval_to_scalars(interval)))
-
-
-intervals_with_points = intervals.flatmap(to_interval_with_points)
+intervals_with_points = (scalars_strategies
+                         .flatmap(cleave_in_tuples(scalars_to_intervals,
+                                                   scalars_to_points)))
 
 
 def to_pythagorean_triplets(*,

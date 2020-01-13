@@ -1,36 +1,32 @@
 from operator import (methodcaller,
                       ne)
-from typing import Tuple
 
 from hypothesis import strategies
 from lz.functional import (compose,
+                           identity,
                            pack)
 from lz.replication import duplicate
 
-from gon.base import Point
 from gon.linear import Segment
-from tests.strategies import (interval_to_scalars,
-                              points_strategies,
+from tests.strategies import (scalars_strategies,
                               scalars_to_points)
-from tests.utils import Strategy
+from tests.utils import (Strategy,
+                         cleave_in_tuples,
+                         to_pairs,
+                         to_triplets)
 
-points_to_segments = compose(methodcaller(Strategy.map.__name__,
-                                          pack(Segment)),
-                             methodcaller(Strategy.filter.__name__,
-                                          pack(ne)),
-                             pack(strategies.tuples),
-                             duplicate)
-segments = points_strategies.flatmap(points_to_segments)
+scalars_to_segments = compose(methodcaller(Strategy.map.__name__,
+                                           pack(Segment)),
+                              methodcaller(Strategy.filter.__name__,
+                                           pack(ne)),
+                              pack(strategies.tuples),
+                              duplicate,
+                              scalars_to_points)
+segments_strategies = scalars_strategies.map(scalars_to_segments)
+segments = segments_strategies.flatmap(identity)
+segments_with_points = (scalars_strategies
+                        .flatmap(cleave_in_tuples(scalars_to_segments,
+                                                  scalars_to_points)))
+segments_pairs = segments_strategies.flatmap(to_pairs)
+segments_triplets = segments_strategies.flatmap(to_triplets)
 non_segments = strategies.builds(object)
-
-
-def to_segment_with_points(segment: Segment
-                           ) -> Strategy[Tuple[Segment, Point]]:
-    return strategies.tuples(strategies.just(segment),
-                             scalars_to_points(interval_to_scalars(segment)))
-
-
-segments_with_points = segments.flatmap(to_segment_with_points)
-segments_pairs = points_strategies.flatmap(compose(pack(strategies.tuples),
-                                                   duplicate,
-                                                   points_to_segments))
