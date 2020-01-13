@@ -5,7 +5,7 @@ from typing import (Hashable,
                     Set,
                     Tuple)
 
-from hypothesis.searchstrategy import SearchStrategy
+from hypothesis.strategies import SearchStrategy
 from lz.hints import (Domain,
                       Map)
 from lz.replication import replicator
