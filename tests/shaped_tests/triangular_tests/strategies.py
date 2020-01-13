@@ -5,7 +5,7 @@ from lz.functional import compose
 
 from tests.strategies import (scalars_strategies,
                               scalars_to_points,
-                              triangles_vertices)
+                              scalars_to_triangles_vertices)
 from tests.utils import points_do_not_lie_on_the_same_line
 
 scalars_to_points_lists = partial(strategies.lists,
@@ -19,4 +19,4 @@ non_triangle_points_lists = (scalars_strategies
                              .flatmap(compose(partial(scalars_to_points_lists,
                                                       min_size=4),
                                               scalars_to_points)))
-triangles_vertices = triangles_vertices
+triangles_vertices = scalars_strategies.flatmap(scalars_to_triangles_vertices)
