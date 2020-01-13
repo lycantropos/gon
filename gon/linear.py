@@ -57,8 +57,6 @@ class Interval:
     __repr__ = generate_repr(__init__)
 
     def __eq__(self, other: 'Interval') -> bool:
-        if not isinstance(other, Interval):
-            return NotImplemented
         return (self._with_start is other._with_start
                 and self._with_end is other._with_end
                 and self._start == other._start
@@ -66,7 +64,9 @@ class Interval:
                 or self._with_start is other._with_end
                 and self._with_end is other._with_start
                 and self._start == other._end
-                and self._end == other._start)
+                and self._end == other._start
+                if isinstance(other, Interval)
+                else NotImplemented)
 
     def __hash__(self) -> int:
         return hash(frozenset([(self._start, self._with_start),
