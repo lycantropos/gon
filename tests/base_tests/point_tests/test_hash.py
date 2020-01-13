@@ -1,3 +1,5 @@
+from typing import Tuple
+
 from hypothesis import given
 
 from gon.linear import Point
@@ -19,8 +21,9 @@ def test_determinism(point: Point) -> None:
     assert result == hash(point)
 
 
-@given(strategies.points, strategies.points)
-def test_connection_with_equality(left_point: Point,
-                                  right_point: Point) -> None:
+@given(strategies.points_pairs)
+def test_connection_with_equality(points_pair: Tuple[Point, Point]) -> None:
+    left_point, right_point = points_pair
+
     assert implication(left_point == right_point,
                        hash(left_point) == hash(right_point))
