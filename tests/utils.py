@@ -1,10 +1,13 @@
 from collections import defaultdict
+from functools import partial
+from itertools import repeat
 from typing import (Hashable,
                     Iterable,
                     Sequence,
                     Set,
                     Tuple)
 
+from hypothesis import strategies
 from hypothesis.strategies import SearchStrategy
 from lz.hints import (Domain,
                       Map)
@@ -52,6 +55,19 @@ def unique_everseen(iterable: Iterable[Domain],
 
 
 triplicate = replicator(3)
+
+
+def to_tuples(elements: Strategy[Domain],
+              *,
+              size: int) -> Strategy[Tuple[Domain, ...]]:
+    return strategies.tuples(*repeat(elements,
+                                     times=size))
+
+
+to_pairs = partial(to_tuples,
+                   size=2)
+to_triplets = partial(to_tuples,
+                      size=3)
 
 
 def points_do_not_lie_on_the_same_line(points: Sequence[Point]) -> bool:
