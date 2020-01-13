@@ -22,9 +22,11 @@ def test_determinism(polygon: Polygon) -> None:
     assert result == hash(polygon)
 
 
-@given(strategies.polygons, strategies.polygons)
-def test_connection_with_equality(left_polygon: Polygon,
-                                  right_polygon: Polygon) -> None:
+@given(strategies.polygons_pairs)
+def test_connection_with_equality(polygons_pair: Tuple[Polygon, Polygon]
+                                  ) -> None:
+    left_polygon, right_polygon = polygons_pair
+
     assert implication(left_polygon == right_polygon,
                        hash(left_polygon) == hash(right_polygon))
 
