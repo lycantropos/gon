@@ -1,4 +1,5 @@
-from typing import Any
+from typing import (Any,
+                    Tuple)
 
 from hypothesis import given
 
@@ -12,16 +13,19 @@ def test_reflexivity(interval: Interval) -> None:
     assert interval == interval
 
 
-@given(strategies.intervals, strategies.intervals)
-def test_symmetry(left_interval: Interval, right_interval: Interval) -> None:
+@given(strategies.intervals_pairs)
+def test_symmetry(intervals_pair: Tuple[Interval, Interval]) -> None:
+    left_interval, right_interval = intervals_pair
+
     assert implication(left_interval == right_interval,
                        right_interval == left_interval)
 
 
-@given(strategies.intervals, strategies.intervals, strategies.intervals)
-def test_transitivity(left_interval: Interval,
-                      mid_interval: Interval,
-                      right_interval: Interval) -> None:
+@given(strategies.intervals_triplets)
+def test_transitivity(intervals_triplet: Tuple[Interval, Interval, Interval]
+                      ) -> None:
+    left_interval, mid_interval, right_interval = intervals_triplet
+
     assert implication(left_interval == mid_interval
                        and mid_interval == right_interval,
                        left_interval == right_interval)

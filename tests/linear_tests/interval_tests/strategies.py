@@ -5,7 +5,8 @@ from typing import (Optional,
                     Tuple)
 
 from hypothesis import strategies
-from lz.functional import pack
+from lz.functional import (identity,
+                           pack)
 from lz.hints import Operator
 
 from gon.base import Point
@@ -17,7 +18,9 @@ from tests.strategies import (interval_to_scalars,
 from tests.utils import (Strategy,
                          inverse_inclusion,
                          reflect_interval,
-                         scale_interval)
+                         scale_interval,
+                         to_pairs,
+                         to_triplets)
 
 
 def points_to_intervals(points: Strategy[Point]) -> Strategy[Interval]:
@@ -35,7 +38,10 @@ def points_to_interval_endpoints(points: Strategy[Point]
     return strategies.tuples(points, points).filter(pack(ne))
 
 
-intervals = points_strategies.flatmap(points_to_intervals)
+intervals_strategies = points_strategies.map(points_to_intervals)
+intervals = intervals_strategies.flatmap(identity)
+intervals_pairs = intervals_strategies.flatmap(to_pairs)
+intervals_triplets = intervals_strategies.flatmap(to_triplets)
 non_intervals = strategies.builds(object)
 
 
@@ -80,8 +86,8 @@ def to_pythagorean_triplets(*,
 pythagorean_triplets = to_pythagorean_triplets(max_value=1000)
 
 
-def to_intervals_pairs(intervals: Strategy[Interval]
-                       ) -> Strategy[Tuple[Interval, Interval]]:
+def to_maybe_intersecting_intervals_pairs(
+        intervals: Strategy[Interval]) -> Strategy[Tuple[Interval, Interval]]:
     def to_scaled_intervals_pair(interval_with_scale: Tuple[Interval, Scalar]
                                  ) -> Tuple[Interval, Interval]:
         interval, scale = interval_with_scale
@@ -134,4 +140,5 @@ def to_intervals_pairs(intervals: Strategy[Interval]
     return strategies.one_of(variants)
 
 
-intervals_pairs = to_intervals_pairs(intervals)
+intervals_pairs |= (intervals_strategies
+                    .flatmap(to_maybe_intersecting_intervals_pairs))
