@@ -1,3 +1,5 @@
+from typing import Tuple
+
 from hypothesis import given
 
 from gon.linear import Interval
@@ -19,9 +21,11 @@ def test_determinism(interval: Interval) -> None:
     assert result == hash(interval)
 
 
-@given(strategies.intervals, strategies.intervals)
-def test_connection_with_equality(left_interval: Interval,
-                                  right_interval: Interval) -> None:
+@given(strategies.intervals_pairs)
+def test_connection_with_equality(intervals_pair: Tuple[Interval, Interval]
+                                  ) -> None:
+    left_interval, right_interval = intervals_pair
+
     assert implication(left_interval == right_interval,
                        hash(left_interval) == hash(right_interval))
 
