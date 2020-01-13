@@ -59,7 +59,7 @@ def scalars_to_quad_edges_with_neighbours(scalars: Strategy[Scalar]
             .map(triangular.delaunay)
             .map(Triangulation.to_inner_edges)
             .map(list)
-            .map(strategies.sampled_from))
+            .flatmap(strategies.sampled_from))
 
 
 quad_edges_with_neighbours = (scalars_strategies
