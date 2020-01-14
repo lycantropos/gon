@@ -13,6 +13,10 @@ from lz.hints import Domain
 from lz.sorting import Key
 from memoir import cached
 from reprit.base import generate_repr
+from robust.hints import Expansion
+from robust.utils import (sum_expansions,
+                          two_product,
+                          two_two_diff)
 
 from gon import documentation
 from gon.angular import (Angle,
@@ -21,10 +25,6 @@ from gon.base import Point
 from gon.hints import (Permutation,
                        Scalar)
 from gon.linear import Segment
-from gon.robust.utils import (Expansion,
-                              sum_expansions,
-                              two_product,
-                              two_two_diff)
 from gon.utils import (inverse_permutation,
                        to_index_min)
 from . import triangular

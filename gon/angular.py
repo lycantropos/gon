@@ -2,10 +2,11 @@ from enum import (IntEnum,
                   unique)
 
 from reprit.base import generate_repr
+from robust import (parallelogram,
+                    projection)
 
-from .base import Point
-from .robust import (parallelogram,
-                     projection)
+from .base import (Point,
+                   _point_to_real_tuple)
 from .utils import to_sign
 
 
@@ -48,16 +49,16 @@ class Angle:
 
     @property
     def kind(self) -> AngleKind:
-        return AngleKind(to_sign(
-                projection.signed_length(self._vertex,
-                                         self._first_ray_point,
-                                         self._vertex,
-                                         self._second_ray_point)))
+        return AngleKind(to_sign(projection.signed_length(
+                _point_to_real_tuple(self._vertex),
+                _point_to_real_tuple(self._first_ray_point),
+                _point_to_real_tuple(self._vertex),
+                _point_to_real_tuple(self._second_ray_point))))
 
     @property
     def orientation(self) -> Orientation:
-        return Orientation(to_sign(
-                parallelogram.signed_area(self._vertex,
-                                          self._first_ray_point,
-                                          self._vertex,
-                                          self._second_ray_point)))
+        return Orientation(to_sign(parallelogram.signed_area(
+                _point_to_real_tuple(self._vertex),
+                _point_to_real_tuple(self._first_ray_point),
+                _point_to_real_tuple(self._vertex),
+                _point_to_real_tuple(self._second_ray_point))))
