@@ -37,7 +37,11 @@ def self_intersects(vertices: Vertices) -> bool:
     return False
 
 
-def is_point_inside_circumcircle(vertices: Vertices, point: Point) -> bool:
-    return cocircular.determinant(*[_point_to_real_tuple(vertex)
-                                    for vertex in vertices],
+def is_point_inside_circumcircle(first_vertex: Point,
+                                 second_vertex: Point,
+                                 third_vertex: Point,
+                                 point: Point) -> bool:
+    return cocircular.determinant(_point_to_real_tuple(first_vertex),
+                                  _point_to_real_tuple(second_vertex),
+                                  _point_to_real_tuple(third_vertex),
                                   _point_to_real_tuple(point)) > 0
