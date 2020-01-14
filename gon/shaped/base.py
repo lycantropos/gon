@@ -263,11 +263,11 @@ class SimplePolygon(Polygon):
 
 
 def _edge_to_endpoints_cross_product_z(edge: Segment) -> Expansion:
-    minuend_y, minuend_tail = two_product(edge.start.x, edge.end.y)
+    minuend, minuend_tail = two_product(edge.start.x, edge.end.y)
     subtrahend, subtrahend_tail = two_product(edge.start.y, edge.end.x)
-    return (two_two_diff(minuend_y, minuend_tail, subtrahend, subtrahend_tail)
+    return (two_two_diff(minuend, minuend_tail, subtrahend, subtrahend_tail)
             if minuend_tail or subtrahend_tail
-            else (0, 0, 0, minuend_y - subtrahend))
+            else (minuend - subtrahend,))
 
 
 @documentation.setup(docstring='Creates polygon from given vertices.',
