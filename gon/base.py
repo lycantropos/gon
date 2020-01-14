@@ -1,3 +1,6 @@
+from numbers import Real
+from typing import Tuple
+
 from reprit.base import generate_repr
 
 from .hints import Scalar
@@ -35,5 +38,9 @@ class Point:
                 else NotImplemented)
 
 
-def to_perpendicular_point(point: Point) -> Point:
-    return Point(-point.y, point.x)
+def _point_to_real_tuple(point: Point) -> Tuple[Real, Real]:
+    return _scalar_to_real(point.x), _scalar_to_real(point.y)
+
+
+def _scalar_to_real(scalar: Scalar) -> Real:
+    return scalar if isinstance(scalar, Real) else float(scalar)
