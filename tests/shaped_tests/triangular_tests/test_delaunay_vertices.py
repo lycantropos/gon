@@ -36,7 +36,7 @@ def test_sizes(points: Sequence[Point]) -> None:
 def test_delaunay_criterion(points: Sequence[Point]) -> None:
     result = delaunay_vertices(points)
 
-    assert all(not any(is_point_inside_circumcircle(triangle_vertices, point)
+    assert all(not any(is_point_inside_circumcircle(*triangle_vertices, point)
                        for triangle_vertices in result)
                for point in points)
 
@@ -67,7 +67,7 @@ def test_step(next_points: Sequence[Point]) -> None:
     assert len(result) <= len(next_result) + 2
     assert all(not is_triangle_in_triangulation(triangle_vertices, next_result)
                for triangle_vertices in result
-               if is_point_inside_circumcircle(triangle_vertices, next_point))
+               if is_point_inside_circumcircle(*triangle_vertices, next_point))
 
 
 def is_triangle_in_triangulation(triangle_vertices: Vertices,

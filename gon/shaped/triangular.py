@@ -210,9 +210,9 @@ def _merge(base_edge: QuadEdge) -> None:
             break
         elif (left_candidate is None
               or right_candidate is not None
-              and is_point_inside_circumcircle((left_candidate.end,
-                                                base_edge.end,
-                                                base_edge.start),
+              and is_point_inside_circumcircle(left_candidate.end,
+                                               base_edge.end,
+                                               base_edge.start,
                                                right_candidate.end)):
             base_edge = right_candidate.connect(base_edge.opposite)
         else:
@@ -223,9 +223,8 @@ def _to_left_candidate(base_edge: QuadEdge) -> Optional[QuadEdge]:
     result = base_edge.opposite.left_from_start
     if base_edge.orientation_with(result.end) is not Orientation.CLOCKWISE:
         return None
-    while (is_point_inside_circumcircle((base_edge.end, base_edge.start,
-                                         result.end),
-                                        result.left_from_start.end)
+    while (is_point_inside_circumcircle(base_edge.end, base_edge.start,
+                                        result.end, result.left_from_start.end)
            and (base_edge.orientation_with(result.left_from_start.end)
                 is Orientation.CLOCKWISE)):
         next_candidate = result.left_from_start
@@ -238,8 +237,8 @@ def _to_right_candidate(base_edge: QuadEdge) -> Optional[QuadEdge]:
     result = base_edge.right_from_start
     if base_edge.orientation_with(result.end) is not Orientation.CLOCKWISE:
         return None
-    while (is_point_inside_circumcircle((base_edge.end, base_edge.start,
-                                         result.end),
+    while (is_point_inside_circumcircle(base_edge.end, base_edge.start,
+                                        result.end,
                                         result.right_from_start.end)
            and (base_edge.orientation_with(result.right_from_start.end)
                 is Orientation.CLOCKWISE)):
@@ -320,11 +319,11 @@ def _should_be_swapped(edge: QuadEdge) -> bool:
 
 
 def _is_non_delaunay(edge: QuadEdge) -> bool:
-    return (is_point_inside_circumcircle((edge.start, edge.end,
-                                          edge.left_from_start.end),
+    return (is_point_inside_circumcircle(edge.start, edge.end,
+                                         edge.left_from_start.end,
                                          edge.right_from_start.end)
-            or is_point_inside_circumcircle((edge.end, edge.start,
-                                             edge.right_from_start.end),
+            or is_point_inside_circumcircle(edge.end, edge.start,
+                                            edge.right_from_start.end,
                                             edge.left_from_start.end))
 
 
