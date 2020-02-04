@@ -1,4 +1,4 @@
-memoir>=0.0.1
-reprit>=0.0.1
-lz>=0.10.0
+memoir>=0.0.2
+reprit>=0.2.0
+lz>=0.10.2
 robust>=0.0.1
