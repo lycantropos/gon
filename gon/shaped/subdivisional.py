@@ -27,8 +27,6 @@ class QuadEdge:
         self._left_from_start = left_from_start
         self._rotated = rotated
 
-    __repr__ = recursive_repr()(generate_repr(__init__))
-
     @property
     def start(self) -> Point:
         """
@@ -98,6 +96,8 @@ class QuadEdge:
         opposite._rotated = triple_rotated
         triple_rotated._rotated = result
         return result
+
+    __repr__ = generate_repr(factory)
 
     def splice(self, other: 'QuadEdge') -> None:
         alpha = self.left_from_start.rotated
