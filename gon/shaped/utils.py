@@ -22,12 +22,6 @@ def to_edges(vertices: Sequence[Point]) -> Iterable[Segment]:
             for index in range(len(vertices)))
 
 
-def _to_non_neighbours(edge_index: int,
-                       edges: Sequence[Segment]) -> Sequence[Segment]:
-    return (edges[max(edge_index + 2 - len(edges), 0):max(edge_index - 1, 0)]
-            + edges[edge_index + 2:edge_index - 1 + len(edges)])
-
-
 def to_convex_hull(points: Sequence[Point]) -> List[Point]:
     points = sorted(points,
                     key=attrgetter('x', 'y'))
