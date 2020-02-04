@@ -275,8 +275,7 @@ def _edge_to_endpoints_cross_product_z(edge: Segment) -> Expansion:
                             'for non-collinear consecutive edges '
                             '& checking of self-intersection',
                      reference='http://tiny.cc/n_gon',
-                     time_complexity='O(n^2), where\n'
-                                     'n -- vertices count')
+                     time_complexity='O(len(vertices) log len(vertices))')
 def to_polygon(vertices: Vertices) -> Polygon:
     """
     >>> to_polygon([Point(-1, -1), Point(1, -1), Point(1, 1), Point(-1, 1)])

@@ -27,6 +27,9 @@ class Point:
     def y(self) -> Scalar:
         return self._y
 
+    def as_tuple(self) -> Tuple[Scalar, Scalar]:
+        return self._x, self._y
+
     __repr__ = generate_repr(__init__)
 
     def __hash__(self) -> int:
