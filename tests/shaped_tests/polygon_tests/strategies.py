@@ -13,13 +13,13 @@ from gon.shaped import (Polygon,
                         to_polygon)
 from tests.strategies import (scalars_strategies,
                               scalars_to_points,
-                              triangles_vertices)
+                              triangular_contours)
 from tests.utils import (Strategy,
                          cleave_in_tuples,
                          to_pairs,
                          to_triplets)
 
-triangles = triangles_vertices.map(to_polygon)
+triangles = triangular_contours.map(to_polygon)
 
 
 def scalars_to_polygons(scalars: Strategy[Scalar]) -> Strategy[Polygon]:
@@ -39,12 +39,12 @@ polygons_with_points = (scalars_strategies
                                                   scalars_to_points)))
 
 
-def to_polygon_with_vertices_indices(polygon: Polygon
-                                     ) -> Strategy[Tuple[Polygon, int]]:
+def to_polygons_with_contours_indices(polygon: Polygon
+                                      ) -> Strategy[Tuple[Polygon, int]]:
     indices = strategies.integers(min_value=0,
-                                  max_value=len(polygon.vertices))
+                                  max_value=len(polygon.contour))
     return strategies.tuples(strategies.just(polygon), indices)
 
 
-polygons_with_vertices_indices = (polygons
-                                  .flatmap(to_polygon_with_vertices_indices))
+polygons_with_contours_indices = (polygons
+                                  .flatmap(to_polygons_with_contours_indices))

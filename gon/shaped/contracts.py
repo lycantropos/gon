@@ -4,27 +4,27 @@ from robust import cocircular
 from gon.angular import Orientation
 from gon.base import (Point,
                       _point_to_real_tuple)
-from .hints import Vertices
+from .hints import Contour
 from .utils import to_angles
 
 
-def vertices_forms_convex_polygon(vertices: Vertices) -> bool:
-    if len(vertices) == 3:
+def contour_forms_convex_polygon(contour: Contour) -> bool:
+    if len(contour) == 3:
         return True
-    orientations = (angle.orientation for angle in to_angles(vertices))
+    orientations = (angle.orientation for angle in to_angles(contour))
     base_orientation = next(orientations)
     # orientation change means
     # that internal angle is greater than 180 degrees
     return all(orientation is base_orientation for orientation in orientations)
 
 
-def vertices_forms_strict_polygon(vertices: Vertices) -> bool:
+def contour_forms_strict_polygon(contour: Contour) -> bool:
     return all(angle.orientation is not Orientation.COLLINEAR
-               for angle in to_angles(vertices))
+               for angle in to_angles(contour))
 
 
-def self_intersects(vertices: Vertices) -> bool:
-    return edges_intersect([vertex.as_tuple() for vertex in vertices])
+def self_intersects(contour: Contour) -> bool:
+    return edges_intersect([vertex.as_tuple() for vertex in contour])
 
 
 def is_point_inside_circumcircle(first_vertex: Point,

@@ -21,7 +21,7 @@ from gon.linear import (IntersectionKind,
                         to_interval,
                         to_segment)
 from .contracts import is_point_inside_circumcircle
-from .hints import Vertices
+from .hints import Contour
 from .subdivisional import QuadEdge
 from .utils import to_convex_hull
 
@@ -64,10 +64,10 @@ class Triangulation:
             other._right_edge = base_edge
         return base_edge
 
-    def to_triangles_vertices(self) -> List[Vertices]:
+    def to_triangles_contours(self) -> List[Contour]:
         return list(self._to_triangles_vertices())
 
-    def _to_triangles_vertices(self) -> Iterable[Vertices]:
+    def _to_triangles_vertices(self) -> Iterable[Contour]:
         visited_vertices_sets = set()
         edges = self.to_edges()
         edges_endpoints = {frozenset((edge.start, edge.end)) for edge in edges}
@@ -273,9 +273,9 @@ def constrained_delaunay(points: Sequence[Point],
     return result
 
 
-delaunay_vertices = compose(Triangulation.to_triangles_vertices,
+delaunay_contours = compose(Triangulation.to_triangles_contours,
                             delaunay)
-constrained_delaunay_vertices = compose(Triangulation.to_triangles_vertices,
+constrained_delaunay_contours = compose(Triangulation.to_triangles_contours,
                                         constrained_delaunay)
 
 

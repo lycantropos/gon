@@ -1,14 +1,12 @@
-from typing import Sequence
-
 import pytest
 from hypothesis import given
 
-from gon.base import Point
 from gon.shaped import to_polygon
+from gon.shaped.hints import Contour
 from . import strategies
 
 
-@given(strategies.invalid_vertices)
-def test_invalid_vertices(vertices: Sequence[Point]) -> None:
+@given(strategies.invalid_contours)
+def test_invalid_contour(contour: Contour) -> None:
     with pytest.raises(ValueError):
-        to_polygon(vertices)
+        to_polygon(contour)

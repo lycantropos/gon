@@ -31,13 +31,13 @@ def test_transitivity(polygons_triplet: Tuple[Polygon, Polygon, Polygon]
                        left_polygon == right_polygon)
 
 
-@given(strategies.polygons_with_vertices_indices)
-def test_vertices_shift(polygon_with_vertices_index: Tuple[Polygon, int]
-                        ) -> None:
-    polygon, index = polygon_with_vertices_index
+@given(strategies.polygons_with_contours_indices)
+def test_contour_shift(polygon_with_contour_index: Tuple[Polygon, int]
+                       ) -> None:
+    polygon, index = polygon_with_contour_index
 
-    shifted_polygon = to_polygon(polygon.vertices[index:]
-                                 + polygon.vertices[:index])
+    shifted_polygon = to_polygon(polygon.contour[index:]
+                                 + polygon.contour[:index])
 
     assert polygon == shifted_polygon
 
