@@ -22,19 +22,11 @@ from tests.utils import (Strategy,
 triangles = triangles_vertices.map(to_polygon)
 
 
-def to_tailed_triangles(scale: int) -> Polygon:
-    """Creates specific polygon that increases triangulation code coverage."""
-    return to_polygon([Point(0, 0), Point(scale, 0), Point(3 * scale, -scale),
-                       Point(4 * scale, scale),
-                       Point(2 * scale, 0), Point(scale, 100 * scale)])
-
-
 def scalars_to_polygons(scalars: Strategy[Scalar]) -> Strategy[Polygon]:
-    return (strategies.integers().filter(bool).map(to_tailed_triangles)
-            | (planar.contours(scalars)
-               .map(mapper(pack(Point)))
-               .map(list)
-               .map(SimplePolygon)))
+    return (planar.contours(scalars)
+            .map(mapper(pack(Point)))
+            .map(list)
+            .map(SimplePolygon))
 
 
 polygons_strategies = scalars_strategies.map(scalars_to_polygons)
