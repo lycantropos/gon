@@ -11,9 +11,9 @@ from . import strategies
 
 
 @given(strategies.polygons)
-def test_vertices(polygon: Polygon) -> None:
+def test_contour(polygon: Polygon) -> None:
     assert all(polygon.location_of(vertex) is LocationKind.ON_BOUNDARY
-               for vertex in polygon.vertices)
+               for vertex in polygon.contour)
 
 
 @given(strategies.polygons_with_points)
@@ -21,7 +21,7 @@ def test_point_on_edge(polygon_with_point: Tuple[Polygon, Point]) -> None:
     polygon, point = polygon_with_point
 
     assert implication(any(point in edge
-                           for edge in to_edges(polygon.vertices)),
+                           for edge in to_edges(polygon.contour)),
                        polygon.location_of(point) is LocationKind.ON_BOUNDARY)
 
 

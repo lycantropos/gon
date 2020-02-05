@@ -9,10 +9,10 @@ from lz.iterating import mapper
 from gon.base import Point
 from .base import scalars_strategies
 
-triangles_vertices = (scalars_strategies.flatmap(planar.triangular_contours)
-                      .map(mapper(pack(Point)))
-                      .map(list))
-to_non_triangle_vertices_base = partial(strategies.lists,
-                                        min_size=4,
-                                        unique_by=(attrgetter('x'),
-                                                   attrgetter('y')))
+triangular_contours = (scalars_strategies.flatmap(planar.triangular_contours)
+                       .map(mapper(pack(Point)))
+                       .map(list))
+to_non_triangular_contours_base = partial(strategies.lists,
+                                          min_size=4,
+                                          unique_by=(attrgetter('x'),
+                                                     attrgetter('y')))

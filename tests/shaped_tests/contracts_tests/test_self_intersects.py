@@ -1,12 +1,10 @@
-from typing import Sequence
-
 from hypothesis import given
 
-from gon.base import Point
 from gon.shaped.contracts import self_intersects
+from gon.shaped.hints import Contour
 from tests import strategies
 
 
-@given(strategies.triangles_vertices)
-def test_triangle_vertices(vertices: Sequence[Point]) -> None:
-    assert not self_intersects(vertices)
+@given(strategies.triangular_contours)
+def test_triangle_contour(contour: Contour) -> None:
+    assert not self_intersects(contour)

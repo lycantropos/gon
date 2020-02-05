@@ -6,13 +6,13 @@ from hypothesis import strategies
 from lz.logical import negate
 
 from gon.base import Point
-from gon.shaped.contracts import (self_intersects,
-                                  vertices_forms_strict_polygon)
+from gon.shaped.contracts import (contour_forms_strict_polygon,
+                                  self_intersects)
 from tests.strategies import (points_strategies,
-                              to_non_triangle_vertices_base)
+                              to_non_triangular_contours_base)
 from tests.utils import Strategy
 
-invalid_vertices = points_strategies.flatmap(to_non_triangle_vertices_base)
+invalid_contours = points_strategies.flatmap(to_non_triangular_contours_base)
 
 
 def to_same_points(points: Strategy[Point]) -> Strategy[Sequence[Point]]:
@@ -22,9 +22,9 @@ def to_same_points(points: Strategy[Point]) -> Strategy[Sequence[Point]]:
             .map(list))
 
 
-invalid_vertices = (
+invalid_contours = (
         points_strategies.flatmap(partial(strategies.lists,
                                           max_size=2))
         | points_strategies.flatmap(to_same_points)
-        | invalid_vertices.filter(self_intersects)
-        | invalid_vertices.filter(negate(vertices_forms_strict_polygon)))
+        | invalid_contours.filter(self_intersects)
+        | invalid_contours.filter(negate(contour_forms_strict_polygon)))

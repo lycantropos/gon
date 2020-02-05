@@ -8,18 +8,19 @@ from gon.angular import (Angle,
 from gon.base import Point
 from gon.linear import (Segment,
                         to_segment)
+from .hints import Contour
 
 
-def to_angles(vertices: Sequence[Point]) -> Iterable[Angle]:
-    return (Angle(vertices[index - 1],
-                  vertices[index],
-                  vertices[(index + 1) % len(vertices)])
-            for index in range(len(vertices)))
+def to_angles(contour: Contour) -> Iterable[Angle]:
+    return (Angle(contour[index - 1],
+                  contour[index],
+                  contour[(index + 1) % len(contour)])
+            for index in range(len(contour)))
 
 
-def to_edges(vertices: Sequence[Point]) -> Iterable[Segment]:
-    return (to_segment(vertices[index], vertices[(index + 1) % len(vertices)])
-            for index in range(len(vertices)))
+def to_edges(contour: Contour) -> Iterable[Segment]:
+    return (to_segment(contour[index], contour[(index + 1) % len(contour)])
+            for index in range(len(contour)))
 
 
 def to_convex_hull(points: Sequence[Point]) -> List[Point]:

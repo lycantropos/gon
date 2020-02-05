@@ -28,10 +28,10 @@ from gon.linear import Segment
 from gon.utils import (inverse_permutation,
                        to_index_min)
 from . import triangular
-from .contracts import (self_intersects,
-                        vertices_forms_convex_polygon,
-                        vertices_forms_strict_polygon)
-from .hints import Vertices
+from .contracts import (contour_forms_convex_polygon,
+                        contour_forms_strict_polygon,
+                        self_intersects)
+from .hints import Contour
 from .utils import (to_convex_hull,
                     to_edges)
 
@@ -67,8 +67,8 @@ class Polygon(ABC):
 
     @property
     @abstractmethod
-    def vertices(self) -> Vertices:
-        """Returns vertices of the polygon."""
+    def contour(self) -> Contour:
+        """Returns contour of the polygon."""
 
     @property
     @abstractmethod
@@ -91,17 +91,17 @@ class Polygon(ABC):
         """Returns triangulation of the polygon."""
 
 
-@documentation.setup(docstring='Sorts vertices by lexicographical order '
+@documentation.setup(docstring='Sorts contour in lexicographical order '
                                'and rotates to establish '
                                'counter-clockwise orientation.',
                      reference='http://tiny.cc/simple_polygon',
                      time_complexity='O(n), where\n'
                                      'n -- vertices count')
 class SimplePolygon(Polygon):
-    __slots__ = ('_order', '_vertices')
+    __slots__ = ('_order', '_contour')
 
-    def __init__(self, vertices: Vertices) -> None:
-        self._order, self._vertices = _normalize_vertices(tuple(vertices))
+    def __init__(self, contour: Contour) -> None:
+        self._order, self._contour = _normalize_vertices(tuple(contour))
 
     __repr__ = generate_repr(__init__)
 
@@ -126,7 +126,7 @@ class SimplePolygon(Polygon):
         True
         """
         result = False
-        for edge in to_edges(self._vertices):
+        for edge in to_edges(self._contour):
             if point in edge:
                 return LocationKind.ON_BOUNDARY
             if ((edge.start.y > point.y) is not (edge.end.y > point.y)
@@ -150,7 +150,7 @@ class SimplePolygon(Polygon):
         """
         if not isinstance(other, Polygon):
             return NotImplemented
-        return (self._vertices == other._vertices
+        return (self._contour == other._contour
                 if isinstance(other, SimplePolygon)
                 else False)
 
@@ -164,10 +164,10 @@ class SimplePolygon(Polygon):
         >>> hash(polygon) == hash(polygon)
         True
         """
-        return hash(self._vertices)
+        return hash(self._contour)
 
     @cached.property_
-    @documentation.setup(docstring='Returns vertices of the polygon '
+    @documentation.setup(docstring='Returns contour of the polygon '
                                    'in the original order.\n'
                                    'Original order is the order '
                                    'from polygon\'s definition.',
@@ -176,15 +176,15 @@ class SimplePolygon(Polygon):
                          reference='http://tiny.cc/inverse_permutation',
                          time_complexity='O(n), where\n'
                                          'n -- polygon\'s vertices count')
-    def vertices(self) -> Vertices:
+    def contour(self) -> Contour:
         """
         >>> vertices = [Point(-1, -1), Point(1, -1), Point(1, 1), Point(-1, 1)]
         >>> polygon = SimplePolygon(vertices)
         >>> all(actual == original
-        ...     for actual, original in zip(polygon.vertices, vertices))
+        ...     for actual, original in zip(polygon.contour, vertices))
         True
         """
-        return itemgetter(*inverse_permutation(self._order))(self._vertices)
+        return itemgetter(*inverse_permutation(self._order))(self._contour)
 
     @cached.property_
     @documentation.setup(docstring='Returns area of the polygon.',
@@ -200,7 +200,7 @@ class SimplePolygon(Polygon):
         True
         """
         expansions = [_edge_to_endpoints_cross_product_z(edge)
-                      for edge in to_edges(self._vertices)]
+                      for edge in to_edges(self._contour)]
         return reduce(sum_expansions, expansions)[-1] / 2
 
     @cached.property_
@@ -216,9 +216,9 @@ class SimplePolygon(Polygon):
         >>> polygon.convex_hull == polygon
         True
         """
-        if len(self._vertices) == 3:
+        if len(self._contour) == 3:
             return self
-        return SimplePolygon(to_convex_hull(self._vertices))
+        return SimplePolygon(to_convex_hull(self._contour))
 
     @cached.property_
     @documentation.setup(docstring='Checks if the polygon is convex.',
@@ -234,7 +234,7 @@ class SimplePolygon(Polygon):
         >>> polygon.is_convex
         True
         """
-        return vertices_forms_convex_polygon(self._vertices)
+        return contour_forms_convex_polygon(self._contour)
 
     @property
     @documentation.setup(docstring='Returns triangulation of the polygon.',
@@ -257,9 +257,9 @@ class SimplePolygon(Polygon):
         True
         """
         return [SimplePolygon(vertices)
-                for vertices in triangular.constrained_delaunay_vertices(
-                    self._vertices,
-                    boundary=tuple(to_edges(self._vertices)))]
+                for vertices in triangular.constrained_delaunay_contours(
+                    self._contour,
+                    boundary=tuple(to_edges(self._contour)))]
 
 
 def _edge_to_endpoints_cross_product_z(edge: Segment) -> Expansion:
@@ -276,14 +276,14 @@ def _edge_to_endpoints_cross_product_z(edge: Segment) -> Expansion:
                             '& checking of self-intersection',
                      reference='http://tiny.cc/n_gon',
                      time_complexity='O(len(vertices) log len(vertices))')
-def to_polygon(vertices: Vertices) -> Polygon:
+def to_polygon(vertices: Contour) -> Polygon:
     """
     >>> to_polygon([Point(-1, -1), Point(1, -1), Point(1, 1), Point(-1, 1)])
     SimplePolygon((Point(-1, -1), Point(1, -1), Point(1, 1), Point(-1, 1)))
     """
     if len(vertices) < 3:
         raise ValueError('Polygon should have at least 3 vertices.')
-    if not vertices_forms_strict_polygon(vertices):
+    if not contour_forms_strict_polygon(vertices):
         raise ValueError('Consecutive vertices triplets '
                          'should not be on the same line.')
     if self_intersects(vertices):
@@ -291,7 +291,7 @@ def to_polygon(vertices: Vertices) -> Polygon:
     return SimplePolygon(vertices)
 
 
-def _normalize_vertices(vertices: Vertices) -> Tuple[Permutation, Vertices]:
+def _normalize_vertices(vertices: Contour) -> Tuple[Permutation, Contour]:
     order, vertices = zip(*_rotate_sequence(tuple(enumerate(vertices)),
                                             key=compose(attrgetter('x', 'y'),
                                                         itemgetter(1))))

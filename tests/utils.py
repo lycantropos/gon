@@ -25,7 +25,7 @@ from gon.hints import Scalar
 from gon.linear import (Interval,
                         Segment,
                         to_segment)
-from gon.shaped.hints import Vertices
+from gon.shaped.hints import Contour
 from gon.shaped.subdivisional import QuadEdge
 from gon.shaped.utils import (to_angles,
                               to_edges)
@@ -99,10 +99,10 @@ def edge_to_ring(edge: QuadEdge) -> Iterable[QuadEdge]:
             break
 
 
-def to_boundary(polygons_vertices: Iterable[Vertices]) -> Set[Segment]:
+def to_boundary(contours: Iterable[Contour]) -> Set[Segment]:
     result = set()
-    for vertices in polygons_vertices:
-        result.symmetric_difference_update(to_edges(vertices))
+    for contour in contours:
+        result.symmetric_difference_update(to_edges(contour))
     shrink_collinear_segments(result)
     return result
 

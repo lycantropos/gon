@@ -22,9 +22,9 @@ def test_basic(polygon: Polygon) -> None:
 def test_sizes(polygon: Polygon) -> None:
     result = polygon.triangulation
 
-    assert 0 < len(result) <= (2 * (len(polygon.vertices) - 1)
-                               - len(polygon.convex_hull.vertices))
-    assert all(len(element.vertices) == 3
+    assert 0 < len(result) <= (2 * (len(polygon.contour) - 1)
+                               - len(polygon.convex_hull.contour))
+    assert all(len(element.contour) == 3
                for element in result)
 
 
@@ -38,6 +38,6 @@ def test_triangle(triangle: Polygon) -> None:
 
 @given(strategies.polygons)
 def test_boundary(polygon: Polygon) -> None:
-    assert (to_boundary(triangle.vertices
+    assert (to_boundary(triangle.contour
                         for triangle in polygon.triangulation)
-            == set(to_edges(polygon.vertices)))
+            == set(to_edges(polygon.contour)))

@@ -73,7 +73,7 @@ Usage
 >>> from gon.base import Point
 >>> from gon.shaped import to_polygon
 >>> square = to_polygon([Point(0, 0), Point(1, 0), Point(1, 1), Point(0, 1)])
->>> len(square.vertices)
+>>> len(square.contour)
 4
 >>> square.is_convex
 True
