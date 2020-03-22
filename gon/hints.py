@@ -1,7 +1,3 @@
-from decimal import Decimal
-from numbers import Real
-from typing import (Sequence,
-                    TypeVar)
+from typing import Sequence
 
-Scalar = TypeVar('Scalar', Real, Decimal)
 Permutation = Sequence[int]
