@@ -12,8 +12,8 @@ from lz.hints import Operator
 from gon.base import Point
 from gon.hints import Coordinate
 from gon.linear import Interval
-from tests.strategies import (scalars_strategies,
-                              scalars_to_points)
+from tests.strategies import (coordinates_strategies,
+                              coordinates_to_points)
 from tests.utils import (Strategy,
                          cleave_in_tuples,
                          inverse_inclusion,
@@ -23,8 +23,9 @@ from tests.utils import (Strategy,
                          to_triplets)
 
 
-def scalars_to_intervals(scalars: Strategy[Coordinate]) -> Strategy[Interval]:
-    return (points_to_interval_endpoints(scalars_to_points(scalars))
+def coordinates_to_intervals(coordinates: Strategy[Coordinate]
+                             ) -> Strategy[Interval]:
+    return (points_to_interval_endpoints(coordinates_to_points(coordinates))
             .flatmap(lambda endpoints:
                      strategies.builds(Interval,
                                        strategies.just(endpoints[0]),
@@ -38,14 +39,14 @@ def points_to_interval_endpoints(points: Strategy[Point]
     return strategies.tuples(points, points).filter(pack(ne))
 
 
-intervals_strategies = scalars_strategies.map(scalars_to_intervals)
+intervals_strategies = coordinates_strategies.map(coordinates_to_intervals)
 intervals = intervals_strategies.flatmap(identity)
 intervals_pairs = intervals_strategies.flatmap(to_pairs)
 intervals_triplets = intervals_strategies.flatmap(to_triplets)
 non_intervals = strategies.builds(object)
-intervals_with_points = (scalars_strategies
-                         .flatmap(cleave_in_tuples(scalars_to_intervals,
-                                                   scalars_to_points)))
+intervals_with_points = (coordinates_strategies
+                         .flatmap(cleave_in_tuples(coordinates_to_intervals,
+                                                   coordinates_to_points)))
 
 
 def to_pythagorean_triplets(*,

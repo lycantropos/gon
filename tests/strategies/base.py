@@ -75,16 +75,17 @@ def to_decimal(number: SupportsFloat) -> Decimal:
     return Decimal(number)
 
 
-scalars_strategies_factories = {float: to_floats,
-                                Fraction: to_fractions,
-                                int: to_integers}
-scalars_strategies = strategies.sampled_from(
-        [factory() for factory in scalars_strategies_factories.values()])
+coordinates_strategies_factories = {float: to_floats,
+                                    Fraction: to_fractions,
+                                    int: to_integers}
+coordinates_strategies = strategies.sampled_from(
+        [factory() for factory in coordinates_strategies_factories.values()])
 
 
-def scalars_to_points(scalars: Strategy[Coordinate]) -> Strategy[Point]:
-    return strategies.builds(Point, scalars, scalars)
+def coordinates_to_points(coordinates: Strategy[Coordinate]
+                          ) -> Strategy[Point]:
+    return strategies.builds(Point, coordinates, coordinates)
 
 
-points_strategies = scalars_strategies.map(scalars_to_points)
-points = scalars_strategies.flatmap(scalars_to_points)
+points_strategies = coordinates_strategies.map(coordinates_to_points)
+points = coordinates_strategies.flatmap(coordinates_to_points)

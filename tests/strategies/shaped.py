@@ -7,9 +7,9 @@ from lz.functional import pack
 from lz.iterating import mapper
 
 from gon.base import Point
-from .base import scalars_strategies
+from .base import coordinates_strategies
 
-triangular_contours = (scalars_strategies.flatmap(planar.triangular_contours)
+triangular_contours = (coordinates_strategies.flatmap(planar.triangular_contours)
                        .map(mapper(pack(Point)))
                        .map(list))
 to_non_triangular_contours_base = partial(strategies.lists,
