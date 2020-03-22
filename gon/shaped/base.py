@@ -3,7 +3,6 @@ from abc import (ABC,
 from enum import (IntEnum,
                   unique)
 from functools import reduce
-from numbers import Real
 from operator import (attrgetter,
                       itemgetter)
 from typing import (Sequence,
@@ -23,7 +22,8 @@ from gon import documentation
 from gon.angular import (Angle,
                          Orientation)
 from gon.base import Point
-from gon.hints import Permutation
+from gon.hints import (Coordinate,
+                       Permutation)
 from gon.linear import Segment
 from gon.utils import (inverse_permutation,
                        to_index_min)
@@ -72,7 +72,7 @@ class Polygon(ABC):
 
     @property
     @abstractmethod
-    def area(self) -> Real:
+    def area(self) -> Coordinate:
         """Returns area of the polygon."""
 
     @property
@@ -192,7 +192,7 @@ class SimplePolygon(Polygon):
                          reference='http://tiny.cc/shoelace_formula',
                          time_complexity='O(n), where\n'
                                          'n -- polygon\'s vertices count')
-    def area(self) -> Real:
+    def area(self) -> Coordinate:
         """
         >>> polygon = SimplePolygon([Point(-1, -1), Point(1, -1),
         ...                          Point(1, 1), Point(-1, 1)])

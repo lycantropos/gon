@@ -1,5 +1,4 @@
 from functools import partial
-from numbers import Real
 from operator import (attrgetter,
                       ne)
 from typing import (Optional,
@@ -11,6 +10,7 @@ from lz.functional import (identity,
 from lz.hints import Operator
 
 from gon.base import Point
+from gon.hints import Coordinate
 from gon.linear import Interval
 from tests.strategies import (scalars_strategies,
                               scalars_to_points)
@@ -23,7 +23,7 @@ from tests.utils import (Strategy,
                          to_triplets)
 
 
-def scalars_to_intervals(scalars: Strategy[Real]) -> Strategy[Interval]:
+def scalars_to_intervals(scalars: Strategy[Coordinate]) -> Strategy[Interval]:
     return (points_to_interval_endpoints(scalars_to_points(scalars))
             .flatmap(lambda endpoints:
                      strategies.builds(Interval,
@@ -82,7 +82,8 @@ pythagorean_triplets = to_pythagorean_triplets(max_value=1000)
 
 def to_maybe_intersecting_intervals_pairs(
         intervals: Strategy[Interval]) -> Strategy[Tuple[Interval, Interval]]:
-    def to_scaled_intervals_pair(interval_with_scale: Tuple[Interval, Real]
+    def to_scaled_intervals_pair(interval_with_scale: Tuple[Interval,
+                                                            Coordinate]
                                  ) -> Tuple[Interval, Interval]:
         interval, scale = interval_with_scale
         return interval, scale_interval(interval,

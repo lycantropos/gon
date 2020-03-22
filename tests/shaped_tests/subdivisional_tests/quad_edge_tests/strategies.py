@@ -1,4 +1,3 @@
-from numbers import Real
 from typing import (List,
                     Optional)
 
@@ -9,6 +8,7 @@ from lz.functional import (compose,
 from lz.replication import duplicate
 
 from gon.base import Point
+from gon.hints import Coordinate
 from gon.shaped import triangular
 from gon.shaped.subdivisional import QuadEdge
 from gon.shaped.triangular import Triangulation
@@ -26,7 +26,7 @@ points_pairs = (scalars_strategies
                                  scalars_to_points)))
 
 
-def scalars_to_quad_edges(scalars: Strategy[Real]) -> Strategy[QuadEdge]:
+def scalars_to_quad_edges(scalars: Strategy[Coordinate]) -> Strategy[QuadEdge]:
     return (scalars_to_points_in_general_position(scalars)
             .map(triangular.delaunay)
             .map(Triangulation.to_edges)
@@ -34,7 +34,7 @@ def scalars_to_quad_edges(scalars: Strategy[Real]) -> Strategy[QuadEdge]:
             .flatmap(strategies.sampled_from))
 
 
-def scalars_to_points_in_general_position(scalars: Strategy[Real],
+def scalars_to_points_in_general_position(scalars: Strategy[Coordinate],
                                           *,
                                           min_size: int = 2,
                                           max_size: Optional[int] = None
@@ -52,7 +52,7 @@ quad_edges_pairs = quad_edges_strategies.flatmap(to_pairs)
 quad_edges_triplets = quad_edges_strategies.flatmap(to_triplets)
 
 
-def scalars_to_quad_edges_with_neighbours(scalars: Strategy[Real]
+def scalars_to_quad_edges_with_neighbours(scalars: Strategy[Coordinate]
                                           ) -> Strategy[QuadEdge]:
     return (scalars_to_points_in_general_position(scalars,
                                                   min_size=4)
