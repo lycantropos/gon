@@ -1,19 +1,19 @@
 import sys
 from decimal import Decimal
 from fractions import Fraction
-from numbers import Real
 from typing import (Optional,
                     SupportsFloat)
 
 from hypothesis import strategies
 
 from gon.base import Point
+from gon.hints import Coordinate
 from tests.utils import Strategy
 
 
 def to_floats(*,
-              min_value: Optional[Real] = None,
-              max_value: Optional[Real] = None,
+              min_value: Optional[Coordinate] = None,
+              max_value: Optional[Coordinate] = None,
               allow_nan: bool = False,
               allow_infinity: bool = False) -> Strategy:
     return (strategies.floats(min_value=min_value,
@@ -24,9 +24,9 @@ def to_floats(*,
 
 
 def to_fractions(*,
-                 min_value: Optional[Real] = None,
-                 max_value: Optional[Real] = None,
-                 max_denominator: Optional[Real] = None) -> Strategy:
+                 min_value: Optional[Coordinate] = None,
+                 max_value: Optional[Coordinate] = None,
+                 max_denominator: Optional[Coordinate] = None) -> Strategy:
     return (strategies.fractions(min_value=min_value,
                                  max_value=max_value,
                                  max_denominator=max_denominator)
@@ -34,16 +34,16 @@ def to_fractions(*,
 
 
 def to_integers(*,
-                min_value: Optional[Real] = None,
-                max_value: Optional[Real] = None) -> Strategy:
+                min_value: Optional[Coordinate] = None,
+                max_value: Optional[Coordinate] = None) -> Strategy:
     return (strategies.integers(min_value=min_value,
                                 max_value=max_value)
             .map(to_digits_count))
 
 
-def to_digits_count(number: Real,
+def to_digits_count(number: Coordinate,
                     *,
-                    max_digits_count: int = sys.float_info.dig) -> Real:
+                    max_digits_count: int = sys.float_info.dig) -> Coordinate:
     decimal = to_decimal(number).normalize()
     _, significant_digits, exponent = decimal.as_tuple()
     significant_digits_count = len(significant_digits)
@@ -82,7 +82,7 @@ scalars_strategies = strategies.sampled_from(
         [factory() for factory in scalars_strategies_factories.values()])
 
 
-def scalars_to_points(scalars: Strategy[Real]) -> Strategy[Point]:
+def scalars_to_points(scalars: Strategy[Coordinate]) -> Strategy[Point]:
     return strategies.builds(Point, scalars, scalars)
 
 

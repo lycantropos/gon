@@ -1,4 +1,3 @@
-from numbers import Real
 from typing import Tuple
 
 from hypothesis import strategies
@@ -8,6 +7,7 @@ from lz.functional import (identity,
 from lz.iterating import mapper
 
 from gon.base import Point
+from gon.hints import Coordinate
 from gon.shaped import (Polygon,
                         SimplePolygon,
                         to_polygon)
@@ -22,7 +22,7 @@ from tests.utils import (Strategy,
 triangles = triangular_contours.map(to_polygon)
 
 
-def scalars_to_polygons(scalars: Strategy[Real]) -> Strategy[Polygon]:
+def scalars_to_polygons(scalars: Strategy[Coordinate]) -> Strategy[Polygon]:
     return (planar.contours(scalars)
             .map(mapper(pack(Point)))
             .map(list)
