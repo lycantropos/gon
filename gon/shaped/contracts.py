@@ -2,8 +2,7 @@ from bentley_ottmann.planar import edges_intersect
 from robust import cocircular
 
 from gon.angular import Orientation
-from gon.base import (Point,
-                      _point_to_real_tuple)
+from gon.base import Point
 from .hints import Contour
 from .utils import to_angles
 
@@ -31,7 +30,7 @@ def is_point_inside_circumcircle(first_vertex: Point,
                                  second_vertex: Point,
                                  third_vertex: Point,
                                  point: Point) -> bool:
-    return cocircular.determinant(_point_to_real_tuple(first_vertex),
-                                  _point_to_real_tuple(second_vertex),
-                                  _point_to_real_tuple(third_vertex),
-                                  _point_to_real_tuple(point)) > 0
+    return cocircular.determinant(first_vertex.as_tuple(),
+                                  second_vertex.as_tuple(),
+                                  third_vertex.as_tuple(),
+                                  point.as_tuple()) > 0

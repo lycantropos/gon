@@ -3,31 +3,30 @@ from typing import Tuple
 
 from reprit.base import generate_repr
 
-from .hints import Scalar
 from .utils import validate_value
 
 
 class Point:
     __slots__ = ('_x', '_y')
 
-    def __new__(cls, x: Scalar, y: Scalar) -> 'Point':
+    def __new__(cls, x: Real, y: Real) -> 'Point':
         validate_value(x)
         validate_value(y)
         return super().__new__(cls)
 
-    def __init__(self, x: Scalar, y: Scalar) -> None:
+    def __init__(self, x: Real, y: Real) -> None:
         self._x = x
         self._y = y
 
     @property
-    def x(self) -> Scalar:
+    def x(self) -> Real:
         return self._x
 
     @property
-    def y(self) -> Scalar:
+    def y(self) -> Real:
         return self._y
 
-    def as_tuple(self) -> Tuple[Scalar, Scalar]:
+    def as_tuple(self) -> Tuple[Real, Real]:
         return self._x, self._y
 
     __repr__ = generate_repr(__init__)
@@ -39,11 +38,3 @@ class Point:
         return (self._x == other._x and self._y == other._y
                 if isinstance(other, Point)
                 else NotImplemented)
-
-
-def _point_to_real_tuple(point: Point) -> Tuple[Real, Real]:
-    return _scalar_to_real(point.x), _scalar_to_real(point.y)
-
-
-def _scalar_to_real(scalar: Scalar) -> Real:
-    return scalar if isinstance(scalar, Real) else float(scalar)

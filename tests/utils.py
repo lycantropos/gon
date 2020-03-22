@@ -1,6 +1,7 @@
 from collections import defaultdict
 from functools import partial
 from itertools import repeat
+from numbers import Real
 from typing import (Callable,
                     Hashable,
                     Iterable,
@@ -21,7 +22,6 @@ from lz.replication import replicator
 from gon.angular import (Angle,
                          Orientation)
 from gon.base import Point
-from gon.hints import Scalar
 from gon.linear import (Interval,
                         Segment,
                         to_segment)
@@ -144,7 +144,7 @@ def reflect_point(point: Point) -> Point:
 
 def scale_interval(interval: Interval,
                    *,
-                   scale: Scalar) -> Interval:
+                   scale: Real) -> Interval:
     return Interval(interval.start,
                     Point(interval.start.x
                           + scale * (interval.end.x - interval.start.x),

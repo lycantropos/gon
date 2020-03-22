@@ -1,4 +1,5 @@
 import math
+from numbers import Real
 from operator import itemgetter
 from typing import (Any,
                     Iterable)
@@ -7,8 +8,7 @@ from lz.functional import compose
 from lz.hints import Domain
 from lz.sorting import Key
 
-from .hints import (Permutation,
-                    Scalar)
+from .hints import Permutation
 
 _sentinel = object()
 
@@ -34,7 +34,7 @@ def inverse_permutation(permutation: Permutation) -> Permutation:
     return type(permutation)(result)
 
 
-def to_sign(value: Scalar) -> int:
+def to_sign(value: Real) -> int:
     validate_value(value)
     if value > 0:
         return 1
@@ -44,6 +44,6 @@ def to_sign(value: Scalar) -> int:
         return 0
 
 
-def validate_value(value: Scalar) -> None:
+def validate_value(value: Real) -> None:
     if not math.isfinite(value):
         raise ValueError('NaN/infinity are not supported.')
