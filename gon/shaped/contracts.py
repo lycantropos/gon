@@ -1,4 +1,4 @@
-from bentley_ottmann.base import edges_intersect
+from bentley_ottmann.planar import edges_intersect
 from robust import cocircular
 
 from gon.angular import Orientation
