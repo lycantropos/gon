@@ -7,8 +7,8 @@ from robust.linear import (SegmentsRelationship,
                            segments_relationship)
 
 from gon.hints import Coordinate
-from .angular import (Angle,
-                      Orientation)
+from .angular import (Orientation,
+                      to_orientation)
 from .base import Point
 
 SegmentsRelationship = SegmentsRelationship
@@ -57,10 +57,7 @@ class Segment:
         return segments_relationship(self.as_tuple(), other.as_tuple())
 
     def orientation_with(self, point: Point) -> Orientation:
-        return self.angle_with(point).orientation
-
-    def angle_with(self, point: Point) -> Angle:
-        return Angle(self.end, self.start, point)
+        return to_orientation(self.end, self.start, point)
 
 
 def to_segment(start: Point, end: Point) -> Union[Segment, Segment]:

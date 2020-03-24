@@ -13,8 +13,8 @@ from lz.iterating import flatten
 from reprit.base import generate_repr
 
 from gon import documentation
-from gon.angular import (Angle,
-                         Orientation)
+from gon.angular import (Orientation,
+                         to_orientation)
 from gon.base import Point
 from gon.linear import (Segment,
                         SegmentsRelationship,
@@ -182,7 +182,7 @@ def _triangulate_three_points(sorted_points: Sequence[Point]) -> Triangulation:
     first_edge, second_edge = (QuadEdge.factory(left_point, mid_point),
                                QuadEdge.factory(mid_point, right_point))
     first_edge.opposite.splice(second_edge)
-    orientation = Angle(left_point, mid_point, right_point).orientation
+    orientation = to_orientation(left_point, mid_point, right_point)
     if orientation is Orientation.COUNTERCLOCKWISE:
         third_edge = second_edge.connect(first_edge)
         return Triangulation(third_edge.opposite, third_edge)

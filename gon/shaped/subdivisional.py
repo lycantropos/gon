@@ -2,8 +2,8 @@ from typing import Optional
 
 from reprit.base import generate_repr
 
-from gon.angular import (Angle,
-                         Orientation)
+from gon.angular import (Orientation,
+                         to_orientation)
 from gon.base import Point
 
 
@@ -127,8 +127,5 @@ class QuadEdge:
         self.splice(self.right_from_start)
         self.opposite.splice(self.opposite.right_from_start)
 
-    def angle_with(self, point: Point) -> Angle:
-        return Angle(self.end, self.start, point)
-
     def orientation_with(self, point: Point) -> Orientation:
-        return self.angle_with(point).orientation
+        return to_orientation(self.end, self.start, point)

@@ -4,13 +4,13 @@ from robust import cocircular
 from gon.angular import Orientation
 from gon.base import Point
 from .hints import Contour
-from .utils import to_angles
+from .utils import to_orientations
 
 
 def contour_forms_convex_polygon(contour: Contour) -> bool:
     if len(contour) == 3:
         return True
-    orientations = (angle.orientation for angle in to_angles(contour))
+    orientations = iter(to_orientations(contour))
     base_orientation = next(orientations)
     # orientation change means
     # that internal angle is greater than 180 degrees
@@ -18,8 +18,8 @@ def contour_forms_convex_polygon(contour: Contour) -> bool:
 
 
 def contour_forms_strict_polygon(contour: Contour) -> bool:
-    return all(angle.orientation is not Orientation.COLLINEAR
-               for angle in to_angles(contour))
+    return all(orientation is not Orientation.COLLINEAR
+               for orientation in to_orientations(contour))
 
 
 def self_intersects(contour: Contour) -> bool:
