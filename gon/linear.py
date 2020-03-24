@@ -1,8 +1,10 @@
-from typing import Union
+from typing import (Tuple,
+                    Union)
 
 from reprit.base import generate_repr
 from robust.linear import SegmentsRelationship
 
+from gon.hints import Coordinate
 from .angular import (Angle,
                       AngleKind,
                       Orientation)
@@ -29,6 +31,10 @@ class Segment:
     @property
     def reversed(self) -> 'Segment':
         return type(self)(self.end, self.start)
+
+    def as_tuple(self) -> Tuple[Tuple[Coordinate, Coordinate],
+                                Tuple[Coordinate, Coordinate]]:
+        return self._start.as_tuple(), self._end.as_tuple()
 
     __repr__ = generate_repr(__init__)
 
