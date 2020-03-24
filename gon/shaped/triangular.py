@@ -16,7 +16,7 @@ from gon import documentation
 from gon.angular import (Angle,
                          Orientation)
 from gon.base import Point
-from gon.linear import (IntersectionKind,
+from gon.linear import (SegmentsRelationship,
                         Segment,
                         to_segment)
 from .contracts import is_point_inside_circumcircle
@@ -360,7 +360,7 @@ def _resolve_crossings(constraint: Segment,
                                               second_non_edge_vertex)):
             edge.swap()
             if (_edge_to_segment(edge).relationship_with(constraint)
-                    is IntersectionKind.CROSS):
+                    is SegmentsRelationship.CROSS):
                 crossed_edges.append(edge)
             else:
                 result.add(edge)
@@ -374,7 +374,7 @@ def _find_crossed_edges(constraint: Segment,
     return set({_edge_to_segment(edge): edge
                 for edge in triangulation.to_inner_edges()
                 if _edge_to_segment(edge).relationship_with(constraint)
-                is IntersectionKind.CROSS}
+                is SegmentsRelationship.CROSS}
                .values())
 
 

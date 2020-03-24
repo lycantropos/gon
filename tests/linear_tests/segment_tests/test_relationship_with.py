@@ -2,7 +2,7 @@ from typing import Tuple
 
 from hypothesis import given
 
-from gon.linear import (IntersectionKind,
+from gon.linear import (SegmentsRelationship,
                         Segment)
 from tests.utils import (reflect_segment)
 from . import strategies
@@ -10,7 +10,7 @@ from . import strategies
 
 @given(strategies.segments)
 def test_relationship_with_self(segment: Segment) -> None:
-    assert segment.relationship_with(segment) is IntersectionKind.OVERLAP
+    assert segment.relationship_with(segment) is SegmentsRelationship.OVERLAP
 
 
 @given(strategies.segments_pairs)
@@ -35,4 +35,4 @@ def test_reflection(segment: Segment) -> None:
     reflected_segment = reflect_segment(segment)
 
     assert (segment.relationship_with(reflected_segment)
-            is IntersectionKind.CROSS)
+            is SegmentsRelationship.CROSS)

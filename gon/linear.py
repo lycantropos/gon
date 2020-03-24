@@ -1,20 +1,14 @@
-from enum import (IntEnum,
-                  unique)
 from typing import Union
 
 from reprit.base import generate_repr
+from robust.linear import SegmentsRelationship
 
 from .angular import (Angle,
                       AngleKind,
                       Orientation)
 from .base import Point
 
-
-@unique
-class IntersectionKind(IntEnum):
-    NONE = 0
-    CROSS = 1
-    OVERLAP = 2
+SegmentsRelationship = SegmentsRelationship
 
 
 class Segment:
@@ -54,11 +48,11 @@ class Segment:
                 and _in_segment(point, self))
 
     def intersects_with(self, other: 'Segment') -> bool:
-        return self.relationship_with(other) is not IntersectionKind.NONE
+        return self.relationship_with(other) is not SegmentsRelationship.NONE
 
-    def relationship_with(self, other: 'Segment') -> IntersectionKind:
+    def relationship_with(self, other: 'Segment') -> SegmentsRelationship:
         if self == other:
-            return IntersectionKind.OVERLAP
+            return SegmentsRelationship.OVERLAP
         self_start_orientation = other.orientation_with(self.start)
         self_end_orientation = other.orientation_with(self.end)
         if (self_start_orientation is Orientation.COLLINEAR
@@ -67,83 +61,83 @@ class Segment:
                 if self.start == other.start:
                     if (Angle(self.end, self.start, other.end).kind
                             is AngleKind.ACUTE):
-                        return IntersectionKind.OVERLAP
+                        return SegmentsRelationship.OVERLAP
                     else:
-                        return IntersectionKind.CROSS
+                        return SegmentsRelationship.CROSS
                 elif self.start == other.end:
                     if (Angle(self.end, self.start, other.start).kind
                             is AngleKind.ACUTE):
-                        return IntersectionKind.OVERLAP
+                        return SegmentsRelationship.OVERLAP
                     else:
-                        return IntersectionKind.CROSS
+                        return SegmentsRelationship.CROSS
                 else:
-                    return IntersectionKind.OVERLAP
+                    return SegmentsRelationship.OVERLAP
             else:
-                return IntersectionKind.CROSS
+                return SegmentsRelationship.CROSS
         elif (self_end_orientation is Orientation.COLLINEAR
               and _in_segment(self.end, other)):
             if self_start_orientation is Orientation.COLLINEAR:
                 if self.end == other.start:
                     if (Angle(self.start, self.end, other.end).kind
                             is AngleKind.ACUTE):
-                        return IntersectionKind.OVERLAP
+                        return SegmentsRelationship.OVERLAP
                     else:
-                        return IntersectionKind.CROSS
+                        return SegmentsRelationship.CROSS
                 elif self.end == other.end:
                     if (Angle(self.start, self.end, other.start).kind
                             is AngleKind.ACUTE):
-                        return IntersectionKind.OVERLAP
+                        return SegmentsRelationship.OVERLAP
                     else:
-                        return IntersectionKind.CROSS
+                        return SegmentsRelationship.CROSS
                 else:
-                    return IntersectionKind.OVERLAP
+                    return SegmentsRelationship.OVERLAP
             else:
-                return IntersectionKind.CROSS
+                return SegmentsRelationship.CROSS
         other_start_orientation = self.orientation_with(other.start)
         other_end_orientation = self.orientation_with(other.end)
         if (self_start_orientation * self_end_orientation < 0
                 and other_start_orientation * other_end_orientation < 0):
-            return IntersectionKind.CROSS
+            return SegmentsRelationship.CROSS
         elif (other_start_orientation is Orientation.COLLINEAR
               and _in_segment(other.start, self)):
             if other_end_orientation is Orientation.COLLINEAR:
                 if other.start == self.start:
                     if (Angle(other.end, other.start, self.end).kind
                             is AngleKind.ACUTE):
-                        return IntersectionKind.OVERLAP
+                        return SegmentsRelationship.OVERLAP
                     else:
-                        return IntersectionKind.CROSS
+                        return SegmentsRelationship.CROSS
                 elif other.start == self.end:
                     if (Angle(other.end, other.start, self.start).kind
                             is AngleKind.ACUTE):
-                        return IntersectionKind.OVERLAP
+                        return SegmentsRelationship.OVERLAP
                     else:
-                        return IntersectionKind.CROSS
+                        return SegmentsRelationship.CROSS
                 else:
-                    return IntersectionKind.OVERLAP
+                    return SegmentsRelationship.OVERLAP
             else:
-                return IntersectionKind.CROSS
+                return SegmentsRelationship.CROSS
         elif (other_end_orientation is Orientation.COLLINEAR
               and _in_segment(other.end, self)):
             if other_start_orientation is Orientation.COLLINEAR:
                 if other.end == self.start:
                     if (Angle(other.start, other.end, self.end).kind
                             is AngleKind.ACUTE):
-                        return IntersectionKind.OVERLAP
+                        return SegmentsRelationship.OVERLAP
                     else:
-                        return IntersectionKind.CROSS
+                        return SegmentsRelationship.CROSS
                 elif other.end == self.end:
                     if (Angle(other.start, other.end, self.start).kind
                             is AngleKind.ACUTE):
-                        return IntersectionKind.OVERLAP
+                        return SegmentsRelationship.OVERLAP
                     else:
-                        return IntersectionKind.CROSS
+                        return SegmentsRelationship.CROSS
                 else:
-                    return IntersectionKind.OVERLAP
+                    return SegmentsRelationship.OVERLAP
             else:
-                return IntersectionKind.CROSS
+                return SegmentsRelationship.CROSS
         else:
-            return IntersectionKind.NONE
+            return SegmentsRelationship.NONE
 
     def orientation_with(self, point: Point) -> Orientation:
         return self.angle_with(point).orientation
