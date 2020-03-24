@@ -4,7 +4,8 @@ from hypothesis import given
 
 from gon.linear import (Segment,
                         SegmentsRelationship)
-from tests.utils import reflect_segment
+from tests.utils import (reflect_segment,
+                         reverse_segment)
 from . import strategies
 
 
@@ -27,7 +28,7 @@ def test_independence_from_ends_order(segments_pair: Tuple[Segment, Segment]
     segment, other_segment = segments_pair
 
     assert (segment.relationship_with(other_segment)
-            is segment.reversed.relationship_with(other_segment))
+            is reverse_segment(segment).relationship_with(other_segment))
 
 
 @given(strategies.segments)

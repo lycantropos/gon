@@ -28,10 +28,6 @@ class Segment:
     def end(self) -> Point:
         return self._end
 
-    @property
-    def reversed(self) -> 'Segment':
-        return type(self)(self.end, self.start)
-
     def as_tuple(self) -> Tuple[Tuple[Coordinate, Coordinate],
                                 Tuple[Coordinate, Coordinate]]:
         return self._start.as_tuple(), self._end.as_tuple()
