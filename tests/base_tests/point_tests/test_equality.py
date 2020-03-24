@@ -1,5 +1,4 @@
-from typing import (Any,
-                    Tuple)
+from typing import Tuple
 
 from hypothesis import given
 
@@ -26,8 +25,3 @@ def test_transitivity(points_triplet: Tuple[Point, Point, Point]) -> None:
 
     assert implication(left_point == mid_point and mid_point == right_point,
                        left_point == right_point)
-
-
-@given(strategies.points, strategies.non_points)
-def test_non_point(point: Point, non_point: Any) -> None:
-    assert point != non_point

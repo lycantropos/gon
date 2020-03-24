@@ -14,4 +14,3 @@ invalid_coordinates = strategies.sampled_from([math.nan, math.inf, -math.inf])
 points = points
 points_pairs = points_strategies.flatmap(to_pairs)
 points_triplets = points_strategies.flatmap(to_triplets)
-non_points = strategies.builds(object)
