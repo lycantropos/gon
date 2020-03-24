@@ -148,11 +148,9 @@ class SimplePolygon(Polygon):
         >>> polygon == polygon
         True
         """
-        if not isinstance(other, Polygon):
-            return NotImplemented
         return (self._contour == other._contour
                 if isinstance(other, SimplePolygon)
-                else False)
+                else NotImplemented)
 
     @documentation.setup(docstring='Returns hash value of the polygon.',
                          time_complexity='O(n), where\n'
