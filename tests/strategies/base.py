@@ -1,8 +1,8 @@
 import sys
 from decimal import Decimal
 from fractions import Fraction
-from typing import (Optional,
-                    SupportsFloat)
+from functools import partial
+from typing import Optional
 
 from hypothesis import strategies
 
@@ -10,10 +10,13 @@ from gon.base import Point
 from gon.hints import Coordinate
 from tests.utils import Strategy
 
+MAX_COORDINATE = 10 ** 15
+MIN_COORDINATE = -MAX_COORDINATE
 
-def to_floats(*,
-              min_value: Optional[Coordinate] = None,
+
+def to_floats(min_value: Optional[Coordinate] = None,
               max_value: Optional[Coordinate] = None,
+              *,
               allow_nan: bool = False,
               allow_infinity: bool = False) -> Strategy:
     return (strategies.floats(min_value=min_value,
@@ -23,28 +26,10 @@ def to_floats(*,
             .map(to_digits_count))
 
 
-def to_fractions(*,
-                 min_value: Optional[Coordinate] = None,
-                 max_value: Optional[Coordinate] = None,
-                 max_denominator: Optional[Coordinate] = None) -> Strategy:
-    return (strategies.fractions(min_value=min_value,
-                                 max_value=max_value,
-                                 max_denominator=max_denominator)
-            .map(to_digits_count))
-
-
-def to_integers(*,
-                min_value: Optional[Coordinate] = None,
-                max_value: Optional[Coordinate] = None) -> Strategy:
-    return (strategies.integers(min_value=min_value,
-                                max_value=max_value)
-            .map(to_digits_count))
-
-
-def to_digits_count(number: Coordinate,
+def to_digits_count(number: float,
                     *,
-                    max_digits_count: int = sys.float_info.dig) -> Coordinate:
-    decimal = to_decimal(number).normalize()
+                    max_digits_count: int = sys.float_info.dig) -> float:
+    decimal = Decimal(number).normalize()
     _, significant_digits, exponent = decimal.as_tuple()
     significant_digits_count = len(significant_digits)
     if exponent < 0:
@@ -64,22 +49,17 @@ def to_digits_count(number: Coordinate,
         decimal *= 10 ** (-exponent - significant_digits_count)
         whole_digits_count = 1
     decimal = round(decimal, max(max_digits_count - whole_digits_count, 0))
-    return type(number)(str(decimal))
+    return float(str(decimal))
 
 
-def to_decimal(number: SupportsFloat) -> Decimal:
-    if isinstance(number, Decimal):
-        return number
-    elif not isinstance(number, (int, float)):
-        number = float(number)
-    return Decimal(number)
-
-
-coordinates_strategies_factories = {float: to_floats,
-                                    Fraction: to_fractions,
-                                    int: to_integers}
+coordinates_strategies_factories = {
+    float: to_floats,
+    Fraction: partial(strategies.fractions,
+                      max_denominator=MAX_COORDINATE),
+    int: strategies.integers}
 coordinates_strategies = strategies.sampled_from(
-        [factory() for factory in coordinates_strategies_factories.values()])
+        [factory(MIN_COORDINATE, MAX_COORDINATE)
+         for factory in coordinates_strategies_factories.values()])
 
 
 def coordinates_to_points(coordinates: Strategy[Coordinate]
