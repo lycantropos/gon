@@ -67,18 +67,3 @@ def to_segment(start: Point, end: Point) -> Union[Segment, Segment]:
     if start == end:
         raise ValueError('Degenerate segment found.')
     return Segment(start, end)
-
-
-def _in_segment(point: Point, segment: Segment) -> bool:
-    if point == segment.start:
-        return True
-    elif point == segment.end:
-        return True
-    else:
-        left_x, right_x = ((segment.start.x, segment.end.x)
-                           if segment.start.x < segment.end.x
-                           else (segment.end.x, segment.start.x))
-        bottom_y, top_y = ((segment.start.y, segment.end.y)
-                           if segment.start.y < segment.end.y
-                           else (segment.end.y, segment.start.y))
-        return left_x <= point.x <= right_x and bottom_y <= point.y <= top_y
