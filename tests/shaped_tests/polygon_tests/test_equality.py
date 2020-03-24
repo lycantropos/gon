@@ -40,8 +40,3 @@ def test_contour_shift(polygon_with_contour_index: Tuple[Polygon, int]
                                  + polygon.contour[:index])
 
     assert polygon == shifted_polygon
-
-
-@given(strategies.polygons, strategies.non_polygons)
-def test_non_polygon(polygon: Polygon, non_polygon: Any) -> None:
-    assert polygon != non_polygon
