@@ -47,9 +47,6 @@ class Segment:
         return (self.orientation_with(point) is Orientation.COLLINEAR
                 and _in_segment(point, self))
 
-    def intersects_with(self, other: 'Segment') -> bool:
-        return self.relationship_with(other) is not SegmentsRelationship.NONE
-
     def relationship_with(self, other: 'Segment') -> SegmentsRelationship:
         if self == other:
             return SegmentsRelationship.OVERLAP
