@@ -18,14 +18,15 @@ from lz.hints import (Domain,
                       Range)
 from lz.replication import replicator
 
-from gon.angular import (Orientation)
+from gon.angular import Orientation
 from gon.base import Point
 from gon.hints import Coordinate
 from gon.linear import (Segment,
                         to_segment)
 from gon.shaped.hints import Contour
 from gon.shaped.subdivisional import QuadEdge
-from gon.shaped.utils import (to_edges, to_orientations)
+from gon.shaped.utils import (to_edges,
+                              to_orientations)
 
 Strategy = SearchStrategy
 
@@ -131,14 +132,6 @@ def replace_segment(segments: Set[Segment],
     segments.add(target)
 
 
-def is_non_origin_point(point: Point) -> bool:
-    return bool(point.x or point.y)
-
-
-def reflect_point(point: Point) -> Point:
-    return Point(-point.x, -point.y)
-
-
 def scale_segment(segment: Segment,
                   *,
                   scale: Coordinate) -> Segment:
@@ -156,12 +149,3 @@ def reflect_segment(segment: Segment) -> Segment:
 
 def reverse_segment(segment: Segment) -> Segment:
     return Segment(segment.end, segment.start)
-
-
-def to_origin(point: Point) -> Point:
-    origin_coordinate = type(point.x)(0)
-    return Point(origin_coordinate, origin_coordinate)
-
-
-def to_perpendicular_point(point: Point) -> Point:
-    return Point(-point.y, point.x)
