@@ -2,9 +2,9 @@ from typing import Tuple
 
 from hypothesis import given
 
-from gon.linear import (SegmentsRelationship,
-                        Segment)
-from tests.utils import (reflect_segment)
+from gon.linear import (Segment,
+                        SegmentsRelationship)
+from tests.utils import reflect_segment
 from . import strategies
 
 
@@ -35,4 +35,4 @@ def test_reflection(segment: Segment) -> None:
     reflected_segment = reflect_segment(segment)
 
     assert (segment.relationship_with(reflected_segment)
-            is SegmentsRelationship.CROSS)
+            is SegmentsRelationship.TOUCH)
