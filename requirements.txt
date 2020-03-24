@@ -1,5 +1,5 @@
-bentley_ottmann>=0.0.2
+bentley_ottmann>=0.5.1
 lz>=0.10.2
-memoir>=0.0.2
-reprit>=0.2.0
-robust>=0.0.1
+memoir>=0.0.3
+reprit>=0.2.2
+robust>=0.2.1
