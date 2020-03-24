@@ -35,10 +35,8 @@ class Segment:
     __repr__ = generate_repr(__init__)
 
     def __eq__(self, other: 'Segment') -> bool:
-        return (self._start == other._start
-                and self._end == other._end
-                or self._start == other._end
-                and self._end == other._start
+        return (self._start == other._start and self._end == other._end
+                or self._start == other._end and self._end == other._start
                 if isinstance(other, Segment)
                 else NotImplemented)
 
