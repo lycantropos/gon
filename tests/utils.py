@@ -18,15 +18,15 @@ from lz.hints import (Domain,
                       Range)
 from lz.replication import replicator
 
-from gon.angular import (Angle,
-                         Orientation)
+from gon.angular import (Orientation,
+                         to_orientation)
 from gon.base import Point
 from gon.hints import Coordinate
 from gon.linear import (Segment,
                         to_segment)
 from gon.shaped.hints import Contour
 from gon.shaped.subdivisional import QuadEdge
-from gon.shaped.utils import (to_angles,
+from gon.shaped.utils import (to_orientations,
                               to_edges)
 
 Strategy = SearchStrategy
@@ -82,7 +82,7 @@ def cleave_in_tuples(*functions: Callable[[Strategy[Domain]], Strategy[Range]]
 
 def points_do_not_lie_on_the_same_line(points: Sequence[Point]) -> bool:
     return any(angle.orientation is not Orientation.COLLINEAR
-               for angle in to_angles(points))
+               for angle in to_orientations(points))
 
 
 def edge_to_relatives_endpoints(edge: QuadEdge) -> Tuple[Point, ...]:
@@ -156,20 +156,9 @@ def reflect_segment(segment: Segment) -> Segment:
                          scale=-1)
 
 
-def reflect_angle(angle: Angle) -> Angle:
-    return Angle(reflect_point(angle.first_ray_point),
-                 reflect_point(angle.vertex),
-                 reflect_point(angle.second_ray_point))
-
-
 def to_origin(point: Point) -> Point:
     origin_coordinate = type(point.x)(0)
     return Point(origin_coordinate, origin_coordinate)
-
-
-def has_opposite_orientations(left_angle: Angle, right_angle: Angle) -> bool:
-    return ((left_angle.orientation is Orientation.COLLINEAR)
-            ^ (right_angle.orientation is not left_angle.orientation))
 
 
 def to_perpendicular_point(point: Point) -> Point:

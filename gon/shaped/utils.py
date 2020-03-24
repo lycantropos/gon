@@ -3,18 +3,18 @@ from typing import (Iterable,
                     List,
                     Sequence)
 
-from gon.angular import (Angle,
-                         Orientation)
+from gon.angular import (Orientation,
+                         to_orientation)
 from gon.base import Point
 from gon.linear import (Segment,
                         to_segment)
 from .hints import Contour
 
 
-def to_angles(contour: Contour) -> Iterable[Angle]:
-    return (Angle(contour[index - 1],
-                  contour[index],
-                  contour[(index + 1) % len(contour)])
+def to_orientations(contour: Contour) -> Iterable[Orientation]:
+    return (to_orientation(contour[index - 1],
+                           contour[index],
+                           contour[(index + 1) % len(contour)])
             for index in range(len(contour)))
 
 
@@ -35,8 +35,8 @@ def _to_sub_hull(points: Iterable[Point]) -> List[Point]:
     result = []
     for point in points:
         while len(result) >= 2:
-            if (Angle(result[-1], result[-2], point).orientation
-                    is not Orientation.COUNTERCLOCKWISE):
+            if to_orientation(result[-1], result[-2],
+                              point) is not Orientation.COUNTERCLOCKWISE:
                 del result[-1]
             else:
                 break

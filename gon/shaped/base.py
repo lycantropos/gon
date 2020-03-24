@@ -19,8 +19,8 @@ from robust.utils import (sum_expansions,
                           two_two_diff)
 
 from gon import documentation
-from gon.angular import (Angle,
-                         Orientation)
+from gon.angular import (Orientation,
+                         to_orientation)
 from gon.base import Point
 from gon.hints import (Coordinate,
                        Permutation)
@@ -295,8 +295,8 @@ def _normalize_vertices(vertices: Contour) -> Tuple[Permutation, Contour]:
     order, vertices = zip(*_rotate_sequence(tuple(enumerate(vertices)),
                                             key=compose(attrgetter('x', 'y'),
                                                         itemgetter(1))))
-    first_angle = Angle(vertices[-1], vertices[0], vertices[1])
-    if first_angle.orientation is not Orientation.CLOCKWISE:
+    if to_orientation(vertices[-1], vertices[0],
+                      vertices[1]) is not Orientation.CLOCKWISE:
         order, vertices = (order[:1] + order[1:][::-1],
                            vertices[:1] + vertices[1:][::-1])
     return order, vertices
