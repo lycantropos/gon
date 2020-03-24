@@ -1,4 +1,3 @@
-from reprlib import recursive_repr
 from typing import Optional
 
 from reprit.base import generate_repr
