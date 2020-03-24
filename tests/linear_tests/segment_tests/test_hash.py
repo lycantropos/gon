@@ -3,7 +3,8 @@ from typing import Tuple
 from hypothesis import given
 
 from gon.linear import Segment
-from tests.utils import implication
+from tests.utils import (implication,
+                         reverse_segment)
 from . import strategies
 
 
@@ -32,4 +33,4 @@ def test_connection_with_equality(segments_pair: Tuple[Segment, Segment]
 
 @given(strategies.segments)
 def test_independence_from_ends_order(segment: Segment) -> None:
-    assert hash(segment) == hash(segment.reversed)
+    assert hash(segment) == hash(reverse_segment(segment))

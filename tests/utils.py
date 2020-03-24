@@ -18,16 +18,14 @@ from lz.hints import (Domain,
                       Range)
 from lz.replication import replicator
 
-from gon.angular import (Orientation,
-                         to_orientation)
+from gon.angular import (Orientation)
 from gon.base import Point
 from gon.hints import Coordinate
 from gon.linear import (Segment,
                         to_segment)
 from gon.shaped.hints import Contour
 from gon.shaped.subdivisional import QuadEdge
-from gon.shaped.utils import (to_orientations,
-                              to_edges)
+from gon.shaped.utils import (to_edges, to_orientations)
 
 Strategy = SearchStrategy
 
@@ -110,7 +108,7 @@ def shrink_collinear_segments(segments: Set[Segment]) -> None:
     points_segments = defaultdict(set)
     for segment in segments:
         points_segments[segment.start].add(segment)
-        points_segments[segment.end].add(segment.reversed)
+        points_segments[segment.end].add(reverse_segment(segment))
     for point, point_segments in points_segments.items():
         first_segment, second_segment = point_segments
         if (first_segment.orientation_with(second_segment.start)
@@ -122,7 +120,7 @@ def shrink_collinear_segments(segments: Set[Segment]) -> None:
             replace_segment(points_segments[first_segment.end],
                             first_segment, replacement)
             replace_segment(points_segments[second_segment.end],
-                            second_segment, replacement.reversed)
+                            second_segment, reverse_segment(replacement))
             segments.add(replacement)
 
 
@@ -154,6 +152,10 @@ def scale_segment(segment: Segment,
 def reflect_segment(segment: Segment) -> Segment:
     return scale_segment(segment,
                          scale=-1)
+
+
+def reverse_segment(segment: Segment) -> Segment:
+    return Segment(segment.end, segment.start)
 
 
 def to_origin(point: Point) -> Point:
