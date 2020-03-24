@@ -16,8 +16,8 @@ from gon import documentation
 from gon.angular import (Angle,
                          Orientation)
 from gon.base import Point
-from gon.linear import (SegmentsRelationship,
-                        Segment,
+from gon.linear import (Segment,
+                        SegmentsRelationship,
                         to_segment)
 from .contracts import is_point_inside_circumcircle
 from .hints import Contour
