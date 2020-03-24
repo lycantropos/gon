@@ -81,8 +81,8 @@ def cleave_in_tuples(*functions: Callable[[Strategy[Domain]], Strategy[Range]]
 
 
 def points_do_not_lie_on_the_same_line(points: Sequence[Point]) -> bool:
-    return any(angle.orientation is not Orientation.COLLINEAR
-               for angle in to_orientations(points))
+    return any(orientation is not Orientation.COLLINEAR
+               for orientation in to_orientations(points))
 
 
 def edge_to_relatives_endpoints(edge: QuadEdge) -> Tuple[Point, ...]:
