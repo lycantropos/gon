@@ -22,8 +22,7 @@ from gon.angular import (Angle,
                          Orientation)
 from gon.base import Point
 from gon.hints import Coordinate
-from gon.linear import (Interval,
-                        Segment,
+from gon.linear import (Segment,
                         to_segment)
 from gon.shaped.hints import Contour
 from gon.shaped.subdivisional import QuadEdge
@@ -142,27 +141,19 @@ def reflect_point(point: Point) -> Point:
     return Point(-point.x, -point.y)
 
 
-def scale_interval(interval: Interval,
-                   *,
-                   scale: Coordinate) -> Interval:
-    return Interval(interval.start,
-                    Point(interval.start.x
-                          + scale * (interval.end.x - interval.start.x),
-                          interval.start.y
-                          + scale * (interval.end.y - interval.start.y)),
-                    with_start=interval.with_start,
-                    with_end=interval.with_end)
+def scale_segment(segment: Segment,
+                  *,
+                  scale: Coordinate) -> Segment:
+    return Segment(segment.start,
+                   Point(segment.start.x
+                         + scale * (segment.end.x - segment.start.x),
+                         segment.start.y
+                         + scale * (segment.end.y - segment.start.y)))
 
 
-def reflect_interval(interval: Interval) -> Interval:
-    return scale_interval(interval,
-                          scale=-1)
-
-
-def inverse_inclusion(interval: Interval) -> Interval:
-    return Interval(interval.start, interval.end,
-                    with_start=not interval.with_start,
-                    with_end=not interval.with_end)
+def reflect_segment(segment: Segment) -> Segment:
+    return scale_segment(segment,
+                         scale=-1)
 
 
 def reflect_angle(angle: Angle) -> Angle:
