@@ -1,5 +1,4 @@
-from typing import (Tuple,
-                    Union)
+from typing import Tuple
 
 from reprit.base import generate_repr
 from robust.linear import (SegmentsRelationship,
@@ -60,7 +59,7 @@ class Segment:
         return to_orientation(self.end, self.start, point)
 
 
-def to_segment(start: Point, end: Point) -> Union[Segment, Segment]:
+def to_segment(start: Point, end: Point) -> Segment:
     if start == end:
         raise ValueError('Degenerate segment found.')
     return Segment(start, end)
