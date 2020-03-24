@@ -18,7 +18,6 @@ from gon.angular import (Angle,
 from gon.base import Point
 from gon.linear import (IntersectionKind,
                         Segment,
-                        to_interval,
                         to_segment)
 from .contracts import is_point_inside_circumcircle
 from .hints import Contour
@@ -349,9 +348,6 @@ def _resolve_crossings(constraint: Segment,
                        triangulation: Triangulation,
                        *,
                        crossed_edges: Set[QuadEdge]) -> Set[QuadEdge]:
-    open_constraint = to_interval(constraint.start, constraint.end,
-                                  with_start=False,
-                                  with_end=False)
     result = set()
     crossed_edges = deque(crossed_edges,
                           maxlen=len(crossed_edges))
@@ -363,7 +359,7 @@ def _resolve_crossings(constraint: Segment,
                                               first_non_edge_vertex,
                                               second_non_edge_vertex)):
             edge.swap()
-            if (_edge_to_segment(edge).relationship_with(open_constraint)
+            if (_edge_to_segment(edge).relationship_with(constraint)
                     is IntersectionKind.CROSS):
                 crossed_edges.append(edge)
             else:
@@ -375,12 +371,9 @@ def _resolve_crossings(constraint: Segment,
 
 def _find_crossed_edges(constraint: Segment,
                         triangulation: Triangulation) -> Set[QuadEdge]:
-    open_constraint = to_interval(constraint.start, constraint.end,
-                                  with_start=False,
-                                  with_end=False)
     return set({_edge_to_segment(edge): edge
                 for edge in triangulation.to_inner_edges()
-                if _edge_to_segment(edge).relationship_with(open_constraint)
+                if _edge_to_segment(edge).relationship_with(constraint)
                 is IntersectionKind.CROSS}
                .values())
 
