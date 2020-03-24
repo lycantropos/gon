@@ -2,8 +2,7 @@ from typing import Tuple
 
 from hypothesis import strategies
 from hypothesis_geometry import planar
-from lz.functional import (identity,
-                           pack)
+from lz.functional import pack
 from lz.iterating import mapper
 
 from gon.base import Point
@@ -30,11 +29,10 @@ def coordinates_to_polygons(coordinates: Strategy[Coordinate]
             .map(SimplePolygon))
 
 
+polygons = coordinates_strategies.flatmap(coordinates_to_polygons)
 polygons_strategies = coordinates_strategies.map(coordinates_to_polygons)
-polygons = polygons_strategies.flatmap(identity)
 polygons_pairs = polygons_strategies.flatmap(to_pairs)
 polygons_triplets = polygons_strategies.flatmap(to_triplets)
-non_polygons = strategies.builds(object)
 polygons_with_points = (coordinates_strategies
                         .flatmap(cleave_in_tuples(coordinates_to_polygons,
                                                   coordinates_to_points)))
