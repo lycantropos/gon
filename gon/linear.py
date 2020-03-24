@@ -2,7 +2,8 @@ from typing import (Tuple,
                     Union)
 
 from reprit.base import generate_repr
-from robust.linear import SegmentsRelationship
+from robust.linear import (SegmentsRelationship,
+                           segment_contains)
 
 from gon.hints import Coordinate
 from .angular import (Angle,
@@ -50,8 +51,7 @@ class Segment:
         return hash(frozenset((self._start, self._end)))
 
     def __contains__(self, point: Point) -> bool:
-        return (self.orientation_with(point) is Orientation.COLLINEAR
-                and _in_segment(point, self))
+        return segment_contains(self.as_tuple(), point.as_tuple())
 
     def relationship_with(self, other: 'Segment') -> SegmentsRelationship:
         if self == other:
