@@ -1,5 +1,4 @@
-from typing import (Any,
-                    Tuple)
+from typing import (Tuple)
 
 from hypothesis import given
 
@@ -36,8 +35,3 @@ def test_independence_from_ends_order(segment: Segment) -> None:
     reversed_segment = Segment(segment.end, segment.start)
 
     assert segment == reversed_segment
-
-
-@given(strategies.segments, strategies.non_segments)
-def test_non_segment(segment: Segment, non_segment: Any) -> None:
-    assert segment != non_segment
