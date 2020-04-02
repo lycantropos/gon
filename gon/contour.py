@@ -7,7 +7,10 @@ from typing import (Iterable,
 from bentley_ottmann.planar import edges_intersect
 from memoir import cached
 from reprit.base import generate_repr
-from robust.utils import sum_expansions
+from robust.hints import Expansion
+from robust.utils import (sum_expansions,
+                          two_product,
+                          two_two_diff)
 
 from gon.angular import (Orientation,
                          to_orientation)
@@ -15,8 +18,6 @@ from gon.geometry import Geometry
 from gon.hints import Coordinate
 from gon.point import (Point,
                        RawPoint)
-from gon.segment import (Segment,
-                         _segment_to_endpoints_cross_product_z)
 
 MIN_VERTICES_COUNT = 3
 
@@ -127,15 +128,19 @@ def to_area(contour: Contour) -> Coordinate:
 
 
 def to_signed_area(contour: Contour) -> Coordinate:
-    expansions = [_segment_to_endpoints_cross_product_z(edge)
-                  for edge in to_edges(contour)]
-    double_area = reduce(sum_expansions, expansions)[-1]
+    vertices = contour.vertices
+    double_area = reduce(sum_expansions,
+                         [_to_endpoints_cross_product_z(vertices[index - 1],
+                                                        vertices[index])
+                          for index in range(len(vertices))])[-1]
     return (Fraction(double_area, 2)
             if isinstance(double_area, int)
             else double_area / 2)
 
 
-def to_edges(contour: Contour) -> Iterable[Segment]:
-    vertices = contour.vertices
-    return (Segment(vertices[index - 1], vertices[index])
-            for index in range(len(vertices)))
+def _to_endpoints_cross_product_z(start: Point, end: Point) -> Expansion:
+    minuend, minuend_tail = two_product(start.x, end.y)
+    subtrahend, subtrahend_tail = two_product(start.y, end.x)
+    return (two_two_diff(minuend, minuend_tail, subtrahend, subtrahend_tail)
+            if minuend_tail or subtrahend_tail
+            else (minuend - subtrahend,))
