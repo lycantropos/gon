@@ -3,6 +3,7 @@ from functools import reduce
 from typing import (Iterable,
                     List,
                     Sequence)
+from weakref import WeakKeyDictionary
 
 from bentley_ottmann.planar import edges_intersect
 from memoir import cached
@@ -45,6 +46,7 @@ class Contour(Geometry):
     def vertices(self) -> Vertices:
         return self._vertices
 
+    @cached.map_(WeakKeyDictionary())
     def raw(self) -> RawContour:
         return [vertex.raw() for vertex in self._vertices]
 
