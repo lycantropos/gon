@@ -1,5 +1,6 @@
 bentley_ottmann>=0.5.1
-lz>=0.10.2
 memoir>=0.0.3
+orient>=0.2.1
 reprit>=0.2.2
 robust>=0.2.1
+sect>=0.2.0
