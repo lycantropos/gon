@@ -1,6 +1,6 @@
+import math
 from typing import Tuple
 
-import math
 from reprit.base import generate_repr
 
 from .geometry import Geometry

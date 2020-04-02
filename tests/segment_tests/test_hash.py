@@ -5,7 +5,7 @@ from hypothesis import given
 from gon.segment import Segment
 from tests.utils import (implication,
                          reverse_segment)
-from tests.segment_tests import strategies
+from . import strategies
 
 
 @given(strategies.segments)
