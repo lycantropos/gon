@@ -12,4 +12,5 @@ def test_triangle(triangle: Polygon) -> None:
 
 @given(strategies.polygons)
 def test_relation_with_convex_hull(polygon: Polygon) -> None:
-    assert equivalence(polygon.is_convex, polygon == polygon.convex_hull)
+    assert equivalence(polygon.is_convex,
+                       polygon.normalized == polygon.convex_hull.normalized)
