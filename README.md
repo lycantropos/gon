@@ -70,19 +70,24 @@ Usage
 -----
 
 ```python
->>> from gon.base import Point
->>> from gon.shaped import to_polygon
->>> square = to_polygon([Point(0, 0), Point(1, 0), Point(1, 1), Point(0, 1)])
->>> len(square.border)
-4
+>>> from gon.polygon import Polygon
+>>> raw_square = [(0, 0), (1, 0), (1, 1), (0, 1)], []
+>>> square = Polygon.from_raw(raw_square)
+>>> square.raw() == raw_square
+True
+>>> len(square.border.vertices) == 4
+True
+>>> len(square.holes) == 0
+True
 >>> square.is_convex
 True
 >>> square.convex_hull == square
 True
->>> square.area
-1.0
->>> set(square.triangulation) == {to_polygon([Point(0, 0), Point(1, 0), Point(0, 1)]), 
-...                               to_polygon([Point(0, 1), Point(1, 0), Point(1, 1)])}
+>>> square.area == 1
+True
+>>> (square.triangulation 
+...  == [Polygon.from_raw(([(0, 1), (1, 0), (1, 1)], [])), 
+...      Polygon.from_raw(([(0, 0), (1, 0), (0, 1)], []))])
 True
 
 ```
