@@ -1,7 +1,7 @@
 from robust.angular import (Orientation,
                             orientation as _orientation)
 
-from .base import Point
+from .point import Point
 
 Orientation = Orientation
 
@@ -9,6 +9,6 @@ Orientation = Orientation
 def to_orientation(first_ray_point: Point,
                    vertex: Point,
                    second_ray_point: Point) -> Orientation:
-    return _orientation(first_ray_point.as_tuple(),
-                        vertex.as_tuple(),
-                        second_ray_point.as_tuple())
+    return _orientation(first_ray_point.raw(),
+                        vertex.raw(),
+                        second_ray_point.raw())
