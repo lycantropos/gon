@@ -55,34 +55,10 @@ class Polygon(Geometry):
         if not contours_in_contour(raw_holes, raw_border):
             raise ValueError('Holes should lie inside border.')
 
-    @documentation.setup(docstring='Locates the point '
-                                   'in relation to the polygon.')
-    def locate(self, point: Point) -> PointLocation:
-        """
-        >>> polygon = Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
-        ...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]]))
-        >>> polygon.locate(Point(0, 0)) is PointLocation.BOUNDARY
-        True
-        >>> polygon.locate(Point(1, 1)) is PointLocation.INTERNAL
-        True
-        >>> polygon.locate(Point(2, 2)) is PointLocation.BOUNDARY
-        True
-        >>> polygon.locate(Point(3, 3)) is PointLocation.EXTERNAL
-        True
-        >>> polygon.locate(Point(4, 4)) is PointLocation.BOUNDARY
-        True
-        >>> polygon.locate(Point(3, 5)) is PointLocation.INTERNAL
-        True
-        >>> polygon.locate(Point(2, 6)) is PointLocation.BOUNDARY
-        True
-        >>> polygon.locate(Point(1, 7)) is PointLocation.EXTERNAL
-        True
-        """
-        return point_in_polygon(point.raw(), self.raw())
-
     def __contains__(self, point: Point) -> bool:
         """Checks if the point lies inside the polygon or on its boundary."""
-        return self.locate(point) is not PointLocation.EXTERNAL
+        return (point_in_polygon(point.raw(), self.raw())
+                is not PointLocation.EXTERNAL)
 
     @documentation.setup(docstring='Checks if polygons are equal.')
     def __eq__(self, other: 'Polygon') -> bool:
