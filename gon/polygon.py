@@ -26,7 +26,7 @@ RawPolygon = Tuple[RawContour, List[RawContour]]
 
 
 class Polygon(Geometry):
-    __slots__ = ('_border', '_holes')
+    __slots__ = '_border', '_holes'
 
     def __init__(self, border: Contour,
                  holes: Optional[Sequence[Contour]] = None) -> None:
