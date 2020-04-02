@@ -1,6 +1,8 @@
 import math
 from typing import Tuple
+from weakref import WeakKeyDictionary
 
+from memoir import cached
 from reprit.base import generate_repr
 
 from .geometry import Geometry
@@ -43,6 +45,7 @@ class Point(Geometry):
     def y(self) -> Coordinate:
         return self._y
 
+    @cached.map_(WeakKeyDictionary())
     def raw(self) -> RawPoint:
         return self._x, self._y
 
