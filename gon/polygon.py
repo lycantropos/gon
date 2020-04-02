@@ -12,7 +12,6 @@ from orient.planar import (PointLocation,
 from reprit.base import generate_repr
 from sect.triangulation import constrained_delaunay_triangles
 
-from . import documentation
 from .angular import (Orientation,
                       to_orientation)
 from .contour import (Contour,
@@ -26,12 +25,6 @@ from .point import Point
 RawPolygon = Tuple[RawContour, List[RawContour]]
 
 
-@documentation.setup(docstring='The Polygon constructor takes two parameters. '
-                               'The first is a sequence of Point tuples. '
-                               'The second is an optional sequence of '
-                               'contours specifying the interior "holes" of '
-                               'the polygon.',
-                     reference='http://tiny.cc/n_gon')
 class Polygon(Geometry):
     __slots__ = ('_border', '_holes')
 
@@ -62,9 +55,10 @@ class Polygon(Geometry):
         return (point_in_polygon(point.raw(), self.raw())
                 is not PointLocation.EXTERNAL)
 
-    @documentation.setup(docstring='Checks if polygons are equal.')
     def __eq__(self, other: 'Polygon') -> bool:
         """
+        Checks if polygons are equal.
+
         >>> polygon = Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
         ...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]]))
         >>> polygon == polygon
@@ -74,9 +68,10 @@ class Polygon(Geometry):
                 if isinstance(other, Polygon)
                 else NotImplemented)
 
-    @documentation.setup(docstring='Returns hash value of the polygon.')
     def __hash__(self) -> int:
         """
+        Returns hash value of the polygon.
+
         >>> polygon = Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
         ...                             [[(2, 2), (4, 2), (4, 4), (2, 4)]]))
         >>> hash(polygon) == hash(polygon)
@@ -102,9 +97,10 @@ class Polygon(Geometry):
                               key=lambda contour: contour.vertices[0]))
 
     @cached.property_
-    @documentation.setup(docstring='Returns area of the polygon.')
     def area(self) -> Coordinate:
         """
+        Returns area of the polygon.
+
         >>> polygon = Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
         ...                             [[(2, 2), (4, 2), (4, 4), (2, 4)]]))
         >>> polygon.area == 32
@@ -114,9 +110,10 @@ class Polygon(Geometry):
                                            for hole in self._holes)
 
     @cached.property_
-    @documentation.setup(docstring='Returns convex hull of the polygon.')
     def convex_hull(self) -> 'Polygon':
         """
+        Returns convex hull of the polygon.
+
         >>> polygon = Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
         ...                             [[(2, 2), (4, 2), (4, 4), (2, 4)]]))
         >>> polygon.convex_hull == Polygon(polygon.border, [])
@@ -127,14 +124,10 @@ class Polygon(Geometry):
         return Polygon(Contour(_to_convex_hull(self._border.vertices)), [])
 
     @cached.property_
-    @documentation.setup(docstring='Checks if the polygon is convex.',
-                         origin='property that each internal angle '
-                                'of convex polygon is less than 180 degrees',
-                         reference='http://tiny.cc/convex_polygon',
-                         time_complexity='O(n), where\n'
-                                         'n -- polygon\'s vertices count')
     def is_convex(self) -> bool:
         """
+        Checks if the polygon is convex.
+
         >>> polygon = Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
         ...                             [[(2, 2), (4, 2), (4, 4), (2, 4)]]))
         >>> polygon.is_convex
@@ -145,15 +138,10 @@ class Polygon(Geometry):
         return not self._holes and forms_convex_polygon(self._border)
 
     @property
-    @documentation.setup(docstring='Returns triangulation of the polygon.',
-                         origin='constrained Delaunay triangulation',
-                         reference='http://tiny.cc/delaunay_triangulation\n'
-                                   'http://tiny.cc/constrained_delaunay',
-                         time_complexity='O(n * log n) for convex polygons,\n'
-                                         'O(n^2) for concave polygons, where\n'
-                                         'n -- polygon\'s vertices count')
     def triangulation(self) -> Sequence['Polygon']:
         """
+        Returns triangulation of the polygon.
+
         >>> polygon = Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
         ...                             [[(2, 2), (4, 2), (4, 4), (2, 4)]]))
         >>> (polygon.triangulation 
