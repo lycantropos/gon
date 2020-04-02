@@ -4,7 +4,7 @@ from hypothesis import given
 
 from gon.angular import (Orientation,
                          to_orientation)
-from gon.base import Point
+from gon.point import Point
 from tests.utils import equivalence
 from . import strategies
 

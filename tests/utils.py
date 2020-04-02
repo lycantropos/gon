@@ -1,11 +1,9 @@
-from collections import defaultdict
 from functools import partial
 from itertools import repeat
 from typing import (Callable,
                     Hashable,
                     Iterable,
                     Sequence,
-                    Set,
                     Tuple)
 
 from hypothesis import strategies
@@ -19,14 +17,10 @@ from lz.hints import (Domain,
 from lz.replication import replicator
 
 from gon.angular import Orientation
-from gon.base import Point
+from gon.contour import _vertices_to_orientations
 from gon.hints import Coordinate
-from gon.linear import (Segment,
-                        to_segment)
-from gon.shaped.hints import Contour
-from gon.shaped.subdivisional import QuadEdge
-from gon.shaped.utils import (to_edges,
-                              to_orientations)
+from gon.point import Point
+from gon.segment import (Segment)
 
 Strategy = SearchStrategy
 
@@ -77,59 +71,6 @@ def cleave_in_tuples(*functions: Callable[[Strategy[Domain]], Strategy[Range]]
                      ) -> Callable[[Strategy[Domain]],
                                    Strategy[Tuple[Range, ...]]]:
     return compose(pack(strategies.tuples), cleave(*functions))
-
-
-def points_do_not_lie_on_the_same_line(points: Sequence[Point]) -> bool:
-    return any(orientation is not Orientation.COLLINEAR
-               for orientation in to_orientations(points))
-
-
-def edge_to_relatives_endpoints(edge: QuadEdge) -> Tuple[Point, ...]:
-    return tuple(relative.end for relative in edge_to_ring(edge))
-
-
-def edge_to_ring(edge: QuadEdge) -> Iterable[QuadEdge]:
-    start = edge
-    while True:
-        yield edge
-        edge = edge.left_from_start
-        if edge is start:
-            break
-
-
-def to_boundary(contours: Iterable[Contour]) -> Set[Segment]:
-    result = set()
-    for contour in contours:
-        result.symmetric_difference_update(to_edges(contour))
-    shrink_collinear_segments(result)
-    return result
-
-
-def shrink_collinear_segments(segments: Set[Segment]) -> None:
-    points_segments = defaultdict(set)
-    for segment in segments:
-        points_segments[segment.start].add(segment)
-        points_segments[segment.end].add(reverse_segment(segment))
-    for point, point_segments in points_segments.items():
-        first_segment, second_segment = point_segments
-        if (first_segment.orientation_with(second_segment.start)
-                is first_segment.orientation_with(second_segment.end)
-                is Orientation.COLLINEAR):
-            segments.remove(first_segment)
-            segments.remove(second_segment)
-            replacement = to_segment(first_segment.end, second_segment.end)
-            replace_segment(points_segments[first_segment.end],
-                            first_segment, replacement)
-            replace_segment(points_segments[second_segment.end],
-                            second_segment, reverse_segment(replacement))
-            segments.add(replacement)
-
-
-def replace_segment(segments: Set[Segment],
-                    source: Segment,
-                    target: Segment) -> None:
-    segments.remove(source)
-    segments.add(target)
 
 
 def scale_segment(segment: Segment,

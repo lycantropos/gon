@@ -1,5 +1,5 @@
 from numbers import Real
-from typing import Sequence
+from typing import TypeVar
 
+Domain = TypeVar('Domain')
 Coordinate = Real
-Permutation = Sequence[int]
