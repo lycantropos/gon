@@ -1,12 +1,9 @@
 from typing import Tuple
 
 from reprit.base import generate_repr
-from robust.hints import Expansion
 from robust.linear import (SegmentsRelationship,
                            segment_contains,
                            segments_relationship)
-from robust.utils import (two_product,
-                          two_two_diff)
 
 from .angular import (Orientation,
                       to_orientation)
@@ -65,11 +62,3 @@ class Segment(Geometry):
 
     def orientation_with(self, point: Point) -> Orientation:
         return to_orientation(self.end, self.start, point)
-
-
-def _segment_to_endpoints_cross_product_z(segment: Segment) -> Expansion:
-    minuend, minuend_tail = two_product(segment.start.x, segment.end.y)
-    subtrahend, subtrahend_tail = two_product(segment.start.y, segment.end.x)
-    return (two_two_diff(minuend, minuend_tail, subtrahend, subtrahend_tail)
-            if minuend_tail or subtrahend_tail
-            else (minuend - subtrahend,))
