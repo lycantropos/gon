@@ -3,6 +3,7 @@ from typing import (Iterable,
                     Optional,
                     Sequence,
                     Tuple)
+from weakref import WeakKeyDictionary
 
 from memoir import cached
 from orient.planar import (PointLocation,
@@ -41,6 +42,7 @@ class Polygon(Geometry):
 
     __repr__ = generate_repr(__init__)
 
+    @cached.map_(WeakKeyDictionary())
     def raw(self) -> RawPolygon:
         return self._border.raw(), [hole.raw() for hole in self._holes]
 
