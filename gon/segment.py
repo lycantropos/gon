@@ -1,5 +1,7 @@
 from typing import Tuple
+from weakref import WeakKeyDictionary
 
+from memoir import cached
 from reprit.base import generate_repr
 from robust.linear import (SegmentsRelationship,
                            segment_contains,
@@ -32,6 +34,7 @@ class Segment(Geometry):
     def end(self) -> Point:
         return self._end
 
+    @cached.map_(WeakKeyDictionary())
     def raw(self) -> RawSegment:
         return self._start.raw(), self._end.raw()
 
