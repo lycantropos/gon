@@ -5,8 +5,8 @@ from hypothesis import given
 from gon.angular import Orientation
 from gon.point import Point
 from gon.segment import Segment
-from tests.segment_tests import strategies
 from tests.utils import implication
+from . import strategies
 
 
 @given(strategies.segments)

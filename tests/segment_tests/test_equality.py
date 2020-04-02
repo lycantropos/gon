@@ -1,10 +1,10 @@
-from typing import (Tuple)
+from typing import Tuple
 
 from hypothesis import given
 
 from gon.segment import Segment
 from tests.utils import implication
-from tests.segment_tests import strategies
+from . import strategies
 
 
 @given(strategies.segments)

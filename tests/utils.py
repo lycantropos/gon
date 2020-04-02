@@ -3,7 +3,6 @@ from itertools import repeat
 from typing import (Callable,
                     Hashable,
                     Iterable,
-                    Sequence,
                     Tuple)
 
 from hypothesis import strategies
@@ -16,8 +15,6 @@ from lz.hints import (Domain,
                       Range)
 from lz.replication import replicator
 
-from gon.angular import Orientation
-from gon.contour import _vertices_to_orientations
 from gon.hints import Coordinate
 from gon.point import Point
 from gon.segment import (Segment)

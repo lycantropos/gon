@@ -1,6 +1,3 @@
-from typing import Tuple
-
-from hypothesis import strategies
 from hypothesis_geometry import planar
 
 from gon.contour import Contour

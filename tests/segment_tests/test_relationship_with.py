@@ -6,7 +6,7 @@ from gon.segment import (Segment,
                          SegmentsRelationship)
 from tests.utils import (reflect_segment,
                          reverse_segment)
-from tests.segment_tests import strategies
+from . import strategies
 
 
 @given(strategies.segments)
