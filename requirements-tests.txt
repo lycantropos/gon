@@ -1,5 +1,6 @@
 hypothesis>=5.7.1
 hypothesis_geometry>=0.10.0
+lz>=0.10.2
 pytest>=5.4.1
 pytest-cov>=2.8.1
 requests>=2.23.0
