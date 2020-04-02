@@ -31,14 +31,3 @@ polygons_triplets = polygons_strategies.flatmap(to_triplets)
 polygons_with_points = (coordinates_strategies
                         .flatmap(cleave_in_tuples(coordinates_to_polygons,
                                                   coordinates_to_points)))
-
-
-def to_polygons_with_contours_indices(polygon: Polygon
-                                      ) -> Strategy[Tuple[Polygon, int]]:
-    indices = strategies.integers(min_value=0,
-                                  max_value=len(polygon.border.vertices))
-    return strategies.tuples(strategies.just(polygon), indices)
-
-
-polygons_with_contours_indices = (polygons
-                                  .flatmap(to_polygons_with_contours_indices))
