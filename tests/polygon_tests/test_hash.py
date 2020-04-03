@@ -8,13 +8,6 @@ from . import strategies
 
 
 @given(strategies.polygons)
-def test_basic(polygon: Polygon) -> None:
-    result = hash(polygon)
-
-    assert isinstance(result, int)
-
-
-@given(strategies.polygons)
 def test_determinism(polygon: Polygon) -> None:
     result = hash(polygon)
 
