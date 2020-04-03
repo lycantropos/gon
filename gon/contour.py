@@ -102,11 +102,6 @@ def _vertices_to_orientations(vertices: Vertices) -> Iterable[Orientation]:
             for index in range(vertices_count))
 
 
-def _vertices_form_strict_contour(vertices: Vertices) -> bool:
-    return all(orientation is not Orientation.COLLINEAR
-               for orientation in _vertices_to_orientations(vertices))
-
-
 def _vertices_form_self_intersecting_contour(vertices: Vertices) -> bool:
     return edges_intersect([vertex.raw() for vertex in vertices])
 
