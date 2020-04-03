@@ -95,13 +95,6 @@ class Contour(Geometry):
             raise ValueError('Contour should not be self-intersecting.')
 
 
-def _vertices_to_orientations(vertices: Vertices) -> Iterable[Orientation]:
-    vertices_count = len(vertices)
-    return (to_orientation(vertices[index - 1], vertices[index],
-                           vertices[(index + 1) % vertices_count])
-            for index in range(vertices_count))
-
-
 def forms_convex_polygon(contour: Contour) -> bool:
     if len(contour.vertices) == 3:
         return True
@@ -110,6 +103,13 @@ def forms_convex_polygon(contour: Contour) -> bool:
     # orientation change means
     # that internal angle is greater than 180 degrees
     return all(orientation is base_orientation for orientation in orientations)
+
+
+def _vertices_to_orientations(vertices: Vertices) -> Iterable[Orientation]:
+    vertices_count = len(vertices)
+    return (to_orientation(vertices[index - 1], vertices[index],
+                           vertices[(index + 1) % vertices_count])
+            for index in range(vertices_count))
 
 
 def _to_first_vertex(contour: Contour) -> Point:
