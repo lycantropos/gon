@@ -17,7 +17,7 @@ from lz.replication import replicator
 
 from gon.hints import Coordinate
 from gon.point import Point
-from gon.segment import (Segment)
+from gon.segment import Segment
 
 Strategy = SearchStrategy
 
