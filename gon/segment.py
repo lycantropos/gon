@@ -1,7 +1,5 @@
 from typing import Tuple
-from weakref import WeakKeyDictionary
 
-from memoir import cached
 from reprit.base import generate_repr
 from robust.linear import (SegmentsRelationship,
                            segment_contains,
@@ -18,11 +16,11 @@ SegmentsRelationship = SegmentsRelationship
 
 
 class Segment(Geometry):
-    __slots__ = '_start', '_end'
+    __slots__ = '_start', '_end', '_raw'
 
     def __init__(self, start: Point, end: Point) -> None:
-        self._start = start
-        self._end = end
+        self._start, self._end = start, end
+        self._raw = start.raw(), end.raw()
 
     __repr__ = generate_repr(__init__)
 
@@ -34,9 +32,8 @@ class Segment(Geometry):
     def end(self) -> Point:
         return self._end
 
-    @cached.map_(WeakKeyDictionary())
     def raw(self) -> RawSegment:
-        return self._start.raw(), self._end.raw()
+        return self._raw
 
     @classmethod
     def from_raw(cls, raw: RawSegment) -> 'Segment':
@@ -45,9 +42,9 @@ class Segment(Geometry):
         return cls(start, end)
 
     def validate(self) -> None:
-        self.start.validate()
-        self.end.validate()
-        if self.start == self.end:
+        self._start.validate()
+        self._end.validate()
+        if self._start == self._end:
             raise ValueError('Segment is degenerate.')
 
     def __eq__(self, other: 'Segment') -> bool:
@@ -57,13 +54,13 @@ class Segment(Geometry):
                 else NotImplemented)
 
     def __hash__(self) -> int:
-        return hash(frozenset((self._start, self._end)))
+        return hash(frozenset(self._raw))
 
     def __contains__(self, point: Point) -> bool:
-        return segment_contains(self.raw(), point.raw())
+        return segment_contains(self._raw, point.raw())
 
     def relationship_with(self, other: 'Segment') -> SegmentsRelationship:
-        return segments_relationship(self.raw(), other.raw())
+        return segments_relationship(self._raw, other._raw)
 
     def orientation_with(self, point: Point) -> Orientation:
-        return to_orientation(self.end, self.start, point)
+        return to_orientation(self._end, self._start, point)
