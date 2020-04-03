@@ -1,8 +1,6 @@
 import math
 from typing import Tuple
-from weakref import WeakKeyDictionary
 
-from memoir import cached
 from reprit.base import generate_repr
 
 from .geometry import Geometry
@@ -12,16 +10,16 @@ RawPoint = Tuple[Coordinate, Coordinate]
 
 
 class Point(Geometry):
-    __slots__ = '_x', '_y'
+    __slots__ = '_x', '_y', '_raw',
 
     def __init__(self, x: Coordinate, y: Coordinate) -> None:
-        self._x = x
-        self._y = y
+        self._x, self._y = x, y
+        self._raw = x, y
 
     __repr__ = generate_repr(__init__)
 
     def __hash__(self) -> int:
-        return hash((self._x, self._y))
+        return hash(self._raw)
 
     def __eq__(self, other: 'Point') -> bool:
         return (self._x == other._x and self._y == other._y
@@ -33,7 +31,7 @@ class Point(Geometry):
         Checks if the point is less than the other.
         Compares points lexicographically, ``x`` coordinates first.
         """
-        return (self.raw() < other.raw()
+        return (self._raw < other._raw
                 if isinstance(other, Point)
                 else NotImplemented)
 
@@ -45,9 +43,8 @@ class Point(Geometry):
     def y(self) -> Coordinate:
         return self._y
 
-    @cached.map_(WeakKeyDictionary())
     def raw(self) -> RawPoint:
-        return self._x, self._y
+        return self._raw
 
     @classmethod
     def from_raw(cls, raw: RawPoint) -> 'Point':
