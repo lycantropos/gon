@@ -45,6 +45,8 @@ class Segment(Geometry):
         return cls(start, end)
 
     def validate(self) -> None:
+        self.start.validate()
+        self.end.validate()
         if self.start == self.end:
             raise ValueError('Segment is degenerate.')
 
