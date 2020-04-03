@@ -81,6 +81,8 @@ class Contour(Geometry):
         return Contour(vertices[:1] + vertices[:0:-1])
 
     def validate(self) -> None:
+        for vertex in self.vertices:
+            vertex.validate()
         if len(self._vertices) < MIN_VERTICES_COUNT:
             raise ValueError('Contour should have '
                              'at least {expected} vertices, '
