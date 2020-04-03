@@ -3,9 +3,7 @@ from typing import (Iterable,
                     Optional,
                     Sequence,
                     Tuple)
-from weakref import WeakKeyDictionary
 
-from memoir import cached
 from orient.planar import (PointLocation,
                            contours_in_contour,
                            point_in_polygon)
@@ -26,18 +24,18 @@ RawPolygon = Tuple[RawContour, List[RawContour]]
 
 
 class Polygon(Geometry):
-    __slots__ = '_border', '_holes'
+    __slots__ = '_border', '_holes', '_raw'
 
     def __init__(self, border: Contour,
                  holes: Optional[Sequence[Contour]] = None) -> None:
-        self._border = border
-        self._holes = tuple(holes or ())
+        holes = holes or []
+        self._border, self._holes = border, holes
+        self._raw = border.raw(), [hole.raw() for hole in holes]
 
     __repr__ = generate_repr(__init__)
 
-    @cached.map_(WeakKeyDictionary())
     def raw(self) -> RawPolygon:
-        return self._border.raw(), [hole.raw() for hole in self._holes]
+        return self._raw
 
     @classmethod
     def from_raw(cls, raw: RawPolygon) -> 'Polygon':
@@ -64,6 +62,8 @@ class Polygon(Geometry):
         >>> polygon == polygon
         True
         """
+        if self is other:
+            return True
         return (self._border == other._border and self._holes == other._holes
                 if isinstance(other, Polygon)
                 else NotImplemented)
@@ -77,7 +77,7 @@ class Polygon(Geometry):
         >>> hash(polygon) == hash(polygon)
         True
         """
-        return hash((self._border, self._holes))
+        return hash((self._border, frozenset(self._holes)))
 
     @property
     def border(self) -> Contour:
@@ -85,18 +85,18 @@ class Polygon(Geometry):
         return self._border
 
     @property
-    def holes(self) -> Sequence[Contour]:
+    def holes(self) -> List[Contour]:
         """Returns holes of the polygon."""
-        return self._holes
+        return list(self._holes)
 
-    @cached.property_
+    @property
     def normalized(self) -> 'Polygon':
         return Polygon(self._border.normalized.to_counterclockwise(),
                        sorted([hole.normalized.to_clockwise()
                                for hole in self._holes],
                               key=lambda contour: contour.vertices[0]))
 
-    @cached.property_
+    @property
     def area(self) -> Coordinate:
         """
         Returns area of the polygon.
@@ -109,7 +109,7 @@ class Polygon(Geometry):
         return to_area(self._border) - sum(to_area(hole)
                                            for hole in self._holes)
 
-    @cached.property_
+    @property
     def convex_hull(self) -> 'Polygon':
         """
         Returns convex hull of the polygon.
@@ -119,11 +119,12 @@ class Polygon(Geometry):
         >>> polygon.convex_hull == Polygon(polygon.border, [])
         True
         """
-        if len(self._border.vertices) == 3 and not self._holes:
-            return Polygon(self._border, self._holes)
-        return Polygon(Contour(_to_convex_hull(self._border.vertices)), [])
+        border_vertices = self._border.vertices
+        return (self
+                if len(border_vertices) == 3 and not self._holes
+                else Polygon(Contour(_to_convex_hull(border_vertices)), []))
 
-    @cached.property_
+    @property
     def is_convex(self) -> bool:
         """
         Checks if the polygon is convex.
