@@ -10,10 +10,12 @@ from tests.utils import (Strategy,
                          to_pairs,
                          to_triplets)
 
-triangular_contours = (coordinates_strategies
-                       .flatmap(planar.triangular_contours)
-                       .map(Contour.from_raw))
+raw_triangular_contours = (coordinates_strategies
+                           .flatmap(planar.triangular_contours))
+triangular_contours = raw_triangular_contours.map(Contour.from_raw)
 triangles = triangular_contours.map(Polygon)
+raw_polygons = coordinates_strategies.flatmap(planar.polygons)
+polygons = raw_polygons.map(Polygon.from_raw)
 
 
 def coordinates_to_polygons(coordinates: Strategy[Coordinate]
@@ -21,7 +23,6 @@ def coordinates_to_polygons(coordinates: Strategy[Coordinate]
     return planar.polygons(coordinates).map(Polygon.from_raw)
 
 
-polygons = coordinates_strategies.flatmap(coordinates_to_polygons)
 polygons_strategies = coordinates_strategies.map(coordinates_to_polygons)
 polygons_pairs = polygons_strategies.flatmap(to_pairs)
 polygons_triplets = polygons_strategies.flatmap(to_triplets)
