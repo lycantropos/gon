@@ -1,12 +1,10 @@
 from fractions import Fraction
 from functools import reduce
-from typing import (Iterable,
+from typing import (Iterator,
                     List,
                     Sequence)
-from weakref import WeakKeyDictionary
 
 from bentley_ottmann.planar import edges_intersect
-from memoir import cached
 from reprit.base import generate_repr
 from robust.hints import Expansion
 from robust.utils import (sum_expansions,
@@ -29,41 +27,43 @@ RawContour = List[RawPoint]
 class Contour(Geometry):
     __slots__ = '_vertices',
 
-    def __init__(self, vertices: Iterable[Point]) -> None:
+    def __init__(self, vertices: Vertices) -> None:
         self._vertices = tuple(vertices)
+        self._raw = [vertex.raw() for vertex in vertices]
 
     __repr__ = generate_repr(__init__)
 
     def __hash__(self) -> int:
         return hash(self._vertices)
 
-    def __eq__(self, other: 'Geometry') -> int:
+    def __eq__(self, other: 'Geometry') -> bool:
+        if self is other:
+            return True
         return (self._vertices == other._vertices
                 if isinstance(other, Contour)
                 else NotImplemented)
 
     @property
     def vertices(self) -> Vertices:
-        return self._vertices
+        return list(self._vertices)
 
-    @cached.map_(WeakKeyDictionary())
     def raw(self) -> RawContour:
-        return [vertex.raw() for vertex in self._vertices]
+        return self._raw[:]
 
     @classmethod
     def from_raw(cls, raw: RawContour) -> 'Contour':
-        return cls(Point.from_raw(raw_vertex) for raw_vertex in raw)
+        return cls([Point.from_raw(raw_vertex) for raw_vertex in raw])
 
-    @cached.property_
+    @property
     def normalized(self) -> 'Contour':
         vertices = self._vertices
         min_index = min(range(len(vertices)),
                         key=vertices.__getitem__)
         return Contour(vertices[min_index:] + vertices[:min_index])
 
-    @cached.property_
+    @property
     def orientation(self) -> 'Orientation':
-        vertices = self.normalized.vertices
+        vertices = self.normalized._vertices
         return to_orientation(vertices[0], vertices[-1], vertices[1])
 
     def to_clockwise(self) -> 'Contour':
@@ -81,7 +81,7 @@ class Contour(Geometry):
         return Contour(vertices[:1] + vertices[:0:-1])
 
     def validate(self) -> None:
-        for vertex in self.vertices:
+        for vertex in self._vertices:
             vertex.validate()
         if len(self._vertices) < MIN_VERTICES_COUNT:
             raise ValueError('Contour should have '
@@ -98,16 +98,16 @@ class Contour(Geometry):
 
 
 def forms_convex_polygon(contour: Contour) -> bool:
-    if len(contour.vertices) == 3:
+    vertices = contour.vertices
+    if len(vertices) == 3:
         return True
-    orientations = iter(_vertices_to_orientations(contour.vertices))
+    orientations = _vertices_to_orientations(vertices)
     base_orientation = next(orientations)
-    # orientation change means
-    # that internal angle is greater than 180 degrees
+    # orientation change means that internal angle is greater than 180 degrees
     return all(orientation is base_orientation for orientation in orientations)
 
 
-def _vertices_to_orientations(vertices: Vertices) -> Iterable[Orientation]:
+def _vertices_to_orientations(vertices: Vertices) -> Iterator[Orientation]:
     vertices_count = len(vertices)
     return (to_orientation(vertices[index - 1], vertices[index],
                            vertices[(index + 1) % vertices_count])
