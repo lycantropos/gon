@@ -91,7 +91,7 @@ class Contour(Geometry):
                for orientation in _vertices_to_orientations(self._vertices)):
             raise ValueError('Consecutive vertices triplets '
                              'should not be on the same line.')
-        if _vertices_form_self_intersecting_contour(self._vertices):
+        if edges_intersect(self.raw()):
             raise ValueError('Contour should not be self-intersecting.')
 
 
@@ -100,10 +100,6 @@ def _vertices_to_orientations(vertices: Vertices) -> Iterable[Orientation]:
     return (to_orientation(vertices[index - 1], vertices[index],
                            vertices[(index + 1) % vertices_count])
             for index in range(vertices_count))
-
-
-def _vertices_form_self_intersecting_contour(vertices: Vertices) -> bool:
-    return edges_intersect([vertex.raw() for vertex in vertices])
 
 
 def forms_convex_polygon(contour: Contour) -> bool:
