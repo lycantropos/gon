@@ -1,6 +1,5 @@
 from hypothesis_geometry import planar
 
-from gon.contour import Contour
 from gon.hints import Coordinate
 from gon.polygon import Polygon
 from tests.strategies import (coordinates_strategies,
@@ -10,10 +9,6 @@ from tests.utils import (Strategy,
                          to_pairs,
                          to_triplets)
 
-raw_triangular_contours = (coordinates_strategies
-                           .flatmap(planar.triangular_contours))
-triangular_contours = raw_triangular_contours.map(Contour.from_raw)
-triangles = triangular_contours.map(Polygon)
 raw_polygons = coordinates_strategies.flatmap(planar.polygons)
 polygons = raw_polygons.map(Polygon.from_raw)
 
