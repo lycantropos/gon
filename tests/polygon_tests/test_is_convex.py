@@ -1,13 +1,20 @@
 from hypothesis import given
 
 from gon.polygon import Polygon
-from tests.utils import equivalence
+from tests.utils import equivalence, implication
 from . import strategies
 
 
-@given(strategies.triangles)
-def test_triangle(triangle: Polygon) -> None:
-    assert triangle.is_convex
+@given(strategies.polygons)
+def test_basic(polygon: Polygon) -> None:
+    assert isinstance(polygon.is_convex, bool)
+
+
+@given(strategies.polygons)
+def test_base_case(polygon: Polygon) -> None:
+    assert implication(len(polygon.border.vertices) == 3
+                       and not polygon.holes,
+                       polygon.is_convex)
 
 
 @given(strategies.polygons)
