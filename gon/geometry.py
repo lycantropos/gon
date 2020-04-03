@@ -42,7 +42,7 @@ class Geometry(ABC):
         """
 
     @abstractmethod
-    def __eq__(self, other: 'Geometry') -> int:
+    def __eq__(self, other: 'Geometry') -> bool:
         """
         Checks if geometric objects are equal.
         """
