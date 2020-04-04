@@ -81,6 +81,17 @@ class Point(Geometry):
 
     @property
     def x(self) -> Coordinate:
+        """
+        Returns ``x`` coordinate of the point.
+
+        Time complexity:
+            ``O(1)``
+        Memory complexity:
+            ``O(1)``
+
+        >>> Point(1, 0).x == 1
+        True
+        """
         return self._x
 
     @property
