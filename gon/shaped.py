@@ -98,7 +98,7 @@ class Polygon(Geometry):
         return Polygon(self._border.normalized.to_counterclockwise(),
                        sorted([hole.normalized.to_clockwise()
                                for hole in self._holes],
-                              key=lambda contour: contour.vertices[0]))
+                              key=lambda contour: contour._vertices[:2]))
 
     @property
     def area(self) -> Coordinate:
