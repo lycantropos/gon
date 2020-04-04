@@ -88,6 +88,14 @@ class Polygon(Geometry):
         """
         Returns area of the polygon.
 
+        Time complexity:
+            ``O(vertices_count)``
+        Memory complexity:
+            ``O(1)``
+
+        where ``vertices_count = len(self.border.vertices)\
+ + sum(len(hole.vertices) for hole in self.holes)``.
+
         >>> polygon = Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
         ...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]]))
         >>> polygon.area == 32
