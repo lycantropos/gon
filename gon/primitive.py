@@ -96,6 +96,11 @@ class Point(Geometry):
         return cls(x, y)
 
     def validate(self) -> None:
+        """
+        Checks if coordinates are finite.
+
+        >>> Point(0, 0).validate()
+        """
         _validate_coordinate(self._x)
         _validate_coordinate(self._y)
 
