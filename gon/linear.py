@@ -423,7 +423,7 @@ class Contour(Geometry):
 
 
 def forms_convex_polygon(contour: Contour) -> bool:
-    vertices = contour.vertices
+    vertices = contour._vertices
     if len(vertices) == 3:
         return True
     orientations = _vertices_to_orientations(vertices)
