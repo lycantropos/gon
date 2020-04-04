@@ -40,6 +40,24 @@ class Segment(Geometry):
     __repr__ = generate_repr(__init__)
 
     def __contains__(self, point: Point) -> bool:
+        """
+        Checks if the point is inside the segment or on its boundary.
+
+        Time complexity:
+            ``O(1)``
+        Memory complexity:
+            ``O(1)``
+
+        >>> segment = Segment.from_raw(((0, 0), (2, 0)))
+        >>> Point(0, 0) in segment
+        True
+        >>> Point(1, 0) in segment
+        True
+        >>> Point(0, 1) in segment
+        False
+        >>> Point(1, 1) in segment
+        False
+        """
         return segment_contains(self._raw, point.raw())
 
     def __eq__(self, other: 'Segment') -> bool:
