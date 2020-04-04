@@ -152,6 +152,18 @@ class Segment(Geometry):
         return self._start
 
     def raw(self) -> RawSegment:
+        """
+        Returns the segment as combination of Python built-ins.
+
+        Time complexity:
+            ``O(1)``
+        Memory complexity:
+            ``O(1)``
+
+        >>> segment = Segment.from_raw(((0, 0), (2, 0)))
+        >>> segment.raw()
+        ((0, 0), (2, 0))
+        """
         return self._raw
 
     def relationship_with(self, other: 'Segment') -> SegmentsRelationship:
