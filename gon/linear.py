@@ -148,6 +148,22 @@ class Contour(Geometry):
     __repr__ = generate_repr(__init__)
 
     def __eq__(self, other: 'Contour') -> bool:
+        """
+        Checks if the contour is equal to the other.
+
+        Time complexity:
+            ``O(min(len(self.vertices), len(other.vertices)))``
+        Memory complexity:
+            ``O(1)``
+
+        >>> contour = Contour.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> contour == contour
+        True
+        >>> contour == Contour.from_raw([(0, 0), (1, 0), (1, 1), (0, 1)])
+        False
+        >>> contour == Contour.from_raw([(1, 0), (0, 0), (0, 1)])
+        False
+        """
         if self is other:
             return True
         return (self._vertices == other._vertices
