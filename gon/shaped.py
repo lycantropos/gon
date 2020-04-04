@@ -275,10 +275,10 @@ class Polygon(Geometry):
         >>> polygon.normalized == polygon
         True
         """
-        return Polygon(self._border.normalized.to_counterclockwise(),
-                       sorted([hole.normalized.to_clockwise()
-                               for hole in self._holes],
-                              key=lambda contour: contour._vertices[:2]))
+        return (self
+                if self._is_normalized
+                else Polygon(self._normalized_border, self._normalized_holes,
+                             _is_normalized=True))
 
     def raw(self) -> RawPolygon:
         """
