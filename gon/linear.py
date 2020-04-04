@@ -198,6 +198,14 @@ class Contour(Geometry):
     __slots__ = '_vertices',
 
     def __init__(self, vertices: Vertices) -> None:
+        """
+        Initializes contour.
+
+        Time complexity:
+            ``O(len(vertices))``
+        Memory complexity:
+            ``O(len(vertices))``
+        """
         self._vertices = tuple(vertices)
         self._raw = [vertex.raw() for vertex in vertices]
 
