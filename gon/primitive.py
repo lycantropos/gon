@@ -13,6 +13,14 @@ class Point(Geometry):
     __slots__ = '_x', '_y', '_raw',
 
     def __init__(self, x: Coordinate, y: Coordinate) -> None:
+        """
+        Initializes point.
+
+        Time complexity:
+            ``O(1)``
+        Memory complexity:
+            ``O(1)``
+        """
         self._x, self._y = x, y
         self._raw = x, y
 
