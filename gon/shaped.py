@@ -17,7 +17,7 @@ from .hints import Coordinate
 from .linear import (Contour,
                      RawContour,
                      forms_convex_polygon,
-                     to_area)
+                     to_signed_area)
 from .primitive import Point
 
 RawPolygon = Tuple[RawContour, List[RawContour]]
@@ -172,8 +172,8 @@ class Polygon(Geometry):
         >>> polygon.area == 32
         True
         """
-        return to_area(self._border) - sum(to_area(hole)
-                                           for hole in self._holes)
+        return (to_signed_area(self._normalized_border)
+                + sum(to_signed_area(hole) for hole in self._normalized_holes))
 
     @property
     def border(self) -> Contour:
