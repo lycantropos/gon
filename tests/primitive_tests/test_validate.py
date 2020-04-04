@@ -1,22 +1,18 @@
 import pytest
 from hypothesis import given
 
-from gon.hints import Coordinate
 from gon.primitive import Point
 from . import strategies
 
 
-@given(strategies.invalid_coordinates, strategies.valid_coordinates)
-def test_invalid_x_coordinate(x: Coordinate, y: Coordinate) -> None:
-    point = Point(x, y)
+@given(strategies.points)
+def test_basic(point: Point) -> None:
+    result = point.validate()
 
-    with pytest.raises(ValueError):
-        point.validate()
+    assert result is None
 
 
-@given(strategies.valid_coordinates, strategies.invalid_coordinates)
-def test_invalid_y_coordinate(x: Coordinate, y: Coordinate) -> None:
-    point = Point(x, y)
-
+@given(strategies.invalid_points)
+def test_invalid_point(point: Point) -> None:
     with pytest.raises(ValueError):
         point.validate()
