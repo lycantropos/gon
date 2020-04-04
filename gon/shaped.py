@@ -251,6 +251,21 @@ class Polygon(Geometry):
                               key=lambda contour: contour._vertices[:2]))
 
     def raw(self) -> RawPolygon:
+        """
+        Returns the polygon as combination of Python built-ins.
+
+        Time complexity:
+            ``O(vertices_count)``
+        Memory complexity:
+            ``O(vertices_count)``
+
+        where ``vertices_count = len(self.border.vertices)\
+ + sum(len(hole.vertices) for hole in self.holes)``.
+
+        >>> contour = Contour.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> contour.raw()
+        [(0, 0), (1, 0), (0, 1)]
+        """
         return self._raw_border[:], [raw_hole[:]
                                      for raw_hole in self._raw_holes]
 
