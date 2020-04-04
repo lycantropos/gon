@@ -263,9 +263,9 @@ class Polygon(Geometry):
         Returns polygon in normalized form.
 
         Time complexity:
-            ``O(vertices_count + len(self.holes) * log len(self.holes))``
+            ``O(1)`` if normalized already, ``O(vertices_count)`` -- otherwise
         Memory complexity:
-            ``O(vertices_count)``
+            ``O(1)`` if normalized already, ``O(vertices_count)`` -- otherwise
 
         where ``vertices_count = len(self.border.vertices)\
  + sum(len(hole.vertices) for hole in self.holes)``.
