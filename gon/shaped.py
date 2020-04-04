@@ -28,6 +28,17 @@ class Polygon(Geometry):
 
     def __init__(self, border: Contour,
                  holes: Optional[Sequence[Contour]] = None) -> None:
+        """
+        Initializes polygon.
+
+        Time complexity:
+            ``O(vertices_count)``
+        Memory complexity:
+            ``O(vertices_count)``
+
+        where ``vertices_count = len(border.vertices)\
+ + sum(len(hole.vertices) for hole in holes)``.
+        """
         holes = tuple(holes or ())
         self._border, self._holes = border, holes
         self._raw_border, self._raw_holes = border.raw(), [hole.raw()
