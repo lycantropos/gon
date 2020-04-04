@@ -98,7 +98,19 @@ class Polygon(Geometry):
 
     @property
     def border(self) -> Contour:
-        """Returns border of the polygon."""
+        """
+        Returns border of the polygon.
+
+        Time complexity:
+            ``O(1)``
+        Memory complexity:
+            ``O(1)``
+
+        >>> polygon = Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
+        ...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]]))
+        >>> polygon.border
+        Contour([Point(0, 0), Point(6, 0), Point(6, 6), Point(0, 6)])
+        """
         return self._border
 
     @property
