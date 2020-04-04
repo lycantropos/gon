@@ -96,6 +96,17 @@ class Point(Geometry):
 
     @property
     def y(self) -> Coordinate:
+        """
+        Returns ``y`` coordinate of the point.
+
+        Time complexity:
+            ``O(1)``
+        Memory complexity:
+            ``O(1)``
+
+        >>> Point(1, 0).y == 0
+        True
+        """
         return self._y
 
     def raw(self) -> RawPoint:
