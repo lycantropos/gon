@@ -34,6 +34,14 @@ class Segment(Geometry):
     __slots__ = '_start', '_end', '_raw'
 
     def __init__(self, start: Point, end: Point) -> None:
+        """
+        Initializes segment.
+
+        Time complexity:
+            ``O(1)``
+        Memory complexity:
+            ``O(1)``
+        """
         self._start, self._end = start, end
         self._raw = start.raw(), end.raw()
 
