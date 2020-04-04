@@ -147,9 +147,6 @@ class Contour(Geometry):
 
     __repr__ = generate_repr(__init__)
 
-    def __hash__(self) -> int:
-        return hash(self._vertices)
-
     def __eq__(self, other: 'Geometry') -> bool:
         if self is other:
             return True
@@ -157,12 +154,8 @@ class Contour(Geometry):
                 if isinstance(other, Contour)
                 else NotImplemented)
 
-    @property
-    def vertices(self) -> Vertices:
-        return list(self._vertices)
-
-    def raw(self) -> RawContour:
-        return self._raw[:]
+    def __hash__(self) -> int:
+        return hash(self._vertices)
 
     @classmethod
     def from_raw(cls, raw: RawContour) -> 'Contour':
@@ -182,6 +175,17 @@ class Contour(Geometry):
         vertices = self.normalized._vertices
         return to_orientation(vertices[0], vertices[-1], vertices[1])
 
+    @property
+    def vertices(self) -> Vertices:
+        return list(self._vertices)
+
+    def raw(self) -> RawContour:
+        return self._raw[:]
+
+    def reverse(self) -> 'Contour':
+        vertices = self._vertices
+        return Contour(vertices[:1] + vertices[:0:-1])
+
     def to_clockwise(self) -> 'Contour':
         return (self
                 if self.orientation is Orientation.CLOCKWISE
@@ -191,10 +195,6 @@ class Contour(Geometry):
         return (self
                 if self.orientation is Orientation.COUNTERCLOCKWISE
                 else self.reverse())
-
-    def reverse(self) -> 'Contour':
-        vertices = self._vertices
-        return Contour(vertices[:1] + vertices[:0:-1])
 
     def validate(self) -> None:
         for vertex in self._vertices:
