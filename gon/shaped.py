@@ -46,23 +46,6 @@ class Polygon(Geometry):
 
     __repr__ = generate_repr(__init__)
 
-    def raw(self) -> RawPolygon:
-        return self._raw_border[:], [raw_hole[:]
-                                     for raw_hole in self._raw_holes]
-
-    @classmethod
-    def from_raw(cls, raw: RawPolygon) -> 'Polygon':
-        raw_border, raw_holes = raw
-        return cls(Contour.from_raw(raw_border),
-                   [Contour.from_raw(raw_hole) for raw_hole in raw_holes])
-
-    def validate(self) -> None:
-        self._border.validate()
-        for hole in self._holes:
-            hole.validate()
-        if not contours_in_contour(self._raw_holes, self._raw_border):
-            raise ValueError('Holes should lie inside border.')
-
     def __contains__(self, point: Point) -> bool:
         """Checks if the point lies inside the polygon or on its boundary."""
         return (point_in_polygon(point.raw(), self.raw())
@@ -94,30 +77,11 @@ class Polygon(Geometry):
         """
         return hash((self._border, self._holes))
 
-    @property
-    def border(self) -> Contour:
-        """Returns border of the polygon."""
-        return self._border
-
-    @property
-    def holes(self) -> List[Contour]:
-        """Returns holes of the polygon."""
-        return list(self._holes)
-
-    @property
-    def normalized(self) -> 'Polygon':
-        """
-        Returns polygon in normalized form.
-
-        >>> polygon = Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
-        ...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]]))
-        >>> polygon.normalized == polygon
-        True
-        """
-        return Polygon(self._border.normalized.to_counterclockwise(),
-                       sorted([hole.normalized.to_clockwise()
-                               for hole in self._holes],
-                              key=lambda contour: contour._vertices[:2]))
+    @classmethod
+    def from_raw(cls, raw: RawPolygon) -> 'Polygon':
+        raw_border, raw_holes = raw
+        return cls(Contour.from_raw(raw_border),
+                   [Contour.from_raw(raw_hole) for raw_hole in raw_holes])
 
     @property
     def area(self) -> Coordinate:
@@ -131,6 +95,11 @@ class Polygon(Geometry):
         """
         return to_area(self._border) - sum(to_area(hole)
                                            for hole in self._holes)
+
+    @property
+    def border(self) -> Contour:
+        """Returns border of the polygon."""
+        return self._border
 
     @property
     def convex_hull(self) -> 'Polygon':
@@ -147,6 +116,11 @@ class Polygon(Geometry):
                 else Polygon(Contour(_to_convex_hull(self._border.vertices))))
 
     @property
+    def holes(self) -> List[Contour]:
+        """Returns holes of the polygon."""
+        return list(self._holes)
+
+    @property
     def is_convex(self) -> bool:
         """
         Checks if the polygon is convex.
@@ -159,6 +133,21 @@ class Polygon(Geometry):
         True
         """
         return not self._holes and forms_convex_polygon(self._border)
+
+    @property
+    def normalized(self) -> 'Polygon':
+        """
+        Returns polygon in normalized form.
+
+        >>> polygon = Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
+        ...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]]))
+        >>> polygon.normalized == polygon
+        True
+        """
+        return Polygon(self._border.normalized.to_counterclockwise(),
+                       sorted([hole.normalized.to_clockwise()
+                               for hole in self._holes],
+                              key=lambda contour: contour._vertices[:2]))
 
     @property
     def triangulation(self) -> Sequence['Polygon']:
@@ -181,6 +170,17 @@ class Polygon(Geometry):
         return [Polygon(Contour.from_raw(raw_contour))
                 for raw_contour in constrained_delaunay_triangles(
                     self._raw_border, self._raw_holes)]
+
+    def raw(self) -> RawPolygon:
+        return self._raw_border[:], [raw_hole[:]
+                                     for raw_hole in self._raw_holes]
+
+    def validate(self) -> None:
+        self._border.validate()
+        for hole in self._holes:
+            hole.validate()
+        if not contours_in_contour(self._raw_holes, self._raw_border):
+            raise ValueError('Holes should lie inside border.')
 
 
 def _to_convex_hull(points: Sequence[Point]) -> List[Point]:
