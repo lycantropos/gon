@@ -24,7 +24,8 @@ RawPolygon = Tuple[RawContour, List[RawContour]]
 
 
 class Polygon(Geometry):
-    __slots__ = '_border', '_holes', '_raw_border', '_raw_holes'
+    __slots__ = ('_border', '_holes', '_raw_border', '_raw_holes',
+                 '_normalized_border', '_normalized_holes')
 
     def __init__(self, border: Contour,
                  holes: Optional[Sequence[Contour]] = None) -> None:
@@ -43,6 +44,11 @@ class Polygon(Geometry):
         self._border, self._holes = border, holes
         self._raw_border, self._raw_holes = border.raw(), [hole.raw()
                                                            for hole in holes]
+        self._normalized_border, self._normalized_holes = (
+            self._border.normalized.to_counterclockwise(),
+            tuple(sorted([hole.normalized.to_clockwise()
+                          for hole in self._holes],
+                         key=lambda contour: contour._vertices[:2])))
 
     __repr__ = generate_repr(__init__)
 
