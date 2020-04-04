@@ -249,6 +249,20 @@ class Contour(Geometry):
         return self._raw[:]
 
     def reverse(self) -> 'Contour':
+        """
+        Returns the reversed contour.
+
+        Time complexity:
+            ``O(len(self.vertices))``
+        Memory complexity:
+            ``O(len(self.vertices))``
+
+        >>> contour = Contour.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> contour.reverse() == contour
+        False
+        >>> contour.reverse().reverse() == contour
+        True
+        """
         vertices = self._vertices
         return Contour(vertices[:1] + vertices[:0:-1])
 
