@@ -22,6 +22,23 @@ class Point(Geometry):
         return hash(self._raw)
 
     def __eq__(self, other: 'Point') -> bool:
+        """
+        Checks if the point is equal to the other.
+
+        Time complexity:
+            ``O(1)``
+        Memory complexity:
+            ``O(1)``
+
+        >>> Point(0, 0) == Point(0, 0)
+        True
+        >>> Point(0, 0) == Point(0, 1)
+        False
+        >>> Point(0, 0) == Point(1, 1)
+        False
+        >>> Point(0, 0) == Point(1, 0)
+        False
+        """
         return (self._x == other._x and self._y == other._y
                 if isinstance(other, Point)
                 else NotImplemented)
