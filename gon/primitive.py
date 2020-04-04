@@ -19,6 +19,17 @@ class Point(Geometry):
     __repr__ = generate_repr(__init__)
 
     def __hash__(self) -> int:
+        """
+        Returns hash value of the point.
+
+        Time complexity:
+            ``O(1)``
+        Memory complexity:
+            ``O(1)``
+
+        >>> hash(Point(0, 0)) == hash(Point(0, 0))
+        True
+        """
         return hash(self._raw)
 
     def __eq__(self, other: 'Point') -> bool:
