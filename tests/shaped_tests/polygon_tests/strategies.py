@@ -5,10 +5,11 @@ from gon.hints import Coordinate
 from gon.linear import Contour
 from gon.shaped import (Polygon,
                         _to_convex_hull)
-from tests.strategies import (coordinates_strategies,
+from tests.strategies import (contours_with_repeated_points,
+                              coordinates_strategies,
                               coordinates_to_contours,
                               coordinates_to_points,
-                              invalid_contours)
+                              invalid_vertices_contours)
 from tests.utils import (Strategy,
                          cleave_in_tuples,
                          to_pairs,
@@ -23,6 +24,7 @@ def to_invalid_polygon_with_hole(concave_contour: Contour) -> Polygon:
                    [Contour(_to_convex_hull(concave_contour.vertices))])
 
 
+invalid_contours = invalid_vertices_contours | contours_with_repeated_points
 invalid_polygons = (
         strategies.builds(Polygon, invalid_contours)
         | strategies.builds(Polygon,
