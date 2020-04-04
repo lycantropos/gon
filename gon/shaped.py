@@ -284,6 +284,21 @@ class Polygon(Geometry):
                     self._raw_border, self._raw_holes)]
 
     def validate(self) -> None:
+        """
+        Checks if contours are valid.
+
+        Time complexity:
+            ``O(vertices_count * log (vertices_count))``
+        Memory complexity:
+            ``O(vertices_count)``
+
+        where ``vertices_count = len(self.border.vertices)\
+ + sum(len(hole.vertices) for hole in self.holes)``.
+
+        >>> polygon = Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
+        ...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]]))
+        >>> polygon.validate()
+        """
         self._border.validate()
         for hole in self._holes:
             hole.validate()
