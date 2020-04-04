@@ -103,6 +103,18 @@ class Segment(Geometry):
 
     @classmethod
     def from_raw(cls, raw: RawSegment) -> 'Segment':
+        """
+        Constructs contour from the combination of Python built-ins.
+
+        Time complexity:
+            ``O(1)``
+        Memory complexity:
+            ``O(1)``
+
+        >>> segment = Segment.from_raw(((0, 0), (2, 0)))
+        >>> segment == Segment(Point(0, 0), Point(2, 0))
+        True
+        """
         raw_start, raw_end = raw
         start, end = Point.from_raw(raw_start), Point.from_raw(raw_end)
         return cls(start, end)
