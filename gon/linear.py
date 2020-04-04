@@ -267,6 +267,21 @@ class Contour(Geometry):
         return Contour(vertices[:1] + vertices[:0:-1])
 
     def to_clockwise(self) -> 'Contour':
+        """
+        Returns the clockwise contour.
+
+        Time complexity:
+            ``O(len(self.vertices))``
+        Memory complexity:
+            ``O(1)`` if normalized and clockwise already,
+            ``O(len(self.vertices))`` -- otherwise
+
+        >>> contour = Contour.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> contour.to_clockwise() == contour
+        False
+        >>> contour.to_clockwise().orientation is Orientation.CLOCKWISE
+        True
+        """
         return (self
                 if self.orientation is Orientation.CLOCKWISE
                 else self.reverse())
