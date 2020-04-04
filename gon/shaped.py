@@ -35,7 +35,7 @@ class Polygon(Geometry):
         Initializes polygon.
 
         Time complexity:
-            ``O(vertices_count)``
+            ``O(vertices_count + len(self.holes) * log len(self.holes))``
         Memory complexity:
             ``O(vertices_count)``
 
