@@ -122,6 +122,16 @@ class Segment(Geometry):
         return segments_relationship(self._raw, other._raw)
 
     def validate(self) -> None:
+        """
+        Checks if endpoints are valid and unequal.
+
+        Time complexity:
+            ``O(1)``
+        Memory complexity:
+            ``O(1)``
+
+        >>> Segment.from_raw((0, 0), (2, 0)).validate()
+        """
         self._start.validate()
         self._end.validate()
         if self._start == self._end:
