@@ -30,6 +30,22 @@ class Point(Geometry):
         """
         Checks if the point is less than the other.
         Compares points lexicographically, ``x`` coordinates first.
+
+        Time complexity:
+            ``O(1)``
+        Memory complexity:
+            ``O(1)``
+        Reference:
+            https://en.wikipedia.org/wiki/Lexicographical_order
+
+        >>> Point(0, 0) < Point(0, 0)
+        False
+        >>> Point(0, 0) < Point(0, 1)
+        True
+        >>> Point(0, 0) < Point(1, 1)
+        True
+        >>> Point(0, 0) < Point(1, 0)
+        True
         """
         return (self._raw < other._raw
                 if isinstance(other, Point)
