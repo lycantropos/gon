@@ -19,6 +19,11 @@ def test_base_case(polygon: Polygon) -> None:
 
 
 @given(strategies.polygons)
+def test_holes(polygon: Polygon) -> None:
+    assert implication(polygon.is_convex, not polygon.holes)
+
+
+@given(strategies.polygons)
 def test_relation_with_convex_hull(polygon: Polygon) -> None:
     assert equivalence(polygon.is_convex,
                        polygon.normalized == polygon.convex_hull.normalized)
