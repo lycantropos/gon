@@ -88,9 +88,7 @@ class Segment(Geometry):
         False
         """
         return (self._start == other._start and self._end == other._end
-                or self._start == other._end and self._end == other._start
-                if isinstance(other, Segment)
-                else NotImplemented)
+                or self._start == other._end and self._end == other._start)
 
     def __hash__(self) -> int:
         """
