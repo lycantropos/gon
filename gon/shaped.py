@@ -47,7 +47,36 @@ class Polygon(Geometry):
     __repr__ = generate_repr(__init__)
 
     def __contains__(self, point: Point) -> bool:
-        """Checks if the point lies inside the polygon or on its boundary."""
+        """
+        Checks if the point lies inside the polygon or on its boundary.
+
+        Time complexity:
+            ``O(vertices_count)``
+        Memory complexity:
+            ``O(1)``
+
+        where ``vertices_count = len(self.border.vertices)\
+ + sum(len(hole.vertices) for hole in self.holes)``.
+
+        >>> polygon = Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
+        ...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]]))
+        >>> Point(0, 0) in polygon
+        True
+        >>> Point(1, 1) in polygon
+        True
+        >>> Point(2, 2) in polygon
+        True
+        >>> Point(3, 3) in polygon
+        False
+        >>> Point(4, 3) in polygon
+        True
+        >>> Point(5, 2) in polygon
+        True
+        >>> Point(6, 1) in polygon
+        True
+        >>> Point(7, 0) in polygon
+        False
+        """
         return (point_in_polygon(point.raw(),
                                  (self._raw_border, self._raw_holes))
                 is not PointLocation.EXTERNAL)
