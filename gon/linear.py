@@ -171,10 +171,6 @@ def _vertices_to_orientations(vertices: Vertices) -> Iterator[Orientation]:
             for index in range(vertices_count))
 
 
-def _to_first_vertex(contour: Contour) -> Point:
-    return contour.vertices[0]
-
-
 def to_area(contour: Contour) -> Coordinate:
     return abs(to_signed_area(contour))
 
