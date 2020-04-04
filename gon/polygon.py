@@ -44,7 +44,10 @@ class Polygon(Geometry):
                    [Contour.from_raw(raw_hole) for raw_hole in raw_holes])
 
     def validate(self) -> None:
-        raw_border, raw_holes = self.raw()
+        self._border.validate()
+        for hole in self._holes:
+            hole.validate()
+        raw_border, raw_holes = self._raw
         if not contours_in_contour(raw_holes, raw_border):
             raise ValueError('Holes should lie inside border.')
 
