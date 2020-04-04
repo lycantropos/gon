@@ -320,7 +320,7 @@ class Contour(Geometry):
                for orientation in _vertices_to_orientations(self._vertices)):
             raise ValueError('Consecutive vertices triplets '
                              'should not be on the same line.')
-        if edges_intersect(self.raw()):
+        if edges_intersect(self._raw):
             raise ValueError('Contour should not be self-intersecting.')
 
 
