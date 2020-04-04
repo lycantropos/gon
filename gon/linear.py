@@ -287,6 +287,22 @@ class Contour(Geometry):
                 else self.reverse())
 
     def to_counterclockwise(self) -> 'Contour':
+        """
+        Returns the counterclockwise contour.
+
+        Time complexity:
+            ``O(len(self.vertices))``
+        Memory complexity:
+            ``O(1)`` if normalized and counterclockwise already,
+            ``O(len(self.vertices))`` -- otherwise
+
+        >>> contour = Contour.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> contour.to_counterclockwise() == contour
+        True
+        >>> (contour.to_counterclockwise().orientation
+        ...  is Orientation.COUNTERCLOCKWISE)
+        True
+        """
         return (self
                 if self.orientation is Orientation.COUNTERCLOCKWISE
                 else self.reverse())
