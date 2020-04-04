@@ -125,7 +125,7 @@ class Polygon(Geometry):
         >>> hash(polygon) == hash(polygon)
         True
         """
-        return hash((self._border, self._holes))
+        return hash((self._normalized_border, self._normalized_holes))
 
     @classmethod
     def from_raw(cls, raw: RawPolygon) -> 'Polygon':
