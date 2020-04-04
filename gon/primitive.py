@@ -99,6 +99,11 @@ class Point(Geometry):
         """
         Checks if coordinates are finite.
 
+        Time complexity:
+            ``O(1)``
+        Memory complexity:
+            ``O(1)``
+
         >>> Point(0, 0).validate()
         """
         _validate_coordinate(self._x)
