@@ -41,16 +41,18 @@ def not_all_unique(vertices: Vertices) -> bool:
     return False
 
 
-invalid_contours = (
-        strategies.builds(Contour,
-                          coordinates_strategies
-                          .map(coordinates_to_points)
-                          .flatmap(partial(strategies.lists,
-                                           min_size=1,
-                                           max_size=MIN_VERTICES_COUNT - 1)))
-        | strategies.builds(Contour,
-                            strategies.lists(invalid_points))
-        | coordinates_strategies.flatmap(to_contours_with_repeated_points))
+small_contours = (
+    strategies.builds(Contour,
+                      coordinates_strategies
+                      .map(coordinates_to_points)
+                      .flatmap(partial(strategies.lists,
+                                       max_size=MIN_VERTICES_COUNT - 1))))
+invalid_vertices_contours = strategies.builds(
+        Contour,
+        strategies.lists(invalid_points,
+                         min_size=MIN_VERTICES_COUNT))
+contours_with_repeated_points = (coordinates_strategies
+                                 .flatmap(to_contours_with_repeated_points))
 
 
 def coordinates_to_contours(coordinates: Strategy[Coordinate]
