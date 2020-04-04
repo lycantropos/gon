@@ -3,6 +3,7 @@ gon
 
 [![](https://travis-ci.com/lycantropos/gon.svg?branch=master)](https://travis-ci.com/lycantropos/gon "Travis CI")
 [![](https://dev.azure.com/lycantropos/gon/_apis/build/status/lycantropos.gon?branchName=master)](https://dev.azure.com/lycantropos/gon/_build/latest?branchName=master "Azure Pipelines")
+[![](https://readthedocs.org/projects/gon/badge/?version=latest)](https://gon.readthedocs.io/en/latest "Documentation")
 [![](https://codecov.io/gh/lycantropos/gon/branch/master/graph/badge.svg)](https://codecov.io/gh/lycantropos/gon "Codecov")
 [![](https://img.shields.io/github/license/lycantropos/gon.svg)](https://github.com/lycantropos/gon/blob/master/LICENSE "License")
 [![](https://badge.fury.io/py/gon.svg)](https://badge.fury.io/py/gon "PyPI")
