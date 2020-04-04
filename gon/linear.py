@@ -61,6 +61,24 @@ class Segment(Geometry):
         return segment_contains(self._raw, point.raw())
 
     def __eq__(self, other: 'Segment') -> bool:
+        """
+        Checks if the segment is equal to the other.
+
+        Time complexity:
+            ``O(1)``
+        Memory complexity:
+            ``O(1)``
+
+        >>> segment = Segment.from_raw(((0, 0), (2, 0)))
+        >>> segment == segment
+        True
+        >>> segment == Segment.from_raw(((2, 0), (0, 0)))
+        True
+        >>> segment == Segment.from_raw(((0, 0), (1, 0)))
+        False
+        >>> segment == Segment.from_raw(((0, 0), (0, 2)))
+        False
+        """
         return (self._start == other._start and self._end == other._end
                 or self._start == other._end and self._end == other._start
                 if isinstance(other, Segment)
