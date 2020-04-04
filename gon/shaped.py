@@ -77,7 +77,7 @@ class Polygon(Geometry):
         Returns hash value of the polygon.
 
         >>> polygon = Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
-        ...                             [[(2, 2), (4, 2), (4, 4), (2, 4)]]))
+        ...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]]))
         >>> hash(polygon) == hash(polygon)
         True
         """
@@ -106,7 +106,7 @@ class Polygon(Geometry):
         Returns area of the polygon.
 
         >>> polygon = Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
-        ...                             [[(2, 2), (4, 2), (4, 4), (2, 4)]]))
+        ...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]]))
         >>> polygon.area == 32
         True
         """
@@ -119,7 +119,7 @@ class Polygon(Geometry):
         Returns convex hull of the polygon.
 
         >>> polygon = Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
-        ...                             [[(2, 2), (4, 2), (4, 4), (2, 4)]]))
+        ...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]]))
         >>> polygon.convex_hull == Polygon(polygon.border, [])
         True
         """
@@ -133,7 +133,7 @@ class Polygon(Geometry):
         Checks if the polygon is convex.
 
         >>> polygon = Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
-        ...                             [[(2, 2), (4, 2), (4, 4), (2, 4)]]))
+        ...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]]))
         >>> polygon.is_convex
         False
         >>> polygon.convex_hull.is_convex
@@ -147,9 +147,9 @@ class Polygon(Geometry):
         Returns triangulation of the polygon.
 
         >>> polygon = Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
-        ...                             [[(2, 2), (4, 2), (4, 4), (2, 4)]]))
-        >>> (polygon.triangulation 
-        ...  == [Polygon.from_raw(([(4, 4), (6, 0), (6, 6)], [])), 
+        ...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]]))
+        >>> (polygon.triangulation
+        ...  == [Polygon.from_raw(([(4, 4), (6, 0), (6, 6)], [])),
         ...      Polygon.from_raw(([(4, 2), (6, 0), (4, 4)], [])),
         ...      Polygon.from_raw(([(0, 6), (4, 4), (6, 6)], [])),
         ...      Polygon.from_raw(([(0, 0), (2, 2), (0, 6)], [])),
