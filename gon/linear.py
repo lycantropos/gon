@@ -308,6 +308,16 @@ class Contour(Geometry):
                 else self.reverse())
 
     def validate(self) -> None:
+        """
+        Checks if vertices are valid.
+
+        Time complexity:
+            ``O(len(self.vertices) * log len(self.vertices))``
+        Memory complexity:
+            ``O(len(self.vertices))``
+
+        >>> Contour.from_raw([(0, 0), (1, 0), (0, 1)]).validate()
+        """
         for vertex in self._vertices:
             vertex.validate()
         if len(self._vertices) < MIN_VERTICES_COUNT:
