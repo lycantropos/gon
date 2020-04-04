@@ -7,7 +7,7 @@ from typing import Optional
 from hypothesis import strategies
 
 from gon.hints import Coordinate
-from gon.point import Point
+from gon.primitive import Point
 from tests.utils import Strategy
 
 MAX_COORDINATE = 10 ** 15

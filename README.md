@@ -70,7 +70,7 @@ Usage
 -----
 
 ```python
->>> from gon.polygon import Polygon
+>>> from gon.shaped import Polygon
 >>> raw_square = [(0, 0), (1, 0), (1, 1), (0, 1)], []
 >>> square = Polygon.from_raw(raw_square)
 >>> square.raw() == raw_square

@@ -2,7 +2,7 @@ from typing import Tuple
 
 from hypothesis import given
 
-from gon.segment import Segment
+from gon.linear import Segment
 from tests.utils import implication
 from . import strategies
 

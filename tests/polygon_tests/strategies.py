@@ -1,7 +1,7 @@
 from hypothesis_geometry import planar
 
 from gon.hints import Coordinate
-from gon.polygon import Polygon
+from gon.shaped import Polygon
 from tests.strategies import (coordinates_strategies,
                               coordinates_to_points)
 from tests.utils import (Strategy,

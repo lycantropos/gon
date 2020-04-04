@@ -3,7 +3,7 @@ from collections import Counter
 from hypothesis import given
 
 from gon.angular import Orientation
-from gon.polygon import Polygon
+from gon.shaped import Polygon
 from . import strategies
 
 

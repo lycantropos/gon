@@ -1,7 +1,7 @@
 from robust.angular import (Orientation,
                             orientation as _orientation)
 
-from .point import Point
+from .primitive import Point
 
 Orientation = Orientation
 

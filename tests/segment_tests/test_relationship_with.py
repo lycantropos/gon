@@ -2,8 +2,8 @@ from typing import Tuple
 
 from hypothesis import given
 
-from gon.segment import (Segment,
-                         SegmentsRelationship)
+from gon.linear import (Segment,
+                        SegmentsRelationship)
 from tests.utils import (reflect_segment,
                          reverse_segment)
 from . import strategies
