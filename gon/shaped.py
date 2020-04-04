@@ -173,11 +173,12 @@ class Polygon(Geometry):
         Returns convex hull of the polygon.
 
         Time complexity:
-            ``O(border_vertices_count)``
-        Memory complexity:
-            ``O(1)`` if convex already,
+            ``O(border_vertices_count)`` if convex already,
             ``O(border_vertices_count * log border_vertices_count)``
             -- otherwise
+        Memory complexity:
+            ``O(1)`` if convex already,
+            ``O(border_vertices_count)`` -- otherwise
 
         where ``border_vertices_count = len(self.border.vertices)``.
 
