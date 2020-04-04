@@ -187,6 +187,13 @@ class Contour(Geometry):
 
     @classmethod
     def from_raw(cls, raw: RawContour) -> 'Contour':
+        """
+        Constructs contour from the combination of Python built-ins.
+
+        >>> contour = Contour.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> contour == Contour([Point(0, 0), Point(1, 0), Point(0, 1)])
+        True
+        """
         return cls([Point.from_raw(raw_vertex) for raw_vertex in raw])
 
     @property
