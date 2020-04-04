@@ -213,6 +213,11 @@ class Polygon(Geometry):
         """
         Checks if the polygon is convex.
 
+        Time complexity:
+            ``O(len(self.border.vertices))``
+        Memory complexity:
+            ``O(1)``
+
         >>> polygon = Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
         ...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]]))
         >>> polygon.is_convex
