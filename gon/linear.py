@@ -85,6 +85,20 @@ class Segment(Geometry):
                 else NotImplemented)
 
     def __hash__(self) -> int:
+        """
+        Returns hash value of the segment.
+
+        Time complexity:
+            ``O(1)``
+        Memory complexity:
+            ``O(1)``
+
+        >>> segment = Segment.from_raw((0, 0), (2, 0))
+        >>> hash(segment) == hash(segment)
+        True
+        >>> hash(segment) == hash(Segment.from_raw((2, 0), (0, 0)))
+        True
+        """
         return hash(frozenset(self._raw))
 
     @property
