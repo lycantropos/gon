@@ -123,10 +123,9 @@ class Polygon(Geometry):
         >>> polygon.convex_hull == Polygon(polygon.border, [])
         True
         """
-        border_vertices = self._border.vertices
         return (self
-                if len(border_vertices) == 3 and not self._holes
-                else Polygon(Contour(_to_convex_hull(border_vertices)), []))
+                if self.is_convex
+                else Polygon(Contour(_to_convex_hull(self._border.vertices))))
 
     @property
     def is_convex(self) -> bool:
