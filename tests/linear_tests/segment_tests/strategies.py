@@ -1,9 +1,12 @@
+from hypothesis import strategies
 from hypothesis_geometry import planar
 
 from gon.hints import Coordinate
 from gon.linear import Segment
 from tests.strategies import (coordinates_strategies,
-                              coordinates_to_points)
+                              coordinates_to_points,
+                              invalid_points,
+                              points)
 from tests.utils import (Strategy,
                          cleave_in_tuples,
                          to_pairs,
@@ -11,6 +14,9 @@ from tests.utils import (Strategy,
 
 raw_segments = coordinates_strategies.flatmap(planar.segments)
 segments = raw_segments.map(Segment.from_raw)
+invalid_segments = (points.map(lambda point: Segment(point, point))
+                    | strategies.builds(Segment, points, invalid_points)
+                    | strategies.builds(Segment, invalid_points, points))
 
 
 def coordinates_to_segments(coordinates: Strategy[Coordinate]
