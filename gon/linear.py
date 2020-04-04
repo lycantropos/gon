@@ -121,6 +121,18 @@ class Segment(Geometry):
 
     @property
     def end(self) -> Point:
+        """
+        Returns end of the segment.
+
+        Time complexity:
+            ``O(1)``
+        Memory complexity:
+            ``O(1)``
+
+        >>> segment = Segment.from_raw(((0, 0), (2, 0)))
+        >>> segment.end == Point(2, 0)
+        True
+        """
         return self._end
 
     @property
