@@ -116,7 +116,9 @@ class Contour(Geometry):
         vertices = self._vertices
         min_index = min(range(len(vertices)),
                         key=vertices.__getitem__)
-        return Contour(vertices[min_index:] + vertices[:min_index])
+        return (Contour(vertices[min_index:] + vertices[:min_index])
+                if min_index
+                else self)
 
     @property
     def orientation(self) -> 'Orientation':
