@@ -226,6 +226,11 @@ class Contour(Geometry):
         """
         Constructs contour from the combination of Python built-ins.
 
+        Time complexity:
+            ``O(len(raw))``
+        Memory complexity:
+            ``O(len(raw))``
+
         >>> contour = Contour.from_raw([(0, 0), (1, 0), (0, 1)])
         >>> contour == Contour([Point(0, 0), Point(1, 0), Point(0, 1)])
         True
