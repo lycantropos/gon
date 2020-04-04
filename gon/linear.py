@@ -231,6 +231,18 @@ class Contour(Geometry):
 
     @property
     def vertices(self) -> Vertices:
+        """
+        Returns vertices of the contour.
+
+        Time complexity:
+            ``O(len(self.vertices))``
+        Memory complexity:
+            ``O(len(self.vertices))``
+
+        >>> contour = Contour.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> contour.vertices
+        [Point(0, 0), Point(1, 0), Point(0, 1)]
+        """
         return list(self._vertices)
 
     def raw(self) -> RawContour:
