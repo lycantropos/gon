@@ -106,6 +106,15 @@ class Polygon(Geometry):
         """
         Returns convex hull of the polygon.
 
+        Time complexity:
+            ``O(border_vertices_count)``
+        Memory complexity:
+            ``O(1)`` if convex already,
+            ``O(border_vertices_count * log border_vertices_count)``
+            -- otherwise
+
+        where ``border_vertices_count = len(self.border.vertices)``.
+
         >>> polygon = Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
         ...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]]))
         >>> polygon.convex_hull == Polygon(polygon.border, [])
