@@ -93,10 +93,10 @@ class Segment(Geometry):
         Memory complexity:
             ``O(1)``
 
-        >>> segment = Segment.from_raw((0, 0), (2, 0))
+        >>> segment = Segment.from_raw(((0, 0), (2, 0)))
         >>> hash(segment) == hash(segment)
         True
-        >>> hash(segment) == hash(Segment.from_raw((2, 0), (0, 0)))
+        >>> hash(segment) == hash(Segment.from_raw(((2, 0), (0, 0))))
         True
         """
         return hash(frozenset(self._raw))
@@ -130,7 +130,7 @@ class Segment(Geometry):
         Memory complexity:
             ``O(1)``
 
-        >>> Segment.from_raw((0, 0), (2, 0)).validate()
+        >>> Segment.from_raw(((0, 0), (2, 0))).validate()
         """
         self._start.validate()
         self._end.validate()
