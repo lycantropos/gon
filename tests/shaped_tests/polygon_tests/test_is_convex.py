@@ -1,7 +1,8 @@
 from hypothesis import given
 
 from gon.shaped import Polygon
-from tests.utils import equivalence, implication
+from tests.utils import (equivalence,
+                         implication)
 from . import strategies
 
 
