@@ -191,6 +191,19 @@ class Contour(Geometry):
 
     @property
     def normalized(self) -> 'Contour':
+        """
+        Returns contour in normalized form.
+
+        Time complexity:
+            ``O(len(self.vertices))``
+        Memory complexity:
+            ``O(1)`` if normalized already,
+            ``O(len(self.vertices))`` -- otherwise.
+
+        >>> contour = Contour.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> contour.normalized == contour
+        True
+        """
         vertices = self._vertices
         min_index = min(range(len(vertices)),
                         key=vertices.__getitem__)
