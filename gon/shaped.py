@@ -95,6 +95,14 @@ class Polygon(Geometry):
 
     @property
     def normalized(self) -> 'Polygon':
+        """
+        Returns polygon in normalized form.
+
+        >>> polygon = Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
+        ...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]]))
+        >>> polygon.normalized == polygon
+        True
+        """
         return Polygon(self._border.normalized.to_counterclockwise(),
                        sorted([hole.normalized.to_clockwise()
                                for hole in self._holes],
