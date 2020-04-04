@@ -48,7 +48,8 @@ class Polygon(Geometry):
 
     def __contains__(self, point: Point) -> bool:
         """Checks if the point lies inside the polygon or on its boundary."""
-        return (point_in_polygon(point.raw(), self.raw())
+        return (point_in_polygon(point.raw(),
+                                 (self._raw_border, self._raw_holes))
                 is not PointLocation.EXTERNAL)
 
     def __eq__(self, other: 'Polygon') -> bool:
