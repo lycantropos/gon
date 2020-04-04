@@ -98,11 +98,9 @@ class Polygon(Geometry):
         >>> polygon == polygon
         True
         """
-        if self is other:
-            return True
-        return (self._border == other._border and self._holes == other._holes
-                if isinstance(other, Polygon)
-                else NotImplemented)
+        return (self is other
+                or self._border == other._border
+                and self._holes == other._holes)
 
     def __hash__(self) -> int:
         """
