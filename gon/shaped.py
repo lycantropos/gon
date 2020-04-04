@@ -117,7 +117,19 @@ class Polygon(Geometry):
 
     @property
     def holes(self) -> List[Contour]:
-        """Returns holes of the polygon."""
+        """
+        Returns holes of the polygon.
+
+        Time complexity:
+            ``O(len(self.holes))``
+        Memory complexity:
+            ``O(len(self.holes))``
+
+        >>> polygon = Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
+        ...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]]))
+        >>> polygon.holes
+        [Contour([Point(2, 2), Point(2, 4), Point(4, 4), Point(4, 2)])]
+        """
         return list(self._holes)
 
     @property
