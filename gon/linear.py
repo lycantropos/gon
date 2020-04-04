@@ -101,22 +101,22 @@ class Segment(Geometry):
         """
         return hash(frozenset(self._raw))
 
-    @property
-    def start(self) -> Point:
-        return self._start
-
-    @property
-    def end(self) -> Point:
-        return self._end
-
-    def raw(self) -> RawSegment:
-        return self._raw
-
     @classmethod
     def from_raw(cls, raw: RawSegment) -> 'Segment':
         raw_start, raw_end = raw
         start, end = Point.from_raw(raw_start), Point.from_raw(raw_end)
         return cls(start, end)
+
+    @property
+    def end(self) -> Point:
+        return self._end
+
+    @property
+    def start(self) -> Point:
+        return self._start
+
+    def raw(self) -> RawSegment:
+        return self._raw
 
     def relationship_with(self, other: 'Segment') -> SegmentsRelationship:
         return segments_relationship(self._raw, other._raw)
