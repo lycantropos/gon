@@ -156,6 +156,37 @@ class Polygon(Geometry):
         return polygon_in_polygon((other._raw_border, other._raw_holes),
                                   (self._raw_border, self._raw_holes))
 
+    def __gt__(self, other: 'Polygon') -> bool:
+        """
+        Checks if the polygon is a strict superset of the other.
+
+        Time complexity:
+            ``O(total_vertices_count * log total_vertices_count)``
+        Memory complexity:
+            ``O(total_vertices_count)``
+
+        where ``vertices_count = total_border_vertices_count\
+ + total_holes_vertices_count``,
+        ``total_border_vertices_count =\
+ border_vertices_count + other_border_vertices_count``
+        ``total_holes_vertices_count =\
+ holes_vertices_count + other_holes_vertices_count``,
+        ``border_vertices_count = len(self.border.vertices)``,
+        ``other_border_vertices_count = len(other.border.vertices)``
+        ``holes_vertices_count =\
+ sum(len(hole.vertices) for hole in self.holes)``,
+        ``other_holes_vertices_count =\
+ sum(len(hole.vertices) for hole in other.holes)``.
+
+        >>> polygon = Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
+        ...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]]))
+        >>> polygon > polygon
+        False
+        >>> polygon > polygon.convex_hull
+        False
+        """
+        return self != other and self <= other
+
     def __hash__(self) -> int:
         """
         Returns hash value of the polygon.
