@@ -45,9 +45,9 @@ class Polygon(Geometry):
         self._raw_border, self._raw_holes = border.raw(), [hole.raw()
                                                            for hole in holes]
         self._normalized_border, self._normalized_holes = (
-            self._border.normalized.to_counterclockwise(),
+            border.normalized.to_counterclockwise(),
             tuple(sorted([hole.normalized.to_clockwise()
-                          for hole in self._holes],
+                          for hole in holes],
                          key=lambda contour: contour._vertices[:2])))
 
     __repr__ = generate_repr(__init__)
