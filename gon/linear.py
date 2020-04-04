@@ -147,7 +147,7 @@ class Contour(Geometry):
 
     __repr__ = generate_repr(__init__)
 
-    def __eq__(self, other: 'Geometry') -> bool:
+    def __eq__(self, other: 'Contour') -> bool:
         if self is other:
             return True
         return (self._vertices == other._vertices
