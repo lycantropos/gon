@@ -110,6 +110,17 @@ class Point(Geometry):
         return self._y
 
     def raw(self) -> RawPoint:
+        """
+        Returns the point as combination of Python built-ins.
+
+        Time complexity:
+            ``O(1)``
+        Memory complexity:
+            ``O(1)``
+
+        >>> Point(1, 0).raw()
+        (1, 0)
+        """
         return self._raw
 
     @classmethod
