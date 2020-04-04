@@ -185,7 +185,7 @@ class Polygon(Geometry):
         >>> polygon > polygon.convex_hull
         False
         """
-        return self != other and self <= other
+        return self != other and self >= other
 
     def __hash__(self) -> int:
         """
