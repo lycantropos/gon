@@ -433,10 +433,6 @@ def _vertices_to_orientations(vertices: Vertices) -> Iterator[Orientation]:
             for index in range(vertices_count))
 
 
-def to_area(contour: Contour) -> Coordinate:
-    return abs(to_signed_area(contour))
-
-
 def to_signed_area(contour: Contour) -> Coordinate:
     vertices = contour._vertices
     double_area = reduce(sum_expansions,
