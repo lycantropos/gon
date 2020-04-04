@@ -444,11 +444,11 @@ def to_area(contour: Contour) -> Coordinate:
 
 
 def to_signed_area(contour: Contour) -> Coordinate:
-    vertices = contour.vertices
+    vertices = contour._vertices
     double_area = reduce(sum_expansions,
-                         [_to_endpoints_cross_product_z(vertices[index - 1],
+                         (_to_endpoints_cross_product_z(vertices[index - 1],
                                                         vertices[index])
-                          for index in range(len(vertices))])[-1]
+                          for index in range(len(vertices))))[-1]
     return (Fraction(double_area, 2)
             if isinstance(double_area, int)
             else double_area / 2)
