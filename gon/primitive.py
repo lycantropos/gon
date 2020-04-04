@@ -79,6 +79,22 @@ class Point(Geometry):
                 if isinstance(other, Point)
                 else NotImplemented)
 
+    @classmethod
+    def from_raw(cls, raw: RawPoint) -> 'Point':
+        """
+        Constructs point from the combination of Python built-ins.
+
+        Time complexity:
+            ``O(1)``
+        Memory complexity:
+            ``O(1)``
+
+        >>> Point.from_raw((1, 0)) == Point(1, 0)
+        True
+        """
+        x, y = raw
+        return cls(x, y)
+
     @property
     def x(self) -> Coordinate:
         """
@@ -122,22 +138,6 @@ class Point(Geometry):
         (1, 0)
         """
         return self._raw
-
-    @classmethod
-    def from_raw(cls, raw: RawPoint) -> 'Point':
-        """
-        Constructs point from the combination of Python built-ins.
-
-        Time complexity:
-            ``O(1)``
-        Memory complexity:
-            ``O(1)``
-
-        >>> Point.from_raw((1, 0)) == Point(1, 0)
-        True
-        """
-        x, y = raw
-        return cls(x, y)
 
     def validate(self) -> None:
         """
