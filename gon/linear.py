@@ -2,26 +2,83 @@ from fractions import Fraction
 from functools import reduce
 from typing import (Iterator,
                     List,
-                    Sequence)
+                    Sequence,
+                    Tuple)
 
 from bentley_ottmann.planar import edges_intersect
 from reprit.base import generate_repr
 from robust.hints import Expansion
+from robust.linear import (SegmentsRelationship,
+                           segment_contains,
+                           segments_relationship)
 from robust.utils import (sum_expansions,
                           two_product,
                           two_two_diff)
 
-from gon.angular import (Orientation,
-                         to_orientation)
-from gon.geometry import Geometry
-from gon.hints import Coordinate
-from gon.point import (Point,
-                       RawPoint)
+from .angular import (Orientation,
+                      to_orientation)
+from .geometry import Geometry
+from .hints import Coordinate
+from .primitive import (Point,
+                        RawPoint)
+
+RawSegment = Tuple[RawPoint, RawPoint]
+SegmentsRelationship = SegmentsRelationship
+Vertices = Sequence[Point]
+RawContour = List[RawPoint]
 
 MIN_VERTICES_COUNT = 3
 
-Vertices = Sequence[Point]
-RawContour = List[RawPoint]
+
+class Segment(Geometry):
+    __slots__ = '_start', '_end', '_raw'
+
+    def __init__(self, start: Point, end: Point) -> None:
+        self._start, self._end = start, end
+        self._raw = start.raw(), end.raw()
+
+    __repr__ = generate_repr(__init__)
+
+    @property
+    def start(self) -> Point:
+        return self._start
+
+    @property
+    def end(self) -> Point:
+        return self._end
+
+    def raw(self) -> RawSegment:
+        return self._raw
+
+    @classmethod
+    def from_raw(cls, raw: RawSegment) -> 'Segment':
+        raw_start, raw_end = raw
+        start, end = Point.from_raw(raw_start), Point.from_raw(raw_end)
+        return cls(start, end)
+
+    def validate(self) -> None:
+        self._start.validate()
+        self._end.validate()
+        if self._start == self._end:
+            raise ValueError('Segment is degenerate.')
+
+    def __eq__(self, other: 'Segment') -> bool:
+        return (self._start == other._start and self._end == other._end
+                or self._start == other._end and self._end == other._start
+                if isinstance(other, Segment)
+                else NotImplemented)
+
+    def __hash__(self) -> int:
+        return hash(frozenset(self._raw))
+
+    def __contains__(self, point: Point) -> bool:
+        return segment_contains(self._raw, point.raw())
+
+    def relationship_with(self, other: 'Segment') -> SegmentsRelationship:
+        return segments_relationship(self._raw, other._raw)
+
+    def orientation_with(self, point: Point) -> Orientation:
+        return to_orientation(self._end, self._start, point)
 
 
 class Contour(Geometry):

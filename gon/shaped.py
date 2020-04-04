@@ -12,13 +12,13 @@ from sect.triangulation import constrained_delaunay_triangles
 
 from .angular import (Orientation,
                       to_orientation)
-from .contour import (Contour,
-                      RawContour,
-                      forms_convex_polygon,
-                      to_area)
 from .geometry import Geometry
 from .hints import Coordinate
-from .point import Point
+from .linear import (Contour,
+                     RawContour,
+                     forms_convex_polygon,
+                     to_area)
+from .primitive import Point
 
 RawPolygon = Tuple[RawContour, List[RawContour]]
 

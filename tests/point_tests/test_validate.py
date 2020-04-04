@@ -2,7 +2,7 @@ import pytest
 from hypothesis import given
 
 from gon.hints import Coordinate
-from gon.point import Point
+from gon.primitive import Point
 from . import strategies
 
 

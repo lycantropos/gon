@@ -2,7 +2,7 @@ import math
 from hypothesis import given
 
 from gon.hints import Coordinate
-from gon.polygon import Polygon
+from gon.shaped import Polygon
 from . import strategies
 
 

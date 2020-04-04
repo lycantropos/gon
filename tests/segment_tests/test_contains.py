@@ -3,8 +3,8 @@ from typing import Tuple
 from hypothesis import given
 
 from gon.angular import Orientation
-from gon.point import Point
-from gon.segment import Segment
+from gon.linear import Segment
+from gon.primitive import Point
 from tests.utils import implication
 from . import strategies
 

@@ -2,8 +2,8 @@ from typing import Tuple
 
 from hypothesis import given
 
-from gon.point import Point
-from gon.polygon import Polygon
+from gon.primitive import Point
+from gon.shaped import Polygon
 from tests.utils import implication
 from . import strategies
 

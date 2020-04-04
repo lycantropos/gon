@@ -6,7 +6,7 @@ from lz.functional import (compose,
                            pack)
 from lz.replication import duplicate
 
-from gon.segment import Segment
+from gon.linear import Segment
 from tests.strategies import (coordinates_strategies,
                               coordinates_to_points)
 from tests.utils import (Strategy,

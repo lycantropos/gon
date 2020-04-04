@@ -2,7 +2,7 @@ from typing import Tuple
 
 from hypothesis import given
 
-from gon.point import Point
+from gon.primitive import Point
 from tests.utils import implication
 from . import strategies
 
