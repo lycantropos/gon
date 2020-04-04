@@ -46,6 +46,7 @@ invalid_contours = (
                           coordinates_strategies
                           .map(coordinates_to_points)
                           .flatmap(partial(strategies.lists,
+                                           min_size=1,
                                            max_size=MIN_VERTICES_COUNT - 1)))
         | strategies.builds(Contour,
                             strategies.lists(invalid_points))
