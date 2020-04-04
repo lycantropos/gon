@@ -253,6 +253,13 @@ class Contour(Geometry):
         return list(self._vertices)
 
     def raw(self) -> RawContour:
+        """
+        Returns the contour as combination of Python built-ins.
+
+        >>> contour = Contour.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> contour.raw()
+        [(0, 0), (1, 0), (0, 1)]
+        """
         return self._raw[:]
 
     def reverse(self) -> 'Contour':
