@@ -125,6 +125,27 @@ class Polygon(Geometry):
 
     @classmethod
     def from_raw(cls, raw: RawPolygon) -> 'Polygon':
+        """
+        Constructs polygon from the combination of Python built-ins.
+
+        Time complexity:
+            ``O(raw_vertices_count)``
+        Memory complexity:
+            ``O(raw_vertices_count)``
+
+        where ``raw_vertices_count = len(raw_border)\
+ + sum(len(raw_hole) for raw_hole in raw_holes)``,
+        ``raw_border, raw_holes = raw``.
+
+        >>> polygon = Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
+        ...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]]))
+        >>> (polygon
+        ...  == Polygon(Contour([Point(0, 0), Point(6, 0),
+        ...                      Point(6, 6), Point(0, 6)]),
+        ...             [Contour([Point(2, 2), Point(2, 4),
+        ...                       Point(4, 4), Point(4, 2)])]))
+        True
+        """
         raw_border, raw_holes = raw
         return cls(Contour.from_raw(raw_border),
                    [Contour.from_raw(raw_hole) for raw_hole in raw_holes])
