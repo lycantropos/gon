@@ -125,6 +125,18 @@ class Segment(Geometry):
 
     @property
     def start(self) -> Point:
+        """
+        Returns start of the segment.
+
+        Time complexity:
+            ``O(1)``
+        Memory complexity:
+            ``O(1)``
+
+        >>> segment = Segment.from_raw(((0, 0), (2, 0)))
+        >>> segment.start == Point(0, 0)
+        True
+        """
         return self._start
 
     def raw(self) -> RawSegment:
