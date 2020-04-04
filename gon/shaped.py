@@ -250,8 +250,11 @@ class Polygon(Geometry):
                                for hole in self._holes],
                               key=lambda contour: contour._vertices[:2]))
 
-    @property
-    def triangulation(self) -> Sequence['Polygon']:
+    def raw(self) -> RawPolygon:
+        return self._raw_border[:], [raw_hole[:]
+                                     for raw_hole in self._raw_holes]
+
+    def triangulate(self) -> List['Polygon']:
         """
         Returns triangulation of the polygon.
 
@@ -265,7 +268,7 @@ class Polygon(Geometry):
 
         >>> polygon = Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
         ...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]]))
-        >>> (polygon.triangulation
+        >>> (polygon.triangulate()
         ...  == [Polygon.from_raw(([(4, 4), (6, 0), (6, 6)], [])),
         ...      Polygon.from_raw(([(4, 2), (6, 0), (4, 4)], [])),
         ...      Polygon.from_raw(([(0, 6), (4, 4), (6, 6)], [])),
@@ -279,10 +282,6 @@ class Polygon(Geometry):
         return [Polygon(Contour.from_raw(raw_contour))
                 for raw_contour in constrained_delaunay_triangles(
                     self._raw_border, self._raw_holes)]
-
-    def raw(self) -> RawPolygon:
-        return self._raw_border[:], [raw_hole[:]
-                                     for raw_hole in self._raw_holes]
 
     def validate(self) -> None:
         self._border.validate()

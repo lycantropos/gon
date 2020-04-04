@@ -85,7 +85,7 @@ True
 True
 >>> square.area == 1
 True
->>> (square.triangulation 
+>>> (square.triangulate()
 ...  == [Polygon.from_raw(([(0, 1), (1, 0), (1, 1)], [])), 
 ...      Polygon.from_raw(([(0, 0), (1, 0), (0, 1)], []))])
 True
