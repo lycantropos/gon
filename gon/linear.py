@@ -198,7 +198,7 @@ class Contour(Geometry):
             ``O(len(self.vertices))``
         Memory complexity:
             ``O(1)`` if normalized already,
-            ``O(len(self.vertices))`` -- otherwise.
+            ``O(len(self.vertices))`` -- otherwise
 
         >>> contour = Contour.from_raw([(0, 0), (1, 0), (0, 1)])
         >>> contour.normalized == contour
@@ -220,7 +220,7 @@ class Contour(Geometry):
             ``O(len(self.vertices))``
         Memory complexity:
             ``O(1)`` if contour is normalized,
-            ``O(len(self.vertices))`` -- otherwise.
+            ``O(len(self.vertices))`` -- otherwise
 
         >>> contour = Contour.from_raw([(0, 0), (1, 0), (0, 1)])
         >>> contour.orientation is Orientation.COUNTERCLOCKWISE
