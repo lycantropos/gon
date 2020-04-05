@@ -239,8 +239,10 @@ class Polygon(Geometry):
         >>> polygon <= polygon.convex_hull
         True
         """
-        return polygon_in_polygon((self._raw_border, self._raw_holes),
-                                  (other._raw_border, other._raw_holes))
+        return (polygon_in_polygon((self._raw_border, self._raw_holes),
+                                   (other._raw_border, other._raw_holes))
+                if isinstance(other, Polygon)
+                else NotImplemented)
 
     def __lt__(self, other: 'Polygon') -> bool:
         """
