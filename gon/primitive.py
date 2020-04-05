@@ -58,7 +58,9 @@ class Point(Geometry):
         >>> Point(0, 0) == Point(1, 0)
         False
         """
-        return self._x == other._x and self._y == other._y
+        return (self._x == other._x and self._y == other._y
+                if isinstance(other, Point)
+                else NotImplemented)
 
     def __lt__(self, other: 'Point') -> bool:
         """
