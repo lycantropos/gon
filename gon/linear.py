@@ -228,7 +228,9 @@ class Contour(Geometry):
         >>> contour == Contour.from_raw([(1, 0), (0, 0), (0, 1)])
         False
         """
-        return self is other or self._vertices == other._vertices
+        return self is other or (self._vertices == other._vertices
+                                 if isinstance(other, Contour)
+                                 else NotImplemented)
 
     def __hash__(self) -> int:
         """
