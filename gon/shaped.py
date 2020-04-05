@@ -155,8 +155,10 @@ class Polygon(Geometry):
         >>> polygon >= polygon.convex_hull
         False
         """
-        return polygon_in_polygon((other._raw_border, other._raw_holes),
-                                  (self._raw_border, self._raw_holes))
+        return (polygon_in_polygon((other._raw_border, other._raw_holes),
+                                   (self._raw_border, self._raw_holes))
+                if isinstance(other, Polygon)
+                else NotImplemented)
 
     def __gt__(self, other: 'Polygon') -> bool:
         """
