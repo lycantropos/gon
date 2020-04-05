@@ -121,8 +121,10 @@ class Polygon(Geometry):
         True
         """
         return (self is other
-                or self._normalized_border == other._normalized_border
-                and self._normalized_holes == other._normalized_holes)
+                or (self._normalized_border == other._normalized_border
+                    and self._normalized_holes == other._normalized_holes
+                    if isinstance(other, Polygon)
+                    else NotImplemented))
 
     def __ge__(self, other: 'Polygon') -> bool:
         """
