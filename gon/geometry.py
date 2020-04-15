@@ -3,6 +3,8 @@ from abc import (ABC,
 from typing import (Type,
                     TypeVar)
 
+from orient.planar import Relation
+
 from .hints import Domain
 
 RawGeometry = TypeVar('RawGeometry', tuple, list)
@@ -32,6 +34,12 @@ class Geometry(ABC):
     def from_raw(cls: Type[Domain], raw: RawGeometry) -> Domain:
         """
         Constructs geometric object from combination of Python built-ins.
+        """
+
+    @abstractmethod
+    def relate(self, other: 'Geometry') -> Relation:
+        """
+        Finds relation between geometric objects.
         """
 
     @abstractmethod

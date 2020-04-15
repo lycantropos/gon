@@ -6,6 +6,12 @@ from typing import (Iterator,
                     Tuple)
 
 from bentley_ottmann.planar import edges_intersect
+from orient.planar import (Relation,
+                           contour_in_contour,
+                           point_in_contour,
+                           point_in_segment,
+                           segment_in_contour,
+                           segment_in_segment)
 from reprit.base import generate_repr
 from robust.hints import Expansion
 from robust.linear import (SegmentsRelationship,
@@ -174,6 +180,13 @@ class Segment(Geometry):
         """
         return self._raw
 
+    def relate(self, other: 'Geometry') -> Relation:
+        return (point_in_segment(other.raw(), self._raw)
+                if isinstance(other, Point)
+                else (segment_in_segment(other._raw, self._raw)
+                      if isinstance(other, Segment)
+                      else other.relate(self).complement))
+
     def relationship_with(self, other: 'Segment') -> SegmentsRelationship:
         return segments_relationship(self._raw, other._raw)
 
@@ -333,6 +346,15 @@ class Contour(Geometry):
         [(0, 0), (1, 0), (0, 1)]
         """
         return self._raw[:]
+
+    def relate(self, other: 'Geometry') -> Relation:
+        return (point_in_contour(other.raw(), self._raw)
+                if isinstance(other, Point)
+                else (segment_in_contour(other.raw(), self._raw)
+                      if isinstance(other, Segment)
+                      else (contour_in_contour(other._raw, self._raw)
+                            if isinstance(other, Contour)
+                            else other.relate(self).complement)))
 
     def reverse(self) -> 'Contour':
         """
