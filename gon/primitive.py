@@ -1,6 +1,7 @@
 import math
 from typing import Tuple
 
+from orient.planar import Relation
 from reprit.base import generate_repr
 
 from .geometry import Geometry
@@ -146,6 +147,13 @@ class Point(Geometry):
         (1, 0)
         """
         return self._raw
+
+    def relate(self, other: 'Geometry') -> Relation:
+        return ((Relation.EQUAL
+                 if self == other
+                 else Relation.DISJOINT)
+                if isinstance(other, Point)
+                else other.relate(self).complement)
 
     def validate(self) -> None:
         """

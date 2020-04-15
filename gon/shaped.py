@@ -5,9 +5,11 @@ from typing import (Iterable,
                     Tuple)
 
 from orient.planar import (Relation,
+                           contour_in_polygon,
                            point_in_polygon,
                            polygon_in_polygon,
-                           region_in_multiregion)
+                           region_in_multiregion,
+                           segment_in_polygon)
 from reprit.base import generate_repr
 from sect.triangulation import constrained_delaunay_triangles
 
@@ -17,6 +19,7 @@ from .geometry import Geometry
 from .hints import Coordinate
 from .linear import (Contour,
                      RawContour,
+                     Segment,
                      forms_convex_polygon,
                      to_signed_area)
 from .primitive import Point
@@ -445,6 +448,17 @@ class Polygon(Geometry):
         """
         return self._raw_border[:], [raw_hole[:]
                                      for raw_hole in self._raw_holes]
+
+    def relate(self, other: 'Geometry') -> Relation:
+        raw = self._raw_border, self._raw_holes
+        return (point_in_polygon(other.raw(), raw)
+                if isinstance(other, Point)
+                else (segment_in_polygon(other.raw(), raw)
+                      if isinstance(other, Segment)
+                      else (contour_in_polygon(other.raw(), raw)
+                            if isinstance(other, Contour)
+                            else polygon_in_polygon((other._raw_border,
+                                                     other._raw_holes), raw))))
 
     def triangulate(self) -> List['Polygon']:
         """
