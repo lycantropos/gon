@@ -4,10 +4,10 @@ from typing import (Iterable,
                     Sequence,
                     Tuple)
 
-from orient.planar import (PointLocation,
-                           contours_in_contour,
+from orient.planar import (Relation,
                            point_in_polygon,
-                           polygon_in_polygon)
+                           polygon_in_polygon,
+                           region_in_multiregion)
 from reprit.base import generate_repr
 from sect.triangulation import constrained_delaunay_triangles
 
@@ -91,7 +91,7 @@ class Polygon(Geometry):
         """
         return (point_in_polygon(point.raw(),
                                  (self._raw_border, self._raw_holes))
-                is not PointLocation.EXTERNAL)
+                is not Relation.DISJOINT)
 
     def __eq__(self, other: 'Polygon') -> bool:
         """
@@ -157,6 +157,8 @@ class Polygon(Geometry):
         """
         return (polygon_in_polygon((other._raw_border, other._raw_holes),
                                    (self._raw_border, self._raw_holes))
+                in (Relation.EQUAL, Relation.COMPONENT, Relation.ENCLOSED,
+                    Relation.WITHIN)
                 if isinstance(other, Polygon)
                 else NotImplemented)
 
@@ -241,6 +243,8 @@ class Polygon(Geometry):
         """
         return (polygon_in_polygon((self._raw_border, self._raw_holes),
                                    (other._raw_border, other._raw_holes))
+                in (Relation.EQUAL, Relation.COMPOSITE, Relation.ENCLOSES,
+                    Relation.COVER)
                 if isinstance(other, Polygon)
                 else NotImplemented)
 
@@ -490,7 +494,8 @@ class Polygon(Geometry):
         self._border.validate()
         for hole in self._holes:
             hole.validate()
-        if not contours_in_contour(self._raw_holes, self._raw_border):
+        relation = region_in_multiregion(self._raw_border, self._raw_holes)
+        if relation is not Relation.COVER or relation is not Relation.ENCLOSES:
             raise ValueError('Holes should lie inside border.')
 
 
