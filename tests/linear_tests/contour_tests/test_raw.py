@@ -1,6 +1,6 @@
 from hypothesis import given
 
-from gon.shaped import (Contour,
+from gon.linear import (Contour,
                         RawContour)
 from . import strategies
 
