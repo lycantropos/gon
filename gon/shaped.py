@@ -246,8 +246,8 @@ class Polygon(Geometry):
         """
         return (polygon_in_polygon((self._raw_border, self._raw_holes),
                                    (other._raw_border, other._raw_holes))
-                in (Relation.EQUAL, Relation.COMPOSITE, Relation.ENCLOSES,
-                    Relation.COVER)
+                in (Relation.EQUAL, Relation.COMPONENT, Relation.ENCLOSED,
+                    Relation.WITHIN)
                 if isinstance(other, Polygon)
                 else NotImplemented)
 
