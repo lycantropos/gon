@@ -16,7 +16,7 @@ def test_basic(geometries_pair: Tuple[Geometry, Geometry]) -> None:
     assert isinstance(result, bool)
 
 
-@given(strategies.geometries_pairs)
+@given(strategies.geometries)
 def test_irreflexivity(geometry: Geometry) -> None:
     assert not geometry.disjoint(geometry)
 
