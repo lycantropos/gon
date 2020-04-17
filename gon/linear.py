@@ -14,9 +14,7 @@ from orient.planar import (Relation,
                            segment_in_segment)
 from reprit.base import generate_repr
 from robust.hints import Expansion
-from robust.linear import (SegmentsRelationship,
-                           segment_contains,
-                           segments_relationship)
+from robust.linear import segment_contains
 from robust.utils import (sum_expansions,
                           two_product,
                           two_two_diff)
@@ -28,10 +26,9 @@ from .hints import Coordinate
 from .primitive import (Point,
                         RawPoint)
 
-RawSegment = Tuple[RawPoint, RawPoint]
-SegmentsRelationship = SegmentsRelationship
-Vertices = Sequence[Point]
 RawContour = List[RawPoint]
+RawSegment = Tuple[RawPoint, RawPoint]
+Vertices = Sequence[Point]
 
 MIN_VERTICES_COUNT = 3
 
@@ -186,9 +183,6 @@ class Segment(Geometry):
                 else (segment_in_segment(other._raw, self._raw)
                       if isinstance(other, Segment)
                       else other.relate(self).complement))
-
-    def relationship_with(self, other: 'Segment') -> SegmentsRelationship:
-        return segments_relationship(self._raw, other._raw)
 
     def validate(self) -> None:
         """
