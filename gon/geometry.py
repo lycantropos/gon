@@ -40,15 +40,15 @@ class Geometry(ABC):
         return self.relate(other) is Relation.DISJOINT
 
     @abstractmethod
-    def relate(self, other: 'Geometry') -> Relation:
-        """
-        Finds relation between geometric objects.
-        """
-
-    @abstractmethod
     def raw(self) -> RawGeometry:
         """
         Returns geometric object as combination of Python built-ins.
+        """
+
+    @abstractmethod
+    def relate(self, other: 'Geometry') -> Relation:
+        """
+        Finds relation between geometric objects.
         """
 
     @abstractmethod
