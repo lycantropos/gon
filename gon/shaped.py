@@ -509,7 +509,8 @@ class Polygon(Geometry):
         for hole in self._holes:
             hole.validate()
         relation = region_in_multiregion(self._raw_border, self._raw_holes)
-        if relation is not Relation.COVER or relation is not Relation.ENCLOSES:
+        if (relation is not Relation.COVER
+                and relation is not Relation.ENCLOSES):
             raise ValueError('Holes should lie inside border.')
 
 
