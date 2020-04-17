@@ -3,16 +3,9 @@ import math
 from hypothesis import strategies
 from lz.functional import identity
 
-from gon.hints import Coordinate
 from gon.primitive import Point
-from tests.utils import Strategy
 from .base import coordinates_strategies
-
-
-def coordinates_to_points(coordinates: Strategy[Coordinate]
-                          ) -> Strategy[Point]:
-    return strategies.builds(Point, coordinates, coordinates)
-
+from .factories import coordinates_to_points
 
 points_strategies = coordinates_strategies.map(coordinates_to_points)
 points = coordinates_strategies.flatmap(coordinates_to_points)

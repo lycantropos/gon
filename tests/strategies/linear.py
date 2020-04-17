@@ -12,8 +12,8 @@ from gon.linear import (MIN_VERTICES_COUNT,
                         Vertices)
 from tests.utils import Strategy
 from .base import coordinates_strategies
-from .primitive import (coordinates_to_points,
-                        invalid_points)
+from .factories import coordinates_to_points
+from .primitive import invalid_points
 
 
 def to_contours_with_repeated_points(coordinates: Strategy[Coordinate],
@@ -53,8 +53,3 @@ invalid_vertices_contours = strategies.builds(
                          min_size=MIN_VERTICES_COUNT))
 contours_with_repeated_points = (coordinates_strategies
                                  .flatmap(to_contours_with_repeated_points))
-
-
-def coordinates_to_contours(coordinates: Strategy[Coordinate]
-                            ) -> Strategy[Contour]:
-    return planar.contours(coordinates).map(Contour.from_raw)
