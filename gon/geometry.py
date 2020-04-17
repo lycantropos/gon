@@ -36,6 +36,9 @@ class Geometry(ABC):
         Constructs geometric object from combination of Python built-ins.
         """
 
+    def disjoint(self, other: 'Geometry') -> bool:
+        return self.relate(other) is Relation.DISJOINT
+
     @abstractmethod
     def relate(self, other: 'Geometry') -> Relation:
         """
