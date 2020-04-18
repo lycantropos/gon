@@ -267,29 +267,6 @@ class Polygon(Shaped):
         return not self._holes and forms_convex_polygon(self._border)
 
     @property
-    def normalized(self) -> 'Polygon':
-        """
-        Returns polygon in normalized form.
-
-        Time complexity:
-            ``O(1)`` if normalized already, ``O(vertices_count)`` -- otherwise
-        Memory complexity:
-            ``O(1)`` if normalized already, ``O(vertices_count)`` -- otherwise
-
-        where ``vertices_count = len(self.border.vertices)\
- + sum(len(hole.vertices) for hole in self.holes)``.
-
-        >>> polygon = Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
-        ...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]]))
-        >>> polygon.normalized == polygon
-        True
-        """
-        return (self
-                if self._is_normalized
-                else Polygon(self._normalized_border, self._normalized_holes,
-                             _is_normalized=True))
-
-    @property
     def perimeter(self) -> Coordinate:
         return self._border.length + sum(hole.length for hole in self._holes)
 
