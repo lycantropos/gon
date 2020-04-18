@@ -16,7 +16,7 @@ from sect.triangulation import constrained_delaunay_triangles
 from .angular import (Orientation,
                       to_orientation)
 from .geometry import (Geometry,
-                       Shaped)
+                       ShapedCompound)
 from .hints import Coordinate
 from .linear import (Contour,
                      RawContour,
@@ -28,7 +28,7 @@ from .primitive import Point
 RawPolygon = Tuple[RawContour, List[RawContour]]
 
 
-class Polygon(Shaped):
+class Polygon(ShapedCompound):
     __slots__ = '_border', '_holes', '_holes_set', '_raw_border', '_raw_holes'
 
     def __init__(self, border: Contour,
