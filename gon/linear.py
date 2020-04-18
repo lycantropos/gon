@@ -265,13 +265,14 @@ class Contour(Linear):
         Time complexity:
             ``O(len(self.vertices))``
         Memory complexity:
-            ``O(1)``
+            ``O(1)`` if normalized and counterclockwise,
+            ``O(len(self.vertices))`` otherwise
 
         >>> contour = Contour.from_raw([(0, 0), (1, 0), (0, 1)])
         >>> hash(contour) == hash(contour)
         True
         """
-        return hash(self._vertices)
+        return hash(self.normalized.to_counterclockwise()._vertices)
 
     def __le__(self, other: 'Geometry') -> bool:
         return (False
