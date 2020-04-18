@@ -5,7 +5,8 @@ from typing import (Type,
 
 from orient.planar import Relation
 
-from .hints import Domain
+from .hints import (Coordinate,
+                    Domain)
 
 RawGeometry = TypeVar('RawGeometry', tuple, list)
 
@@ -56,4 +57,37 @@ class Geometry(ABC):
         """
         Checks geometric object's constraints
         and raises error if any violation was found.
+        """
+
+
+class Linear(Geometry):
+    @abstractmethod
+    def __ge__(self, other: 'Geometry') -> bool:
+        """
+        Checks if the geometry is a superset of the other.
+        """
+
+    @abstractmethod
+    def __gt__(self, other: 'Geometry') -> bool:
+        """
+        Checks if the geometry is a strict superset of the other.
+        """
+
+    @abstractmethod
+    def __le__(self, other: 'Geometry') -> bool:
+        """
+        Checks if the geometry is a subset of the other.
+        """
+
+    @abstractmethod
+    def __lt__(self, other: 'Geometry') -> bool:
+        """
+        Checks if the geometry is a strict subset of the other.
+        """
+
+    @property
+    @abstractmethod
+    def length(self) -> Coordinate:
+        """
+        Returns length of the geometry.
         """
