@@ -96,29 +96,52 @@ class Linear(Compound):
 
 
 class Shaped(Compound):
-    @abstractmethod
     def __ge__(self, other: 'Geometry') -> bool:
         """
         Checks if the geometry is a superset of the other.
         """
+        return (self is other
+                or (self.relate(other) in (Relation.EQUAL, Relation.COMPONENT,
+                                           Relation.ENCLOSED, Relation.WITHIN)
+                    if isinstance(other, Compound)
+                    else NotImplemented))
 
-    @abstractmethod
     def __gt__(self, other: 'Geometry') -> bool:
         """
         Checks if the geometry is a strict superset of the other.
         """
+        return (self is not other
+                and (self.relate(other) in (Relation.COMPONENT,
+                                            Relation.ENCLOSED, Relation.WITHIN)
+                     if isinstance(other, Compound)
+                     else NotImplemented))
 
-    @abstractmethod
     def __le__(self, other: 'Geometry') -> bool:
         """
         Checks if the geometry is a subset of the other.
         """
+        return (self is other
+                or ((self.relate(other) in (Relation.COVER, Relation.ENCLOSES,
+                                            Relation.COMPOSITE, Relation.EQUAL)
+                     if isinstance(other, Shaped)
+                     # shaped cannot be subset of or equal to linear
+                     else False)
+                    if isinstance(other, Compound)
+                    else NotImplemented))
 
-    @abstractmethod
     def __lt__(self, other: 'Geometry') -> bool:
         """
         Checks if the geometry is a strict subset of the other.
         """
+        return (self is not other
+                and ((self.relate(other) in (Relation.COVER,
+                                             Relation.ENCLOSES,
+                                             Relation.COMPOSITE)
+                      if isinstance(other, Shaped)
+                      # shaped cannot be subset of linear
+                      else False)
+                     if isinstance(other, Compound)
+                     else NotImplemented))
 
     @property
     @abstractmethod
