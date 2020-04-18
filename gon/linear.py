@@ -441,12 +441,16 @@ class Loop(LinearCompound):
         >>> hash(loop) == hash(loop)
         True
         """
-        vertices = self.to_counterclockwise()._vertices
+        vertices = self._vertices
         min_index = min(range(len(vertices)),
                         key=vertices.__getitem__)
-        return hash(vertices[min_index:] + vertices[:min_index]
+        vertices = (vertices[min_index:] + vertices[:min_index]
                     if min_index
                     else vertices)
+        return hash(vertices
+                    if (to_orientation(vertices[0], vertices[- 1], vertices[1])
+                        is Orientation.COUNTERCLOCKWISE)
+                    else _rotate_vertices(vertices))
 
     def __le__(self, other: Compound) -> bool:
         return (False
@@ -753,6 +757,10 @@ class Contour(LinearOriented):
                              'should not be on the same line.')
         if edges_intersect(self._raw):
             raise ValueError('Contour should not be self-intersecting.')
+
+
+def _rotate_vertices(vertices: Vertices) -> Vertices:
+    return vertices[:1] + vertices[:0:-1]
 
 
 def _vertices_to_length(vertices: Vertices) -> Coordinate:
