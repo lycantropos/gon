@@ -22,8 +22,7 @@ from robust.utils import (sum_expansions,
 
 from .angular import (Orientation,
                       to_orientation)
-from .geometry import (Compound,
-                       Geometry,
+from .geometry import (Geometry,
                        Linear)
 from .hints import Coordinate
 from .primitive import (Point,
@@ -259,30 +258,6 @@ class Contour(Linear):
                                        if isinstance(other, Geometry)
                                        else NotImplemented))
 
-    def __ge__(self, other: 'Geometry') -> bool:
-        return (self is other
-                or (segment_in_contour(other.raw(), self._raw)
-                    is Relation.COMPONENT
-                    if isinstance(other, Segment)
-                    else (contour_in_contour(other._raw, self._raw)
-                          in (Relation.EQUAL, Relation.COMPONENT)
-                          if isinstance(other, Contour)
-                          else (other <= self
-                                if isinstance(other, Compound)
-                                else NotImplemented))))
-
-    def __gt__(self, other: 'Geometry') -> bool:
-        return (self is not other
-                and (segment_in_contour(other.raw(), self._raw)
-                     is Relation.COMPONENT
-                     if isinstance(other, Segment)
-                     else (contour_in_contour(other._raw, self._raw)
-                           is Relation.COMPONENT
-                           if isinstance(other, Contour)
-                           else (other < self
-                                 if isinstance(other, Compound)
-                                 else NotImplemented))))
-
     def __hash__(self) -> int:
         """
         Returns hash value of the contour.
@@ -299,26 +274,14 @@ class Contour(Linear):
         return hash(self._vertices)
 
     def __le__(self, other: 'Geometry') -> bool:
-        return (self is other
-                or (False
-                    if isinstance(other, Segment)
-                    else (contour_in_contour(self._raw, other._raw)
-                          in (Relation.EQUAL, Relation.COMPONENT)
-                          if isinstance(other, Contour)
-                          else (other >= self
-                                if isinstance(other, Compound)
-                                else NotImplemented))))
+        return (False
+                if isinstance(other, Segment)
+                else super().__le__(other))
 
     def __lt__(self, other: 'Geometry') -> bool:
-        return (self is not other
-                and (False
-                     if isinstance(other, Segment)
-                     else (contour_in_contour(self._raw, other._raw)
-                           is Relation.COMPONENT
-                           if isinstance(other, Contour)
-                           else (other > self
-                                 if isinstance(other, Compound)
-                                 else NotImplemented))))
+        return (False
+                if isinstance(other, Segment)
+                else super().__lt__(other))
 
     @classmethod
     def from_raw(cls, raw: RawContour) -> 'Contour':
