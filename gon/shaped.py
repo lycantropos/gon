@@ -29,13 +29,10 @@ RawPolygon = Tuple[RawContour, List[RawContour]]
 
 
 class Polygon(Shaped):
-    __slots__ = ('_border', '_holes', '_raw_border', '_raw_holes',
-                 '_normalized_border', '_normalized_holes', '_is_normalized')
+    __slots__ = '_border', '_holes', '_holes_set', '_raw_border', '_raw_holes'
 
     def __init__(self, border: Contour,
-                 holes: Optional[Sequence[Contour]] = None,
-                 *,
-                 _is_normalized: bool = False) -> None:
+                 holes: Optional[Sequence[Contour]] = None) -> None:
         """
         Initializes polygon.
 
@@ -48,17 +45,10 @@ class Polygon(Shaped):
  + sum(len(hole.vertices) for hole in holes)``.
         """
         holes = tuple(holes or ())
-        self._border, self._holes = border, holes
+        self._border, self._holes, self._holes_set = (border, holes,
+                                                      frozenset(holes))
         self._raw_border, self._raw_holes = border.raw(), [hole.raw()
                                                            for hole in holes]
-        self._normalized_border, self._normalized_holes = (
-            (border, holes)
-            if _is_normalized
-            else (border.normalized.to_counterclockwise(),
-                  tuple(sorted([hole.normalized.to_clockwise()
-                                for hole in holes],
-                               key=lambda contour: contour._vertices[:2]))))
-        self._is_normalized = _is_normalized
 
     __repr__ = generate_repr(__init__)
 
@@ -125,8 +115,8 @@ class Polygon(Shaped):
         True
         """
         return (self is other
-                or (self._normalized_border == other._normalized_border
-                    and self._normalized_holes == other._normalized_holes
+                or (self._border == other._border
+                    and self._holes_set == other._holes_set
                     if isinstance(other, Polygon)
                     else (False
                           if isinstance(other, Geometry)
@@ -149,7 +139,7 @@ class Polygon(Shaped):
         >>> hash(polygon) == hash(polygon)
         True
         """
-        return hash((self._normalized_border, self._normalized_holes))
+        return hash((self._border, self._holes_set))
 
     @classmethod
     def from_raw(cls, raw: RawPolygon) -> 'Polygon':
