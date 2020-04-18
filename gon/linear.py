@@ -476,9 +476,7 @@ class Loop(LinearCompound):
 
     @property
     def length(self) -> Coordinate:
-        vertices = self._vertices
-        return sum(Segment(vertices[index - 1], vertices[index]).length
-                   for index in range(len(vertices)))
+        return _vertices_to_length(self._vertices)
 
     @property
     def vertices(self) -> Vertices:
@@ -622,9 +620,7 @@ class Contour(LinearOriented):
 
     @property
     def length(self) -> Coordinate:
-        vertices = self._vertices
-        return sum(Segment(vertices[index - 1], vertices[index]).length
-                   for index in range(len(vertices)))
+        return _vertices_to_length(self._vertices)
 
     @property
     def orientation(self) -> 'Orientation':
@@ -757,6 +753,12 @@ class Contour(LinearOriented):
                              'should not be on the same line.')
         if edges_intersect(self._raw):
             raise ValueError('Contour should not be self-intersecting.')
+
+
+def _vertices_to_length(vertices: Vertices) -> Coordinate:
+    return sum(math.sqrt(_squared_distance(vertices[index - 1],
+                                           vertices[index]))
+               for index in range(len(vertices)))
 
 
 def _vertices_form_convex_polygon(vertices: Vertices) -> bool:
