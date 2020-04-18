@@ -396,7 +396,7 @@ class Contour(Linear):
 
         >>> contour = Contour.from_raw([(0, 0), (1, 0), (0, 1)])
         >>> contour.reverse() == contour
-        False
+        True
         >>> contour.reverse().reverse() == contour
         True
         """
