@@ -4,12 +4,12 @@ from hypothesis_geometry import planar
 from gon.linear import Contour
 from gon.shaped import (Polygon,
                         _to_convex_hull)
-from tests.strategies import (coordinates_strategies,
+from tests.strategies import (contours_with_repeated_points,
+                              coordinates_strategies,
                               coordinates_to_contours,
                               coordinates_to_points,
                               coordinates_to_polygons,
-                              invalid_vertices_loops,
-                              loops_with_repeated_points)
+                              invalid_vertices_contours)
 from tests.utils import (cleave_in_tuples,
                          to_pairs,
                          to_triplets)
@@ -23,7 +23,7 @@ def to_invalid_polygon_with_hole(concave_loop: Contour) -> Polygon:
                    [Contour(_to_convex_hull(concave_loop.vertices))])
 
 
-invalid_loops = invalid_vertices_loops | loops_with_repeated_points
+invalid_loops = invalid_vertices_contours | contours_with_repeated_points
 invalid_polygons = (
         strategies.builds(Polygon, invalid_loops)
         | strategies.builds(Polygon,
