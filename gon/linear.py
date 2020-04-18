@@ -99,20 +99,14 @@ class Segment(Linear):
                 else NotImplemented)
 
     def __ge__(self, other: 'Geometry') -> bool:
-        return self is other or (segment_in_segment(other._raw, self._raw)
-                                 in (Relation.EQUAL, Relation.COMPONENT)
-                                 if isinstance(other, Segment)
-                                 else (other <= self
-                                       if isinstance(other, Compound)
-                                       else NotImplemented))
+        return (False
+                if isinstance(other, Contour)
+                else super().__ge__(other))
 
     def __gt__(self, other: 'Geometry') -> bool:
-        return self is not other and (segment_in_segment(other._raw, self._raw)
-                                      is Relation.COMPONENT
-                                      if isinstance(other, Segment)
-                                      else (other < self
-                                            if isinstance(other, Compound)
-                                            else NotImplemented))
+        return (False
+                if isinstance(other, Contour)
+                else super().__gt__(other))
 
     def __hash__(self) -> int:
         """
@@ -130,22 +124,6 @@ class Segment(Linear):
         True
         """
         return hash(frozenset(self._raw))
-
-    def __le__(self, other: 'Geometry') -> bool:
-        return self is other or (segment_in_segment(self._raw, other._raw)
-                                 in (Relation.EQUAL, Relation.COMPONENT)
-                                 if isinstance(other, Segment)
-                                 else (other >= self
-                                       if isinstance(other, Compound)
-                                       else NotImplemented))
-
-    def __lt__(self, other: 'Geometry') -> bool:
-        return self is not other and (segment_in_segment(self._raw, other._raw)
-                                      is Relation.COMPONENT
-                                      if isinstance(other, Segment)
-                                      else (other > self
-                                            if isinstance(other, Compound)
-                                            else NotImplemented))
 
     @classmethod
     def from_raw(cls, raw: RawSegment) -> 'Segment':
