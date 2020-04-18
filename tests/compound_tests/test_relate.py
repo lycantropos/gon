@@ -3,7 +3,7 @@ from typing import Tuple
 from hypothesis import given
 from orient.planar import Relation
 
-from gon.compound import Compound
+from gon.geometry import Compound
 from . import strategies
 
 

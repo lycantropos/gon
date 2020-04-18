@@ -20,12 +20,12 @@ from robust.utils import (sum_expansions,
 
 from .angular import (Orientation,
                       to_orientation)
-from .compound import (Compound,
+from .geometry import (Compound,
+                       Geometry,
                        Linear,
+                       Oriented,
                        Relation)
-from .geometry import Geometry
 from .hints import Coordinate
-from .oriented import Oriented
 from .primitive import (Point,
                         RawPoint)
 
