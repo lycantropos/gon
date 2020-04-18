@@ -3,9 +3,14 @@ from abc import (ABC,
 from typing import (Type,
                     TypeVar)
 
-from .hints import Domain
+from orient.planar import Relation
+
+from .hints import (Coordinate,
+                    Domain)
 
 RawGeometry = TypeVar('RawGeometry', tuple, list)
+
+Relation = Relation
 
 
 class Geometry(ABC):
@@ -45,4 +50,78 @@ class Geometry(ABC):
         """
         Checks geometric object's constraints
         and raises error if any violation was found.
+        """
+
+
+class Oriented(Geometry):
+    @abstractmethod
+    def reverse(self) -> 'Oriented':
+        """
+        Returns the geometry reversed.
+        """
+
+
+class Compound(Geometry):
+    @abstractmethod
+    def __contains__(self, other: 'Geometry') -> bool:
+        """
+        Checks if the geometry contains the other.
+        """
+
+    @abstractmethod
+    def __ge__(self, other: 'Compound') -> bool:
+        """
+        Checks if the geometry is a superset of the other.
+        """
+
+    @abstractmethod
+    def __gt__(self, other: 'Compound') -> bool:
+        """
+        Checks if the geometry is a strict superset of the other.
+        """
+
+    @abstractmethod
+    def __le__(self, other: 'Compound') -> bool:
+        """
+        Checks if the geometry is a subset of the other.
+        """
+
+    @abstractmethod
+    def __lt__(self, other: 'Compound') -> bool:
+        """
+        Checks if the geometry is a strict subset of the other.
+        """
+
+    def disjoint(self, other: 'Compound') -> bool:
+        return self.relate(other) is Relation.DISJOINT
+
+    @abstractmethod
+    def relate(self, other: 'Compound') -> Relation:
+        """
+        Finds relation between geometric objects.
+        """
+
+
+class Linear(Geometry):
+    @property
+    @abstractmethod
+    def length(self) -> Coordinate:
+        """
+        Returns length of the geometry.
+        """
+
+
+class Shaped(Geometry):
+    @property
+    @abstractmethod
+    def area(self) -> Coordinate:
+        """
+        Returns area of the geometry.
+        """
+
+    @property
+    @abstractmethod
+    def perimeter(self) -> Coordinate:
+        """
+        Returns perimeter of the geometry.
         """

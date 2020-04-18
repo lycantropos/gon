@@ -2,7 +2,7 @@ from typing import Tuple
 
 from hypothesis import given
 
-from gon.compound import Compound
+from gon.geometry import Compound
 from tests.utils import equivalence
 from . import strategies
 
