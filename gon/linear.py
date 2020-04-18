@@ -265,14 +265,20 @@ class Contour(Linear):
         Time complexity:
             ``O(len(self.vertices))``
         Memory complexity:
-            ``O(1)`` if normalized and counterclockwise,
+            ``O(1)`` if contours is counterclockwise
+            and starts from the bottom leftmost vertex,
             ``O(len(self.vertices))`` otherwise
 
         >>> contour = Contour.from_raw([(0, 0), (1, 0), (0, 1)])
         >>> hash(contour) == hash(contour)
         True
         """
-        return hash(self.normalized.to_counterclockwise()._vertices)
+        vertices = self.to_counterclockwise()._vertices
+        min_index = min(range(len(vertices)),
+                        key=vertices.__getitem__)
+        return hash(vertices[min_index:] + vertices[:min_index]
+                    if min_index
+                    else vertices)
 
     def __le__(self, other: 'Geometry') -> bool:
         return (False
