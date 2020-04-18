@@ -14,10 +14,10 @@ from sect.triangulation import constrained_delaunay_triangles
 
 from .angular import (Orientation,
                       to_orientation)
-from .geometry import (Compound,
-                       Geometry,
+from .compound import (Compound,
                        Relation,
                        Shaped)
+from .geometry import Geometry
 from .hints import Coordinate
 from .linear import (Contour,
                      RawContour,
