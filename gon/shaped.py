@@ -75,7 +75,7 @@ class Polygon(ShapedCompound):
         Initializes polygon.
 
         Time complexity:
-            ``O(vertices_count + len(self.holes) * log len(self.holes))``
+            ``O(vertices_count)``
         Memory complexity:
             ``O(vertices_count)``
 
