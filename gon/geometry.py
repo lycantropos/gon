@@ -124,7 +124,7 @@ class Shaped(Compound):
                 or ((self.relate(other) in (Relation.COVER, Relation.ENCLOSES,
                                             Relation.COMPOSITE, Relation.EQUAL)
                      if isinstance(other, Shaped)
-                     # shaped cannot be subset of or equal to linear
+                     # shaped cannot be subset of linear
                      else False)
                     if isinstance(other, Compound)
                     else NotImplemented))
@@ -138,7 +138,7 @@ class Shaped(Compound):
                                              Relation.ENCLOSES,
                                              Relation.COMPOSITE)
                       if isinstance(other, Shaped)
-                      # shaped cannot be subset of linear
+                      # shaped cannot be strict subset of linear
                       else False)
                      if isinstance(other, Compound)
                      else NotImplemented))
