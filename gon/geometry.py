@@ -93,3 +93,43 @@ class Linear(Compound):
         """
         Returns length of the geometry.
         """
+
+
+class Shaped(Compound):
+    @abstractmethod
+    def __ge__(self, other: 'Geometry') -> bool:
+        """
+        Checks if the geometry is a superset of the other.
+        """
+
+    @abstractmethod
+    def __gt__(self, other: 'Geometry') -> bool:
+        """
+        Checks if the geometry is a strict superset of the other.
+        """
+
+    @abstractmethod
+    def __le__(self, other: 'Geometry') -> bool:
+        """
+        Checks if the geometry is a subset of the other.
+        """
+
+    @abstractmethod
+    def __lt__(self, other: 'Geometry') -> bool:
+        """
+        Checks if the geometry is a strict subset of the other.
+        """
+
+    @property
+    @abstractmethod
+    def area(self) -> Coordinate:
+        """
+        Returns area of the geometry.
+        """
+
+    @property
+    @abstractmethod
+    def perimeter(self) -> Coordinate:
+        """
+        Returns perimeter of the geometry.
+        """
