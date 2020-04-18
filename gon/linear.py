@@ -22,7 +22,8 @@ from robust.utils import (sum_expansions,
 
 from .angular import (Orientation,
                       to_orientation)
-from .geometry import (Geometry,
+from .geometry import (Compound,
+                       Geometry,
                        Linear)
 from .hints import Coordinate
 from .primitive import (Point,
@@ -102,7 +103,7 @@ class Segment(Linear):
                                  in (Relation.EQUAL, Relation.COMPONENT)
                                  if isinstance(other, Segment)
                                  else (other <= self
-                                       if isinstance(other, Geometry)
+                                       if isinstance(other, Compound)
                                        else NotImplemented))
 
     def __gt__(self, other: 'Geometry') -> bool:
@@ -110,7 +111,7 @@ class Segment(Linear):
                                       is Relation.COMPONENT
                                       if isinstance(other, Segment)
                                       else (other < self
-                                            if isinstance(other, Geometry)
+                                            if isinstance(other, Compound)
                                             else NotImplemented))
 
     def __hash__(self) -> int:
@@ -135,7 +136,7 @@ class Segment(Linear):
                                  in (Relation.EQUAL, Relation.COMPONENT)
                                  if isinstance(other, Segment)
                                  else (other >= self
-                                       if isinstance(other, Geometry)
+                                       if isinstance(other, Compound)
                                        else NotImplemented))
 
     def __lt__(self, other: 'Geometry') -> bool:
@@ -143,7 +144,7 @@ class Segment(Linear):
                                       is Relation.COMPONENT
                                       if isinstance(other, Segment)
                                       else (other > self
-                                            if isinstance(other, Geometry)
+                                            if isinstance(other, Compound)
                                             else NotImplemented))
 
     @classmethod
