@@ -5,6 +5,7 @@ from typing import (Type,
 
 from orient.planar import Relation
 
+from .angular import Orientation
 from .hints import (Coordinate,
                     Domain)
 
@@ -57,6 +58,15 @@ class Geometry(ABC):
         """
         Checks geometric object's constraints
         and raises error if any violation was found.
+        """
+
+
+class Oriented(Geometry):
+    @property
+    @abstractmethod
+    def orientation(self) -> Orientation:
+        """
+        Returns orientation of the geometry.
         """
 
 
