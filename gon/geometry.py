@@ -38,19 +38,10 @@ class Geometry(ABC):
         Constructs geometric object from combination of Python built-ins.
         """
 
-    def disjoint(self, other: 'Geometry') -> bool:
-        return self.relate(other) is Relation.DISJOINT
-
     @abstractmethod
     def raw(self) -> RawGeometry:
         """
         Returns geometric object as combination of Python built-ins.
-        """
-
-    @abstractmethod
-    def relate(self, other: 'Geometry') -> Relation:
-        """
-        Finds relation between geometric objects.
         """
 
     @abstractmethod
@@ -99,6 +90,15 @@ class Compound(Geometry):
     def __lt__(self, other: 'Geometry') -> bool:
         """
         Checks if the geometry is a strict subset of the other.
+        """
+
+    def disjoint(self, other: 'Compound') -> bool:
+        return self.relate(other) is Relation.DISJOINT
+
+    @abstractmethod
+    def relate(self, other: 'Compound') -> Relation:
+        """
+        Finds relation between geometric objects.
         """
 
 
