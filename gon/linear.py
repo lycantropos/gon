@@ -1,4 +1,5 @@
 import math
+from abc import abstractmethod
 from fractions import Fraction
 from functools import reduce
 from typing import (Iterator,
@@ -22,8 +23,9 @@ from robust.utils import (sum_expansions,
 
 from .angular import (Orientation,
                       to_orientation)
-from .geometry import (Geometry,
-                       LinearCompound)
+from .geometry import (Compound,
+                       Geometry,
+                       Linear)
 from .hints import Coordinate
 from .primitive import (Point,
                         RawPoint)
@@ -33,6 +35,57 @@ RawSegment = Tuple[RawPoint, RawPoint]
 Vertices = Sequence[Point]
 
 MIN_VERTICES_COUNT = 3
+
+
+class LinearCompound(Linear, Compound):
+    def __ge__(self, other: 'Geometry') -> bool:
+        """
+        Checks if the geometry is a superset of the other.
+        """
+        return (self is other
+                or ((self.relate(other) in (Relation.COMPONENT, Relation.EQUAL)
+                     if isinstance(other, LinearCompound)
+                     # linear cannot be superset of shaped
+                     else False)
+                    if isinstance(other, Compound)
+                    else NotImplemented))
+
+    def __gt__(self, other: 'Geometry') -> bool:
+        """
+        Checks if the geometry is a strict superset of the other.
+        """
+        return (self is not other
+                and ((self.relate(other) is Relation.COMPONENT
+                      if isinstance(other, LinearCompound)
+                      # linear cannot be strict superset of shaped
+                      else False)
+                     if isinstance(other, Compound)
+                     else NotImplemented))
+
+    def __le__(self, other: 'Geometry') -> bool:
+        """
+        Checks if the geometry is a subset of the other.
+        """
+        return (self is other
+                or (self.relate(other) in (Relation.EQUAL, Relation.COMPONENT)
+                    if isinstance(other, Compound)
+                    else NotImplemented))
+
+    def __lt__(self, other: 'Geometry') -> bool:
+        """
+        Checks if the geometry is a strict subset of the other.
+        """
+        return (self is not other
+                and (self.relate(other) is Relation.COMPONENT
+                     if isinstance(other, Compound)
+                     else NotImplemented))
+
+    @property
+    @abstractmethod
+    def length(self) -> Coordinate:
+        """
+        Returns length of the geometry.
+        """
 
 
 class Segment(LinearCompound):
