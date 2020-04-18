@@ -15,9 +15,7 @@ from sect.triangulation import constrained_delaunay_triangles
 
 from .angular import (Orientation,
                       to_orientation)
-from .geometry import (Compound,
-                       Geometry,
-                       Linear,
+from .geometry import (Geometry,
                        Shaped)
 from .hints import Coordinate
 from .linear import (Contour,
@@ -134,76 +132,6 @@ class Polygon(Shaped):
                           if isinstance(other, Geometry)
                           else NotImplemented)))
 
-    def __ge__(self, other: 'Polygon') -> bool:
-        """
-        Checks if the polygon is a superset of the other.
-
-        Time complexity:
-            ``O(total_vertices_count * log total_vertices_count)``
-        Memory complexity:
-            ``O(total_vertices_count)``
-
-        where ``vertices_count = total_border_vertices_count\
- + total_holes_vertices_count``,
-        ``total_border_vertices_count =\
- border_vertices_count + other_border_vertices_count``
-        ``total_holes_vertices_count =\
- holes_vertices_count + other_holes_vertices_count``,
-        ``border_vertices_count = len(self.border.vertices)``,
-        ``other_border_vertices_count = len(other.border.vertices)``
-        ``holes_vertices_count =\
- sum(len(hole.vertices) for hole in self.holes)``,
-        ``other_holes_vertices_count =\
- sum(len(hole.vertices) for hole in other.holes)``.
-
-        >>> polygon = Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
-        ...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]]))
-        >>> polygon >= polygon
-        True
-        >>> polygon >= polygon.convex_hull
-        False
-        """
-        return (self is other
-                or (self.relate(other) in (Relation.EQUAL, Relation.COMPONENT,
-                                           Relation.ENCLOSED, Relation.WITHIN)
-                    if isinstance(other, Compound)
-                    else NotImplemented))
-
-    def __gt__(self, other: 'Polygon') -> bool:
-        """
-        Checks if the polygon is a strict superset of the other.
-
-        Time complexity:
-            ``O(total_vertices_count * log total_vertices_count)``
-        Memory complexity:
-            ``O(total_vertices_count)``
-
-        where ``vertices_count = total_border_vertices_count\
- + total_holes_vertices_count``,
-        ``total_border_vertices_count =\
- border_vertices_count + other_border_vertices_count``
-        ``total_holes_vertices_count =\
- holes_vertices_count + other_holes_vertices_count``,
-        ``border_vertices_count = len(self.border.vertices)``,
-        ``other_border_vertices_count = len(other.border.vertices)``
-        ``holes_vertices_count =\
- sum(len(hole.vertices) for hole in self.holes)``,
-        ``other_holes_vertices_count =\
- sum(len(hole.vertices) for hole in other.holes)``.
-
-        >>> polygon = Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
-        ...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]]))
-        >>> polygon > polygon
-        False
-        >>> polygon > polygon.convex_hull
-        False
-        """
-        return (self is not other
-                and (self.relate(other) in (Relation.COMPONENT,
-                                            Relation.ENCLOSED, Relation.WITHIN)
-                     if isinstance(other, Compound)
-                     else NotImplemented))
-
     def __hash__(self) -> int:
         """
         Returns hash value of the polygon.
@@ -222,83 +150,6 @@ class Polygon(Shaped):
         True
         """
         return hash((self._normalized_border, self._normalized_holes))
-
-    def __le__(self, other: 'Polygon') -> bool:
-        """
-        Checks if the polygon is a subset of the other.
-
-        Time complexity:
-            ``O(total_vertices_count * log total_vertices_count)``
-        Memory complexity:
-            ``O(total_vertices_count)``
-
-        where ``vertices_count = total_border_vertices_count\
- + total_holes_vertices_count``,
-        ``total_border_vertices_count =\
- border_vertices_count + other_border_vertices_count``
-        ``total_holes_vertices_count =\
- holes_vertices_count + other_holes_vertices_count``,
-        ``border_vertices_count = len(self.border.vertices)``,
-        ``other_border_vertices_count = len(other.border.vertices)``
-        ``holes_vertices_count =\
- sum(len(hole.vertices) for hole in self.holes)``,
-        ``other_holes_vertices_count =\
- sum(len(hole.vertices) for hole in other.holes)``.
-
-        >>> polygon = Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
-        ...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]]))
-        >>> polygon <= polygon
-        True
-        >>> polygon <= polygon.convex_hull
-        True
-        """
-        return (self is other
-                or ((False
-                     if isinstance(other, Linear)
-                     else self.relate(other) in (Relation.COVER,
-                                                 Relation.ENCLOSES,
-                                                 Relation.COMPOSITE,
-                                                 Relation.EQUAL))
-                    if isinstance(other, Compound)
-                    else NotImplemented))
-
-    def __lt__(self, other: 'Polygon') -> bool:
-        """
-        Checks if the polygon is a strict subset of the other.
-
-        Time complexity:
-            ``O(total_vertices_count * log total_vertices_count)``
-        Memory complexity:
-            ``O(total_vertices_count)``
-
-        where ``vertices_count = total_border_vertices_count\
- + total_holes_vertices_count``,
-        ``total_border_vertices_count =\
- border_vertices_count + other_border_vertices_count``
-        ``total_holes_vertices_count =\
- holes_vertices_count + other_holes_vertices_count``,
-        ``border_vertices_count = len(self.border.vertices)``,
-        ``other_border_vertices_count = len(other.border.vertices)``
-        ``holes_vertices_count =\
- sum(len(hole.vertices) for hole in self.holes)``,
-        ``other_holes_vertices_count =\
- sum(len(hole.vertices) for hole in other.holes)``.
-
-        >>> polygon = Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
-        ...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]]))
-        >>> polygon < polygon
-        False
-        >>> polygon < polygon.convex_hull
-        True
-        """
-        return (self is not other
-                and ((False
-                      if isinstance(other, Linear)
-                      else self.relate(other) in (Relation.COVER,
-                                                  Relation.ENCLOSES,
-                                                  Relation.COMPOSITE))
-                     if isinstance(other, Compound)
-                     else NotImplemented))
 
     @classmethod
     def from_raw(cls, raw: RawPolygon) -> 'Polygon':
