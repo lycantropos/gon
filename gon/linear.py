@@ -313,28 +313,6 @@ class Contour(Linear):
                    for index in range(len(vertices)))
 
     @property
-    def normalized(self) -> 'Contour':
-        """
-        Returns contour in normalized form.
-
-        Time complexity:
-            ``O(len(self.vertices))``
-        Memory complexity:
-            ``O(1)`` if normalized already,
-            ``O(len(self.vertices))`` -- otherwise
-
-        >>> contour = Contour.from_raw([(0, 0), (1, 0), (0, 1)])
-        >>> contour.normalized == contour
-        True
-        """
-        vertices = self._vertices
-        min_index = min(range(len(vertices)),
-                        key=vertices.__getitem__)
-        return (Contour(vertices[min_index:] + vertices[:min_index])
-                if min_index
-                else self)
-
-    @property
     def orientation(self) -> 'Orientation':
         """
         Returns orientation of the contour.
