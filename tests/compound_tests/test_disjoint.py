@@ -4,7 +4,7 @@ from hypothesis import given
 
 from gon.compound import Compound
 from tests.utils import equivalence
-from tests.geometry_tests.compounds_tests import strategies
+from . import strategies
 
 
 @given(strategies.compounds_pairs)
