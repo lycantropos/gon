@@ -25,5 +25,4 @@ def test_holes(polygon: Polygon) -> None:
 
 @given(strategies.polygons)
 def test_relation_with_convex_hull(polygon: Polygon) -> None:
-    assert equivalence(polygon.is_convex,
-                       polygon.normalized == polygon.convex_hull.normalized)
+    assert equivalence(polygon.is_convex, polygon == polygon.convex_hull)
