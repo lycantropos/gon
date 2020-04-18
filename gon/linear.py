@@ -531,7 +531,7 @@ def _contours_vertices_equal(left: Vertices, right: Vertices) -> bool:
         for left_index, right_index in zip(range(size),
                                            range(index, size)
                                            if right_step == 1
-                                           else range(index - 1, -1,
+                                           else range(index, -1,
                                                       right_step)):
             if left[left_index] != right[right_index]:
                 return False
