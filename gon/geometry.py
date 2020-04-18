@@ -96,14 +96,14 @@ class Compound(Geometry):
         """
 
 
-class Linear(Compound):
+class LinearCompound(Compound):
     def __ge__(self, other: 'Geometry') -> bool:
         """
         Checks if the geometry is a superset of the other.
         """
         return (self is other
                 or ((self.relate(other) in (Relation.COMPONENT, Relation.EQUAL)
-                     if isinstance(other, Linear)
+                     if isinstance(other, LinearCompound)
                      # linear cannot be superset of shaped
                      else False)
                     if isinstance(other, Compound)
@@ -115,7 +115,7 @@ class Linear(Compound):
         """
         return (self is not other
                 and ((self.relate(other) is Relation.COMPONENT
-                      if isinstance(other, Linear)
+                      if isinstance(other, LinearCompound)
                       # linear cannot be strict superset of shaped
                       else False)
                      if isinstance(other, Compound)

@@ -23,7 +23,7 @@ from robust.utils import (sum_expansions,
 from .angular import (Orientation,
                       to_orientation)
 from .geometry import (Geometry,
-                       Linear)
+                       LinearCompound)
 from .hints import Coordinate
 from .primitive import (Point,
                         RawPoint)
@@ -35,7 +35,7 @@ Vertices = Sequence[Point]
 MIN_VERTICES_COUNT = 3
 
 
-class Segment(Linear):
+class Segment(LinearCompound):
     __slots__ = '_start', '_end', '_raw'
 
     def __init__(self, start: Point, end: Point) -> None:
@@ -217,7 +217,7 @@ class Segment(Linear):
             raise ValueError('Segment is degenerate.')
 
 
-class Contour(Linear):
+class Contour(LinearCompound):
     __slots__ = '_vertices',
 
     def __init__(self, vertices: Vertices) -> None:
