@@ -19,14 +19,14 @@ from .compound import (Compound,
                        Shaped)
 from .geometry import Geometry
 from .hints import Coordinate
-from .linear import (Contour,
-                     RawContour,
+from .linear import (Loop,
+                     RawLoop,
                      Segment,
-                     forms_convex_polygon,
-                     to_signed_area)
+                     _vertices_form_convex_polygon,
+                     _vertices_to_signed_area)
 from .primitive import Point
 
-RawPolygon = Tuple[RawContour, List[RawContour]]
+RawPolygon = Tuple[RawLoop, List[RawLoop]]
 
 
 class ShapedCompound(Shaped, Compound):
@@ -69,8 +69,8 @@ class ShapedCompound(Shaped, Compound):
 class Polygon(ShapedCompound):
     __slots__ = '_border', '_holes', '_holes_set', '_raw_border', '_raw_holes'
 
-    def __init__(self, border: Contour,
-                 holes: Optional[Sequence[Contour]] = None) -> None:
+    def __init__(self, border: Loop,
+                 holes: Optional[Sequence[Loop]] = None) -> None:
         """
         Initializes polygon.
 
@@ -197,15 +197,15 @@ class Polygon(ShapedCompound):
         >>> polygon = Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
         ...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]]))
         >>> (polygon
-        ...  == Polygon(Contour([Point(0, 0), Point(6, 0),
+        ...  == Polygon(Loop([Point(0, 0), Point(6, 0),
         ...                      Point(6, 6), Point(0, 6)]),
-        ...             [Contour([Point(2, 2), Point(2, 4),
+        ...             [Loop([Point(2, 2), Point(2, 4),
         ...                       Point(4, 4), Point(4, 2)])]))
         True
         """
         raw_border, raw_holes = raw
-        return cls(Contour.from_raw(raw_border),
-                   [Contour.from_raw(raw_hole) for raw_hole in raw_holes])
+        return cls(Loop.from_raw(raw_border),
+                   [Loop.from_raw(raw_hole) for raw_hole in raw_holes])
 
     @property
     def area(self) -> Coordinate:
@@ -225,11 +225,12 @@ class Polygon(ShapedCompound):
         >>> polygon.area == 32
         True
         """
-        return (abs(to_signed_area(self._border))
-                - sum(abs(to_signed_area(hole)) for hole in self._holes))
+        return (abs(_vertices_to_signed_area(self._border._vertices))
+                - sum(abs(_vertices_to_signed_area(hole._vertices))
+                      for hole in self._holes))
 
     @property
-    def border(self) -> Contour:
+    def border(self) -> Loop:
         """
         Returns border of the polygon.
 
@@ -267,10 +268,10 @@ class Polygon(ShapedCompound):
         """
         return (self
                 if self.is_convex
-                else Polygon(Contour(_to_convex_hull(self._border.vertices))))
+                else Polygon(Loop(_to_convex_hull(self._border.vertices))))
 
     @property
-    def holes(self) -> List[Contour]:
+    def holes(self) -> List[Loop]:
         """
         Returns holes of the polygon.
 
@@ -303,7 +304,8 @@ class Polygon(ShapedCompound):
         >>> polygon.convex_hull.is_convex
         True
         """
-        return not self._holes and forms_convex_polygon(self._border)
+        return (not self._holes
+                and _vertices_form_convex_polygon(self._border._vertices))
 
     @property
     def perimeter(self) -> Coordinate:
@@ -321,7 +323,7 @@ class Polygon(ShapedCompound):
         where ``vertices_count = len(self.border.vertices)\
  + sum(len(hole.vertices) for hole in self.holes)``.
 
-        >>> contour = Contour.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> contour = Loop.from_raw([(0, 0), (1, 0), (0, 1)])
         >>> contour.raw()
         [(0, 0), (1, 0), (0, 1)]
         """
@@ -333,7 +335,7 @@ class Polygon(ShapedCompound):
         return (segment_in_polygon(other.raw(), raw)
                 if isinstance(other, Segment)
                 else (contour_in_polygon(other.raw(), raw)
-                      if isinstance(other, Contour)
+                      if isinstance(other, Loop)
                       else polygon_in_polygon((other._raw_border,
                                                other._raw_holes), raw)))
 
@@ -362,7 +364,7 @@ class Polygon(ShapedCompound):
         ...      Polygon.from_raw(([(0, 0), (4, 2), (2, 2)], []))])
         True
         """
-        return [Polygon(Contour.from_raw(raw_contour))
+        return [Polygon(Loop.from_raw(raw_contour))
                 for raw_contour in constrained_delaunay_triangles(
                     self._raw_border, self._raw_holes)]
 

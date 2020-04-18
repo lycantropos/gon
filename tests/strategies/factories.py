@@ -4,7 +4,7 @@ from hypothesis import strategies
 from hypothesis_geometry import planar
 
 from gon.hints import Coordinate
-from gon.linear import (Contour,
+from gon.linear import (Loop,
                         Segment)
 from gon.primitive import Point
 from gon.shaped import Polygon
@@ -21,15 +21,15 @@ def coordinates_to_segments(coordinates: Strategy[Coordinate]
     return planar.segments(coordinates).map(Segment.from_raw)
 
 
-def coordinates_to_contours(coordinates: Strategy[Coordinate],
-                            *,
-                            min_size: int = planar.TRIANGULAR_CONTOUR_SIZE,
-                            max_size: Optional[int] = None
-                            ) -> Strategy[Contour]:
+def coordinates_to_loops(coordinates: Strategy[Coordinate],
+                         *,
+                         min_size: int = planar.TRIANGULAR_CONTOUR_SIZE,
+                         max_size: Optional[int] = None
+                         ) -> Strategy[Loop]:
     return (planar.contours(coordinates,
                             min_size=min_size,
                             max_size=max_size)
-            .map(Contour.from_raw))
+            .map(Loop.from_raw))
 
 
 def coordinates_to_polygons(coordinates: Strategy[Coordinate],
