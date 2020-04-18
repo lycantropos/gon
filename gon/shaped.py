@@ -186,8 +186,8 @@ class Polygon(Shaped):
         >>> polygon.area == 32
         True
         """
-        return (to_signed_area(self._normalized_border)
-                + sum(to_signed_area(hole) for hole in self._normalized_holes))
+        return (abs(to_signed_area(self._border))
+                - sum(abs(to_signed_area(hole)) for hole in self._holes))
 
     @property
     def border(self) -> Contour:
