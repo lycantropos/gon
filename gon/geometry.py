@@ -69,25 +69,25 @@ class Compound(Geometry):
         """
 
     @abstractmethod
-    def __ge__(self, other: 'Geometry') -> bool:
+    def __ge__(self, other: 'Compound') -> bool:
         """
         Checks if the geometry is a superset of the other.
         """
 
     @abstractmethod
-    def __gt__(self, other: 'Geometry') -> bool:
+    def __gt__(self, other: 'Compound') -> bool:
         """
         Checks if the geometry is a strict superset of the other.
         """
 
     @abstractmethod
-    def __le__(self, other: 'Geometry') -> bool:
+    def __le__(self, other: 'Compound') -> bool:
         """
         Checks if the geometry is a subset of the other.
         """
 
     @abstractmethod
-    def __lt__(self, other: 'Geometry') -> bool:
+    def __lt__(self, other: 'Compound') -> bool:
         """
         Checks if the geometry is a strict subset of the other.
         """
