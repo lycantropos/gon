@@ -4,8 +4,7 @@ from typing import (Iterable,
                     Sequence,
                     Tuple)
 
-from orient.planar import (Relation,
-                           contour_in_polygon,
+from orient.planar import (contour_in_polygon,
                            point_in_polygon,
                            polygon_in_polygon,
                            region_in_multiregion,
@@ -15,9 +14,10 @@ from sect.triangulation import constrained_delaunay_triangles
 
 from .angular import (Orientation,
                       to_orientation)
-from .geometry import (Compound,
-                       Geometry,
+from .compound import (Compound,
+                       Relation,
                        Shaped)
+from .geometry import Geometry
 from .hints import Coordinate
 from .linear import (Contour,
                      RawContour,

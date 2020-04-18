@@ -7,8 +7,7 @@ from typing import (Iterator,
                     Tuple)
 
 from bentley_ottmann.planar import edges_intersect
-from orient.planar import (Relation,
-                           contour_in_contour,
+from orient.planar import (contour_in_contour,
                            point_in_contour,
                            point_in_segment,
                            segment_in_contour,
@@ -21,9 +20,10 @@ from robust.utils import (sum_expansions,
 
 from .angular import (Orientation,
                       to_orientation)
-from .geometry import (Compound,
-                       Geometry,
-                       Linear)
+from .compound import (Compound,
+                       Linear,
+                       Relation)
+from .geometry import Geometry
 from .hints import Coordinate
 from .primitive import (Point,
                         RawPoint)
