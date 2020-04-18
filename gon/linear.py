@@ -15,7 +15,6 @@ from orient.planar import (Relation,
                            segment_in_segment)
 from reprit.base import generate_repr
 from robust.hints import Expansion
-from robust.linear import segment_contains
 from robust.utils import (sum_expansions,
                           two_product,
                           two_two_diff)
@@ -37,6 +36,11 @@ MIN_VERTICES_COUNT = 3
 
 
 class LinearCompound(Linear, Compound):
+    def __contains__(self, other: Geometry) -> bool:
+        return (self.relate(other) is Relation.COMPONENT
+                if isinstance(other, Point)
+                else False)
+
     def __ge__(self, other: 'Geometry') -> bool:
         return (self is other
                 or ((self.relate(other) in (Relation.COMPONENT, Relation.EQUAL)
@@ -84,27 +88,6 @@ class Segment(LinearCompound):
         self._raw = start.raw(), end.raw()
 
     __repr__ = generate_repr(__init__)
-
-    def __contains__(self, point: Point) -> bool:
-        """
-        Checks if the point is inside the segment or on its boundary.
-
-        Time complexity:
-            ``O(1)``
-        Memory complexity:
-            ``O(1)``
-
-        >>> segment = Segment.from_raw(((0, 0), (2, 0)))
-        >>> Point(0, 0) in segment
-        True
-        >>> Point(1, 0) in segment
-        True
-        >>> Point(0, 1) in segment
-        False
-        >>> Point(1, 1) in segment
-        False
-        """
-        return segment_contains(self._raw, point.raw())
 
     def __eq__(self, other: 'Segment') -> bool:
         """
