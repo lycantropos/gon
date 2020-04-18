@@ -15,7 +15,10 @@ from sect.triangulation import constrained_delaunay_triangles
 
 from .angular import (Orientation,
                       to_orientation)
-from .geometry import Geometry
+from .geometry import (Compound,
+                       Geometry,
+                       Linear,
+                       Shaped)
 from .hints import Coordinate
 from .linear import (Contour,
                      RawContour,
@@ -27,7 +30,7 @@ from .primitive import Point
 RawPolygon = Tuple[RawContour, List[RawContour]]
 
 
-class Polygon(Geometry):
+class Polygon(Shaped):
     __slots__ = ('_border', '_holes', '_raw_border', '_raw_holes',
                  '_normalized_border', '_normalized_holes', '_is_normalized')
 
@@ -127,7 +130,9 @@ class Polygon(Geometry):
                 or (self._normalized_border == other._normalized_border
                     and self._normalized_holes == other._normalized_holes
                     if isinstance(other, Polygon)
-                    else NotImplemented))
+                    else (False
+                          if isinstance(other, Geometry)
+                          else NotImplemented)))
 
     def __ge__(self, other: 'Polygon') -> bool:
         """
@@ -158,12 +163,11 @@ class Polygon(Geometry):
         >>> polygon >= polygon.convex_hull
         False
         """
-        return (polygon_in_polygon((other._raw_border, other._raw_holes),
-                                   (self._raw_border, self._raw_holes))
-                in (Relation.EQUAL, Relation.COMPONENT, Relation.ENCLOSED,
-                    Relation.WITHIN)
-                if isinstance(other, Polygon)
-                else NotImplemented)
+        return (self is other
+                or (self.relate(other) in (Relation.EQUAL, Relation.COMPONENT,
+                                           Relation.ENCLOSED, Relation.WITHIN)
+                    if isinstance(other, Compound)
+                    else NotImplemented))
 
     def __gt__(self, other: 'Polygon') -> bool:
         """
@@ -194,7 +198,11 @@ class Polygon(Geometry):
         >>> polygon > polygon.convex_hull
         False
         """
-        return self != other and self >= other
+        return (self is not other
+                and (self.relate(other) in (Relation.COMPONENT,
+                                            Relation.ENCLOSED, Relation.WITHIN)
+                     if isinstance(other, Compound)
+                     else NotImplemented))
 
     def __hash__(self) -> int:
         """
@@ -244,12 +252,15 @@ class Polygon(Geometry):
         >>> polygon <= polygon.convex_hull
         True
         """
-        return (polygon_in_polygon((self._raw_border, self._raw_holes),
-                                   (other._raw_border, other._raw_holes))
-                in (Relation.EQUAL, Relation.COMPONENT, Relation.ENCLOSED,
-                    Relation.WITHIN)
-                if isinstance(other, Polygon)
-                else NotImplemented)
+        return (self is other
+                or ((False
+                     if isinstance(other, Linear)
+                     else self.relate(other) in (Relation.COVER,
+                                                 Relation.ENCLOSES,
+                                                 Relation.COMPOSITE,
+                                                 Relation.EQUAL))
+                    if isinstance(other, Compound)
+                    else NotImplemented))
 
     def __lt__(self, other: 'Polygon') -> bool:
         """
@@ -280,7 +291,14 @@ class Polygon(Geometry):
         >>> polygon < polygon.convex_hull
         True
         """
-        return self != other and self <= other
+        return (self is not other
+                and ((False
+                      if isinstance(other, Linear)
+                      else self.relate(other) in (Relation.COVER,
+                                                  Relation.ENCLOSES,
+                                                  Relation.COMPOSITE))
+                     if isinstance(other, Compound)
+                     else NotImplemented))
 
     @classmethod
     def from_raw(cls, raw: RawPolygon) -> 'Polygon':
@@ -429,6 +447,10 @@ class Polygon(Geometry):
                 if self._is_normalized
                 else Polygon(self._normalized_border, self._normalized_holes,
                              _is_normalized=True))
+
+    @property
+    def perimeter(self) -> Coordinate:
+        return self._border.length + sum(hole.length for hole in self._holes)
 
     def raw(self) -> RawPolygon:
         """
