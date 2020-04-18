@@ -336,15 +336,17 @@ class Contour(Linear):
         Time complexity:
             ``O(len(self.vertices))``
         Memory complexity:
-            ``O(1)`` if contour is normalized,
-            ``O(len(self.vertices))`` -- otherwise
+            ``O(1)``
 
         >>> contour = Contour.from_raw([(0, 0), (1, 0), (0, 1)])
         >>> contour.orientation is Orientation.COUNTERCLOCKWISE
         True
         """
-        vertices = self.normalized._vertices
-        return to_orientation(vertices[0], vertices[-1], vertices[1])
+        vertices = self._vertices
+        min_index = min(range(len(vertices)),
+                        key=vertices.__getitem__)
+        return to_orientation(vertices[min_index], vertices[min_index - 1],
+                              vertices[(min_index + 1) % len(vertices)])
 
     @property
     def vertices(self) -> Vertices:
