@@ -113,12 +113,12 @@ class Segment(LinearCompound):
                 if isinstance(other, Segment)
                 else NotImplemented)
 
-    def __ge__(self, other: 'Geometry') -> bool:
+    def __ge__(self, other: Compound) -> bool:
         return (False
                 if isinstance(other, Contour)
                 else super().__ge__(other))
 
-    def __gt__(self, other: 'Geometry') -> bool:
+    def __gt__(self, other: Compound) -> bool:
         return (False
                 if isinstance(other, Contour)
                 else super().__gt__(other))
