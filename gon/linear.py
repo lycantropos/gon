@@ -481,26 +481,6 @@ class Loop(LinearCompound):
                    for index in range(len(vertices)))
 
     @property
-    def orientation(self) -> 'Orientation':
-        """
-        Returns orientation of the loop.
-
-        Time complexity:
-            ``O(len(self.vertices))``
-        Memory complexity:
-            ``O(1)``
-
-        >>> loop = Loop.from_raw([(0, 0), (1, 0), (0, 1)])
-        >>> loop.orientation is Orientation.COUNTERCLOCKWISE
-        True
-        """
-        vertices = self._vertices
-        min_index = min(range(len(vertices)),
-                        key=vertices.__getitem__)
-        return to_orientation(vertices[min_index], vertices[min_index - 1],
-                              vertices[(min_index + 1) % len(vertices)])
-
-    @property
     def vertices(self) -> Vertices:
         """
         Returns vertices of the loop.
@@ -539,61 +519,6 @@ class Loop(LinearCompound):
                       else (contour_in_contour(other._raw, self._raw)
                             if isinstance(other, Loop)
                             else other.relate(self).complement)))
-
-    def reverse(self) -> 'Loop':
-        """
-        Returns the reversed loop.
-
-        Time complexity:
-            ``O(len(self.vertices))``
-        Memory complexity:
-            ``O(len(self.vertices))``
-
-        >>> loop = Loop.from_raw([(0, 0), (1, 0), (0, 1)])
-        >>> loop.reverse() == loop
-        True
-        >>> loop.reverse().reverse() == loop
-        True
-        """
-        vertices = self._vertices
-        return Loop(vertices[:1] + vertices[:0:-1])
-
-    def to_clockwise(self) -> 'Loop':
-        """
-        Returns the clockwise loop.
-
-        Time complexity:
-            ``O(len(self.vertices))``
-        Memory complexity:
-            ``O(1)`` if clockwise already,
-            ``O(len(self.vertices))`` -- otherwise
-
-        >>> loop = Loop.from_raw([(0, 0), (1, 0), (0, 1)])
-        >>> loop.to_clockwise().orientation is Orientation.CLOCKWISE
-        True
-        """
-        return (self
-                if self.orientation is Orientation.CLOCKWISE
-                else self.reverse())
-
-    def to_counterclockwise(self) -> 'Loop':
-        """
-        Returns the counterclockwise loop.
-
-        Time complexity:
-            ``O(len(self.vertices))``
-        Memory complexity:
-            ``O(1)`` if counterclockwise already,
-            ``O(len(self.vertices))`` -- otherwise
-
-        >>> loop = Loop.from_raw([(0, 0), (1, 0), (0, 1)])
-        >>> (loop.to_counterclockwise().orientation
-        ...  is Orientation.COUNTERCLOCKWISE)
-        True
-        """
-        return (self
-                if self.orientation is Orientation.COUNTERCLOCKWISE
-                else self.reverse())
 
     def validate(self) -> None:
         """
