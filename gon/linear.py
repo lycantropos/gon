@@ -431,7 +431,7 @@ class Contour(Linear):
         Time complexity:
             ``O(len(self.vertices))``
         Memory complexity:
-            ``O(1)`` if normalized and counterclockwise already,
+            ``O(1)`` if counterclockwise already,
             ``O(len(self.vertices))`` -- otherwise
 
         >>> contour = Contour.from_raw([(0, 0), (1, 0), (0, 1)])
