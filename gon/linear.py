@@ -41,7 +41,7 @@ class LinearCompound(Linear, Compound):
                 if isinstance(other, Point)
                 else False)
 
-    def __ge__(self, other: 'Geometry') -> bool:
+    def __ge__(self, other: Compound) -> bool:
         return (self is other
                 or ((self.relate(other) in (Relation.COMPONENT, Relation.EQUAL)
                      if isinstance(other, LinearCompound)
@@ -50,7 +50,7 @@ class LinearCompound(Linear, Compound):
                     if isinstance(other, Compound)
                     else NotImplemented))
 
-    def __gt__(self, other: 'Geometry') -> bool:
+    def __gt__(self, other: Compound) -> bool:
         return (self is not other
                 and ((self.relate(other) is Relation.COMPONENT
                       if isinstance(other, LinearCompound)
@@ -59,13 +59,13 @@ class LinearCompound(Linear, Compound):
                      if isinstance(other, Compound)
                      else NotImplemented))
 
-    def __le__(self, other: 'Geometry') -> bool:
+    def __le__(self, other: Compound) -> bool:
         return (self is other
                 or (self.relate(other) in (Relation.EQUAL, Relation.COMPONENT)
                     if isinstance(other, Compound)
                     else NotImplemented))
 
-    def __lt__(self, other: 'Geometry') -> bool:
+    def __lt__(self, other: Compound) -> bool:
         return (self is not other
                 and (self.relate(other) is Relation.COMPONENT
                      if isinstance(other, Compound)
