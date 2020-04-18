@@ -233,11 +233,14 @@ class Contour(Geometry):
         >>> contour == Contour.from_raw([(0, 0), (1, 0), (1, 1), (0, 1)])
         False
         >>> contour == Contour.from_raw([(1, 0), (0, 0), (0, 1)])
-        False
+        True
         """
-        return self is other or (self._vertices == other._vertices
+        return self is other or (_contours_vertices_equal(self._vertices,
+                                                          other._vertices)
                                  if isinstance(other, Contour)
-                                 else NotImplemented)
+                                 else (False
+                                       if isinstance(other, Geometry)
+                                       else NotImplemented))
 
     def __hash__(self) -> int:
         """
@@ -470,3 +473,43 @@ def _to_endpoints_cross_product_z(start: Point, end: Point) -> Expansion:
     return (two_two_diff(minuend, minuend_tail, subtrahend, subtrahend_tail)
             if minuend_tail or subtrahend_tail
             else (minuend - subtrahend,))
+
+
+def _vertices_orientation(vertices: Vertices) -> Orientation:
+    index = min(range(len(vertices)),
+                key=vertices.__getitem__)
+    return to_orientation(vertices[index], vertices[index - 1],
+                          vertices[(index + 1) % len(vertices)])
+
+
+def _contours_vertices_equal(left: Vertices, right: Vertices) -> bool:
+    if len(left) != len(right):
+        return False
+    right_step = (1
+                  if (_vertices_orientation(left)
+                      is _vertices_orientation(right))
+                  else -1)
+    size = len(left)
+    try:
+        index = right.index(left[0])
+    except ValueError:
+        return False
+    else:
+        left_index = 0
+        for left_index, right_index in zip(range(size),
+                                           range(index, size)
+                                           if right_step == 1
+                                           else range(index - 1, -1,
+                                                      right_step)):
+            if left[left_index] != right[right_index]:
+                return False
+        else:
+            for left_index, right_index in zip(range(left_index + 1, size),
+                                               range(index)
+                                               if right_step == 1
+                                               else range(size - 1, index - 1,
+                                                          right_step)):
+                if left[left_index] != right[right_index]:
+                    return False
+            else:
+                return True
