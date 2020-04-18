@@ -72,6 +72,12 @@ class Oriented(Geometry):
 
 class Compound(Geometry):
     @abstractmethod
+    def __contains__(self, other: 'Geometry') -> bool:
+        """
+        Checks if the geometry contains the other.
+        """
+
+    @abstractmethod
     def __ge__(self, other: 'Geometry') -> bool:
         """
         Checks if the geometry is a superset of the other.
