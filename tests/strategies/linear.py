@@ -10,7 +10,6 @@ from hypothesis_geometry import planar
 from gon.hints import Coordinate
 from gon.linear import (MIN_VERTICES_COUNT,
                         Contour,
-                        Loop,
                         Vertices)
 from gon.primitive import Point
 from tests.utils import Strategy
@@ -49,23 +48,10 @@ small_contours = (
                       .map(coordinates_to_points)
                       .flatmap(partial(strategies.lists,
                                        max_size=MIN_VERTICES_COUNT - 1))))
-small_loops = (
-    strategies.builds(Loop,
-                      coordinates_strategies
-                      .map(coordinates_to_points)
-                      .flatmap(partial(strategies.lists,
-                                       max_size=MIN_VERTICES_COUNT - 1))))
 invalid_vertices_contours = strategies.builds(
         Contour,
-        strategies.lists(invalid_points,
-                         min_size=MIN_VERTICES_COUNT))
-invalid_vertices_loops = strategies.builds(
-        Loop,
         strategies.lists(invalid_points,
                          min_size=MIN_VERTICES_COUNT))
 contours_with_repeated_points = (coordinates_strategies
                                  .flatmap(to_repeated_points)
                                  .map(Contour.from_raw))
-loops_with_repeated_points = (coordinates_strategies
-                              .flatmap(to_repeated_points)
-                              .map(Loop.from_raw))
