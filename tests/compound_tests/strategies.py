@@ -7,14 +7,14 @@ from lz.functional import identity
 from gon.compound import Compound
 from gon.hints import Coordinate
 from tests.strategies import (coordinates_strategies,
-                              coordinates_to_contours,
+                              coordinates_to_loops,
                               coordinates_to_polygons,
                               coordinates_to_segments)
 from tests.utils import Strategy
 
 CompoundStrategyFactory = Callable[[Strategy[Coordinate]], Strategy[Compound]]
 compounds_factories = strategies.sampled_from([coordinates_to_segments,
-                                               coordinates_to_contours,
+                                               coordinates_to_loops,
                                                coordinates_to_polygons])
 
 
