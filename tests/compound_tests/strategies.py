@@ -4,7 +4,7 @@ from typing import (Callable,
 from hypothesis import strategies
 from lz.functional import identity
 
-from gon.geometry import Compound
+from gon.compound import Compound
 from gon.hints import Coordinate
 from tests.strategies import (coordinates_strategies,
                               coordinates_to_contours,
