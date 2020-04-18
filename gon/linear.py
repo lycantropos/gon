@@ -36,11 +36,6 @@ MIN_VERTICES_COUNT = 3
 
 
 class LinearCompound(Linear, Compound):
-    def __contains__(self, other: Geometry) -> bool:
-        return (self.relate(other) is Relation.COMPONENT
-                if isinstance(other, Point)
-                else False)
-
     def __ge__(self, other: Compound) -> bool:
         return (self is other
                 or ((self.relate(other) in (Relation.COMPONENT, Relation.EQUAL)
@@ -88,6 +83,11 @@ class Segment(LinearCompound):
         self._raw = start.raw(), end.raw()
 
     __repr__ = generate_repr(__init__)
+
+    def __contains__(self, other: Geometry) -> bool:
+        return (point_in_segment(other.raw(), self._raw) is Relation.COMPONENT
+                if isinstance(other, Point)
+                else False)
 
     def __eq__(self, other: 'Segment') -> bool:
         """
@@ -209,12 +209,10 @@ class Segment(LinearCompound):
         """
         return self._raw
 
-    def relate(self, other: 'Geometry') -> Relation:
-        return (point_in_segment(other.raw(), self._raw)
-                if isinstance(other, Point)
-                else (segment_in_segment(other._raw, self._raw)
-                      if isinstance(other, Segment)
-                      else other.relate(self).complement))
+    def relate(self, other: Compound) -> Relation:
+        return (segment_in_segment(other._raw, self._raw)
+                if isinstance(other, Segment)
+                else other.relate(self).complement)
 
     def validate(self) -> None:
         """
@@ -249,6 +247,11 @@ class Contour(LinearCompound):
         self._raw = [vertex.raw() for vertex in vertices]
 
     __repr__ = generate_repr(__init__)
+
+    def __contains__(self, other: Geometry) -> bool:
+        return (point_in_contour(other.raw(), self._raw) is Relation.COMPONENT
+                if isinstance(other, Point)
+                else False)
 
     def __eq__(self, other: 'Contour') -> bool:
         """
@@ -296,12 +299,12 @@ class Contour(LinearCompound):
                     if min_index
                     else vertices)
 
-    def __le__(self, other: 'Geometry') -> bool:
+    def __le__(self, other: Compound) -> bool:
         return (False
                 if isinstance(other, Segment)
                 else super().__le__(other))
 
-    def __lt__(self, other: 'Geometry') -> bool:
+    def __lt__(self, other: Compound) -> bool:
         return (False
                 if isinstance(other, Segment)
                 else super().__lt__(other))
@@ -379,7 +382,7 @@ class Contour(LinearCompound):
         """
         return self._raw[:]
 
-    def relate(self, other: 'Geometry') -> Relation:
+    def relate(self, other: Compound) -> Relation:
         return (point_in_contour(other.raw(), self._raw)
                 if isinstance(other, Point)
                 else (segment_in_contour(other.raw(), self._raw)
