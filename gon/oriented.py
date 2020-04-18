@@ -1,13 +1,11 @@
 from abc import abstractmethod
 
-from .angular import Orientation
 from .geometry import Geometry
 
 
 class Oriented(Geometry):
-    @property
     @abstractmethod
-    def orientation(self) -> Orientation:
+    def reverse(self) -> 'Oriented':
         """
-        Returns orientation of the geometry.
+        Returns the geometry reversed.
         """
