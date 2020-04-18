@@ -23,7 +23,6 @@ from .angular import (Orientation,
 from .geometry import (Compound,
                        Geometry,
                        Linear,
-                       Oriented,
                        Relation)
 from .hints import Coordinate
 from .primitive import (Point,
@@ -34,10 +33,6 @@ RawSegment = Tuple[RawPoint, RawPoint]
 Vertices = Sequence[Point]
 
 MIN_VERTICES_COUNT = 3
-
-
-class LinearOriented(Linear, Oriented):
-    pass
 
 
 class LinearCompound(Linear, Compound):

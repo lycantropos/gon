@@ -53,14 +53,6 @@ class Geometry(ABC):
         """
 
 
-class Oriented(Geometry):
-    @abstractmethod
-    def reverse(self) -> 'Oriented':
-        """
-        Returns the geometry reversed.
-        """
-
-
 class Compound(Geometry):
     @abstractmethod
     def __contains__(self, other: 'Geometry') -> bool:
