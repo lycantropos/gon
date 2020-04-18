@@ -4,7 +4,7 @@ from hypothesis import given
 from orient.planar import Relation
 
 from gon.compound import Compound
-from tests.geometry_tests.compounds_tests import strategies
+from . import strategies
 
 
 @given(strategies.compounds_pairs)
