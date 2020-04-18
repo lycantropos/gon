@@ -87,6 +87,48 @@ class Compound(Geometry):
 
 
 class Linear(Compound):
+    def __ge__(self, other: 'Geometry') -> bool:
+        """
+        Checks if the geometry is a superset of the other.
+        """
+        return (self is other
+                or ((self.relate(other) in (Relation.COMPONENT, Relation.EQUAL)
+                     if isinstance(other, Linear)
+                     # linear cannot be superset of shaped
+                     else False)
+                    if isinstance(other, Compound)
+                    else NotImplemented))
+
+    def __gt__(self, other: 'Geometry') -> bool:
+        """
+        Checks if the geometry is a strict superset of the other.
+        """
+        return (self is not other
+                and ((self.relate(other) is Relation.COMPONENT
+                      if isinstance(other, Linear)
+                      # linear cannot be strict superset of shaped
+                      else False)
+                     if isinstance(other, Compound)
+                     else NotImplemented))
+
+    def __le__(self, other: 'Geometry') -> bool:
+        """
+        Checks if the geometry is a subset of the other.
+        """
+        return (self is other
+                or (self.relate(other) in (Relation.EQUAL, Relation.COMPONENT)
+                    if isinstance(other, Compound)
+                    else NotImplemented))
+
+    def __lt__(self, other: 'Geometry') -> bool:
+        """
+        Checks if the geometry is a strict subset of the other.
+        """
+        return (self is not other
+                and (self.relate(other) is Relation.COMPONENT
+                     if isinstance(other, Compound)
+                     else NotImplemented))
+
     @property
     @abstractmethod
     def length(self) -> Coordinate:
