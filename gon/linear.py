@@ -148,7 +148,7 @@ class Segment(LinearCompound):
     @classmethod
     def from_raw(cls, raw: RawSegment) -> 'Segment':
         """
-        Constructs loop from the combination of Python built-ins.
+        Constructs segment from the combination of Python built-ins.
 
         Time complexity:
             ``O(1)``
