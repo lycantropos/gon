@@ -30,21 +30,21 @@ RawPolygon = Tuple[RawContour, List[RawContour]]
 
 
 class ShapedCompound(Shaped, Compound):
-    def __ge__(self, other: 'Geometry') -> bool:
+    def __ge__(self, other: Compound) -> bool:
         return (self is other
                 or (self.relate(other) in (Relation.EQUAL, Relation.COMPONENT,
                                            Relation.ENCLOSED, Relation.WITHIN)
                     if isinstance(other, Compound)
                     else NotImplemented))
 
-    def __gt__(self, other: 'Geometry') -> bool:
+    def __gt__(self, other: Compound) -> bool:
         return (self is not other
                 and (self.relate(other) in (Relation.COMPONENT,
                                             Relation.ENCLOSED, Relation.WITHIN)
                      if isinstance(other, Compound)
                      else NotImplemented))
 
-    def __le__(self, other: 'Geometry') -> bool:
+    def __le__(self, other: Compound) -> bool:
         return (self is other
                 or ((self.relate(other) in (Relation.COVER, Relation.ENCLOSES,
                                             Relation.COMPOSITE, Relation.EQUAL)
@@ -54,7 +54,7 @@ class ShapedCompound(Shaped, Compound):
                     if isinstance(other, Compound)
                     else NotImplemented))
 
-    def __lt__(self, other: 'Geometry') -> bool:
+    def __lt__(self, other: Compound) -> bool:
         return (self is not other
                 and ((self.relate(other) in (Relation.COVER,
                                              Relation.ENCLOSES,
