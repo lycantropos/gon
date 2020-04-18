@@ -692,8 +692,7 @@ class Contour(LinearOriented):
         >>> contour.reverse().reverse() == contour
         True
         """
-        vertices = self._vertices
-        return Contour(vertices[:1] + vertices[:0:-1])
+        return Contour(_rotate_vertices(self._vertices))
 
     def to_clockwise(self) -> 'Contour':
         """
