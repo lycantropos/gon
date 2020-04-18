@@ -15,8 +15,9 @@ from sect.triangulation import constrained_delaunay_triangles
 
 from .angular import (Orientation,
                       to_orientation)
-from .geometry import (Geometry,
-                       ShapedCompound)
+from .geometry import (Compound,
+                       Geometry,
+                       Shaped)
 from .hints import Coordinate
 from .linear import (Contour,
                      RawContour,
@@ -26,6 +27,43 @@ from .linear import (Contour,
 from .primitive import Point
 
 RawPolygon = Tuple[RawContour, List[RawContour]]
+
+
+class ShapedCompound(Shaped, Compound):
+    def __ge__(self, other: 'Geometry') -> bool:
+        return (self is other
+                or (self.relate(other) in (Relation.EQUAL, Relation.COMPONENT,
+                                           Relation.ENCLOSED, Relation.WITHIN)
+                    if isinstance(other, Compound)
+                    else NotImplemented))
+
+    def __gt__(self, other: 'Geometry') -> bool:
+        return (self is not other
+                and (self.relate(other) in (Relation.COMPONENT,
+                                            Relation.ENCLOSED, Relation.WITHIN)
+                     if isinstance(other, Compound)
+                     else NotImplemented))
+
+    def __le__(self, other: 'Geometry') -> bool:
+        return (self is other
+                or ((self.relate(other) in (Relation.COVER, Relation.ENCLOSES,
+                                            Relation.COMPOSITE, Relation.EQUAL)
+                     if isinstance(other, ShapedCompound)
+                     # shaped cannot be subset of linear
+                     else False)
+                    if isinstance(other, Compound)
+                    else NotImplemented))
+
+    def __lt__(self, other: 'Geometry') -> bool:
+        return (self is not other
+                and ((self.relate(other) in (Relation.COVER,
+                                             Relation.ENCLOSES,
+                                             Relation.COMPOSITE)
+                      if isinstance(other, ShapedCompound)
+                      # shaped cannot be strict subset of linear
+                      else False)
+                     if isinstance(other, Compound)
+                     else NotImplemented))
 
 
 class Polygon(ShapedCompound):
