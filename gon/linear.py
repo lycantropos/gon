@@ -29,7 +29,7 @@ from .oriented import Oriented
 from .primitive import (Point,
                         RawPoint)
 
-RawLoop = List[RawPoint]
+RawContour = RawLoop = List[RawPoint]
 RawSegment = RawVector = Tuple[RawPoint, RawPoint]
 Vertices = Sequence[Point]
 
@@ -620,6 +620,218 @@ class Loop(LinearCompound):
                              'should not be on the same line.')
         if edges_intersect(self._raw):
             raise ValueError('Loop should not be self-intersecting.')
+
+
+class Contour(LinearOriented):
+    __slots__ = '_vertices',
+
+    def __init__(self, vertices: Vertices) -> None:
+        """
+        Initializes contour.
+
+        Time complexity:
+            ``O(len(vertices))``
+        Memory complexity:
+            ``O(len(vertices))``
+        """
+        self._vertices = tuple(vertices)
+        self._raw = [vertex.raw() for vertex in vertices]
+
+    __repr__ = generate_repr(__init__)
+
+    def __eq__(self, other: 'Contour') -> bool:
+        """
+        Checks if the contour is equal to the other.
+
+        Time complexity:
+            ``O(min(len(self.vertices), len(other.vertices)))``
+        Memory complexity:
+            ``O(1)``
+
+        >>> contour = Contour.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> contour == contour
+        True
+        >>> contour == Contour.from_raw([(0, 0), (1, 0), (1, 1), (0, 1)])
+        False
+        >>> contour == Contour.from_raw([(1, 0), (0, 0), (0, 1)])
+        True
+        """
+        return self is other or (self._vertices == other._vertices
+                                 if isinstance(other, Contour)
+                                 else (False
+                                       if isinstance(other, Geometry)
+                                       else NotImplemented))
+
+    def __hash__(self) -> int:
+        """
+        Returns hash value of the contour.
+
+        Time complexity:
+            ``O(len(self.vertices))``
+        Memory complexity:
+            ``O(1)`` if contour is counterclockwise
+            and starts from the bottom leftmost vertex,
+            ``O(len(self.vertices))`` otherwise
+
+        >>> contour = Contour.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> hash(contour) == hash(contour)
+        True
+        """
+        return hash(self._vertices)
+
+    @classmethod
+    def from_raw(cls, raw: RawContour) -> 'Contour':
+        """
+        Constructs contour from the combination of Python built-ins.
+
+        Time complexity:
+            ``O(len(raw))``
+        Memory complexity:
+            ``O(len(raw))``
+
+        >>> contour = Contour.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> contour == Contour([Point(0, 0), Point(1, 0), Point(0, 1)])
+        True
+        """
+        return cls([Point.from_raw(raw_vertex) for raw_vertex in raw])
+
+    @property
+    def length(self) -> Coordinate:
+        vertices = self._vertices
+        return sum(Segment(vertices[index - 1], vertices[index]).length
+                   for index in range(len(vertices)))
+
+    @property
+    def orientation(self) -> 'Orientation':
+        """
+        Returns orientation of the contour.
+
+        Time complexity:
+            ``O(len(self.vertices))``
+        Memory complexity:
+            ``O(1)``
+
+        >>> contour = Contour.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> contour.orientation is Orientation.COUNTERCLOCKWISE
+        True
+        """
+        vertices = self._vertices
+        min_index = min(range(len(vertices)),
+                        key=vertices.__getitem__)
+        return to_orientation(vertices[min_index], vertices[min_index - 1],
+                              vertices[(min_index + 1) % len(vertices)])
+
+    @property
+    def vertices(self) -> Vertices:
+        """
+        Returns vertices of the contour.
+
+        Time complexity:
+            ``O(len(self.vertices))``
+        Memory complexity:
+            ``O(len(self.vertices))``
+
+        >>> contour = Contour.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> contour.vertices
+        [Point(0, 0), Point(1, 0), Point(0, 1)]
+        """
+        return list(self._vertices)
+
+    def raw(self) -> RawContour:
+        """
+        Returns the contour as combination of Python built-ins.
+
+        Time complexity:
+            ``O(len(self.vertices))``
+        Memory complexity:
+            ``O(len(self.vertices))``
+
+        >>> contour = Contour.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> contour.raw()
+        [(0, 0), (1, 0), (0, 1)]
+        """
+        return self._raw[:]
+
+    def reverse(self) -> 'Contour':
+        """
+        Returns the reversed contour.
+
+        Time complexity:
+            ``O(len(self.vertices))``
+        Memory complexity:
+            ``O(len(self.vertices))``
+
+        >>> contour = Contour.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> contour.reverse() == contour
+        False
+        >>> contour.reverse().reverse() == contour
+        True
+        """
+        vertices = self._vertices
+        return Contour(vertices[:1] + vertices[:0:-1])
+
+    def to_clockwise(self) -> 'Contour':
+        """
+        Returns the clockwise contour.
+
+        Time complexity:
+            ``O(len(self.vertices))``
+        Memory complexity:
+            ``O(1)`` if clockwise already,
+            ``O(len(self.vertices))`` -- otherwise
+
+        >>> contour = Contour.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> contour.to_clockwise().orientation is Orientation.CLOCKWISE
+        True
+        """
+        return (self
+                if self.orientation is Orientation.CLOCKWISE
+                else self.reverse())
+
+    def to_counterclockwise(self) -> 'Contour':
+        """
+        Returns the counterclockwise contour.
+
+        Time complexity:
+            ``O(len(self.vertices))``
+        Memory complexity:
+            ``O(1)`` if counterclockwise already,
+            ``O(len(self.vertices))`` -- otherwise
+
+        >>> contour = Contour.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> (contour.to_counterclockwise().orientation
+        ...  is Orientation.COUNTERCLOCKWISE)
+        True
+        """
+        return (self
+                if self.orientation is Orientation.COUNTERCLOCKWISE
+                else self.reverse())
+
+    def validate(self) -> None:
+        """
+        Checks if the contour is valid.
+
+        Time complexity:
+            ``O(len(self.vertices) * log len(self.vertices))``
+        Memory complexity:
+            ``O(len(self.vertices))``
+
+        >>> Contour.from_raw([(0, 0), (1, 0), (0, 1)]).validate()
+        """
+        for vertex in self._vertices:
+            vertex.validate()
+        if len(self._vertices) < MIN_VERTICES_COUNT:
+            raise ValueError('Contour should have '
+                             'at least {expected} vertices, '
+                             'but found {actual}.'
+                             .format(expected=MIN_VERTICES_COUNT,
+                                     actual=len(self._vertices)))
+        if any(orientation is Orientation.COLLINEAR
+               for orientation in _vertices_to_orientations(self._vertices)):
+            raise ValueError('Consecutive vertices triplets '
+                             'should not be on the same line.')
+        if edges_intersect(self._raw):
+            raise ValueError('Contour should not be self-intersecting.')
 
 
 def _vertices_form_convex_polygon(vertices: Vertices) -> bool:
