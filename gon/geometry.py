@@ -105,7 +105,7 @@ class Linear(Geometry):
         """
 
 
-class Shaped(Compound):
+class ShapedCompound(Compound):
     def __ge__(self, other: 'Geometry') -> bool:
         """
         Checks if the geometry is a superset of the other.
@@ -133,7 +133,7 @@ class Shaped(Compound):
         return (self is other
                 or ((self.relate(other) in (Relation.COVER, Relation.ENCLOSES,
                                             Relation.COMPOSITE, Relation.EQUAL)
-                     if isinstance(other, Shaped)
+                     if isinstance(other, ShapedCompound)
                      # shaped cannot be subset of linear
                      else False)
                     if isinstance(other, Compound)
@@ -147,7 +147,7 @@ class Shaped(Compound):
                 and ((self.relate(other) in (Relation.COVER,
                                              Relation.ENCLOSES,
                                              Relation.COMPOSITE)
-                      if isinstance(other, Shaped)
+                      if isinstance(other, ShapedCompound)
                       # shaped cannot be strict subset of linear
                       else False)
                      if isinstance(other, Compound)
