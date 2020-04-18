@@ -60,7 +60,7 @@ class Geometry(ABC):
         """
 
 
-class Linear(Geometry):
+class Compound(Geometry):
     @abstractmethod
     def __ge__(self, other: 'Geometry') -> bool:
         """
@@ -85,6 +85,8 @@ class Linear(Geometry):
         Checks if the geometry is a strict subset of the other.
         """
 
+
+class Linear(Compound):
     @property
     @abstractmethod
     def length(self) -> Coordinate:
