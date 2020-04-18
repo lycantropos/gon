@@ -1,3 +1,4 @@
+import math
 from fractions import Fraction
 from functools import reduce
 from typing import (Iterator,
@@ -21,7 +22,8 @@ from robust.utils import (sum_expansions,
 
 from .angular import (Orientation,
                       to_orientation)
-from .geometry import Geometry
+from .geometry import (Geometry,
+                       Linear)
 from .hints import Coordinate
 from .primitive import (Point,
                         RawPoint)
@@ -33,7 +35,7 @@ Vertices = Sequence[Point]
 MIN_VERTICES_COUNT = 3
 
 
-class Segment(Geometry):
+class Segment(Linear):
     __slots__ = '_start', '_end', '_raw'
 
     def __init__(self, start: Point, end: Point) -> None:
@@ -95,6 +97,22 @@ class Segment(Geometry):
                 if isinstance(other, Segment)
                 else NotImplemented)
 
+    def __ge__(self, other: 'Geometry') -> bool:
+        return self is other or (segment_in_segment(other._raw, self._raw)
+                                 in (Relation.EQUAL, Relation.COMPONENT)
+                                 if isinstance(other, Segment)
+                                 else (other <= self
+                                       if isinstance(other, Geometry)
+                                       else NotImplemented))
+
+    def __gt__(self, other: 'Geometry') -> bool:
+        return self is not other and (segment_in_segment(other._raw, self._raw)
+                                      is Relation.COMPONENT
+                                      if isinstance(other, Segment)
+                                      else (other < self
+                                            if isinstance(other, Geometry)
+                                            else NotImplemented))
+
     def __hash__(self) -> int:
         """
         Returns hash value of the segment.
@@ -111,6 +129,22 @@ class Segment(Geometry):
         True
         """
         return hash(frozenset(self._raw))
+
+    def __le__(self, other: 'Geometry') -> bool:
+        return self is other or (segment_in_segment(self._raw, other._raw)
+                                 in (Relation.EQUAL, Relation.COMPONENT)
+                                 if isinstance(other, Segment)
+                                 else (other >= self
+                                       if isinstance(other, Geometry)
+                                       else NotImplemented))
+
+    def __lt__(self, other: 'Geometry') -> bool:
+        return self is not other and (segment_in_segment(self._raw, other._raw)
+                                      is Relation.COMPONENT
+                                      if isinstance(other, Segment)
+                                      else (other > self
+                                            if isinstance(other, Geometry)
+                                            else NotImplemented))
 
     @classmethod
     def from_raw(cls, raw: RawSegment) -> 'Segment':
@@ -145,6 +179,10 @@ class Segment(Geometry):
         True
         """
         return self._end
+
+    @property
+    def length(self) -> Coordinate:
+        return math.sqrt(_squared_distance(self.start, self.end))
 
     @property
     def start(self) -> Point:
@@ -513,3 +551,7 @@ def _contours_vertices_equal(left: Vertices, right: Vertices) -> bool:
                     return False
             else:
                 return True
+
+
+def _squared_distance(left: Point, right: Point) -> Coordinate:
+    return (right.x - left.x) ** 2 + (right.y - left.y) ** 2
