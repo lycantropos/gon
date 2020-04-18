@@ -240,7 +240,7 @@ class Segment(Linear):
             raise ValueError('Segment is degenerate.')
 
 
-class Contour(Geometry):
+class Contour(Linear):
     __slots__ = '_vertices',
 
     def __init__(self, vertices: Vertices) -> None:
@@ -281,6 +281,30 @@ class Contour(Geometry):
                                        if isinstance(other, Geometry)
                                        else NotImplemented))
 
+    def __ge__(self, other: 'Geometry') -> bool:
+        return (self is other
+                or (segment_in_contour(other.raw(), self._raw)
+                    is Relation.COMPONENT
+                    if isinstance(other, Segment)
+                    else (contour_in_contour(other._raw, self._raw)
+                          in (Relation.EQUAL, Relation.COMPONENT)
+                          if isinstance(other, Contour)
+                          else (other <= self
+                                if isinstance(other, Compound)
+                                else NotImplemented))))
+
+    def __gt__(self, other: 'Geometry') -> bool:
+        return (self is not other
+                and (segment_in_contour(other.raw(), self._raw)
+                     is Relation.COMPONENT
+                     if isinstance(other, Segment)
+                     else (contour_in_contour(other._raw, self._raw)
+                           is Relation.COMPONENT
+                           if isinstance(other, Contour)
+                           else (other < self
+                                 if isinstance(other, Compound)
+                                 else NotImplemented))))
+
     def __hash__(self) -> int:
         """
         Returns hash value of the contour.
@@ -295,6 +319,28 @@ class Contour(Geometry):
         True
         """
         return hash(self._vertices)
+
+    def __le__(self, other: 'Geometry') -> bool:
+        return (self is other
+                or (False
+                    if isinstance(other, Segment)
+                    else (contour_in_contour(self._raw, other._raw)
+                          in (Relation.EQUAL, Relation.COMPONENT)
+                          if isinstance(other, Contour)
+                          else (other >= self
+                                if isinstance(other, Compound)
+                                else NotImplemented))))
+
+    def __lt__(self, other: 'Geometry') -> bool:
+        return (self is not other
+                and (False
+                     if isinstance(other, Segment)
+                     else (contour_in_contour(self._raw, other._raw)
+                           is Relation.COMPONENT
+                           if isinstance(other, Contour)
+                           else (other > self
+                                 if isinstance(other, Compound)
+                                 else NotImplemented))))
 
     @classmethod
     def from_raw(cls, raw: RawContour) -> 'Contour':
@@ -311,6 +357,12 @@ class Contour(Geometry):
         True
         """
         return cls([Point.from_raw(raw_vertex) for raw_vertex in raw])
+
+    @property
+    def length(self) -> Coordinate:
+        vertices = self._vertices
+        return sum(Segment(vertices[index - 1], vertices[index]).length
+                   for index in range(len(vertices)))
 
     @property
     def normalized(self) -> 'Contour':
