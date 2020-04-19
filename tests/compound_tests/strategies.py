@@ -12,28 +12,27 @@ from tests.strategies import (coordinates_strategies,
                               coordinates_to_segments)
 from tests.utils import Strategy
 
-CompoundStrategyFactory = Callable[[Strategy[Coordinate]], Strategy[Compound]]
+CompoundsFactory = Callable[[Strategy[Coordinate]], Strategy[Compound]]
 compounds_factories = strategies.sampled_from([coordinates_to_segments,
                                                coordinates_to_contours,
                                                coordinates_to_polygons])
 
 
-def coordinates_to_geometries(coordinates: Strategy[Coordinate],
-                              factory: CompoundStrategyFactory
-                              ) -> Strategy[Compound]:
+def coordinates_to_compounds(coordinates: Strategy[Coordinate],
+                             factory: CompoundsFactory) -> Strategy[Compound]:
     return factory(coordinates)
 
 
-compounds = (strategies.builds(coordinates_to_geometries,
+compounds = (strategies.builds(coordinates_to_compounds,
                                coordinates_strategies,
                                compounds_factories)
              .flatmap(identity))
 
 
 def coordinates_to_compounds_tuples(coordinates: Strategy[Coordinate],
-                                    *factories: CompoundStrategyFactory
+                                    *factories: CompoundsFactory
                                     ) -> Strategy[Tuple[Compound, ...]]:
-    return strategies.tuples(*[coordinates_to_geometries(coordinates, factory)
+    return strategies.tuples(*[coordinates_to_compounds(coordinates, factory)
                                for factory in factories])
 
 
