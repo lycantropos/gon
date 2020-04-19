@@ -224,6 +224,18 @@ class Segment(LinearCompound):
 
     @property
     def length(self) -> Coordinate:
+        """
+        Returns length of the segment.
+
+        Time complexity:
+            ``O(1)``
+        Memory complexity:
+            ``O(1)``
+
+        >>> segment = Segment.from_raw(((0, 0), (2, 0)))
+        >>> segment.length == 2
+        True
+        """
         return math.sqrt(_squared_distance(self.start, self.end))
 
     @property
