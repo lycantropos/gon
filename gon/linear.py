@@ -376,6 +376,10 @@ class Contour(LinearCompound):
             ``O(len(self.vertices))``
         Memory complexity:
             ``O(1)``
+
+        >>> contour = Contour.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> all(vertex in contour for vertex in contour.vertices)
+        True
         """
         return (point_in_contour(other.raw(), self._raw) is Relation.COMPONENT
                 if isinstance(other, Point)
