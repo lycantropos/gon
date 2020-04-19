@@ -30,18 +30,21 @@ compounds = (strategies.builds(coordinates_to_geometries,
              .flatmap(identity))
 
 
-def coordinates_to_compounds_pairs(coordinates: Strategy[Coordinate],
-                                   first_factory: CompoundStrategyFactory,
-                                   second_factory: CompoundStrategyFactory
-                                   ) -> Strategy[Tuple[Compound, Compound]]:
-    return strategies.tuples(coordinates_to_geometries(coordinates,
-                                                       first_factory),
-                             coordinates_to_geometries(coordinates,
-                                                       second_factory))
+def coordinates_to_compounds_tuples(coordinates: Strategy[Coordinate],
+                                    *factories: CompoundStrategyFactory
+                                    ) -> Strategy[Tuple[Compound, ...]]:
+    return strategies.tuples(*[coordinates_to_geometries(coordinates, factory)
+                               for factory in factories])
 
 
-compounds_pairs = (strategies.builds(coordinates_to_compounds_pairs,
+compounds_pairs = (strategies.builds(coordinates_to_compounds_tuples,
                                      coordinates_strategies,
                                      compounds_factories,
                                      compounds_factories)
                    .flatmap(identity))
+compounds_triplets = (strategies.builds(coordinates_to_compounds_tuples,
+                                        coordinates_strategies,
+                                        compounds_factories,
+                                        compounds_factories,
+                                        compounds_factories)
+                      .flatmap(identity))
