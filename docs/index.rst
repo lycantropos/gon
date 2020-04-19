@@ -22,6 +22,8 @@ compound module
 .. automodule:: gon.compound
     :members:
     :special-members:
+.. autoclass:: Relation
+    :members:
 
 primitive module
 ================
