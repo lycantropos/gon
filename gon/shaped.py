@@ -29,44 +29,7 @@ from .primitive import Point
 RawPolygon = Tuple[RawContour, List[RawContour]]
 
 
-class ShapedCompound(Compound, Shaped):
-    def __ge__(self, other: Compound) -> bool:
-        return (self is other
-                or (self.relate(other) in (Relation.EQUAL, Relation.COMPONENT,
-                                           Relation.ENCLOSED, Relation.WITHIN)
-                    if isinstance(other, Compound)
-                    else NotImplemented))
-
-    def __gt__(self, other: Compound) -> bool:
-        return (self is not other
-                and (self.relate(other) in (Relation.COMPONENT,
-                                            Relation.ENCLOSED, Relation.WITHIN)
-                     if isinstance(other, Compound)
-                     else NotImplemented))
-
-    def __le__(self, other: Compound) -> bool:
-        return (self is other
-                or ((self.relate(other) in (Relation.COVER, Relation.ENCLOSES,
-                                            Relation.COMPOSITE, Relation.EQUAL)
-                     if isinstance(other, ShapedCompound)
-                     # shaped cannot be subset of linear
-                     else False)
-                    if isinstance(other, Compound)
-                    else NotImplemented))
-
-    def __lt__(self, other: Compound) -> bool:
-        return (self is not other
-                and ((self.relate(other) in (Relation.COVER,
-                                             Relation.ENCLOSES,
-                                             Relation.COMPOSITE)
-                      if isinstance(other, ShapedCompound)
-                      # shaped cannot be strict subset of linear
-                      else False)
-                     if isinstance(other, Compound)
-                     else NotImplemented))
-
-
-class Polygon(ShapedCompound):
+class Polygon(Compound, Shaped):
     __slots__ = '_border', '_holes', '_holes_set', '_raw_border', '_raw_holes'
 
     def __init__(self, border: Contour,
@@ -161,6 +124,52 @@ class Polygon(ShapedCompound):
                           if isinstance(other, Geometry)
                           else NotImplemented)))
 
+    def __ge__(self, other: Compound) -> bool:
+        """
+        Checks if the polygon is a superset of the other geometry.
+
+        Time complexity:
+            ``O(vertices_count * log vertices_count)``
+        Memory complexity:
+            ``O(1)``
+
+        where ``vertices_count = len(self.border.vertices)\
+ + sum(len(hole.vertices) for hole in self.holes)``.
+
+        >>> polygon = Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
+        ...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]]))
+        >>> polygon >= polygon
+        True
+        """
+        return (self == other
+                or (self.relate(other) in (Relation.EQUAL, Relation.COMPONENT,
+                                           Relation.ENCLOSED, Relation.WITHIN)
+                    if isinstance(other, Compound)
+                    else NotImplemented))
+
+    def __gt__(self, other: Compound) -> bool:
+        """
+        Checks if the polygon is a strict superset of the other geometry.
+
+        Time complexity:
+            ``O(vertices_count * log vertices_count)``
+        Memory complexity:
+            ``O(1)``
+
+        where ``vertices_count = len(self.border.vertices)\
+ + sum(len(hole.vertices) for hole in self.holes)``.
+
+        >>> polygon = Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
+        ...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]]))
+        >>> polygon > polygon
+        False
+        """
+        return (self != other
+                and (self.relate(other) in (Relation.COMPONENT,
+                                            Relation.ENCLOSED, Relation.WITHIN)
+                     if isinstance(other, Compound)
+                     else NotImplemented))
+
     def __hash__(self) -> int:
         """
         Returns hash value of the polygon.
@@ -179,6 +188,59 @@ class Polygon(ShapedCompound):
         True
         """
         return hash((self._border, self._holes_set))
+
+    def __le__(self, other: Compound) -> bool:
+        """
+        Checks if the polygon is a subset of the other geometry.
+
+        Time complexity:
+            ``O(vertices_count * log vertices_count)``
+        Memory complexity:
+            ``O(1)``
+
+        where ``vertices_count = len(self.border.vertices)\
+ + sum(len(hole.vertices) for hole in self.holes)``.
+
+        >>> polygon = Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
+        ...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]]))
+        >>> polygon <= polygon
+        True
+        """
+        return (self == other
+                or ((self.relate(other) in (Relation.COVER, Relation.ENCLOSES,
+                                            Relation.COMPOSITE, Relation.EQUAL)
+                     if isinstance(other, Shaped)
+                     # shaped cannot be subset of linear
+                     else False)
+                    if isinstance(other, Compound)
+                    else NotImplemented))
+
+    def __lt__(self, other: Compound) -> bool:
+        """
+        Checks if the polygon is a strict subset of the other geometry.
+
+        Time complexity:
+            ``O(vertices_count * log vertices_count)``
+        Memory complexity:
+            ``O(1)``
+
+        where ``vertices_count = len(self.border.vertices)\
+ + sum(len(hole.vertices) for hole in self.holes)``.
+
+        >>> polygon = Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
+        ...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]]))
+        >>> polygon < polygon
+        False
+        """
+        return (self != other
+                and ((self.relate(other) in (Relation.COVER,
+                                             Relation.ENCLOSES,
+                                             Relation.COMPOSITE)
+                      if isinstance(other, Shaped)
+                      # shaped cannot be strict subset of linear
+                      else False)
+                     if isinstance(other, Compound)
+                     else NotImplemented))
 
     @classmethod
     def from_raw(cls, raw: RawPolygon) -> 'Polygon':
