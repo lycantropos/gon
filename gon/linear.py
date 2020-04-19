@@ -35,7 +35,7 @@ Vertices = Sequence[Point]
 MIN_VERTICES_COUNT = 3
 
 
-class LinearCompound(Linear, Compound):
+class LinearCompound(Compound, Linear):
     def __ge__(self, other: Compound) -> bool:
         return (self is other
                 or ((self.relate(other) in (Relation.COMPONENT, Relation.EQUAL)
