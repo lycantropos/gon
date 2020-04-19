@@ -86,6 +86,9 @@ True
 False
 >>> square > square
 False
+>>> from gon.primitive import Point
+>>> Point(0, 0) in square
+True
 >>> len(square.border.vertices) == 4
 True
 >>> len(square.holes) == 0
