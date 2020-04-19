@@ -35,42 +35,6 @@ Vertices = Sequence[Point]
 MIN_VERTICES_COUNT = 3
 
 
-class LinearCompound(Compound, Linear):
-    def __ge__(self, other: Compound) -> bool:
-        return (self is other
-                or ((self.relate(other) in (Relation.COMPONENT, Relation.EQUAL)
-                     if isinstance(other, LinearCompound)
-                     # linear cannot be superset of shaped
-                     else False)
-                    if isinstance(other, Compound)
-                    else NotImplemented))
-
-    def __gt__(self, other: Compound) -> bool:
-        return (self is not other
-                and ((self.relate(other) is Relation.COMPONENT
-                      if isinstance(other, LinearCompound)
-                      # linear cannot be strict superset of shaped
-                      else False)
-                     if isinstance(other, Compound)
-                     else NotImplemented))
-
-    def __le__(self, other: Compound) -> bool:
-        return (self is other
-                or ((self.relate(other) in (Relation.EQUAL, Relation.COMPOSITE)
-                     if isinstance(other, LinearCompound)
-                     else other >= self)
-                    if isinstance(other, Compound)
-                    else NotImplemented))
-
-    def __lt__(self, other: Compound) -> bool:
-        return (self is not other
-                and ((self.relate(other) is Relation.COMPOSITE
-                      if isinstance(other, LinearCompound)
-                      else other > self)
-                     if isinstance(other, Compound)
-                     else NotImplemented))
-
-
 class Segment(Compound, Linear):
     __slots__ = '_start', '_end', '_raw'
 
@@ -351,7 +315,7 @@ class Segment(Compound, Linear):
             raise ValueError('Segment is degenerate.')
 
 
-class Contour(LinearCompound):
+class Contour(Compound, Linear):
     __slots__ = '_vertices',
 
     def __init__(self, vertices: Vertices) -> None:
@@ -409,6 +373,60 @@ class Contour(LinearCompound):
                                        if isinstance(other, Geometry)
                                        else NotImplemented))
 
+    def __ge__(self, other: Compound) -> bool:
+        """
+        Checks if the contour is a superset of the other geometry.
+
+        Time complexity:
+            ``O(vertices_count * log vertices_count)``
+        Memory complexity:
+            ``O(vertices_count)``
+
+        where ``vertices_count = len(self.vertices)``.
+
+        >>> contour = Contour.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> contour >= contour
+        True
+        >>> contour >= Contour.from_raw([(0, 0), (1, 0), (1, 1), (0, 1)])
+        False
+        >>> contour >= Contour.from_raw([(1, 0), (0, 0), (0, 1)])
+        True
+        """
+        return (self == other
+                or ((self.relate(other) in (Relation.COMPONENT, Relation.EQUAL)
+                     if isinstance(other, Linear)
+                     # linear cannot be superset of shaped
+                     else False)
+                    if isinstance(other, Compound)
+                    else NotImplemented))
+
+    def __gt__(self, other: Compound) -> bool:
+        """
+        Checks if the contour is a strict superset of the other geometry.
+
+        Time complexity:
+            ``O(vertices_count * log vertices_count)``
+        Memory complexity:
+            ``O(vertices_count)``
+
+        where ``vertices_count = len(self.vertices)``.
+
+        >>> contour = Contour.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> contour > contour
+        False
+        >>> contour > Contour.from_raw([(0, 0), (1, 0), (1, 1), (0, 1)])
+        False
+        >>> contour > Contour.from_raw([(1, 0), (0, 0), (0, 1)])
+        False
+        """
+        return (self != other
+                and ((self.relate(other) is Relation.COMPONENT
+                      if isinstance(other, Linear)
+                      # linear cannot be strict superset of shaped
+                      else False)
+                     if isinstance(other, Compound)
+                     else NotImplemented))
+
     def __hash__(self) -> int:
         """
         Returns hash value of the contour.
@@ -436,14 +454,63 @@ class Contour(LinearCompound):
                     else _rotate_vertices(vertices))
 
     def __le__(self, other: Compound) -> bool:
-        return (False
-                if isinstance(other, Segment)
-                else super().__le__(other))
+        """
+        Checks if the contour is a subset of the other geometry.
+
+        Time complexity:
+            ``O(vertices_count * log vertices_count)``
+        Memory complexity:
+            ``O(vertices_count)``
+
+        where ``vertices_count = len(self.vertices)``.
+
+        >>> contour = Contour.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> contour <= contour
+        True
+        >>> contour <= Contour.from_raw([(0, 0), (1, 0), (1, 1), (0, 1)])
+        False
+        >>> contour <= Contour.from_raw([(1, 0), (0, 0), (0, 1)])
+        True
+        """
+        return (self == other
+                or (((self.relate(other) in (Relation.EQUAL,
+                                             Relation.COMPOSITE)
+                      if isinstance(other, Contour)
+                      # contour cannot be subset of segment
+                      else False)
+                     if isinstance(other, Linear)
+                     else other >= self)
+                    if isinstance(other, Compound)
+                    else NotImplemented))
 
     def __lt__(self, other: Compound) -> bool:
-        return (False
-                if isinstance(other, Segment)
-                else super().__lt__(other))
+        """
+        Checks if the contour is a strict subset of the other geometry.
+
+        Time complexity:
+            ``O(vertices_count * log vertices_count)``
+        Memory complexity:
+            ``O(vertices_count)``
+
+        where ``vertices_count = len(self.vertices)``.
+
+        >>> contour = Contour.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> contour < contour
+        False
+        >>> contour < Contour.from_raw([(0, 0), (1, 0), (1, 1), (0, 1)])
+        False
+        >>> contour < Contour.from_raw([(1, 0), (0, 0), (0, 1)])
+        False
+        """
+        return (self != other
+                and (((self.relate(other) is Relation.COMPOSITE
+                       if isinstance(other, Contour)
+                       # contour cannot be strict subset of segment
+                       else False)
+                      if isinstance(other, Linear)
+                      else other > self)
+                     if isinstance(other, Compound)
+                     else NotImplemented))
 
     @classmethod
     def from_raw(cls, raw: RawContour) -> 'Contour':
