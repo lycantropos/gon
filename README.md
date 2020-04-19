@@ -76,6 +76,16 @@ Usage
 >>> square = Polygon.from_raw(raw_square)
 >>> square.raw() == raw_square
 True
+>>> square == square
+True
+>>> square >= square
+True
+>>> square <= square
+True
+>>> square < square
+False
+>>> square > square
+False
 >>> len(square.border.vertices) == 4
 True
 >>> len(square.holes) == 0
@@ -85,6 +95,8 @@ True
 >>> square.convex_hull == square
 True
 >>> square.area == 1
+True
+>>> square.perimeter == 4
 True
 >>> (square.triangulate()
 ...  == [Polygon.from_raw(([(0, 1), (1, 0), (1, 1)], [])), 
