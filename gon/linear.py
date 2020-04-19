@@ -71,7 +71,7 @@ class LinearCompound(Compound, Linear):
                      else NotImplemented))
 
 
-class Segment(LinearCompound):
+class Segment(Compound, Linear):
     __slots__ = '_start', '_end', '_raw'
 
     def __init__(self, start: Point, end: Point) -> None:
@@ -144,13 +144,17 @@ class Segment(LinearCompound):
         >>> segment >= Segment.from_raw(((0, 0), (0, 2)))
         False
         """
-        return (False
-                if isinstance(other, Contour)
-                else super().__ge__(other))
+        return (self == other
+                or ((self.relate(other) is Relation.COMPONENT
+                     if isinstance(other, Segment)
+                     # segment cannot be superset of contour or shaped
+                     else False)
+                    if isinstance(other, Compound)
+                    else NotImplemented))
 
     def __gt__(self, other: Compound) -> bool:
         """
-        Checks if the geometry is a strict superset of the other.
+        Checks if the segment is a strict superset of the other geometry.
 
         Time complexity:
             ``O(1)``
@@ -167,9 +171,13 @@ class Segment(LinearCompound):
         >>> segment > Segment.from_raw(((0, 0), (0, 2)))
         False
         """
-        return (False
-                if isinstance(other, Contour)
-                else super().__gt__(other))
+        return (self != other
+                and ((self.relate(other) is Relation.COMPONENT
+                      if isinstance(other, Segment)
+                      # linear cannot be strict superset of contour or shaped
+                      else False)
+                     if isinstance(other, Compound)
+                     else NotImplemented))
 
     def __hash__(self) -> int:
         """
@@ -187,6 +195,58 @@ class Segment(LinearCompound):
         True
         """
         return hash(frozenset(self._raw))
+
+    def __le__(self, other: Compound) -> bool:
+        """
+        Checks if the segment is a subset of the other geometry.
+
+        Time complexity:
+            ``O(1)``
+        Memory complexity:
+            ``O(1)``
+
+        >>> segment = Segment.from_raw(((0, 0), (2, 0)))
+        >>> segment <= segment
+        True
+        >>> segment <= Segment.from_raw(((2, 0), (0, 0)))
+        True
+        >>> segment <= Segment.from_raw(((0, 0), (1, 0)))
+        False
+        >>> segment <= Segment.from_raw(((0, 0), (0, 2)))
+        False
+        """
+        return (self is other
+                or ((self.relate(other) in (Relation.EQUAL, Relation.COMPOSITE)
+                     if isinstance(other, Linear)
+                     else other >= self)
+                    if isinstance(other, Compound)
+                    else NotImplemented))
+
+    def __lt__(self, other: Compound) -> bool:
+        """
+        Checks if the segment is a strict subset of the other geometry.
+
+        Time complexity:
+            ``O(1)``
+        Memory complexity:
+            ``O(1)``
+
+        >>> segment = Segment.from_raw(((0, 0), (2, 0)))
+        >>> segment < segment
+        False
+        >>> segment < Segment.from_raw(((2, 0), (0, 0)))
+        False
+        >>> segment < Segment.from_raw(((0, 0), (1, 0)))
+        False
+        >>> segment < Segment.from_raw(((0, 0), (0, 2)))
+        False
+        """
+        return (self is not other
+                and ((self.relate(other) is Relation.COMPOSITE
+                      if isinstance(other, Linear)
+                      else other > self)
+                     if isinstance(other, Compound)
+                     else NotImplemented))
 
     @classmethod
     def from_raw(cls, raw: RawSegment) -> 'Segment':
