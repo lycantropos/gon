@@ -261,6 +261,14 @@ class Contour(LinearCompound):
     __repr__ = generate_repr(__init__)
 
     def __contains__(self, other: Geometry) -> bool:
+        """
+        Checks if the contour contains the other geometry.
+
+        Time complexity:
+            ``O(len(self.vertices))``
+        Memory complexity:
+            ``O(1)``
+        """
         return (point_in_contour(other.raw(), self._raw) is Relation.COMPONENT
                 if isinstance(other, Point)
                 else False)
