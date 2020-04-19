@@ -9,6 +9,20 @@ Welcome to gon's documentation!
    it should be considered as implementation detail
    that can change and should not be relied upon.
 
+geometry module
+===============
+
+.. automodule:: gon.geometry
+    :members:
+    :special-members:
+
+compound module
+===============
+
+.. automodule:: gon.compound
+    :members:
+    :special-members:
+
 primitive module
 ================
 
