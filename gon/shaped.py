@@ -332,6 +332,22 @@ class Polygon(ShapedCompound):
                                      for raw_hole in self._raw_holes]
 
     def relate(self, other: Compound) -> Relation:
+        """
+        Finds relation between the polygon and the other geometric object.
+
+        Time complexity:
+            ``O(vertices_count * log vertices_count)``
+        Memory complexity:
+            ``O(vertices_count)``
+
+        where ``vertices_count = len(self.border.vertices)\
+ + sum(len(hole.vertices) for hole in self.holes)``.
+
+        >>> polygon = Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
+        ...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]]))
+        >>> polygon.relate(polygon) is Relation.EQUAL
+        True
+        """
         raw = self._raw_border, self._raw_holes
         return (segment_in_polygon(other.raw(), raw)
                 if isinstance(other, Segment)
