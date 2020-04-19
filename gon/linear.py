@@ -205,7 +205,7 @@ class Segment(Compound, Linear):
         >>> segment < Segment.from_raw(((0, 0), (0, 2)))
         False
         """
-        return (self is not other
+        return (self != other
                 and ((self.relate(other) is Relation.COMPOSITE
                       if isinstance(other, Linear)
                       else other > self)
