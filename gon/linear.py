@@ -126,6 +126,24 @@ class Segment(LinearCompound):
                 else NotImplemented)
 
     def __ge__(self, other: Compound) -> bool:
+        """
+        Checks if the segment is a superset of the other geometry.
+
+        Time complexity:
+            ``O(1)``
+        Memory complexity:
+            ``O(1)``
+
+        >>> segment = Segment.from_raw(((0, 0), (2, 0)))
+        >>> segment >= segment
+        True
+        >>> segment >= Segment.from_raw(((2, 0), (0, 0)))
+        True
+        >>> segment >= Segment.from_raw(((0, 0), (1, 0)))
+        True
+        >>> segment >= Segment.from_raw(((0, 0), (0, 2)))
+        False
+        """
         return (False
                 if isinstance(other, Contour)
                 else super().__ge__(other))
