@@ -56,13 +56,13 @@ class LinearCompound(Linear, Compound):
 
     def __le__(self, other: Compound) -> bool:
         return (self is other
-                or (self.relate(other) in (Relation.EQUAL, Relation.COMPONENT)
+                or (self.relate(other) in (Relation.EQUAL, Relation.COMPOSITE)
                     if isinstance(other, Compound)
                     else NotImplemented))
 
     def __lt__(self, other: Compound) -> bool:
         return (self is not other
-                and (self.relate(other) is Relation.COMPONENT
+                and (self.relate(other) is Relation.COMPOSITE
                      if isinstance(other, Compound)
                      else NotImplemented))
 
