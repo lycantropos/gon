@@ -55,7 +55,7 @@ class Polygon(Compound, Shaped):
 
     def __contains__(self, other: Geometry) -> bool:
         """
-        Checks if the point lies inside the polygon or on its boundary.
+        Checks if the polygon contains the other geometry.
 
         Time complexity:
             ``O(vertices_count)``
