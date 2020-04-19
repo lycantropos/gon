@@ -29,7 +29,7 @@ from .primitive import Point
 RawPolygon = Tuple[RawContour, List[RawContour]]
 
 
-class ShapedCompound(Shaped, Compound):
+class ShapedCompound(Compound, Shaped):
     def __ge__(self, other: Compound) -> bool:
         return (self is other
                 or (self.relate(other) in (Relation.EQUAL, Relation.COMPONENT,
