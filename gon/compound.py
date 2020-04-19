@@ -40,6 +40,9 @@ class Compound(Geometry):
         """
 
     def disjoint(self, other: 'Compound') -> bool:
+        """
+        Checks if the geometry is disjoint with the other.
+        """
         return self.relate(other) is Relation.DISJOINT
 
     @abstractmethod
