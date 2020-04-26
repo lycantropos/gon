@@ -9,6 +9,10 @@ from .utils import squared_raw_segment_point_distance
 
 
 class EdgeNode(kd.Node):
+    """
+    Custom kd-tree node class for searching contour edge
+    which is the nearest to point.
+    """
     __slots__ = '_edge_start',
 
     def __init__(self,
