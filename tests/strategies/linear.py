@@ -8,9 +8,9 @@ from hypothesis import strategies
 from hypothesis_geometry import planar
 
 from gon.hints import Coordinate
-from gon.linear import (MIN_VERTICES_COUNT,
-                        Contour,
-                        Vertices)
+from gon.linear import (Contour,
+                        vertices)
+from gon.linear.hints import Vertices
 from gon.primitive import Point
 from tests.utils import Strategy
 from .base import coordinates_strategies
@@ -19,7 +19,7 @@ from .primitive import invalid_points
 
 
 def to_repeated_points(coordinates: Strategy[Coordinate],
-                       min_size: int = MIN_VERTICES_COUNT,
+                       min_size: int = vertices.MIN_COUNT,
                        max_size: Optional[int] = None
                        ) -> Strategy[List[Point]]:
     return (strategies.lists(planar.points(coordinates),
@@ -47,11 +47,11 @@ small_contours = (
                       coordinates_strategies
                       .map(coordinates_to_points)
                       .flatmap(partial(strategies.lists,
-                                       max_size=MIN_VERTICES_COUNT - 1))))
+                                       max_size=vertices.MIN_COUNT - 1))))
 invalid_vertices_contours = strategies.builds(
         Contour,
         strategies.lists(invalid_points,
-                         min_size=MIN_VERTICES_COUNT))
+                         min_size=vertices.MIN_COUNT))
 contours_with_repeated_points = (coordinates_strategies
                                  .flatmap(to_repeated_points)
                                  .map(Contour.from_raw))

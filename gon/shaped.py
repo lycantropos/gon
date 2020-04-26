@@ -22,8 +22,7 @@ from .hints import Coordinate
 from .linear import (Contour,
                      RawContour,
                      Segment,
-                     _vertices_form_convex_polygon,
-                     _vertices_to_signed_area)
+                     vertices)
 from .primitive import Point
 
 RawPolygon = Tuple[RawContour, List[RawContour]]
@@ -287,8 +286,8 @@ class Polygon(Compound, Shaped):
         >>> polygon.area == 32
         True
         """
-        return (abs(_vertices_to_signed_area(self._border._vertices))
-                - sum(abs(_vertices_to_signed_area(hole._vertices))
+        return (abs(vertices.region_signed_area(self._border._vertices))
+                - sum(abs(vertices.region_signed_area(hole._vertices))
                       for hole in self._holes))
 
     @property
@@ -367,7 +366,7 @@ class Polygon(Compound, Shaped):
         True
         """
         return (not self._holes
-                and _vertices_form_convex_polygon(self._border._vertices))
+                and vertices.form_convex_polygon(self._border._vertices))
 
     @property
     def perimeter(self) -> Coordinate:
