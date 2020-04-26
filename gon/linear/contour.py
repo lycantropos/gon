@@ -63,11 +63,9 @@ class Contour(Compound, Linear):
         if not isinstance(other, Point):
             return False
         raw_point = other.raw()
-        edge_index = self._tree.nearest_index(raw_point)
-        raw = self._raw
-        return not squared_raw_segment_point_distance(raw[edge_index - 1],
-                                                      raw[edge_index],
-                                                      raw_point)
+        edge_index, edge_end = self._tree.nearest_item(raw_point)
+        return not squared_raw_segment_point_distance(
+                self._raw[edge_index - 1], edge_end, raw_point)
 
     @property
     def _tree(self) -> kd.Tree:
