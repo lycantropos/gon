@@ -348,7 +348,7 @@ class Contour(Compound, Linear):
             ``O(len(self.vertices))`` -- otherwise
 
         >>> contour = Contour.from_raw([(0, 0), (1, 0), (0, 1)])
-        >>> contour.to_clockwise().to_orientation is Orientation.CLOCKWISE
+        >>> contour.to_clockwise().orientation is Orientation.CLOCKWISE
         True
         """
         return (self
@@ -366,7 +366,7 @@ class Contour(Compound, Linear):
             ``O(len(self.vertices))`` -- otherwise
 
         >>> contour = Contour.from_raw([(0, 0), (1, 0), (0, 1)])
-        >>> (contour.to_counterclockwise().to_orientation
+        >>> (contour.to_counterclockwise().orientation
         ...  is Orientation.COUNTERCLOCKWISE)
         True
         """
