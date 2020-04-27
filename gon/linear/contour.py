@@ -39,6 +39,8 @@ class Contour(Compound, Linear):
         where ``vertices_count = len(vertices)``.
         """
         self._vertices = tuple(vertices)
+        self._min_index = min(range(len(vertices)),
+                              key=vertices.__getitem__)
         self._raw = [vertex.raw() for vertex in vertices]
         self._cached_tree = None
 
