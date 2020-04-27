@@ -159,7 +159,9 @@ class Contour(Compound, Linear):
         Returns hash value of the contour.
 
         Time complexity:
-            ``O(len(self.vertices))``
+            ``O(1)`` if contour is counterclockwise
+            and starts from the bottom leftmost vertex,
+            ``O(len(self.vertices))`` otherwise
         Memory complexity:
             ``O(1)`` if contour is counterclockwise
             and starts from the bottom leftmost vertex,
@@ -169,12 +171,7 @@ class Contour(Compound, Linear):
         >>> hash(contour) == hash(contour)
         True
         """
-        vertices = self._vertices
-        min_index = min(range(len(vertices)),
-                        key=vertices.__getitem__)
-        vertices = (vertices[min_index:] + vertices[:min_index]
-                    if min_index
-                    else vertices)
+        vertices = _vertices.shift(self._vertices, self._min_index)
         return hash(vertices
                     if (to_orientation(vertices[0], vertices[- 1], vertices[1])
                         is Orientation.COUNTERCLOCKWISE)
