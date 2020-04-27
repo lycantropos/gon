@@ -25,7 +25,7 @@ from .utils import squared_raw_segment_point_distance
 
 
 class Contour(Compound, Linear):
-    __slots__ = '_vertices',
+    __slots__ = '_cached_tree', '_min_index', '_raw', '_vertices'
 
     def __init__(self, vertices: Vertices) -> None:
         """
