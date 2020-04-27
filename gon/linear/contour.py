@@ -274,7 +274,7 @@ class Contour(Compound, Linear):
         Returns orientation of the contour.
 
         Time complexity:
-            ``O(len(self.vertices))``
+            ``O(1)``
         Memory complexity:
             ``O(1)``
 
@@ -282,9 +282,7 @@ class Contour(Compound, Linear):
         >>> contour.orientation is Orientation.COUNTERCLOCKWISE
         True
         """
-        vertices = self._vertices
-        min_index = min(range(len(vertices)),
-                        key=vertices.__getitem__)
+        vertices, min_index = self._vertices, self._min_index
         return to_orientation(vertices[min_index], vertices[min_index - 1],
                               vertices[(min_index + 1) % len(vertices)])
 
