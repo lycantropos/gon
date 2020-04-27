@@ -18,6 +18,12 @@ from .utils import squared_points_distance
 MIN_COUNT = 3
 
 
+def shift(vertices: Vertices, step: int) -> Vertices:
+    return (vertices[step:] + vertices[:step]
+            if step
+            else vertices)
+
+
 def rotate(vertices: Vertices) -> Vertices:
     return vertices[:1] + vertices[:0:-1]
 
