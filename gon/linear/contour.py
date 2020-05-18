@@ -3,7 +3,6 @@ from functools import partial
 from bentley_ottmann.planar import edges_intersect
 from locus import kd
 from orient.planar import (contour_in_contour,
-                           point_in_contour,
                            segment_in_contour)
 from reprit.base import generate_repr
 from robust.hints import Point
@@ -318,13 +317,11 @@ class Contour(Compound, Linear):
         return self._raw[:]
 
     def relate(self, other: Compound) -> Relation:
-        return (point_in_contour(other.raw(), self._raw)
-                if isinstance(other, Point)
-                else (segment_in_contour(other.raw(), self._raw)
-                      if isinstance(other, Segment)
-                      else (contour_in_contour(other._raw, self._raw)
-                            if isinstance(other, Contour)
-                            else other.relate(self).complement)))
+        return (segment_in_contour(other.raw(), self._raw)
+                if isinstance(other, Segment)
+                else (contour_in_contour(other._raw, self._raw)
+                      if isinstance(other, Contour)
+                      else other.relate(self).complement))
 
     def reverse(self) -> 'Contour':
         """
