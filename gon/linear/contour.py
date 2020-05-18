@@ -395,7 +395,8 @@ class Contour(Indexable, Linear):
         Memory complexity:
             ``O(len(self.vertices))``
 
-        >>> Contour.from_raw([(0, 0), (1, 0), (0, 1)]).validate()
+        >>> contour = Contour.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> contour.validate()
         """
         for vertex in self._vertices:
             vertex.validate()
