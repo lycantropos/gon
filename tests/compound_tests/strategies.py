@@ -13,9 +13,10 @@ from tests.strategies import (coordinates_strategies,
 from tests.utils import Strategy
 
 CompoundsFactory = Callable[[Strategy[Coordinate]], Strategy[Compound]]
-compounds_factories = strategies.sampled_from([coordinates_to_segments,
-                                               coordinates_to_contours,
-                                               coordinates_to_polygons])
+indexables_factories = strategies.sampled_from([coordinates_to_contours,
+                                                coordinates_to_polygons])
+compounds_factories = (strategies.just(coordinates_to_segments)
+                       | indexables_factories)
 
 
 def coordinates_to_compounds(coordinates: Strategy[Coordinate],
@@ -23,6 +24,10 @@ def coordinates_to_compounds(coordinates: Strategy[Coordinate],
     return factory(coordinates)
 
 
+indexables = (strategies.builds(coordinates_to_compounds,
+                                coordinates_strategies,
+                                indexables_factories)
+              .flatmap(identity))
 compounds = (strategies.builds(coordinates_to_compounds,
                                coordinates_strategies,
                                compounds_factories)
