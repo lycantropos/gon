@@ -75,3 +75,11 @@ class Shaped(Geometry):
         """
         Returns perimeter of the geometry.
         """
+
+
+class Indexable(Compound):
+    @abstractmethod
+    def index(self) -> None:
+        """
+        Pre-processes geometry to potentially improve queries time complexity.
+        """

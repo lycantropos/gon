@@ -11,6 +11,7 @@ from sect.decomposition import multisegment_trapezoidal
 from gon.angular import (Orientation,
                          to_orientation)
 from gon.compound import (Compound,
+                          Indexable,
                           Linear,
                           Relation)
 from gon.geometry import Geometry
@@ -23,7 +24,7 @@ from .hints import (RawContour,
 from .segment import Segment
 
 
-class Contour(Compound, Linear):
+class Contour(Indexable, Linear):
     __slots__ = '_contains', '_min_index', '_raw', '_vertices'
 
     def __init__(self, vertices: Vertices) -> None:
