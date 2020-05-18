@@ -16,7 +16,10 @@ from lz.hints import (Domain,
 from lz.replication import replicator
 
 from gon.hints import Coordinate
-from gon.linear import Segment
+from gon.linear import (Contour,
+                        Segment)
+from gon.linear.vertices import (rotate,
+                                 shift)
 from gon.primitive import Point
 
 Strategy = SearchStrategy
@@ -87,3 +90,11 @@ def reflect_segment(segment: Segment) -> Segment:
 
 def reverse_segment(segment: Segment) -> Segment:
     return Segment(segment.end, segment.start)
+
+
+def rotate_contour(contour: Contour) -> Contour:
+    return Contour(rotate(contour.vertices))
+
+
+def shift_contour(contour: Contour, step: int) -> Contour:
+    return Contour(shift(contour.vertices, step))
