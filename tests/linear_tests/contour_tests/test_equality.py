@@ -4,7 +4,6 @@ from hypothesis import given
 
 from gon.linear import Contour
 from tests.utils import (implication,
-                         rotate_contour,
                          shift_contour)
 from . import strategies
 
@@ -32,8 +31,8 @@ def test_transitivity(contours_triplet: Tuple[Contour, Contour, Contour]
 
 
 @given(strategies.contours)
-def test_rotated(contour: Contour) -> None:
-    assert contour == rotate_contour(contour)
+def test_reversed(contour: Contour) -> None:
+    assert contour == contour.reverse()
 
 
 @given(strategies.contours)
