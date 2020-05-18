@@ -91,10 +91,3 @@ def equal(left: Vertices, right: Vertices, same_oriented: bool) -> bool:
                         else range(size - 1, index - 1, right_step)))
     return all(left[left_index] == right[right_index]
                for left_index, right_index in indices)
-
-
-def to_orientation(vertices: Vertices) -> Orientation:
-    index = min(range(len(vertices)),
-                key=vertices.__getitem__)
-    return to_angle_orientation(vertices[index], vertices[index - 1],
-                                vertices[(index + 1) % len(vertices)])
