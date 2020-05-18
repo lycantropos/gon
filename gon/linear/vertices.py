@@ -1,6 +1,7 @@
 import math
 from fractions import Fraction
 from functools import reduce
+from itertools import chain
 from typing import Iterator
 
 from robust.hints import Expansion
@@ -68,36 +69,28 @@ def to_orientations(vertices: Vertices) -> Iterator[Orientation]:
             for index in range(vertices_count))
 
 
-def equal(left: Vertices, right: Vertices) -> bool:
+def equal(left: Vertices, right: Vertices, same_oriented: bool) -> bool:
     if len(left) != len(right):
         return False
-    right_step = (1
-                  if to_orientation(left) is to_orientation(right)
-                  else -1)
+    right_step = 1 if same_oriented else -1
     size = len(left)
     try:
         index = right.index(left[0])
     except ValueError:
         return False
-    else:
-        left_index = 0
-        for left_index, right_index in zip(range(size),
-                                           range(index, size)
-                                           if right_step == 1
-                                           else range(index, -1,
-                                                      right_step)):
-            if left[left_index] != right[right_index]:
-                return False
-        else:
-            for left_index, right_index in zip(range(left_index + 1, size),
-                                               range(index)
-                                               if right_step == 1
-                                               else range(size - 1, index - 1,
-                                                          right_step)):
-                if left[left_index] != right[right_index]:
-                    return False
-            else:
-                return True
+    indices = chain(zip(range(size),
+                        range(index, size)
+                        if same_oriented
+                        else range(index, -1, right_step)),
+                    zip(range(size - index
+                              if same_oriented
+                              else index + 1,
+                              size),
+                        range(index)
+                        if same_oriented
+                        else range(size - 1, index - 1, right_step)))
+    return all(left[left_index] == right[right_index]
+               for left_index, right_index in indices)
 
 
 def to_orientation(vertices: Vertices) -> Orientation:
