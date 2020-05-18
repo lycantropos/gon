@@ -3,7 +3,9 @@ from typing import Tuple
 from hypothesis import given
 
 from gon.linear import Contour
-from tests.utils import implication
+from tests.utils import (implication,
+                         rotate_contour,
+                         shift_contour)
 from . import strategies
 
 
@@ -27,3 +29,14 @@ def test_transitivity(contours_triplet: Tuple[Contour, Contour, Contour]
 
     assert implication(left_contour == mid_contour == right_contour,
                        left_contour == right_contour)
+
+
+@given(strategies.contours)
+def test_rotated(contour: Contour) -> None:
+    assert contour == rotate_contour(contour)
+
+
+@given(strategies.contours)
+def test_shifted(contour: Contour) -> None:
+    assert all(contour == shift_contour(contour, step)
+               for step in range(len(contour.vertices)))
