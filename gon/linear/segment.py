@@ -41,9 +41,9 @@ class Segment(Compound, Linear):
         Memory complexity:
             ``O(1)``
         """
-        return (point_in_segment(other.raw(), self._raw) is Relation.COMPONENT
-                if isinstance(other, Point)
-                else False)
+        return (isinstance(other, Point)
+                and (point_in_segment(other.raw(), self._raw)
+                     is Relation.COMPONENT))
 
     def __eq__(self, other: 'Segment') -> bool:
         """
