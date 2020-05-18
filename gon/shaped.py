@@ -1,3 +1,4 @@
+from functools import partial
 from typing import (Iterable,
                     List,
                     Optional,
@@ -10,6 +11,7 @@ from orient.planar import (contour_in_polygon,
                            region_in_multiregion,
                            segment_in_polygon)
 from reprit.base import generate_repr
+from sect.decomposition import polygon_trapezoidal
 from sect.triangulation import constrained_delaunay_triangles
 
 from .angular import (Orientation,
@@ -23,13 +25,15 @@ from .linear import (Contour,
                      RawContour,
                      Segment,
                      vertices)
-from .primitive import Point
+from .primitive import (Point,
+                        RawPoint)
 
 RawPolygon = Tuple[RawContour, List[RawContour]]
 
 
 class Polygon(Compound, Shaped):
-    __slots__ = '_border', '_holes', '_holes_set', '_raw_border', '_raw_holes'
+    __slots__ = ('_border', '_holes', '_holes_set',
+                 '_raw_border', '_raw_holes', '_contains')
 
     def __init__(self, border: Contour,
                  holes: Optional[Sequence[Contour]] = None) -> None:
@@ -49,6 +53,8 @@ class Polygon(Compound, Shaped):
                                                       frozenset(holes))
         self._raw_border, self._raw_holes = border.raw(), [hole.raw()
                                                            for hole in holes]
+        self._contains = partial(_plain_contains,
+                                 (self._raw_border, self._raw_holes))
 
     __repr__ = generate_repr(__init__)
 
@@ -83,10 +89,7 @@ class Polygon(Compound, Shaped):
         >>> Point(7, 0) in polygon
         False
         """
-        raw = self._raw_border, self._raw_holes
-        return (point_in_polygon(other.raw(), raw) is not Relation.DISJOINT
-                if isinstance(other, Point)
-                else False)
+        return isinstance(other, Point) and self._contains(other.raw())
 
     def __eq__(self, other: 'Polygon') -> bool:
         """
@@ -388,6 +391,26 @@ class Polygon(Compound, Shaped):
         """
         return self._border.length + sum(hole.length for hole in self._holes)
 
+    def index(self) -> None:
+        """
+        Pre-processes contour to potentially improve queries time complexity.
+
+        Time complexity:
+            ``O(vertices_count * log vertices_count)`` expected,
+            ``O(vertices_count ** 2)`` worst
+        Memory complexity:
+            ``O(vertices_count)``
+
+        where ``vertices_count = len(self.border.vertices)\
+ + sum(len(hole.vertices) for hole in self.holes)``.
+
+        >>> polygon = Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
+        ...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]]))
+        >>> polygon.index()
+        """
+        graph = polygon_trapezoidal(self._raw_border, self._raw_holes)
+        self._contains = graph.__contains__
+
     def raw(self) -> RawPolygon:
         """
         Returns the polygon as combination of Python built-ins.
@@ -506,3 +529,7 @@ def _to_sub_hull(points: Iterable[Point]) -> List[Point]:
                 break
         result.append(point)
     return result
+
+
+def _plain_contains(raw_polygon: RawPolygon, raw_point: RawPoint) -> bool:
+    return bool(point_in_polygon(raw_point, raw_polygon))
