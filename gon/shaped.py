@@ -17,6 +17,7 @@ from sect.triangulation import constrained_delaunay_triangles
 from .angular import (Orientation,
                       to_orientation)
 from .compound import (Compound,
+                       Indexable,
                        Relation,
                        Shaped)
 from .geometry import Geometry
@@ -31,7 +32,7 @@ from .primitive import (Point,
 RawPolygon = Tuple[RawContour, List[RawContour]]
 
 
-class Polygon(Compound, Shaped):
+class Polygon(Indexable, Shaped):
     __slots__ = ('_border', '_holes', '_holes_set',
                  '_raw_border', '_raw_holes', '_contains')
 
