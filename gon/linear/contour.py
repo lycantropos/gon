@@ -1,11 +1,12 @@
 from functools import partial
 
 from bentley_ottmann.planar import edges_intersect
-from locus import kd
 from orient.planar import (contour_in_contour,
+                           point_in_contour,
                            segment_in_contour)
 from reprit.base import generate_repr
 from robust.hints import Point
+from sect.decomposition import multisegment_trapezoidal
 
 from gon.angular import (Orientation,
                          to_orientation)
@@ -14,17 +15,16 @@ from gon.compound import (Compound,
                           Relation)
 from gon.geometry import Geometry
 from gon.hints import Coordinate
-from gon.primitive import Point
+from gon.primitive import (Point,
+                           RawPoint)
 from . import vertices as _vertices
-from .edge_node import EdgeNode
 from .hints import (RawContour,
                     Vertices)
 from .segment import Segment
-from .utils import squared_raw_segment_point_distance
 
 
 class Contour(Compound, Linear):
-    __slots__ = '_cached_tree', '_min_index', '_raw', '_vertices'
+    __slots__ = '_contains', '_min_index', '_raw', '_vertices'
 
     def __init__(self, vertices: Vertices) -> None:
         """
@@ -41,7 +41,7 @@ class Contour(Compound, Linear):
         self._min_index = min(range(len(vertices)),
                               key=vertices.__getitem__)
         self._raw = [vertex.raw() for vertex in vertices]
-        self._cached_tree = None
+        self._contains = partial(_plain_contains, self._raw)
 
     __repr__ = generate_repr(__init__)
 
@@ -50,8 +50,8 @@ class Contour(Compound, Linear):
         Checks if the contour contains the other geometry.
 
         Time complexity:
-            ``O(vertices_count * log vertices_count)`` on the first call,
-            ``O(log vertices_count)`` on subsequent ones.
+            ``O(log vertices_count)`` expected after indexing,
+            ``O(vertices_count)`` worst after indexing or without it.
         Memory complexity:
             ``O(1)``
 
@@ -61,19 +61,7 @@ class Contour(Compound, Linear):
         >>> all(vertex in contour for vertex in contour.vertices)
         True
         """
-        if not isinstance(other, Point):
-            return False
-        raw_point = other.raw()
-        edge_index, edge_end = self._tree.nearest_item(raw_point)
-        return not squared_raw_segment_point_distance(
-                self._raw[edge_index - 1], edge_end, raw_point)
-
-    @property
-    def _tree(self) -> kd.Tree:
-        if self._cached_tree is None:
-            self._cached_tree = kd.Tree(self._raw,
-                                        node_cls=partial(EdgeNode, self._raw))
-        return self._cached_tree
+        return isinstance(other, Point) and self._contains(other.raw())
 
     def __eq__(self, other: 'Contour') -> bool:
         """
@@ -301,6 +289,26 @@ class Contour(Compound, Linear):
         """
         return list(self._vertices)
 
+    def index(self) -> None:
+        """
+        Indexes contour to improve queries.
+
+        Time complexity:
+            ``O(vertices_count * log vertices_count)`` expected,
+            ``O(vertices_count ** 2)`` worst
+        Memory complexity:
+            ``O(vertices_count)``
+
+        where ``vertices_count = len(self.vertices)``.
+
+        >>> contour = Contour.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> contour.index()
+        """
+        raw = self._raw
+        graph = multisegment_trapezoidal([(raw[index - 1], raw[index])
+                                          for index in range(len(raw))])
+        self._contains = graph.__contains__
+
     def raw(self) -> RawContour:
         """
         Returns the contour as combination of Python built-ins.
@@ -400,3 +408,7 @@ class Contour(Compound, Linear):
                              'should not be on the same line.')
         if edges_intersect(self._raw):
             raise ValueError('Contour should not be self-intersecting.')
+
+
+def _plain_contains(raw_contour: RawContour, raw_point: RawPoint) -> bool:
+    return bool(point_in_contour(raw_point, raw_contour))
