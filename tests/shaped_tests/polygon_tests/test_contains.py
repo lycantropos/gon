@@ -4,7 +4,8 @@ from hypothesis import given
 
 from gon.primitive import Point
 from gon.shaped import Polygon
-from tests.utils import implication
+from tests.utils import (equivalence,
+                         implication)
 from . import strategies
 
 
@@ -26,3 +27,16 @@ def test_convex_hull(polygon_with_point: Tuple[Polygon, Point]) -> None:
     polygon, point = polygon_with_point
 
     assert implication(point in polygon, point in polygon.convex_hull)
+
+
+@given(strategies.polygons_with_points)
+def test_indexing(polygon_with_point: Tuple[Polygon, Point]) -> None:
+    polygon, point = polygon_with_point
+
+    before_indexing = point in polygon
+
+    polygon.index()
+
+    after_indexing = point in polygon
+
+    assert equivalence(before_indexing, after_indexing)
