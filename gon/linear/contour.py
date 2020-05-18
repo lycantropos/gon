@@ -291,7 +291,7 @@ class Contour(Compound, Linear):
 
     def index(self) -> None:
         """
-        Indexes contour to improve queries.
+        Pre-processes contour to potentially improve queries time complexity.
 
         Time complexity:
             ``O(vertices_count * log vertices_count)`` expected,
