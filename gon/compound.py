@@ -9,6 +9,8 @@ Relation = Relation
 
 
 class Compound(Geometry):
+    __slots__ = ()
+
     @abstractmethod
     def __contains__(self, other: 'Geometry') -> bool:
         """
