@@ -171,12 +171,14 @@ class Multipoint(Compound):
         >>> multipoint > Multipoint.from_raw([(1, 0), (0, 0), (0, 1)])
         False
         """
-        return ((self._points_set > other._points_set
-                 if isinstance(other, Multipoint)
-                 # multipoint cannot be strict superset of continuous geometry
-                 else False)
-                if isinstance(other, Compound)
-                else NotImplemented)
+        return (other is EMPTY
+                or ((self._points_set > other._points_set
+                     if isinstance(other, Multipoint)
+                     # multipoint cannot be strict superset
+                     # of continuous geometry
+                     else False)
+                    if isinstance(other, Compound)
+                    else NotImplemented))
 
     def __hash__(self) -> int:
         """
