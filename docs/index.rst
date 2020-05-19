@@ -32,6 +32,13 @@ primitive module
     :members:
     :special-members:
 
+discrete module
+===============
+
+.. automodule:: gon.discrete
+    :members:
+    :special-members:
+
 linear module
 =============
 
