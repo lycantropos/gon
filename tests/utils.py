@@ -15,6 +15,7 @@ from lz.hints import (Domain,
                       Range)
 from lz.replication import replicator
 
+from gon.discrete import Multipoint
 from gon.hints import Coordinate
 from gon.linear import (Contour,
                         Segment)
@@ -93,3 +94,11 @@ def reverse_segment(segment: Segment) -> Segment:
 
 def shift_contour(contour: Contour, step: int) -> Contour:
     return Contour(shift(contour.vertices, step))
+
+
+def reverse_multipoint(multipoint: Multipoint) -> Multipoint:
+    return Multipoint(*multipoint.points[::-1])
+
+
+def shift_multipoint(multipoint: Multipoint, step: int) -> Multipoint:
+    return Multipoint(*shift(multipoint.points, step))
