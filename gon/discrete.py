@@ -214,6 +214,20 @@ class Multipoint(Compound):
         return list(self._points)
 
     def raw(self) -> RawMultipoint:
+        """
+        Returns the multipoint as combination of Python built-ins.
+
+        Time complexity:
+            ``O(points_count)``
+        Memory complexity:
+            ``O(points_count)``
+
+        where ``points_count = len(self.points)``.
+
+        >>> multipoint = Multipoint.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> multipoint.raw()
+        [(0, 0), (1, 0), (0, 1)]
+        """
         return self._raw[:]
 
     def relate(self, other: Compound) -> Relation:
