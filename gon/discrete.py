@@ -98,6 +98,22 @@ class Multipoint(Compound):
                 else NotImplemented)
 
     def __gt__(self, other: Compound) -> bool:
+        """
+        Checks if the multipoint is a strict superset of the other geometry.
+
+        Time complexity:
+            ``O(len(self.points))``
+        Memory complexity:
+            ``O(1)``
+
+        >>> multipoint = Multipoint.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> multipoint > multipoint
+        False
+        >>> multipoint > Multipoint.from_raw([(0, 0), (1, 0), (1, 1), (0, 1)])
+        False
+        >>> multipoint > Multipoint.from_raw([(1, 0), (0, 0), (0, 1)])
+        False
+        """
         return ((self._points_set > other._points_set
                  if isinstance(other, Multipoint)
                  # multipoint cannot be strict superset of continuous geometry
