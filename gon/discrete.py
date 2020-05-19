@@ -50,7 +50,7 @@ class Multipoint(Compound):
         """
         return isinstance(other, Point) and other in self._points_set
 
-    def __eq__(self, other: Geometry) -> bool:
+    def __eq__(self, other: 'Multipoint') -> bool:
         return self is other or (self._points_set == other._points_set
                                  if isinstance(other, Multipoint)
                                  else (False
