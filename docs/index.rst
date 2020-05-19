@@ -38,6 +38,12 @@ linear module
 .. automodule:: gon.linear
     :members:
     :special-members:
+.. autoclass:: Segment
+    :members:
+    :special-members:
+.. autoclass:: Contour
+    :members:
+    :special-members:
 
 shaped module
 =============
