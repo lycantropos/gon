@@ -258,7 +258,7 @@ class Multipoint(Compound):
         Checks if the multipoint is valid.
 
         Time complexity:
-            ``O(1)``
+            ``O(len(self.points))``
         Memory complexity:
             ``O(1)``
 
@@ -269,6 +269,8 @@ class Multipoint(Compound):
             raise ValueError('Multipoint is empty.')
         elif len(self._points) > len(self._points_set):
             raise ValueError('Duplicate points found.')
+        for point in self._points:
+            point.validate()
 
 
 def _relate_sets(left: Set[Domain], right: Set[Domain]) -> Relation:
