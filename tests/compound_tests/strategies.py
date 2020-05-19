@@ -6,10 +6,11 @@ from typing import (Callable,
 from hypothesis import strategies
 from lz.functional import identity
 
-from gon.compound import (Compound)
+from gon.compound import Compound
 from gon.discrete import Multipoint
 from gon.hints import Coordinate
-from gon.linear import Contour, Segment
+from gon.linear import (Contour,
+                        Segment)
 from gon.shaped import Polygon
 from tests.strategies import (coordinates_strategies,
                               coordinates_to_contours,
