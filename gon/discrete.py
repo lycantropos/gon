@@ -15,6 +15,8 @@ RawMultipoint = List[RawPoint]
 
 
 class Empty(Compound):
+    __slots__ = ()
+
     _instance = None
 
     def __new__(cls) -> 'Empty':
