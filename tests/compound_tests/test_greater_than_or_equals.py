@@ -40,8 +40,9 @@ def test_connection_with_greater_than(compounds_pair: Tuple[Compound, Compound]
 
 
 @given(strategies.compounds_pairs)
-def test_connection_with_lower_than_or_equals(
-        compounds_pair: Tuple[Compound, Compound]) -> None:
+def test_connection_with_lower_than_or_equals(compounds_pair: Tuple[Compound,
+                                                                    Compound]
+                                              ) -> None:
     first_compound, second_compound = compounds_pair
 
     assert equivalence(first_compound >= second_compound,
