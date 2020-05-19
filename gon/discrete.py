@@ -51,6 +51,22 @@ class Multipoint(Compound):
         return isinstance(other, Point) and other in self._points_set
 
     def __eq__(self, other: 'Multipoint') -> bool:
+        """
+        Checks if multipoints are equal.
+
+        Time complexity:
+            ``O(min(len(self.points), len(other.points)))``
+        Memory complexity:
+            ``O(1)``
+
+        >>> multipoint = Multipoint.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> multipoint == multipoint
+        True
+        >>> multipoint == Multipoint.from_raw([(0, 0), (1, 0), (1, 1), (0, 1)])
+        False
+        >>> multipoint == Multipoint.from_raw([(1, 0), (0, 0), (0, 1)])
+        True
+        """
         return self is other or (self._points_set == other._points_set
                                  if isinstance(other, Multipoint)
                                  else (False
