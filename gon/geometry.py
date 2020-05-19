@@ -5,7 +5,7 @@ from typing import (Type,
 
 from .hints import Domain
 
-RawGeometry = TypeVar('RawGeometry', tuple, list)
+RawGeometry = TypeVar('RawGeometry', None, tuple, list)
 
 
 class Geometry(ABC):
