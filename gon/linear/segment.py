@@ -8,11 +8,13 @@ from robust.hints import Point
 from gon.compound import (Compound,
                           Linear,
                           Relation)
+from gon.discrete import Multipoint
 from gon.geometry import Geometry
 from gon.hints import Coordinate
 from gon.primitive import Point
 from .hints import RawSegment
-from .utils import squared_points_distance
+from .utils import (relate_multipoint_to_linear_compound,
+                    squared_points_distance)
 
 
 class Segment(Compound, Linear):
@@ -90,7 +92,7 @@ class Segment(Compound, Linear):
         """
         return (self == other
                 or ((self.relate(other) is Relation.COMPONENT
-                     if isinstance(other, Segment)
+                     if isinstance(other, (Multipoint, Segment))
                      # segment cannot be superset of contour or shaped
                      else False)
                     if isinstance(other, Compound)
@@ -117,7 +119,7 @@ class Segment(Compound, Linear):
         """
         return (self != other
                 and ((self.relate(other) is Relation.COMPONENT
-                      if isinstance(other, Segment)
+                      if isinstance(other, (Multipoint, Segment))
                       # linear cannot be strict superset of contour or shaped
                       else False)
                      if isinstance(other, Compound)
@@ -274,9 +276,11 @@ class Segment(Compound, Linear):
         return self._raw
 
     def relate(self, other: Compound) -> Relation:
-        return (segment_in_segment(other._raw, self._raw)
-                if isinstance(other, Segment)
-                else other.relate(self).complement)
+        return (relate_multipoint_to_linear_compound(other, self)
+                if isinstance(other, Multipoint)
+                else (segment_in_segment(other._raw, self._raw)
+                      if isinstance(other, Segment)
+                      else other.relate(self).complement))
 
     def validate(self) -> None:
         """

@@ -14,6 +14,7 @@ from gon.compound import (Compound,
                           Indexable,
                           Linear,
                           Relation)
+from gon.discrete import Multipoint
 from gon.geometry import Geometry
 from gon.hints import Coordinate
 from gon.primitive import (Point,
@@ -22,6 +23,7 @@ from . import vertices as _vertices
 from .hints import (RawContour,
                     Vertices)
 from .segment import Segment
+from .utils import relate_multipoint_to_linear_compound
 
 
 class Contour(Indexable, Linear):
@@ -111,7 +113,7 @@ class Contour(Indexable, Linear):
         """
         return (self == other
                 or ((self.relate(other) in (Relation.COMPONENT, Relation.EQUAL)
-                     if isinstance(other, Linear)
+                     if isinstance(other, (Linear, Multipoint))
                      # linear cannot be superset of shaped
                      else False)
                     if isinstance(other, Compound)
@@ -138,7 +140,7 @@ class Contour(Indexable, Linear):
         """
         return (self != other
                 and ((self.relate(other) is Relation.COMPONENT
-                      if isinstance(other, Linear)
+                      if isinstance(other, (Linear, Multipoint))
                       # linear cannot be strict superset of shaped
                       else False)
                      if isinstance(other, Compound)
@@ -328,11 +330,13 @@ class Contour(Indexable, Linear):
         return self._raw[:]
 
     def relate(self, other: Compound) -> Relation:
-        return (segment_in_contour(other.raw(), self._raw)
-                if isinstance(other, Segment)
-                else (contour_in_contour(other._raw, self._raw)
-                      if isinstance(other, Contour)
-                      else other.relate(self).complement))
+        return (relate_multipoint_to_linear_compound(other, self)
+                if isinstance(other, Multipoint)
+                else (segment_in_contour(other.raw(), self._raw)
+                      if isinstance(other, Segment)
+                      else (contour_in_contour(other._raw, self._raw)
+                            if isinstance(other, Contour)
+                            else other.relate(self).complement)))
 
     def reverse(self) -> 'Contour':
         """
