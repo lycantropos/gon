@@ -68,7 +68,7 @@ class Contour(Indexable, Linear):
 
     def __eq__(self, other: 'Contour') -> bool:
         """
-        Checks if the contour is equal to the other.
+        Checks if contours are equal.
 
         Time complexity:
             ``O(min(len(self.vertices), len(other.vertices)))``
