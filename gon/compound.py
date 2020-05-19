@@ -55,6 +55,8 @@ class Compound(Geometry):
 
 
 class Linear(Geometry):
+    __slots__ = ()
+
     @property
     @abstractmethod
     def length(self) -> Coordinate:
