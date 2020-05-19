@@ -18,18 +18,18 @@ raw_polygons = coordinates_strategies.flatmap(planar.polygons)
 polygons = raw_polygons.map(Polygon.from_raw)
 
 
-def to_invalid_polygon_with_hole(concave_loop: Contour) -> Polygon:
-    return Polygon(concave_loop,
-                   [Contour(_to_convex_hull(concave_loop.vertices))])
+def to_invalid_polygon_with_hole(concave_contour: Contour) -> Polygon:
+    return Polygon(concave_contour,
+                   [Contour(_to_convex_hull(concave_contour.vertices))])
 
 
-invalid_loops = invalid_vertices_contours | contours_with_repeated_points
+invalid_contours = invalid_vertices_contours | contours_with_repeated_points
 invalid_polygons = (
-        strategies.builds(Polygon, invalid_loops)
+        strategies.builds(Polygon, invalid_contours)
         | strategies.builds(Polygon,
                             coordinates_strategies
                             .flatmap(coordinates_to_contours),
-                            strategies.lists(invalid_loops, min_size=1))
+                            strategies.lists(invalid_contours, min_size=1))
         | (coordinates_strategies.flatmap(planar.concave_contours)
            .map(Contour.from_raw)
            .map(to_invalid_polygon_with_hole)))
