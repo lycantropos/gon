@@ -200,6 +200,18 @@ class Multipoint(Compound):
 
     @property
     def points(self) -> List[Point]:
+        """
+        Returns points of the multipoint.
+
+        Time complexity:
+            ``O(len(self.points))``
+        Memory complexity:
+            ``O(len(self.points))``
+
+        >>> multipoint = Multipoint.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> multipoint.points
+        [Point(0, 0), Point(1, 0), Point(0, 1)]
+        """
         return list(self._points)
 
     def raw(self) -> RawGeometry:
