@@ -1,6 +1,5 @@
 from functools import partial
-from typing import (Iterable,
-                    List,
+from typing import (List,
                     Optional,
                     Sequence,
                     Tuple)
@@ -15,22 +14,21 @@ from sect.decomposition import (Location,
                                 polygon_trapezoidal)
 from sect.triangulation import constrained_delaunay_triangles
 
-from .angular import (Orientation,
-                      to_orientation)
-from .compound import (Compound,
-                       Indexable,
-                       Relation,
-                       Shaped)
-from .degenerate import EMPTY
-from .discrete import Multipoint
-from .geometry import Geometry
-from .hints import Coordinate
-from .linear import (Contour,
-                     RawContour,
-                     Segment,
-                     vertices)
-from .primitive import (Point,
-                        RawPoint)
+from gon.compound import (Compound,
+                          Indexable,
+                          Relation,
+                          Shaped)
+from gon.degenerate import EMPTY
+from gon.discrete import Multipoint
+from gon.geometry import Geometry
+from gon.hints import Coordinate
+from gon.linear import (Contour,
+                        RawContour,
+                        Segment,
+                        vertices)
+from gon.primitive import (Point,
+                           RawPoint)
+from gon.shaped.utils import to_convex_hull
 
 RawPolygon = Tuple[RawContour, List[RawContour]]
 
@@ -338,7 +336,7 @@ class Polygon(Indexable, Shaped):
         """
         return (self
                 if self.is_convex
-                else Polygon(Contour(_to_convex_hull(self._border.vertices))))
+                else Polygon(Contour(to_convex_hull(self._border.vertices))))
 
     @property
     def holes(self) -> List[Contour]:
@@ -546,26 +544,6 @@ class Polygon(Indexable, Shaped):
                              else Relation.ENCLOSED)
                             if is_subset
                             else Relation.CROSS)))
-
-
-def _to_convex_hull(points: Sequence[Point]) -> List[Point]:
-    points = sorted(points)
-    lower = _to_sub_hull(points)
-    upper = _to_sub_hull(reversed(points))
-    return lower[:-1] + upper[:-1]
-
-
-def _to_sub_hull(points: Iterable[Point]) -> List[Point]:
-    result = []
-    for point in points:
-        while len(result) >= 2:
-            if to_orientation(result[-1], result[-2],
-                              point) is not Orientation.COUNTERCLOCKWISE:
-                del result[-1]
-            else:
-                break
-        result.append(point)
-    return result
 
 
 def _plain_locate(raw_polygon: RawPolygon, raw_point: RawPoint) -> Location:

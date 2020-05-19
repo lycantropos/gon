@@ -2,8 +2,8 @@ from hypothesis import strategies
 from hypothesis_geometry import planar
 
 from gon.linear import Contour
-from gon.shaped import (Polygon,
-                        _to_convex_hull)
+from gon.shaped import Polygon
+from gon.shaped.utils import to_convex_hull
 from tests.strategies import (contours_with_repeated_points,
                               coordinates_strategies,
                               coordinates_to_contours,
@@ -20,7 +20,7 @@ polygons = raw_polygons.map(Polygon.from_raw)
 
 def to_invalid_polygon_with_hole(concave_contour: Contour) -> Polygon:
     return Polygon(concave_contour,
-                   [Contour(_to_convex_hull(concave_contour.vertices))])
+                   [Contour(to_convex_hull(concave_contour.vertices))])
 
 
 invalid_contours = invalid_vertices_contours | contours_with_repeated_points
