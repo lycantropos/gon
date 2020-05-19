@@ -183,7 +183,7 @@ class Multipoint(Compound):
                 else NotImplemented)
 
     @classmethod
-    def from_raw(cls, raw: RawGeometry) -> Domain:
+    def from_raw(cls, raw: RawMultipoint) -> Domain:
         return cls(*map(Point.from_raw, raw))
 
     @property
