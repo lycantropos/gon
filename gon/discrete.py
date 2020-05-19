@@ -147,12 +147,13 @@ class Multipoint(Compound):
         >>> multipoint >= Multipoint.from_raw([(1, 0), (0, 0), (0, 1)])
         True
         """
-        return ((self._points_set >= other._points_set
-                 if isinstance(other, Multipoint)
-                 # multipoint cannot be superset of continuous geometry
-                 else False)
-                if isinstance(other, Compound)
-                else NotImplemented)
+        return (other is EMPTY
+                or ((self._points_set >= other._points_set
+                     if isinstance(other, Multipoint)
+                     # multipoint cannot be superset of continuous geometry
+                     else False)
+                    if isinstance(other, Compound)
+                    else NotImplemented))
 
     def __gt__(self, other: Compound) -> bool:
         """
