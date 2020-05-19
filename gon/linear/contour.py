@@ -14,8 +14,8 @@ from gon.compound import (Compound,
                           Indexable,
                           Linear,
                           Relation)
-from gon.discrete import (EMPTY,
-                          Multipoint)
+from gon.degenerate import EMPTY
+from gon.discrete import Multipoint
 from gon.geometry import Geometry
 from gon.hints import Coordinate
 from gon.primitive import (Point,

@@ -8,8 +8,8 @@ from lz.functional import (identity,
                            to_constant)
 
 from gon.compound import Compound
-from gon.discrete import (EMPTY,
-                          Multipoint)
+from gon.degenerate import EMPTY
+from gon.discrete import Multipoint
 from gon.hints import Coordinate
 from gon.linear import (Contour,
                         Segment)
