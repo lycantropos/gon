@@ -18,6 +18,18 @@ class Empty(Compound):
     _instance = None
 
     def __new__(cls) -> 'Empty':
+        """
+        Returns empty geometry instance.
+
+        Based on singleton pattern.
+
+        Time complexity:
+            ``O(1)``
+        Memory complexity:
+            ``O(1)``
+        Reference:
+            https://en.wikipedia.org/wiki/Singleton_pattern
+        """
         if cls._instance is None:
             cls._instance = super().__new__(cls)
         return cls._instance
