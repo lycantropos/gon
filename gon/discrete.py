@@ -254,6 +254,17 @@ class Multipoint(Compound):
                 else other.relate(self).complement)
 
     def validate(self) -> None:
+        """
+        Checks if the multipoint is valid.
+
+        Time complexity:
+            ``O(1)``
+        Memory complexity:
+            ``O(1)``
+
+        >>> multipoint = Multipoint.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> multipoint.validate()
+        """
         if not self._points:
             raise ValueError('Multipoint is empty.')
         elif len(self._points) > len(self._points_set):
