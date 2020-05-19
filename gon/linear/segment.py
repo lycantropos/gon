@@ -119,7 +119,8 @@ class Segment(Compound, Linear):
         >>> segment > Segment.from_raw(((0, 0), (0, 2)))
         False
         """
-        return (self != other
+        return (other is EMPTY
+                or self != other
                 and ((self.relate(other) is Relation.COMPONENT
                       if isinstance(other, (Multipoint, Segment))
                       # linear cannot be strict superset of contour or shaped
