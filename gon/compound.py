@@ -66,6 +66,8 @@ class Linear(Geometry):
 
 
 class Shaped(Geometry):
+    __slots__ = ()
+
     @property
     @abstractmethod
     def area(self) -> Coordinate:
