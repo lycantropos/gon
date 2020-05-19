@@ -1,9 +1,20 @@
 import math
+from functools import partial
+from operator import (itemgetter,
+                      mul)
+from typing import (List,
+                    Optional)
 
 from hypothesis import strategies
+from hypothesis_geometry import planar
 from lz.functional import identity
 
-from gon.primitive import Point
+from gon.hints import Coordinate
+from gon.linear import vertices
+from gon.linear.hints import Vertices
+from gon.primitive import (Point,
+                           RawPoint)
+from tests.utils import Strategy
 from .base import coordinates_strategies
 from .factories import coordinates_to_points
 
@@ -15,3 +26,30 @@ invalid_points = (strategies.builds(Point, valid_coordinates,
                                     invalid_coordinates)
                   | strategies.builds(Point, invalid_coordinates,
                                       valid_coordinates))
+
+
+def to_repeated_raw_points(coordinates: Strategy[Coordinate],
+                           min_size: int = vertices.MIN_COUNT,
+                           max_size: Optional[int] = None
+                           ) -> Strategy[List[RawPoint]]:
+    return (strategies.lists(planar.points(coordinates),
+                             min_size=min_size,
+                             max_size=max_size)
+            .map(partial(mul, 2))
+            .flatmap(strategies.permutations)
+            .map(itemgetter(slice(max_size)))
+            .filter(not_all_unique))
+
+
+def not_all_unique(vertices: Vertices) -> bool:
+    seen = set()
+    seen_add = seen.add
+    for value in vertices:
+        if value in seen:
+            return True
+        else:
+            seen_add(value)
+    return False
+
+
+repeated_raw_points = coordinates_strategies.flatmap(to_repeated_raw_points)
