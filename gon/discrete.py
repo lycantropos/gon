@@ -233,6 +233,20 @@ class Multipoint(Compound):
         return self._raw[:]
 
     def relate(self, other: Compound) -> Relation:
+        """
+        Finds relation between the multipoint and the other geometry.
+
+        Time complexity:
+            ``O(points_count)``
+        Memory complexity:
+            ``O(points_count)``
+
+        where ``points_count = len(self.points)``.
+
+        >>> multipoint = Multipoint.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> multipoint.relate(multipoint) is Relation.EQUAL
+        True
+        """
         return ((Relation.EQUAL
                  if self is other
                  else _relate_sets(self._points_set, other._points_set))
