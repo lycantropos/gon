@@ -9,6 +9,8 @@ RawGeometry = TypeVar('RawGeometry', None, tuple, list)
 
 
 class Geometry(ABC):
+    __slots__ = ()
+
     @abstractmethod
     def __eq__(self, other: 'Geometry') -> bool:
         """
