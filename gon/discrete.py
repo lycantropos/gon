@@ -277,11 +277,10 @@ def _relate_sets(left: Set[Domain], right: Set[Domain]) -> Relation:
     if left == right:
         return Relation.EQUAL
     intersection = left & right
-    if not intersection:
-        return Relation.DISJOINT
-    elif intersection == right:
-        return Relation.COMPONENT
-    elif intersection == left:
-        return Relation.COMPOSITE
-    else:
-        return Relation.OVERLAP
+    return ((Relation.COMPONENT
+             if intersection == right
+             else (Relation.COMPOSITE
+                   if intersection == left
+                   else Relation.OVERLAP))
+            if intersection
+            else Relation.DISJOINT)
