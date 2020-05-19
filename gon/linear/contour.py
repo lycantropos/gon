@@ -151,9 +151,7 @@ class Contour(Indexable, Linear):
         Returns hash value of the contour.
 
         Time complexity:
-            ``O(1)`` if contour is counterclockwise
-            and starts from the bottom leftmost vertex,
-            ``O(len(self.vertices))`` otherwise
+            ``O(len(self.vertices))``
         Memory complexity:
             ``O(1)`` if contour is counterclockwise
             and starts from the bottom leftmost vertex,
