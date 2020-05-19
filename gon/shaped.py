@@ -171,7 +171,8 @@ class Polygon(Indexable, Shaped):
         >>> polygon > polygon
         False
         """
-        return (self != other
+        return (other is EMPTY
+                or self != other
                 and (self.relate(other) in (Relation.COMPONENT,
                                             Relation.ENCLOSED, Relation.WITHIN)
                      if isinstance(other, Compound)
