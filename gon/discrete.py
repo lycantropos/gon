@@ -18,6 +18,16 @@ class Multipoint(Compound):
     __slots__ = '_points', '_points_set', '_raw'
 
     def __init__(self, *points: Point) -> None:
+        """
+        Initializes multipoint.
+
+        Time complexity:
+            ``O(points_count)``
+        Memory complexity:
+            ``O(points_count)``
+
+        where ``points_count = len(points)``.
+        """
         self._points = points
         self._points_set = frozenset(points)
         self._raw = [point.raw() for point in points]
