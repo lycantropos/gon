@@ -214,7 +214,7 @@ class Multipoint(Compound):
         """
         return list(self._points)
 
-    def raw(self) -> RawGeometry:
+    def raw(self) -> RawMultipoint:
         return self._raw[:]
 
     def relate(self, other: Compound) -> Relation:
