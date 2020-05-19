@@ -8,7 +8,8 @@ from robust.hints import Point
 from gon.compound import (Compound,
                           Linear,
                           Relation)
-from gon.discrete import Multipoint
+from gon.discrete import (EMPTY,
+                          Multipoint)
 from gon.geometry import Geometry
 from gon.hints import Coordinate
 from gon.primitive import Point
@@ -90,7 +91,8 @@ class Segment(Compound, Linear):
         >>> segment >= Segment.from_raw(((0, 0), (0, 2)))
         False
         """
-        return (self == other
+        return (other is EMPTY
+                or self == other
                 or ((self.relate(other) is Relation.COMPONENT
                      if isinstance(other, (Multipoint, Segment))
                      # segment cannot be superset of contour or shaped
