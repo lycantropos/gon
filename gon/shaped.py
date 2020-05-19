@@ -436,7 +436,7 @@ class Polygon(Indexable, Shaped):
 
     def relate(self, other: Compound) -> Relation:
         """
-        Finds relation between the polygon and the other geometric object.
+        Finds relation between the polygon and the other geometry.
 
         Time complexity:
             ``O(vertices_count * log vertices_count)``
