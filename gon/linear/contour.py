@@ -330,6 +330,20 @@ class Contour(Indexable, Linear):
         return self._raw[:]
 
     def relate(self, other: Compound) -> Relation:
+        """
+        Finds relation between the contour and the other geometry.
+
+        Time complexity:
+            ``O(vertices_count * log vertices_count)``
+        Memory complexity:
+            ``O(vertices_count)``
+
+        where ``vertices_count = len(self.vertices)``.
+
+        >>> contour = Contour.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> contour.relate(contour) is Relation.EQUAL
+        True
+        """
         return (relate_multipoint_to_linear_compound(other, self)
                 if isinstance(other, Multipoint)
                 else (segment_in_contour(other.raw(), self._raw)
