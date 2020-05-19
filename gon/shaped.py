@@ -11,9 +11,11 @@ from orient.planar import (contour_in_polygon,
                            region_in_multiregion,
                            segment_in_polygon)
 from reprit.base import generate_repr
-from sect.decomposition import polygon_trapezoidal
+from sect.decomposition import (Location,
+                                polygon_trapezoidal)
 from sect.triangulation import constrained_delaunay_triangles
 
+from gon.discrete import Multipoint
 from .angular import (Orientation,
                       to_orientation)
 from .compound import (Compound,
@@ -34,7 +36,7 @@ RawPolygon = Tuple[RawContour, List[RawContour]]
 
 class Polygon(Indexable, Shaped):
     __slots__ = ('_border', '_holes', '_holes_set',
-                 '_raw_border', '_raw_holes', '_contains')
+                 '_raw_border', '_raw_holes', '_locate')
 
     def __init__(self, border: Contour,
                  holes: Optional[Sequence[Contour]] = None) -> None:
@@ -54,8 +56,8 @@ class Polygon(Indexable, Shaped):
                                                       frozenset(holes))
         self._raw_border, self._raw_holes = border.raw(), [hole.raw()
                                                            for hole in holes]
-        self._contains = partial(_plain_contains,
-                                 (self._raw_border, self._raw_holes))
+        self._locate = partial(_plain_locate,
+                               (self._raw_border, self._raw_holes))
 
     __repr__ = generate_repr(__init__)
 
@@ -90,7 +92,7 @@ class Polygon(Indexable, Shaped):
         >>> Point(7, 0) in polygon
         False
         """
-        return isinstance(other, Point) and self._contains(other.raw())
+        return isinstance(other, Point) and bool(self._locate(other.raw()))
 
     def __eq__(self, other: 'Polygon') -> bool:
         """
@@ -410,7 +412,7 @@ class Polygon(Indexable, Shaped):
         >>> polygon.index()
         """
         graph = polygon_trapezoidal(self._raw_border, self._raw_holes)
-        self._contains = graph.__contains__
+        self._locate = graph.locate
 
     def raw(self) -> RawPolygon:
         """
@@ -450,12 +452,14 @@ class Polygon(Indexable, Shaped):
         True
         """
         raw = self._raw_border, self._raw_holes
-        return (segment_in_polygon(other.raw(), raw)
-                if isinstance(other, Segment)
-                else (contour_in_polygon(other.raw(), raw)
-                      if isinstance(other, Contour)
-                      else polygon_in_polygon((other._raw_border,
-                                               other._raw_holes), raw)))
+        return (self._relate_multipoint(other)
+                if isinstance(other, Multipoint)
+                else (segment_in_polygon(other.raw(), raw)
+                      if isinstance(other, Segment)
+                      else (contour_in_polygon(other.raw(), raw)
+                            if isinstance(other, Contour)
+                            else polygon_in_polygon((other._raw_border,
+                                                     other._raw_holes), raw))))
 
     def triangulate(self) -> List['Polygon']:
         """
@@ -511,6 +515,32 @@ class Polygon(Indexable, Shaped):
                     and relation is not Relation.ENCLOSES):
                 raise ValueError('Holes should lie inside border.')
 
+    def _relate_multipoint(self, multipoint: Multipoint) -> Relation:
+        disjoint = is_subset = not_interior = not_boundary = True
+        for point in multipoint.points:
+            location = self._locate(point)
+            if location is Location.INTERIOR:
+                if disjoint:
+                    disjoint = False
+                if not_interior:
+                    not_interior = False
+            elif location is Location.BOUNDARY:
+                if disjoint:
+                    disjoint = False
+                if not_boundary:
+                    not_boundary = True
+            elif is_subset:
+                is_subset = False
+        return (Relation.DISJOINT
+                if disjoint
+                else (Relation.TOUCH
+                      if not_interior
+                      else ((Relation.WITHIN
+                             if not_boundary
+                             else Relation.ENCLOSED)
+                            if is_subset
+                            else Relation.CROSS)))
+
 
 def _to_convex_hull(points: Sequence[Point]) -> List[Point]:
     points = sorted(points)
@@ -532,5 +562,10 @@ def _to_sub_hull(points: Iterable[Point]) -> List[Point]:
     return result
 
 
-def _plain_contains(raw_polygon: RawPolygon, raw_point: RawPoint) -> bool:
-    return bool(point_in_polygon(raw_point, raw_polygon))
+def _plain_locate(raw_polygon: RawPolygon, raw_point: RawPoint) -> Location:
+    relation = point_in_polygon(raw_point, raw_polygon)
+    return (Location.EXTERIOR
+            if relation is Relation.DISJOINT
+            else (Location.BOUNDARY
+                  if relation is Relation.COMPONENT
+                  else Location.INTERIOR))

@@ -1,0 +1,106 @@
+from typing import (List,
+                    Set)
+
+from reprit.base import generate_repr
+
+from .compound import (Compound,
+                       Relation)
+from .geometry import (Geometry,
+                       RawGeometry)
+from .hints import Domain
+from .primitive import (Point,
+                        RawPoint)
+
+RawMultipoint = List[RawPoint]
+
+
+class Multipoint(Compound):
+    __slots__ = '_points', '_points_set', '_raw'
+
+    def __init__(self, *points: Point) -> None:
+        self._points = points
+        self._points_set = frozenset(points)
+        self._raw = [point.raw() for point in points]
+
+    __repr__ = generate_repr(__init__)
+
+    def __contains__(self, other: Geometry) -> bool:
+        return isinstance(other, Point) and other in self._points_set
+
+    def __eq__(self, other: Geometry) -> bool:
+        return self is other or (self._points_set == other._points_set
+                                 if isinstance(other, Multipoint)
+                                 else (False
+                                       if isinstance(other, Geometry)
+                                       else NotImplemented))
+
+    def __ge__(self, other: Compound) -> bool:
+        return ((self._points_set >= other._points_set
+                 if isinstance(other, Multipoint)
+                 # multipoint cannot be superset of continuous geometry
+                 else False)
+                if isinstance(other, Compound)
+                else NotImplemented)
+
+    def __gt__(self, other: Compound) -> bool:
+        return ((self._points_set > other._points_set
+                 if isinstance(other, Multipoint)
+                 # multipoint cannot be strict superset of continuous geometry
+                 else False)
+                if isinstance(other, Compound)
+                else NotImplemented)
+
+    def __hash__(self) -> int:
+        return hash(self._points_set)
+
+    def __le__(self, other: Compound) -> bool:
+        return ((self._points_set <= other._points_set
+                 if isinstance(other, Multipoint)
+                 else other >= self)
+                if isinstance(other, Compound)
+                else NotImplemented)
+
+    def __lt__(self, other: Compound) -> bool:
+        return ((self._points_set < other._points_set
+                 if isinstance(other, Multipoint)
+                 else other > self)
+                if isinstance(other, Compound)
+                else NotImplemented)
+
+    @classmethod
+    def from_raw(cls, raw: RawGeometry) -> Domain:
+        return cls(*map(Point.from_raw, raw))
+
+    @property
+    def points(self) -> List[Point]:
+        return list(self._points)
+
+    def raw(self) -> RawGeometry:
+        return self._raw[:]
+
+    def relate(self, other: Compound) -> Relation:
+        return ((Relation.EQUAL
+                 if self is other
+                 else _relate_sets(self._points_set, other._points_set))
+                if isinstance(other, Multipoint)
+                else other.relate(self).complement)
+
+    def validate(self) -> None:
+        if not self._points:
+            raise ValueError('Multipoint is empty.')
+        elif len(self._points) > len(self._points_set):
+            raise ValueError('Duplicate points found.')
+
+
+def _relate_sets(left: Set[Domain], right: Set[Domain]) -> Relation:
+    if left == right:
+        return Relation.EQUAL
+    intersection = left & right
+    if not intersection:
+        return Relation.DISJOINT
+    elif intersection == right:
+        return Relation.COMPONENT
+    elif intersection == left:
+        return Relation.COMPOSITE
+    else:
+        return Relation.OVERLAP
