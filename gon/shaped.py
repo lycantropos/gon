@@ -518,7 +518,7 @@ class Polygon(Indexable, Shaped):
     def _relate_multipoint(self, multipoint: Multipoint) -> Relation:
         disjoint = is_subset = not_interior = not_boundary = True
         for point in multipoint.points:
-            location = self._locate(point)
+            location = self._locate(point.raw())
             if location is Location.INTERIOR:
                 if disjoint:
                     disjoint = False
