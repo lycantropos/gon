@@ -5,8 +5,7 @@ from reprit.base import generate_repr
 
 from .compound import (Compound,
                        Relation)
-from .geometry import (Geometry,
-                       RawGeometry)
+from .geometry import Geometry
 from .hints import Domain
 from .primitive import (Point,
                         RawPoint)
