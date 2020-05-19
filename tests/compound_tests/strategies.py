@@ -1,11 +1,16 @@
+from collections import OrderedDict
+from itertools import chain
 from typing import (Callable,
                     Tuple)
 
 from hypothesis import strategies
 from lz.functional import identity
 
-from gon.compound import Compound
+from gon.compound import (Compound)
+from gon.discrete import Multipoint
 from gon.hints import Coordinate
+from gon.linear import Contour, Segment
+from gon.shaped import Polygon
 from tests.strategies import (coordinates_strategies,
                               coordinates_to_contours,
                               coordinates_to_multipoints,
@@ -43,11 +48,31 @@ def coordinates_to_compounds_tuples(coordinates: Strategy[Coordinate],
                                for factory in factories])
 
 
-compounds_pairs = (strategies.builds(coordinates_to_compounds_tuples,
-                                     coordinates_strategies,
-                                     compounds_factories,
-                                     compounds_factories)
-                   .flatmap(identity))
+def compound_to_compound_with_multipoint(compound: Compound
+                                         ) -> Tuple[Compound, Multipoint]:
+    if isinstance(compound, Multipoint):
+        return compound, compound
+    elif isinstance(compound, Segment):
+        return compound, Multipoint(compound.start, compound.end)
+    elif isinstance(compound, Contour):
+        return compound, Multipoint(*compound.vertices)
+    elif isinstance(compound, Polygon):
+        unique_vertices = OrderedDict.fromkeys(
+                chain(compound.border.vertices,
+                      chain.from_iterable(hole.vertices
+                                          for hole in compound.holes)))
+        return compound, Multipoint(*unique_vertices)
+    else:
+        raise TypeError('Unsupported geometry type: {type}.'
+                        .format(type=type(compound)))
+
+
+compounds_pairs = (compounds.map(compound_to_compound_with_multipoint)
+                   | (strategies.builds(coordinates_to_compounds_tuples,
+                                        coordinates_strategies,
+                                        compounds_factories,
+                                        compounds_factories)
+                      .flatmap(identity)))
 compounds_triplets = (strategies.builds(coordinates_to_compounds_tuples,
                                         coordinates_strategies,
                                         compounds_factories,
