@@ -35,6 +35,19 @@ class Multipoint(Compound):
     __repr__ = generate_repr(__init__)
 
     def __contains__(self, other: Geometry) -> bool:
+        """
+        Checks if the multipoint contains the other geometry.
+
+        Time complexity:
+            ``O(1)`` expected,
+            ``O(len(self.points))`` worst.
+        Memory complexity:
+            ``O(1)``
+
+        >>> multipoint = Multipoint.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> all(point in multipoint for point in multipoint.points)
+        True
+        """
         return isinstance(other, Point) and other in self._points_set
 
     def __eq__(self, other: Geometry) -> bool:
