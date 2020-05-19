@@ -35,7 +35,7 @@ RawPolygon = Tuple[RawContour, List[RawContour]]
 
 class Polygon(Indexable, Shaped):
     __slots__ = ('_border', '_holes', '_holes_set',
-                 '_raw_border', '_raw_holes', '_locate')
+                 '_raw_border', '_raw_holes', '_raw_locate')
 
     def __init__(self, border: Contour,
                  holes: Optional[Sequence[Contour]] = None) -> None:
@@ -55,8 +55,8 @@ class Polygon(Indexable, Shaped):
                                                       frozenset(holes))
         self._raw_border, self._raw_holes = border.raw(), [hole.raw()
                                                            for hole in holes]
-        self._locate = partial(_plain_locate,
-                               (self._raw_border, self._raw_holes))
+        self._raw_locate = partial(raw_locate_point,
+                                   (self._raw_border, self._raw_holes))
 
     __repr__ = generate_repr(__init__)
 
@@ -91,7 +91,7 @@ class Polygon(Indexable, Shaped):
         >>> Point(7, 0) in polygon
         False
         """
-        return isinstance(other, Point) and bool(self._locate(other.raw()))
+        return isinstance(other, Point) and bool(self._raw_locate(other.raw()))
 
     def __eq__(self, other: 'Polygon') -> bool:
         """
@@ -413,7 +413,7 @@ class Polygon(Indexable, Shaped):
         >>> polygon.index()
         """
         graph = polygon_trapezoidal(self._raw_border, self._raw_holes)
-        self._locate = graph.locate
+        self._raw_locate = graph.locate
 
     def raw(self) -> RawPolygon:
         """
@@ -522,7 +522,7 @@ class Polygon(Indexable, Shaped):
     def _relate_multipoint(self, multipoint: Multipoint) -> Relation:
         disjoint = is_subset = not_interior = not_boundary = True
         for point in multipoint.points:
-            location = self._locate(point.raw())
+            location = self._raw_locate(point.raw())
             if location is Location.INTERIOR:
                 if disjoint:
                     disjoint = False
@@ -546,7 +546,7 @@ class Polygon(Indexable, Shaped):
                             else Relation.CROSS)))
 
 
-def _plain_locate(raw_polygon: RawPolygon, raw_point: RawPoint) -> Location:
+def raw_locate_point(raw_polygon: RawPolygon, raw_point: RawPoint) -> Location:
     relation = point_in_polygon(raw_point, raw_polygon)
     return (Location.EXTERIOR
             if relation is Relation.DISJOINT
