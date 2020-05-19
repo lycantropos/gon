@@ -3,6 +3,7 @@ from typing import Tuple
 
 from hypothesis import strategies
 from hypothesis_geometry import planar
+from lz.functional import pack
 
 from gon.discrete import Multipoint
 from gon.hints import Coordinate
@@ -32,8 +33,9 @@ def coordinates_to_multipoints_with_points(coordinates: Strategy[Coordinate]
 multipoints_with_points = (coordinates_strategies
                            .flatmap(coordinates_to_multipoints_with_points))
 empty_multipoints = strategies.builds(Multipoint)
-invalid_points_multipoints = strategies.lists(invalid_points,
-                                              min_size=1)
+invalid_points_multipoints = (strategies.lists(invalid_points,
+                                               min_size=1)
+                              .map(pack(Multipoint)))
 multipoints_with_repeated_points = repeated_raw_points.map(Multipoint.from_raw)
 invalid_multipoints = (empty_multipoints
                        | invalid_points_multipoints
