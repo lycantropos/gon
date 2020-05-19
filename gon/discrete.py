@@ -184,6 +184,18 @@ class Multipoint(Compound):
 
     @classmethod
     def from_raw(cls, raw: RawMultipoint) -> Domain:
+        """
+        Constructs multipoint from the combination of Python built-ins.
+
+        Time complexity:
+            ``O(len(raw))``
+        Memory complexity:
+            ``O(len(raw))``
+
+        >>> multipoint = Multipoint.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> multipoint == Multipoint(Point(0, 0), Point(1, 0), Point(0, 1))
+        True
+        """
         return cls(*map(Point.from_raw, raw))
 
     @property
