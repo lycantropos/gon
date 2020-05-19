@@ -140,7 +140,8 @@ class Contour(Indexable, Linear):
         >>> contour > Contour.from_raw([(1, 0), (0, 0), (0, 1)])
         False
         """
-        return (self != other
+        return (other is EMPTY
+                or self != other
                 and ((self.relate(other) is Relation.COMPONENT
                       if isinstance(other, (Linear, Multipoint))
                       # linear cannot be strict superset of shaped
