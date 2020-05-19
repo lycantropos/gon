@@ -147,7 +147,8 @@ class Polygon(Indexable, Shaped):
         >>> polygon >= polygon
         True
         """
-        return (self == other
+        return (other is EMPTY
+                or self == other
                 or (self.relate(other) in (Relation.EQUAL, Relation.COMPONENT,
                                            Relation.ENCLOSED, Relation.WITHIN)
                     if isinstance(other, Compound)
