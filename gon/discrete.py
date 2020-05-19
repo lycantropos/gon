@@ -57,7 +57,15 @@ class Empty(Compound):
         return None
 
     def validate(self) -> None:
-        pass
+        """
+        Checks if the empty geometry is valid.
+
+        Time complexity:
+            ``O(1)``
+        Memory complexity:
+            ``O(1)``
+        """
+        # empty geometry considered to be always valid
 
 
 EMPTY = Empty()
