@@ -21,8 +21,8 @@ from .compound import (Compound,
                        Indexable,
                        Relation,
                        Shaped)
-from .discrete import (EMPTY,
-                       Multipoint)
+from .degenerate import EMPTY
+from .discrete import Multipoint
 from .geometry import Geometry
 from .hints import Coordinate
 from .linear import (Contour,

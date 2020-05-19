@@ -3,7 +3,7 @@ from typing import Tuple
 from hypothesis import given
 
 from gon.compound import Compound
-from gon.discrete import EMPTY
+from gon.degenerate import EMPTY
 from tests.utils import equivalence
 from . import strategies
 
