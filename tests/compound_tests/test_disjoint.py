@@ -3,6 +3,7 @@ from typing import Tuple
 from hypothesis import given
 
 from gon.compound import Compound
+from gon.discrete import EMPTY
 from tests.utils import equivalence
 from . import strategies
 
@@ -16,9 +17,10 @@ def test_basic(compounds_pair: Tuple[Compound, Compound]) -> None:
     assert isinstance(result, bool)
 
 
-@given(strategies.compounds)
-def test_irreflexivity(compound: Compound) -> None:
-    assert not compound.disjoint(compound)
+@given(strategies.empty_compounds)
+def test_reflexivity_criteria(compound: Compound) -> None:
+    assert equivalence(compound.disjoint(compound),
+                       compound is EMPTY)
 
 
 @given(strategies.compounds_pairs)

@@ -16,8 +16,13 @@ def test_basic(compounds_pair: Tuple[Compound, Compound]) -> None:
     assert isinstance(result, Relation)
 
 
-@given(strategies.compounds)
-def test_self(compound: Compound) -> None:
+@given(strategies.empty_compounds)
+def test_empty_self(compound: Compound) -> None:
+    assert compound.relate(compound) is Relation.DISJOINT
+
+
+@given(strategies.non_empty_compounds)
+def test_non_empty_self(compound: Compound) -> None:
     assert compound.relate(compound) is Relation.EQUAL
 
 
