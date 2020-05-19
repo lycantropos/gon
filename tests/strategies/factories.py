@@ -2,7 +2,9 @@ from typing import Optional
 
 from hypothesis import strategies
 from hypothesis_geometry import planar
+from lz.functional import pack
 
+from gon.discrete import Multipoint
 from gon.hints import Coordinate
 from gon.linear import (Contour,
                         Segment)
@@ -14,6 +16,14 @@ from tests.utils import Strategy
 def coordinates_to_points(coordinates: Strategy[Coordinate]
                           ) -> Strategy[Point]:
     return strategies.builds(Point, coordinates, coordinates)
+
+
+def coordinates_to_multipoints(coordinates: Strategy[Coordinate]
+                               ) -> Strategy[Multipoint]:
+    points = coordinates_to_points(coordinates)
+    return strategies.builds(pack(Multipoint),
+                             strategies.lists(points,
+                                              min_size=1))
 
 
 def coordinates_to_segments(coordinates: Strategy[Coordinate]
