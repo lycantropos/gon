@@ -58,3 +58,6 @@ shaped module
 .. automodule:: gon.shaped
     :members:
     :special-members:
+.. autoclass:: Polygon
+    :members:
+    :special-members:
