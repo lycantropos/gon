@@ -303,7 +303,8 @@ class Segment(Compound, Linear):
         Memory complexity:
             ``O(1)``
 
-        >>> Segment.from_raw(((0, 0), (2, 0))).validate()
+        >>> segment = Segment.from_raw(((0, 0), (2, 0)))
+        >>> segment.validate()
         """
         self._start.validate()
         self._end.validate()
