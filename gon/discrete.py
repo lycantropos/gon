@@ -122,6 +122,18 @@ class Multipoint(Compound):
                 else NotImplemented)
 
     def __hash__(self) -> int:
+        """
+        Returns hash value of the multipoint.
+
+        Time complexity:
+            ``O(len(self.points))``
+        Memory complexity:
+            ``O(1)``
+
+        >>> multipoint = Multipoint.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> hash(multipoint) == hash(multipoint)
+        True
+        """
         return hash(self._points_set)
 
     def __le__(self, other: Compound) -> bool:
