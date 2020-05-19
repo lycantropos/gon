@@ -276,6 +276,18 @@ class Segment(Compound, Linear):
         return self._raw
 
     def relate(self, other: Compound) -> Relation:
+        """
+        Finds relation between the segment and the other geometry.
+
+        Time complexity:
+            ``O(1)``
+        Memory complexity:
+            ``O(1)``
+
+        >>> segment = Segment.from_raw(((0, 0), (2, 0)))
+        >>> segment.relate(segment) is Relation.EQUAL
+        True
+        """
         return (relate_multipoint_to_linear_compound(other, self)
                 if isinstance(other, Multipoint)
                 else (segment_in_segment(other._raw, self._raw)
