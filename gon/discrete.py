@@ -203,9 +203,11 @@ class Multipoint(Compound):
         Returns points of the multipoint.
 
         Time complexity:
-            ``O(len(self.points))``
+            ``O(points_count)``
         Memory complexity:
-            ``O(len(self.points))``
+            ``O(points_count)``
+
+        where ``points_count = len(self.points)``.
 
         >>> multipoint = Multipoint.from_raw([(0, 0), (1, 0), (0, 1)])
         >>> multipoint.points
