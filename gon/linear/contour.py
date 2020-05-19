@@ -14,7 +14,8 @@ from gon.compound import (Compound,
                           Indexable,
                           Linear,
                           Relation)
-from gon.discrete import Multipoint
+from gon.discrete import (EMPTY,
+                          Multipoint)
 from gon.geometry import Geometry
 from gon.hints import Coordinate
 from gon.primitive import (Point,
@@ -111,7 +112,8 @@ class Contour(Indexable, Linear):
         >>> contour >= Contour.from_raw([(1, 0), (0, 0), (0, 1)])
         True
         """
-        return (self == other
+        return (other is EMPTY
+                or self == other
                 or ((self.relate(other) in (Relation.COMPONENT, Relation.EQUAL)
                      if isinstance(other, (Linear, Multipoint))
                      # linear cannot be superset of shaped
