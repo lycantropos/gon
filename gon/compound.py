@@ -84,6 +84,8 @@ class Shaped(Geometry):
 
 
 class Indexable(Compound):
+    __slots__ = ()
+
     @abstractmethod
     def index(self) -> None:
         """
