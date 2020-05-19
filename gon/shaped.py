@@ -15,13 +15,14 @@ from sect.decomposition import (Location,
                                 polygon_trapezoidal)
 from sect.triangulation import constrained_delaunay_triangles
 
-from gon.discrete import Multipoint
 from .angular import (Orientation,
                       to_orientation)
 from .compound import (Compound,
                        Indexable,
                        Relation,
                        Shaped)
+from .discrete import (EMPTY,
+                       Multipoint)
 from .geometry import Geometry
 from .hints import Coordinate
 from .linear import (Contour,
@@ -452,14 +453,17 @@ class Polygon(Indexable, Shaped):
         True
         """
         raw = self._raw_border, self._raw_holes
-        return (self._relate_multipoint(other)
-                if isinstance(other, Multipoint)
-                else (segment_in_polygon(other.raw(), raw)
-                      if isinstance(other, Segment)
-                      else (contour_in_polygon(other.raw(), raw)
-                            if isinstance(other, Contour)
-                            else polygon_in_polygon((other._raw_border,
-                                                     other._raw_holes), raw))))
+        return (Relation.DISJOINT
+                if other is EMPTY
+                else (self._relate_multipoint(other)
+                      if isinstance(other, Multipoint)
+                      else (segment_in_polygon(other.raw(), raw)
+                            if isinstance(other, Segment)
+                            else (contour_in_polygon(other.raw(), raw)
+                                  if isinstance(other, Contour)
+                                  else polygon_in_polygon((other._raw_border,
+                                                           other._raw_holes),
+                                                          raw)))))
 
     def triangulate(self) -> List['Polygon']:
         """
