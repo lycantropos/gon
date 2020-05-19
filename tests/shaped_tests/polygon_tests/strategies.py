@@ -29,7 +29,8 @@ invalid_polygons = (
         | strategies.builds(Polygon,
                             coordinates_strategies
                             .flatmap(coordinates_to_contours),
-                            strategies.lists(invalid_contours, min_size=1))
+                            strategies.lists(invalid_contours,
+                                             min_size=1))
         | (coordinates_strategies.flatmap(planar.concave_contours)
            .map(Contour.from_raw)
            .map(to_invalid_polygon_with_hole)))
