@@ -72,12 +72,12 @@ def to_orientations(vertices: Vertices) -> Iterator[Orientation]:
 def equal(left: Vertices, right: Vertices, same_oriented: bool) -> bool:
     if len(left) != len(right):
         return False
-    right_step = 1 if same_oriented else -1
-    size = len(left)
     try:
         index = right.index(left[0])
     except ValueError:
         return False
+    right_step = 1 if same_oriented else -1
+    size = len(left)
     indices = chain(zip(range(size),
                         range(index, size)
                         if same_oriented
