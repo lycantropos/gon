@@ -44,12 +44,7 @@ linear module
 
 .. automodule:: gon.linear
     :members:
-    :special-members:
-.. autoclass:: Segment
-    :members:
-    :special-members:
-.. autoclass:: Contour
-    :members:
+    :imported-members:
     :special-members:
 
 shaped module
@@ -57,7 +52,5 @@ shaped module
 
 .. automodule:: gon.shaped
     :members:
-    :special-members:
-.. autoclass:: Polygon
-    :members:
+    :imported-members:
     :special-members:
