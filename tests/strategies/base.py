@@ -14,14 +14,11 @@ MIN_COORDINATE = -MAX_COORDINATE
 
 
 def to_floats(min_value: Optional[Coordinate] = None,
-              max_value: Optional[Coordinate] = None,
-              *,
-              allow_nan: bool = False,
-              allow_infinity: bool = False) -> Strategy:
+              max_value: Optional[Coordinate] = None) -> Strategy:
     return (strategies.floats(min_value=min_value,
                               max_value=max_value,
-                              allow_nan=allow_nan,
-                              allow_infinity=allow_infinity)
+                              allow_nan=False,
+                              allow_infinity=False)
             .map(to_digits_count))
 
 
