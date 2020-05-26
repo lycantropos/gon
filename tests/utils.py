@@ -18,6 +18,7 @@ from lz.replication import replicator
 from gon.discrete import Multipoint
 from gon.hints import Coordinate
 from gon.linear import (Contour,
+                        Multisegment,
                         Segment)
 from gon.linear.utils import shift_sequence
 from gon.primitive import Point
@@ -92,12 +93,25 @@ def reverse_segment(segment: Segment) -> Segment:
     return Segment(segment.end, segment.start)
 
 
+def shift_multisegment(multisegment: Multisegment,
+                       step: int) -> Multisegment:
+    return Multisegment(*shift_sequence(multisegment.segments, step))
+
+
 def shift_contour(contour: Contour, step: int) -> Contour:
     return Contour(shift_sequence(contour.vertices, step))
 
 
 def reverse_multipoint(multipoint: Multipoint) -> Multipoint:
     return Multipoint(*multipoint.points[::-1])
+
+
+def reverse_multisegment(multisegment: Multisegment) -> Multisegment:
+    return Multisegment(*multisegment.segments[::-1])
+
+
+def reverse_multisegment_segments(multisegment: Multisegment) -> Multisegment:
+    return Multisegment(*map(reverse_segment, multisegment.segments))
 
 
 def shift_multipoint(multipoint: Multipoint, step: int) -> Multipoint:
