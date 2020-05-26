@@ -67,10 +67,11 @@ class Segment(Compound, Linear):
         >>> segment == Segment.from_raw(((0, 0), (0, 2)))
         False
         """
-        return (self._start == other._start and self._end == other._end
-                or self._start == other._end and self._end == other._start
-                if isinstance(other, Segment)
-                else NotImplemented)
+        return (self is other
+                or (self._start == other._start and self._end == other._end
+                    or self._start == other._end and self._end == other._start
+                    if isinstance(other, Segment)
+                    else NotImplemented))
 
     def __ge__(self, other: Compound) -> bool:
         """
