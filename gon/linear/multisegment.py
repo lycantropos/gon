@@ -196,6 +196,28 @@ class Multisegment(Indexable, Linear):
                     else NotImplemented))
 
     def __lt__(self, other: Compound) -> bool:
+        """
+        Checks if the multisegment is a strict subset of the other geometry.
+
+        Time complexity:
+            ``O(segments_count * log segments_count)``
+        Memory complexity:
+            ``O(segments_count)``
+
+        where ``segments_count = len(self.segments)``.
+
+        >>> multisegment = Multisegment.from_raw([((0, 0), (1, 0)),
+        ...                                       ((0, 1), (1, 1))])
+        >>> multisegment < multisegment
+        False
+        >>> multisegment < Multisegment.from_raw([((0, 0), (1, 0)),
+        ...                                       ((0, 1), (1, 1)),
+        ...                                       ((0, 0), (1, 1))])
+        True
+        >>> multisegment < Multisegment.from_raw([((0, 1), (1, 1)),
+        ...                                       ((0, 0), (1, 0))])
+        False
+        """
         return (self != other
                 and ((self.relate(other) is Relation.COMPOSITE
                       if isinstance(other, Linear)
