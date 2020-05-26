@@ -32,5 +32,5 @@ def test_connection_with_equality(segments_pair: Tuple[Segment, Segment]
 
 
 @given(strategies.segments)
-def test_independence_from_ends_order(segment: Segment) -> None:
+def test_reversals(segment: Segment) -> None:
     assert hash(segment) == hash(reverse_segment(segment))
