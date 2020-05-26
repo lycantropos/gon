@@ -20,6 +20,7 @@ from gon.compound import (Compound,
                           Linear,
                           Relation,
                           Shaped)
+from gon.degenerate import EMPTY
 from gon.discrete import Multipoint
 from gon.geometry import Geometry
 from gon.hints import Coordinate
@@ -147,7 +148,8 @@ class Polygon(Indexable, Shaped):
         >>> polygon >= polygon
         True
         """
-        return (self == other
+        return (other is EMPTY
+                or self == other
                 or (self.relate(other) in (Relation.EQUAL, Relation.COMPONENT,
                                            Relation.ENCLOSED, Relation.WITHIN)
                     if isinstance(other, Compound)
@@ -170,7 +172,8 @@ class Polygon(Indexable, Shaped):
         >>> polygon > polygon
         False
         """
-        return (self != other
+        return (other is EMPTY
+                or self != other
                 and (self.relate(other) in (Relation.COMPONENT,
                                             Relation.ENCLOSED, Relation.WITHIN)
                      if isinstance(other, Compound)
