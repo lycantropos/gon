@@ -129,6 +129,28 @@ class Multisegment(Indexable, Linear):
                     else NotImplemented))
 
     def __gt__(self, other: Compound) -> bool:
+        """
+        Checks if the multisegment is a strict superset of the other geometry.
+
+        Time complexity:
+            ``O(segments_count * log segments_count)``
+        Memory complexity:
+            ``O(segments_count)``
+
+        where ``segments_count = len(self.segments)``.
+
+        >>> multisegment = Multisegment.from_raw([((0, 0), (1, 0)),
+        ...                                       ((0, 1), (1, 1))])
+        >>> multisegment > multisegment
+        False
+        >>> multisegment > Multisegment.from_raw([((0, 0), (1, 0)),
+        ...                                       ((0, 1), (1, 1)),
+        ...                                       ((0, 0), (1, 1))])
+        False
+        >>> multisegment > Multisegment.from_raw([((0, 1), (1, 1)),
+        ...                                       ((0, 0), (1, 0))])
+        False
+        """
         return (other is EMPTY
                 or self != other
                 and ((self.relate(other) is Relation.COMPONENT
