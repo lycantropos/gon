@@ -166,6 +166,28 @@ class Multisegment(Indexable, Linear):
         return hash(self._segments_set)
 
     def __le__(self, other: Compound) -> bool:
+        """
+        Checks if the multisegment is a subset of the other geometry.
+
+        Time complexity:
+            ``O(segments_count * log segments_count)``
+        Memory complexity:
+            ``O(segments_count)``
+
+        where ``segments_count = len(self.segments)``.
+
+        >>> multisegment = Multisegment.from_raw([((0, 0), (1, 0)),
+        ...                                       ((0, 1), (1, 1))])
+        >>> multisegment <= multisegment
+        True
+        >>> multisegment <= Multisegment.from_raw([((0, 0), (1, 0)),
+        ...                                        ((0, 1), (1, 1)),
+        ...                                        ((0, 0), (1, 1))])
+        True
+        >>> multisegment <= Multisegment.from_raw([((0, 1), (1, 1)),
+        ...                                        ((0, 0), (1, 0))])
+        True
+        """
         return (self == other
                 or ((self.relate(other) in (Relation.EQUAL, Relation.COMPOSITE)
                      if isinstance(other, Linear)
