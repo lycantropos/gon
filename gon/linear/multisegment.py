@@ -293,6 +293,21 @@ class Multisegment(Indexable, Linear):
         return list(self._segments)
 
     def index(self) -> None:
+        """
+        Pre-processes multisegment to potentially improve queries.
+
+        Time complexity:
+            ``O(segments_count * log segments_count)`` expected,
+            ``O(segments_count ** 2)`` worst
+        Memory complexity:
+            ``O(segments_count)``
+
+        where ``segments_count = len(self.segments)``.
+
+        >>> multisegment = Multisegment.from_raw([((0, 0), (1, 0)),
+        ...                                       ((0, 1), (1, 1))])
+        >>> multisegment.index()
+        """
         if len(self._segments) > 1:
             graph = multisegment_trapezoidal(self._raw)
             self._raw_locate = graph.locate
