@@ -414,9 +414,11 @@ class Contour(Indexable, Linear):
         Checks if the contour is valid.
 
         Time complexity:
-            ``O(len(self.vertices) * log len(self.vertices))``
+            ``O(vertices_count * log vertices_count)``
         Memory complexity:
-            ``O(len(self.vertices))``
+            ``O(vertices_count)``
+
+        where ``vertices_count = len(self.vertices)``.
 
         >>> contour = Contour.from_raw([(0, 0), (1, 0), (0, 1)])
         >>> contour.validate()
