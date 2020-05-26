@@ -275,6 +275,21 @@ class Multisegment(Indexable, Linear):
 
     @property
     def segments(self) -> List[Segment]:
+        """
+        Returns segments of the multisegment.
+
+        Time complexity:
+            ``O(segments_count)``
+        Memory complexity:
+            ``O(segments_count)``
+
+        where ``segments_count = len(self.segments)``.
+
+        >>> multisegment = Multisegment.from_raw([((0, 0), (1, 0)),
+        ...                                       ((0, 1), (1, 1))])
+        >>> multisegment.segments
+        [Segment(Point(0, 0), Point(1, 0)), Segment(Point(0, 1), Point(1, 1))]
+        """
         return list(self._segments)
 
     def index(self) -> None:
