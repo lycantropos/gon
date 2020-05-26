@@ -5,6 +5,7 @@ from typing import (List,
                     Tuple)
 
 from orient.planar import (contour_in_polygon,
+                           multisegment_in_polygon,
                            point_in_polygon,
                            polygon_in_polygon,
                            region_in_multiregion,
@@ -23,6 +24,7 @@ from gon.discrete import Multipoint
 from gon.geometry import Geometry
 from gon.hints import Coordinate
 from gon.linear import (Contour,
+                        Multisegment,
                         RawContour,
                         Segment,
                         vertices)
@@ -453,17 +455,19 @@ class Polygon(Indexable, Shaped):
         True
         """
         raw = self._raw_border, self._raw_holes
-        return (Relation.DISJOINT
-                if other is EMPTY
-                else (self._relate_multipoint(other)
-                      if isinstance(other, Multipoint)
-                      else (segment_in_polygon(other.raw(), raw)
-                            if isinstance(other, Segment)
+        return (self._relate_multipoint(other)
+                if isinstance(other, Multipoint)
+                else (segment_in_polygon(other.raw(), raw)
+                      if isinstance(other, Segment)
+                      else (multisegment_in_polygon(other.raw(), raw)
+                            if isinstance(other, Multisegment)
                             else (contour_in_polygon(other.raw(), raw)
                                   if isinstance(other, Contour)
-                                  else polygon_in_polygon((other._raw_border,
-                                                           other._raw_holes),
-                                                          raw)))))
+                                  else (polygon_in_polygon((other._raw_border,
+                                                            other._raw_holes),
+                                                           raw)
+                                        if isinstance(other, Polygon)
+                                        else other.relate(self).complement)))))
 
     def triangulate(self) -> List['Polygon']:
         """
