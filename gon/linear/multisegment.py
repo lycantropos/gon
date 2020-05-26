@@ -163,6 +163,19 @@ class Multisegment(Indexable, Linear):
                      else NotImplemented))
 
     def __hash__(self) -> int:
+        """
+        Returns hash value of the multisegment.
+
+        Time complexity:
+            ``O(len(self.segments))``
+        Memory complexity:
+            ``O(1)``
+
+        >>> multisegment = Multisegment.from_raw([((0, 0), (1, 0)),
+        ...                                       ((0, 1), (1, 1))])
+        >>> hash(multisegment) == hash(multisegment)
+        True
+        """
         return hash(self._segments_set)
 
     def __le__(self, other: Compound) -> bool:
