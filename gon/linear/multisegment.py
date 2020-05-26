@@ -313,6 +313,19 @@ class Multisegment(Indexable, Linear):
             self._raw_locate = graph.locate
 
     def raw(self) -> RawMultisegment:
+        """
+        Returns the multisegment as combination of Python built-ins.
+
+        Time complexity:
+            ``O(len(self.segments))``
+        Memory complexity:
+            ``O(len(self.segments))``
+
+        >>> multisegment = Multisegment.from_raw([((0, 0), (1, 0)),
+        ...                                       ((0, 1), (1, 1))])
+        >>> multisegment.raw()
+        [((0, 0), (1, 0)), ((0, 1), (1, 1))]
+        """
         return self._raw[:]
 
     def relate(self, other: Compound) -> Relation:
