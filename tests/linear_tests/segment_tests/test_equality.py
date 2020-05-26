@@ -3,7 +3,8 @@ from typing import Tuple
 from hypothesis import given
 
 from gon.linear import Segment
-from tests.utils import implication
+from tests.utils import (implication,
+                         reverse_segment)
 from . import strategies
 
 
@@ -31,7 +32,5 @@ def test_transitivity(segments_triplet: Tuple[Segment, Segment, Segment]
 
 
 @given(strategies.segments)
-def test_independence_from_ends_order(segment: Segment) -> None:
-    reversed_segment = Segment(segment.end, segment.start)
-
-    assert segment == reversed_segment
+def test_reversals(segment: Segment) -> None:
+    assert segment == reverse_segment(segment)
