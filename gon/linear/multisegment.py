@@ -329,6 +329,21 @@ class Multisegment(Indexable, Linear):
         return self._raw[:]
 
     def relate(self, other: Compound) -> Relation:
+        """
+        Finds relation between the multisegment and the other geometry.
+
+        Time complexity:
+            ``O(segments_count * log segments_count)``
+        Memory complexity:
+            ``O(segments_count)``
+
+        where ``segments_count = len(self.segments)``.
+
+        >>> multisegment = Multisegment.from_raw([((0, 0), (1, 0)),
+        ...                                       ((0, 1), (1, 1))])
+        >>> multisegment.relate(multisegment) is Relation.EQUAL
+        True
+        """
         return (relate_multipoint_to_linear_compound(other, self)
                 if isinstance(other, Multipoint)
                 else (segment_in_multisegment(other.raw(), self._raw)
