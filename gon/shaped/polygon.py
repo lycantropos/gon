@@ -17,9 +17,9 @@ from sect.triangulation import constrained_delaunay_triangles
 
 from gon.compound import (Compound,
                           Indexable,
+                          Linear,
                           Relation,
                           Shaped)
-from gon.degenerate import EMPTY
 from gon.discrete import Multipoint
 from gon.geometry import Geometry
 from gon.hints import Coordinate
@@ -147,8 +147,7 @@ class Polygon(Indexable, Shaped):
         >>> polygon >= polygon
         True
         """
-        return (other is EMPTY
-                or self == other
+        return (self == other
                 or (self.relate(other) in (Relation.EQUAL, Relation.COMPONENT,
                                            Relation.ENCLOSED, Relation.WITHIN)
                     if isinstance(other, Compound)
@@ -171,8 +170,7 @@ class Polygon(Indexable, Shaped):
         >>> polygon > polygon
         False
         """
-        return (other is EMPTY
-                or self != other
+        return (self != other
                 and (self.relate(other) in (Relation.COMPONENT,
                                             Relation.ENCLOSED, Relation.WITHIN)
                      if isinstance(other, Compound)
@@ -215,11 +213,11 @@ class Polygon(Indexable, Shaped):
         True
         """
         return (self == other
-                or ((self.relate(other) in (Relation.COVER, Relation.ENCLOSES,
-                                            Relation.COMPOSITE, Relation.EQUAL)
-                     if isinstance(other, Shaped)
-                     # shaped cannot be subset of linear
-                     else False)
+                or (not isinstance(other, (Multipoint, Linear))
+                    and self.relate(other) in (Relation.COVER,
+                                               Relation.ENCLOSES,
+                                               Relation.COMPOSITE,
+                                               Relation.EQUAL)
                     if isinstance(other, Compound)
                     else NotImplemented))
 
@@ -241,12 +239,10 @@ class Polygon(Indexable, Shaped):
         False
         """
         return (self != other
-                and ((self.relate(other) in (Relation.COVER,
-                                             Relation.ENCLOSES,
-                                             Relation.COMPOSITE)
-                      if isinstance(other, Shaped)
-                      # shaped cannot be strict subset of linear
-                      else False)
+                and (not isinstance(other, (Multipoint, Linear))
+                     and self.relate(other) in (Relation.COVER,
+                                                Relation.ENCLOSES,
+                                                Relation.COMPOSITE)
                      if isinstance(other, Compound)
                      else NotImplemented))
 
