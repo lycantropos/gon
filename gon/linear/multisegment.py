@@ -103,8 +103,9 @@ class Multisegment(Indexable, Linear):
         return list(self._segments)
 
     def index(self) -> None:
-        graph = multisegment_trapezoidal(self._raw)
-        self._raw_locate = graph.locate
+        if len(self._segments) > 1:
+            graph = multisegment_trapezoidal(self._raw)
+            self._raw_locate = graph.locate
 
     def raw(self) -> RawMultisegment:
         return self._raw[:]
