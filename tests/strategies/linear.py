@@ -3,10 +3,12 @@ from functools import partial
 from hypothesis import strategies
 
 from gon.linear import (Contour,
+                        Segment,
                         vertices)
 from .base import coordinates_strategies
 from .factories import coordinates_to_points
 from .primitive import (invalid_points,
+                        points,
                         repeated_raw_points)
 
 small_contours = (
@@ -21,3 +23,6 @@ invalid_vertices_contours = strategies.builds(
         strategies.lists(invalid_points,
                          min_size=vertices.MIN_COUNT))
 contours_with_repeated_points = (repeated_raw_points.map(Contour.from_raw))
+invalid_segments = (points.map(lambda point: Segment(point, point))
+                    | strategies.builds(Segment, points, invalid_points)
+                    | strategies.builds(Segment, invalid_points, points))
