@@ -7,6 +7,7 @@ from lz.functional import pack
 from gon.discrete import Multipoint
 from gon.hints import Coordinate
 from gon.linear import (Contour,
+                        Multisegment,
                         Segment)
 from gon.primitive import Point
 from gon.shaped import Polygon
@@ -30,6 +31,12 @@ def coordinates_to_multipoints(coordinates: Strategy[Coordinate]
 def coordinates_to_segments(coordinates: Strategy[Coordinate]
                             ) -> Strategy[Segment]:
     return planar.segments(coordinates).map(Segment.from_raw)
+
+
+def coordinates_to_multisegments(coordinates: Strategy[Coordinate]
+                                 ) -> Strategy[Multisegment]:
+    return planar.multisegments(coordinates,
+                                min_size=1).map(Multisegment.from_raw)
 
 
 def coordinates_to_contours(coordinates: Strategy[Coordinate],

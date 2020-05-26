@@ -6,17 +6,20 @@ from typing import (Callable,
 from hypothesis import strategies
 from lz.functional import (identity,
                            to_constant)
+from lz.iterating import flatten
 
 from gon.compound import Compound
 from gon.degenerate import EMPTY
 from gon.discrete import Multipoint
 from gon.hints import Coordinate
 from gon.linear import (Contour,
+                        Multisegment,
                         Segment)
 from gon.shaped import Polygon
 from tests.strategies import (coordinates_strategies,
                               coordinates_to_contours,
                               coordinates_to_multipoints,
+                              coordinates_to_multisegments,
                               coordinates_to_polygons,
                               coordinates_to_segments)
 from tests.utils import Strategy
@@ -24,7 +27,8 @@ from tests.utils import Strategy
 CompoundsFactory = Callable[[Strategy[Coordinate]], Strategy[Compound]]
 
 empty_compounds = strategies.just(EMPTY)
-indexables_factories = strategies.sampled_from([coordinates_to_contours,
+indexables_factories = strategies.sampled_from([coordinates_to_multisegments,
+                                                coordinates_to_contours,
                                                 coordinates_to_polygons])
 non_empty_compounds_factories = (
         strategies.sampled_from([coordinates_to_multipoints,
@@ -65,6 +69,9 @@ def compound_to_compound_with_multipoint(compound: Compound
         return compound, compound
     elif isinstance(compound, Segment):
         return compound, Multipoint(compound.start, compound.end)
+    elif isinstance(compound, Multisegment):
+        return compound, Multipoint(*flatten((segment.start, segment.end)
+                                             for segment in compound.segments))
     elif isinstance(compound, Contour):
         return compound, Multipoint(*compound.vertices)
     elif isinstance(compound, Polygon):
