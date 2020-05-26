@@ -123,7 +123,7 @@ class Segment(Compound, Linear):
                 or self != other
                 and ((self.relate(other) is Relation.COMPONENT
                       if isinstance(other, (Multipoint, Segment))
-                      # linear cannot be strict superset of contour or shaped
+                      # segment cannot be strict superset of contour or shaped
                       else False)
                      if isinstance(other, Compound)
                      else NotImplemented))
