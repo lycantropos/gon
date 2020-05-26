@@ -1,3 +1,4 @@
+from fractions import Fraction
 from functools import partial
 from itertools import repeat
 from typing import (Callable,
@@ -116,3 +117,9 @@ def shift_multipoint(multipoint: Multipoint, step: int) -> Multipoint:
 def shift_multisegment(multisegment: Multisegment,
                        step: int) -> Multisegment:
     return Multisegment(*shift_sequence(multisegment.segments, step))
+
+
+def divide_by_int(dividend: Coordinate, divisor: int) -> Coordinate:
+    return (Fraction(dividend, divisor)
+            if isinstance(dividend, int)
+            else dividend / divisor)
