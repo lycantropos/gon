@@ -345,9 +345,11 @@ class Polygon(Indexable, Shaped):
         Returns holes of the polygon.
 
         Time complexity:
-            ``O(len(self.holes))``
+            ``O(holes_count)``
         Memory complexity:
-            ``O(len(self.holes))``
+            ``O(holes_count)``
+
+        where ``holes_count = len(self.holes)``.
 
         >>> polygon = Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
         ...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]]))
