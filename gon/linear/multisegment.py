@@ -47,6 +47,23 @@ class Multisegment(Indexable, Linear):
     __repr__ = generate_repr(__init__)
 
     def __contains__(self, other: Geometry) -> bool:
+        """
+        Checks if the multisegment contains the other geometry.
+
+        Time complexity:
+            ``O(log segments_count)`` expected after indexing,
+            ``O(segments_count)`` worst after indexing or without it.
+        Memory complexity:
+            ``O(1)``
+
+        where ``segments_count = len(self.segments)``.
+
+        >>> multisegment = Multisegment.from_raw([((0, 0), (1, 0)),
+        ...                                       ((0, 1), (1, 1))])
+        >>> all(segment.start in multisegment and segment.end in multisegment
+        ...     for segment in multisegment.segments)
+        True
+        """
         return isinstance(other, Point) and bool(self._raw_locate(other.raw()))
 
     def __eq__(self, other: Geometry) -> bool:
