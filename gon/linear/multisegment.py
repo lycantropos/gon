@@ -67,6 +67,26 @@ class Multisegment(Indexable, Linear):
         return isinstance(other, Point) and bool(self._raw_locate(other.raw()))
 
     def __eq__(self, other: 'Multisegment') -> bool:
+        """
+        Checks if multisegments are equal.
+
+        Time complexity:
+            ``O(min(len(self.segments), len(other.segments)))``
+        Memory complexity:
+            ``O(1)``
+
+        >>> multisegment = Multisegment.from_raw([((0, 0), (1, 0)),
+        ...                                       ((0, 1), (1, 1))])
+        >>> multisegment == multisegment
+        True
+        >>> multisegment == Multisegment.from_raw([((0, 0), (1, 0)),
+        ...                                        ((0, 1), (1, 1)),
+        ...                                        ((0, 0), (1, 1))])
+        False
+        >>> multisegment == Multisegment.from_raw([((0, 1), (1, 1)),
+        ...                                        ((0, 0), (1, 0))])
+        True
+        """
         return (self is other
                 or (self._segments_set == other._segments_set
                     if isinstance(other, Multisegment)
