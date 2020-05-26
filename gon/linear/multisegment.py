@@ -353,6 +353,20 @@ class Multisegment(Indexable, Linear):
                             else other.relate(self).complement)))
 
     def validate(self) -> None:
+        """
+        Checks if the multisegment is valid.
+
+        Time complexity:
+            ``O(segments_count * log segments_count)``
+        Memory complexity:
+            ``O(segments_count)``
+
+        where ``segments_count = len(self.segments)``.
+
+        >>> multisegment = Multisegment.from_raw([((0, 0), (1, 0)),
+        ...                                       ((0, 1), (1, 1))])
+        >>> multisegment.validate()
+        """
         if not self._segments:
             raise ValueError('Multisegment is empty.')
         elif len(self._segments) > len(self._segments_set):
