@@ -31,11 +31,11 @@ def test_transitivity(contours_triplet: Tuple[Contour, Contour, Contour]
 
 
 @given(strategies.contours)
-def test_reversed(contour: Contour) -> None:
+def test_reversals(contour: Contour) -> None:
     assert contour == contour.reverse()
 
 
 @given(strategies.contours)
-def test_shifted(contour: Contour) -> None:
+def test_shifts(contour: Contour) -> None:
     assert all(contour == shift_contour(contour, step)
-               for step in range(len(contour.vertices)))
+               for step in range(1, len(contour.vertices)))
