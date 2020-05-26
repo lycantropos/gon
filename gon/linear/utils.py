@@ -1,7 +1,10 @@
+from typing import Sequence
+
 from gon.compound import (Compound,
                           Relation)
 from gon.discrete import Multipoint
-from gon.hints import Coordinate
+from gon.hints import (Coordinate,
+                       Domain)
 from gon.primitive import (Point,
                            RawPoint)
 
@@ -29,3 +32,9 @@ def relate_multipoint_to_linear_compound(multipoint: Multipoint,
             else (Relation.COMPONENT
                   if is_subset
                   else Relation.TOUCH))
+
+
+def shift_sequence(sequence: Sequence[Domain], step: int) -> Sequence[Domain]:
+    return (sequence[step:] + sequence[:step]
+            if step
+            else sequence)

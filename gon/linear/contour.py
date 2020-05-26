@@ -25,7 +25,8 @@ from .hints import (RawContour,
                     Vertices)
 from .multisegment import Multisegment
 from .segment import Segment
-from .utils import relate_multipoint_to_linear_compound
+from .utils import (relate_multipoint_to_linear_compound,
+                    shift_sequence)
 
 
 class Contour(Indexable, Linear):
@@ -161,7 +162,7 @@ class Contour(Indexable, Linear):
         >>> hash(contour) == hash(contour)
         True
         """
-        vertices = _vertices.shift(self._vertices, self._min_index)
+        vertices = shift_sequence(self._vertices, self._min_index)
         return hash(vertices
                     if (to_orientation(vertices[0], vertices[- 1], vertices[1])
                         is Orientation.COUNTERCLOCKWISE)
