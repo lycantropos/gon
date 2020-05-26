@@ -19,7 +19,7 @@ from gon.discrete import Multipoint
 from gon.hints import Coordinate
 from gon.linear import (Contour,
                         Segment)
-from gon.linear.vertices import shift
+from gon.linear.utils import shift_sequence
 from gon.primitive import Point
 
 Strategy = SearchStrategy
@@ -93,7 +93,7 @@ def reverse_segment(segment: Segment) -> Segment:
 
 
 def shift_contour(contour: Contour, step: int) -> Contour:
-    return Contour(shift(contour.vertices, step))
+    return Contour(shift_sequence(contour.vertices, step))
 
 
 def reverse_multipoint(multipoint: Multipoint) -> Multipoint:
@@ -101,4 +101,4 @@ def reverse_multipoint(multipoint: Multipoint) -> Multipoint:
 
 
 def shift_multipoint(multipoint: Multipoint, step: int) -> Multipoint:
-    return Multipoint(*shift(multipoint.points, step))
+    return Multipoint(*shift_sequence(multipoint.points, step))
