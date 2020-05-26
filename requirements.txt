@@ -1,4 +1,4 @@
-bentley_ottmann>=0.6.0
+bentley_ottmann>=0.8.0
 orient>=0.8.0
 reprit>=0.2.2
 robust>=0.2.4
