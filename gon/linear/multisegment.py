@@ -240,6 +240,20 @@ class Multisegment(Indexable, Linear):
 
     @classmethod
     def from_raw(cls, raw: RawMultisegment) -> Domain:
+        """
+        Constructs multisegment from the combination of Python built-ins.
+
+        Time complexity:
+            ``O(len(raw))``
+        Memory complexity:
+            ``O(len(raw))``
+
+        >>> multisegment = Multisegment.from_raw([((0, 0), (1, 0)),
+        ...                                       ((0, 1), (1, 1))])
+        >>> multisegment == Multisegment(Segment(Point(0, 0), Point(1, 0)),
+        ...                              Segment(Point(0, 1), Point(1, 1)))
+        True
+        """
         return Multisegment(*map(Segment.from_raw, raw))
 
     @property
