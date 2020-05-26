@@ -258,6 +258,19 @@ class Multisegment(Indexable, Linear):
 
     @property
     def length(self) -> Coordinate:
+        """
+        Returns length of the multisegment.
+
+        Time complexity:
+            ``O(len(self.segments))``
+        Memory complexity:
+            ``O(1)``
+
+        >>> multisegment = Multisegment.from_raw([((0, 0), (1, 0)),
+        ...                                       ((0, 1), (1, 1))])
+        >>> multisegment.length == 2
+        True
+        """
         return sum(segment.length for segment in self._segments)
 
     @property
