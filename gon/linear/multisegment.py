@@ -29,6 +29,16 @@ class Multisegment(Indexable, Linear):
     __slots__ = '_segments', '_segments_set', '_raw', '_raw_locate'
 
     def __init__(self, *segments: Segment) -> None:
+        """
+        Initializes multisegment.
+
+        Time complexity:
+            ``O(segments_count)``
+        Memory complexity:
+            ``O(segments_count)``
+
+        where ``segments_count = len(segments)``.
+        """
         self._segments = segments
         self._raw = [segment.raw() for segment in segments]
         self._segments_set = frozenset(segments)
