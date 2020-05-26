@@ -2,6 +2,7 @@ from functools import partial
 
 from bentley_ottmann.planar import edges_intersect
 from orient.planar import (contour_in_contour,
+                           multisegment_in_contour,
                            point_in_contour,
                            segment_in_contour)
 from reprit.base import generate_repr
@@ -23,6 +24,7 @@ from gon.primitive import (Point,
 from . import vertices as _vertices
 from .hints import (RawContour,
                     Vertices)
+from .multisegment import Multisegment
 from .segment import Segment
 from .utils import relate_multipoint_to_linear_compound
 
@@ -351,9 +353,11 @@ class Contour(Indexable, Linear):
                 if isinstance(other, Multipoint)
                 else (segment_in_contour(other.raw(), self._raw)
                       if isinstance(other, Segment)
-                      else (contour_in_contour(other._raw, self._raw)
-                            if isinstance(other, Contour)
-                            else other.relate(self).complement)))
+                      else (multisegment_in_contour(other.raw(), self._raw)
+                            if isinstance(other, Multisegment)
+                            else (contour_in_contour(other._raw, self._raw)
+                                  if isinstance(other, Contour)
+                                  else other.relate(self).complement))))
 
     def reverse(self) -> 'Contour':
         """
