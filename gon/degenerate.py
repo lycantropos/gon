@@ -36,22 +36,32 @@ class Empty(Compound):
         return False
 
     def __eq__(self, other: Geometry) -> bool:
-        return self is other
+        return (self is other
+                if isinstance(other, Geometry)
+                else NotImplemented)
 
     def __ge__(self, other: Compound) -> bool:
-        return self is other
+        return (self is other
+                if isinstance(other, Compound)
+                else NotImplemented)
 
     def __gt__(self, other: Compound) -> bool:
-        return False
+        return (False
+                if isinstance(other, Compound)
+                else NotImplemented)
 
     def __hash__(self) -> int:
         return 0
 
     def __le__(self, other: Compound) -> bool:
-        return True
+        return (True
+                if isinstance(other, Compound)
+                else NotImplemented)
 
     def __lt__(self, other: Compound) -> bool:
-        return self is not other
+        return (self is not other
+                if isinstance(other, Compound)
+                else NotImplemented)
 
     def relate(self, other: Compound) -> Relation:
         return Relation.DISJOINT
