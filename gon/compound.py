@@ -89,5 +89,5 @@ class Indexable(Compound):
     @abstractmethod
     def index(self) -> None:
         """
-        Pre-processes geometry to potentially improve queries time complexity.
+        Pre-processes geometry to potentially improve queries.
         """
