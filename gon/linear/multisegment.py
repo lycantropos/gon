@@ -66,7 +66,7 @@ class Multisegment(Indexable, Linear):
         """
         return isinstance(other, Point) and bool(self._raw_locate(other.raw()))
 
-    def __eq__(self, other: Geometry) -> bool:
+    def __eq__(self, other: 'Multisegment') -> bool:
         return (self is other
                 or (self._segments_set == other._segments_set
                     if isinstance(other, Multisegment)
