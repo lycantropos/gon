@@ -320,9 +320,11 @@ class Contour(Indexable, Linear):
         Returns the contour as combination of Python built-ins.
 
         Time complexity:
-            ``O(len(self.vertices))``
+            ``O(vertices_count)``
         Memory complexity:
-            ``O(len(self.vertices))``
+            ``O(vertices_count)``
+
+        where ``vertices_count = len(self.vertices)``.
 
         >>> contour = Contour.from_raw([(0, 0), (1, 0), (0, 1)])
         >>> contour.raw()
