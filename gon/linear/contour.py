@@ -379,10 +379,13 @@ class Contour(Indexable, Linear):
         Returns the clockwise contour.
 
         Time complexity:
-            ``O(len(self.vertices))``
+            ``O(1)`` if clockwise already,
+            ``O(vertices_count)`` -- otherwise
         Memory complexity:
             ``O(1)`` if clockwise already,
-            ``O(len(self.vertices))`` -- otherwise
+            ``O(vertices_count)`` -- otherwise
+
+        where ``vertices_count = len(self.vertices)``.
 
         >>> contour = Contour.from_raw([(0, 0), (1, 0), (0, 1)])
         >>> contour.to_clockwise().orientation is Orientation.CLOCKWISE
