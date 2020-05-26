@@ -122,7 +122,7 @@ class Multisegment(Indexable, Linear):
     def validate(self) -> None:
         if not self._segments:
             raise ValueError('Multisegment is empty.')
-        elif len(self._segments) > len(self._segments):
+        elif len(self._segments) > len(self._segments_set):
             raise ValueError('Duplicate segments found.')
         for segment in self._segments:
             segment.validate()
