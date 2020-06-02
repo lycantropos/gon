@@ -1,2 +1,2 @@
-from .polygon import (Polygon,
-                      RawPolygon)
+from .hints import RawPolygon
+from .polygon import Polygon
