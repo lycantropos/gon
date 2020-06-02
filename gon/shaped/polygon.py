@@ -1,8 +1,7 @@
 from functools import partial
 from typing import (List,
                     Optional,
-                    Sequence,
-                    Tuple)
+                    Sequence)
 
 from orient.planar import (contour_in_polygon,
                            multisegment_in_polygon,
@@ -26,14 +25,12 @@ from gon.geometry import Geometry
 from gon.hints import Coordinate
 from gon.linear import (Contour,
                         Multisegment,
-                        RawContour,
                         Segment,
                         vertices)
 from gon.primitive import (Point,
                            RawPoint)
 from gon.shaped.utils import to_convex_hull
-
-RawPolygon = Tuple[RawContour, List[RawContour]]
+from .hints import RawPolygon
 
 
 class Polygon(Indexable, Shaped):
