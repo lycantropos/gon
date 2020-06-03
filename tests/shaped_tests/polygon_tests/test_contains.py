@@ -10,13 +10,9 @@ from . import strategies
 
 
 @given(strategies.polygons)
-def test_border_vertices(polygon: Polygon) -> None:
+def test_vertices(polygon: Polygon) -> None:
     assert all(vertex in polygon
                for vertex in polygon.border.vertices)
-
-
-@given(strategies.polygons)
-def test_holes_vertices(polygon: Polygon) -> None:
     assert all(vertex in polygon
                for hole in polygon.holes
                for vertex in hole.vertices)
