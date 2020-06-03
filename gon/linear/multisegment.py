@@ -52,7 +52,7 @@ class Multisegment(Indexable, Linear):
 
         Time complexity:
             ``O(log segments_count)`` expected after indexing,
-            ``O(segments_count)`` worst after indexing or without it.
+            ``O(segments_count)`` worst after indexing or without it
         Memory complexity:
             ``O(1)``
 
@@ -320,7 +320,7 @@ class Multisegment(Indexable, Linear):
 
         Time complexity:
             ``O(log segments_count)`` expected after indexing,
-            ``O(segments_count)`` worst after indexing or without it.
+            ``O(segments_count)`` worst after indexing or without it
         Memory complexity:
             ``O(1)``
 
