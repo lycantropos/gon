@@ -18,8 +18,7 @@ raw_multipolygons = (coordinates_strategies
                      .flatmap(partial(planar.multipolygons,
                                       min_size=1)))
 multipolygons = raw_multipolygons.map(Multipolygon.from_raw)
-polygons = (coordinates_strategies.flatmap(coordinates_to_polygons)
-            .map(Polygon.from_raw))
+polygons = coordinates_strategies.flatmap(coordinates_to_polygons)
 repeated_polygons = (strategies.builds(repeat, polygons,
                                        strategies.integers(1, 100))
                      .map(list))
