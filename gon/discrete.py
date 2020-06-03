@@ -4,6 +4,7 @@ from typing import (List,
 from reprit.base import generate_repr
 
 from .compound import (Compound,
+                       Location,
                        Relation)
 from .degenerate import EMPTY
 from .geometry import Geometry
@@ -218,6 +219,25 @@ class Multipoint(Compound):
         [Point(0, 0), Point(1, 0), Point(0, 1)]
         """
         return list(self._points)
+
+    def locate(self, point: Point) -> Location:
+        """
+        Finds location of the point relative to the multipoint.
+
+        Time complexity:
+            ``O(1)`` expected,
+            ``O(len(self.points))`` worst.
+        Memory complexity:
+            ``O(1)``
+
+        >>> multipoint = Multipoint.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> all(multipoint.locate(point) is Location.BOUNDARY
+        ...     for point in multipoint.points)
+        True
+        """
+        return (Location.BOUNDARY
+                if point in self._points_set
+                else Location.EXTERIOR)
 
     def raw(self) -> RawMultipoint:
         """
