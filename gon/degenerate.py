@@ -36,6 +36,17 @@ class Empty(Compound):
     __repr__ = generate_repr(__new__)
 
     def __contains__(self, other: Geometry) -> bool:
+        """
+        Checks if the empty geometry contains the other geometry.
+
+        Time complexity:
+            ``O(1)``
+        Memory complexity:
+            ``O(1)``
+
+        >>> EMPTY in EMPTY
+        False
+        """
         return False
 
     def __eq__(self, other: Geometry) -> bool:
