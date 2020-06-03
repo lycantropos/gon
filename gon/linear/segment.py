@@ -7,12 +7,14 @@ from robust.hints import Point
 
 from gon.compound import (Compound,
                           Linear,
+                          Location,
                           Relation)
 from gon.degenerate import EMPTY
 from gon.discrete import Multipoint
 from gon.geometry import Geometry
 from gon.hints import Coordinate
-from gon.primitive import Point
+from gon.primitive import (Point,
+                           RawPoint)
 from .hints import RawSegment
 from .utils import (relate_multipoint_to_linear_compound,
                     squared_points_distance)
@@ -50,9 +52,7 @@ class Segment(Compound, Linear):
         >>> segment.end in segment
         True
         """
-        return (isinstance(other, Point)
-                and (point_in_segment(other.raw(), self._raw)
-                     is Relation.COMPONENT))
+        return isinstance(other, Point) and bool(self.locate(other))
 
     def __eq__(self, other: 'Segment') -> bool:
         """
@@ -270,6 +270,23 @@ class Segment(Compound, Linear):
         """
         return self._start
 
+    def locate(self, point: Point) -> Location:
+        """
+        Finds location of the point relative to the segment.
+
+        Time complexity:
+            ``O(1)``
+        Memory complexity:
+            ``O(1)``
+
+        >>> segment = Segment.from_raw(((0, 0), (2, 0)))
+        >>> segment.locate(segment.start) is Location.BOUNDARY
+        True
+        >>> segment.locate(segment.end) is Location.BOUNDARY
+        True
+        """
+        return raw_locate_point(self._raw, point.raw())
+
     def raw(self) -> RawSegment:
         """
         Returns the segment as combination of Python built-ins.
@@ -320,3 +337,9 @@ class Segment(Compound, Linear):
         self._end.validate()
         if self._start == self._end:
             raise ValueError('Segment is degenerate.')
+
+
+def raw_locate_point(raw_segment: RawSegment, raw_point: RawPoint) -> Location:
+    return (Location.BOUNDARY
+            if point_in_segment(raw_point, raw_segment)
+            else Location.EXTERIOR)
