@@ -6,11 +6,13 @@ from lz.functional import identity
 from gon.compound import Shaped
 from gon.hints import Coordinate
 from tests.strategies import (coordinates_strategies,
+                              coordinates_to_multipolygons,
                               coordinates_to_polygons)
 from tests.utils import Strategy
 
 ShapedGeometriesFactory = Callable[[Strategy[Coordinate]], Strategy[Shaped]]
-shaped_geometries_factories = strategies.just(coordinates_to_polygons)
+shaped_geometries_factories = strategies.sampled_from(
+        [coordinates_to_polygons, coordinates_to_multipolygons])
 
 
 def coordinates_to_shaped_geometries(coordinates: Strategy[Coordinate],
