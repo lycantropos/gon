@@ -144,6 +144,11 @@ class Empty(Compound):
                 if isinstance(other, Compound)
                 else NotImplemented)
 
+    @classmethod
+    def from_raw(cls, raw: RawEmpty) -> Domain:
+        assert raw is RAW_EMPTY
+        return cls()
+
     def locate(self, point: Point) -> Location:
         """
         Finds location of the point relative to the empty geometry.
@@ -158,16 +163,11 @@ class Empty(Compound):
         """
         return Location.EXTERIOR
 
-    def relate(self, other: Compound) -> Relation:
-        return Relation.DISJOINT
-
-    @classmethod
-    def from_raw(cls, raw: RawEmpty) -> Domain:
-        assert raw is RAW_EMPTY
-        return cls()
-
     def raw(self) -> RawEmpty:
         return RAW_EMPTY
+
+    def relate(self, other: Compound) -> Relation:
+        return Relation.DISJOINT
 
     def validate(self) -> None:
         """
