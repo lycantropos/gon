@@ -1,9 +1,11 @@
 from reprit.base import generate_repr
 
 from .compound import (Compound,
+                       Location,
                        Relation)
 from .geometry import Geometry
 from .hints import Domain
+from .primitive import Point
 
 RawEmpty = type(None)
 
@@ -62,6 +64,9 @@ class Empty(Compound):
         return (self is not other
                 if isinstance(other, Compound)
                 else NotImplemented)
+
+    def locate(self, point: Point) -> Location:
+        return Location.EXTERIOR
 
     def relate(self, other: Compound) -> Relation:
         return Relation.DISJOINT
