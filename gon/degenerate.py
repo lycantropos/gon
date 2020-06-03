@@ -66,6 +66,17 @@ class Empty(Compound):
                 else NotImplemented)
 
     def __ge__(self, other: Compound) -> bool:
+        """
+        Checks if the empty geometry is a superset of the other geometry.
+
+        Time complexity:
+            ``O(1)``
+        Memory complexity:
+            ``O(1)``
+
+        >>> EMPTY >= EMPTY
+        True
+        """
         return (self is other
                 if isinstance(other, Compound)
                 else NotImplemented)
