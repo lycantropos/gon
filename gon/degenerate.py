@@ -99,6 +99,17 @@ class Empty(Compound):
                 else NotImplemented)
 
     def __hash__(self) -> int:
+        """
+        Returns hash value of the empty geometry.
+
+        Time complexity:
+            ``O(1)``
+        Memory complexity:
+            ``O(1)``
+
+        >>> hash(EMPTY) == hash(EMPTY)
+        True
+        """
         return 0
 
     def __le__(self, other: Compound) -> bool:
