@@ -488,19 +488,17 @@ class Polygon(Indexable, Shaped):
         True
         """
         raw = self._raw_border, self._raw_holes
-        return (self._relate_multipoint(other)
-                if isinstance(other, Multipoint)
-                else (segment_in_polygon(other.raw(), raw)
-                      if isinstance(other, Segment)
-                      else (multisegment_in_polygon(other.raw(), raw)
-                            if isinstance(other, Multisegment)
-                            else (contour_in_polygon(other.raw(), raw)
-                                  if isinstance(other, Contour)
-                                  else (polygon_in_polygon((other._raw_border,
-                                                            other._raw_holes),
-                                                           raw)
-                                        if isinstance(other, Polygon)
-                                        else other.relate(self).complement)))))
+        return (segment_in_polygon(other.raw(), raw)
+                if isinstance(other, Segment)
+                else (multisegment_in_polygon(other.raw(), raw)
+                      if isinstance(other, Multisegment)
+                      else (contour_in_polygon(other.raw(), raw)
+                            if isinstance(other, Contour)
+                            else (polygon_in_polygon((other._raw_border,
+                                                      other._raw_holes),
+                                                     raw)
+                                  if isinstance(other, Polygon)
+                                  else other.relate(self).complement))))
 
     def triangulate(self) -> List['Polygon']:
         """
@@ -555,32 +553,6 @@ class Polygon(Indexable, Shaped):
             if (relation is not Relation.COVER
                     and relation is not Relation.ENCLOSES):
                 raise ValueError('Holes should lie inside border.')
-
-    def _relate_multipoint(self, multipoint: Multipoint) -> Relation:
-        disjoint = is_subset = not_interior = not_boundary = True
-        for point in multipoint.points:
-            location = self._raw_locate(point.raw())
-            if location is Location.INTERIOR:
-                if disjoint:
-                    disjoint = False
-                if not_interior:
-                    not_interior = False
-            elif location is Location.BOUNDARY:
-                if disjoint:
-                    disjoint = False
-                if not_boundary:
-                    not_boundary = True
-            elif is_subset:
-                is_subset = False
-        return (Relation.DISJOINT
-                if disjoint
-                else (Relation.TOUCH
-                      if not_interior
-                      else ((Relation.WITHIN
-                             if not_boundary
-                             else Relation.ENCLOSED)
-                            if is_subset
-                            else Relation.CROSS)))
 
 
 def raw_locate_point(raw_polygon: RawPolygon, raw_point: RawPoint) -> Location:
