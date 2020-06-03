@@ -15,6 +15,7 @@ from gon.hints import Coordinate
 from gon.linear import (Contour,
                         Multisegment,
                         Segment)
+from gon.primitive import Point
 from gon.shaped import (Multipolygon,
                         Polygon)
 from tests.strategies import (coordinates_strategies,
@@ -22,6 +23,7 @@ from tests.strategies import (coordinates_strategies,
                               coordinates_to_multipoints,
                               coordinates_to_multipolygons,
                               coordinates_to_multisegments,
+                              coordinates_to_points,
                               coordinates_to_polygons,
                               coordinates_to_segments)
 from tests.utils import Strategy
@@ -57,6 +59,20 @@ non_empty_compounds = (strategies.builds(coordinates_to_compounds,
 compounds = (strategies.builds(coordinates_to_compounds,
                                coordinates_strategies, compounds_factories)
              .flatmap(identity))
+
+
+def coordinates_to_compounds_with_points(coordinates: Strategy[Coordinate],
+                                         factory: CompoundsFactory
+                                         ) -> Strategy[Tuple[Compound, Point]]:
+    return strategies.tuples(factory(coordinates),
+                             coordinates_to_points(coordinates))
+
+
+compounds_with_points = (
+    (strategies.builds(coordinates_to_compounds_with_points,
+                       coordinates_strategies,
+                       compounds_factories)
+     .flatmap(identity)))
 
 
 def coordinates_to_compounds_tuples(coordinates: Strategy[Coordinate],
