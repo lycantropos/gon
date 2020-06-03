@@ -275,7 +275,7 @@ class Multipoint(Compound):
                  if self is other
                  else _relate_sets(self._points_set, other._points_set))
                 if isinstance(other, Multipoint)
-                else other.relate(self).complement)
+                else self._relate_geometry(other))
 
     def validate(self) -> None:
         """
@@ -295,6 +295,32 @@ class Multipoint(Compound):
             raise ValueError('Duplicate points found.')
         for point in self._points:
             point.validate()
+
+    def _relate_geometry(self, other: Compound) -> Relation:
+        disjoint = is_subset = not_interior = not_boundary = True
+        for point in self._points:
+            location = other.locate(point)
+            if location is Location.INTERIOR:
+                if disjoint:
+                    disjoint = False
+                if not_interior:
+                    not_interior = False
+            elif location is Location.BOUNDARY:
+                if disjoint:
+                    disjoint = False
+                if not_boundary:
+                    not_boundary = True
+            elif is_subset:
+                is_subset = False
+        return (Relation.DISJOINT
+                if disjoint
+                else (Relation.TOUCH
+                      if not_interior
+                      else ((Relation.COVER
+                             if not_boundary
+                             else Relation.ENCLOSES)
+                            if is_subset
+                            else Relation.CROSS)))
 
 
 def _relate_sets(left: Set[Domain], right: Set[Domain]) -> Relation:
