@@ -15,10 +15,12 @@ from gon.hints import Coordinate
 from gon.linear import (Contour,
                         Multisegment,
                         Segment)
-from gon.shaped import Polygon
+from gon.shaped import (Multipolygon,
+                        Polygon)
 from tests.strategies import (coordinates_strategies,
                               coordinates_to_contours,
                               coordinates_to_multipoints,
+                              coordinates_to_multipolygons,
                               coordinates_to_multisegments,
                               coordinates_to_polygons,
                               coordinates_to_segments)
@@ -29,7 +31,8 @@ CompoundsFactory = Callable[[Strategy[Coordinate]], Strategy[Compound]]
 empty_compounds = strategies.just(EMPTY)
 indexables_factories = strategies.sampled_from([coordinates_to_multisegments,
                                                 coordinates_to_contours,
-                                                coordinates_to_polygons])
+                                                coordinates_to_polygons,
+                                                coordinates_to_multipolygons])
 non_empty_compounds_factories = (
         strategies.sampled_from([coordinates_to_multipoints,
                                  coordinates_to_segments])
@@ -79,6 +82,14 @@ def compound_to_compound_with_multipoint(compound: Compound
                 chain(compound.border.vertices,
                       chain.from_iterable(hole.vertices
                                           for hole in compound.holes)))
+        return compound, Multipoint(*unique_vertices)
+    elif isinstance(compound, Multipolygon):
+        unique_vertices = OrderedDict.fromkeys(
+                chain.from_iterable(
+                        chain(polygon.border.vertices,
+                              chain.from_iterable(hole.vertices
+                                                  for hole in polygon.holes))
+                        for polygon in compound.polygons))
         return compound, Multipoint(*unique_vertices)
     else:
         raise TypeError('Unsupported geometry type: {type}.'
