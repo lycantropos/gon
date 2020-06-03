@@ -58,7 +58,7 @@ class Contour(Indexable, Linear):
 
         Time complexity:
             ``O(log vertices_count)`` expected after indexing,
-            ``O(vertices_count)`` worst after indexing or without it.
+            ``O(vertices_count)`` worst after indexing or without it
         Memory complexity:
             ``O(1)``
 
@@ -324,7 +324,7 @@ class Contour(Indexable, Linear):
 
         Time complexity:
             ``O(log vertices_count)`` expected after indexing,
-            ``O(vertices_count)`` worst after indexing or without it.
+            ``O(vertices_count)`` worst after indexing or without it
         Memory complexity:
             ``O(1)``
 

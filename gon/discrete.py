@@ -41,7 +41,7 @@ class Multipoint(Compound):
 
         Time complexity:
             ``O(1)`` expected,
-            ``O(len(self.points))`` worst.
+            ``O(len(self.points))`` worst
         Memory complexity:
             ``O(1)``
 
@@ -226,7 +226,7 @@ class Multipoint(Compound):
 
         Time complexity:
             ``O(1)`` expected,
-            ``O(len(self.points))`` worst.
+            ``O(len(self.points))`` worst
         Memory complexity:
             ``O(1)``
 
