@@ -177,6 +177,17 @@ class Empty(Compound):
         return RAW_EMPTY
 
     def relate(self, other: Compound) -> Relation:
+        """
+        Finds relation between the empty geometry and the other geometry.
+
+        Time complexity:
+            ``O(1)``
+        Memory complexity:
+            ``O(1)``
+
+        >>> EMPTY.relate(EMPTY) is Relation.DISJOINT
+        True
+        """
         return Relation.DISJOINT
 
     def validate(self) -> None:
