@@ -50,6 +50,17 @@ class Empty(Compound):
         return False
 
     def __eq__(self, other: 'Empty') -> bool:
+        """
+        Checks if empty geometries are equal.
+
+        Time complexity:
+            ``O(1)``
+        Memory complexity:
+            ``O(1)``
+
+        >>> EMPTY == EMPTY
+        True
+        """
         return (self is other
                 if isinstance(other, Geometry)
                 else NotImplemented)
