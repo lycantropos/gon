@@ -314,7 +314,9 @@ class Multipoint(Compound):
                 is_subset = False
         return (Relation.DISJOINT
                 if disjoint
-                else (Relation.TOUCH
+                else ((Relation.COMPOSITE
+                       if is_subset
+                       else Relation.TOUCH)
                       if not_interior
                       else ((Relation.COVER
                              if not_boundary
