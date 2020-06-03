@@ -431,22 +431,22 @@ class Polygon(Indexable, Shaped):
 
         >>> polygon = Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
         ...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]]))
-        >>> Point(0, 0) in polygon
+        >>> polygon.locate(Point(0, 0)) is Location.BOUNDARY
         True
-        >>> Point(1, 1) in polygon
+        >>> polygon.locate(Point(1, 1)) is Location.INTERIOR
         True
-        >>> Point(2, 2) in polygon
+        >>> polygon.locate(Point(2, 2)) is Location.BOUNDARY
         True
-        >>> Point(3, 3) in polygon
-        False
-        >>> Point(4, 3) in polygon
+        >>> polygon.locate(Point(3, 3)) is Location.EXTERIOR
         True
-        >>> Point(5, 2) in polygon
+        >>> polygon.locate(Point(4, 3)) is Location.BOUNDARY
         True
-        >>> Point(6, 1) in polygon
+        >>> polygon.locate(Point(5, 2)) is Location.INTERIOR
         True
-        >>> Point(7, 0) in polygon
-        False
+        >>> polygon.locate(Point(6, 1)) is Location.BOUNDARY
+        True
+        >>> polygon.locate(Point(7, 0)) is Location.EXTERIOR
+        True
         """
         return isinstance(point, Point) and self._raw_locate(point.raw())
 
