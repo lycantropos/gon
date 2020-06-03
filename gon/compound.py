@@ -5,6 +5,7 @@ from sect.decomposition import Location
 
 from .geometry import Geometry
 from .hints import Coordinate
+from .primitive import Point
 
 Relation = Relation
 Location = Location
@@ -48,6 +49,12 @@ class Compound(Geometry):
         Checks if the geometry is disjoint with the other.
         """
         return self.relate(other) is Relation.DISJOINT
+
+    @abstractmethod
+    def locate(self, point: Point) -> Location:
+        """
+        Finds location of point relative to the geometry.
+        """
 
     @abstractmethod
     def relate(self, other: 'Compound') -> Relation:
