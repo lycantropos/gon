@@ -448,7 +448,7 @@ class Polygon(Indexable, Shaped):
         >>> Point(7, 0) in polygon
         False
         """
-        return isinstance(point, Point) and bool(self._raw_locate(point.raw()))
+        return isinstance(point, Point) and self._raw_locate(point.raw())
 
     def raw(self) -> RawPolygon:
         """
