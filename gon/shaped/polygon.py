@@ -65,7 +65,8 @@ class Polygon(Indexable, Shaped):
         Checks if the polygon contains the other geometry.
 
         Time complexity:
-            ``O(vertices_count)``
+            ``O(log vertices_count)`` expected after indexing,
+            ``O(vertices_count)`` worst after indexing or without it.
         Memory complexity:
             ``O(1)``
 
