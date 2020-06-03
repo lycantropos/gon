@@ -129,6 +129,17 @@ class Empty(Compound):
                 else NotImplemented)
 
     def __lt__(self, other: Compound) -> bool:
+        """
+        Checks if the empty geometry is a strict subset of the other geometry.
+
+        Time complexity:
+            ``O(1)``
+        Memory complexity:
+            ``O(1)``
+
+        >>> EMPTY < EMPTY
+        False
+        """
         return (self is not other
                 if isinstance(other, Compound)
                 else NotImplemented)
