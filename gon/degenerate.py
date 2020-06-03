@@ -82,6 +82,18 @@ class Empty(Compound):
                 else NotImplemented)
 
     def __gt__(self, other: Compound) -> bool:
+        """
+        Checks if the empty geometry is a strict superset
+        of the other geometry.
+
+        Time complexity:
+            ``O(1)``
+        Memory complexity:
+            ``O(1)``
+
+        >>> EMPTY > EMPTY
+        False
+        """
         return (False
                 if isinstance(other, Compound)
                 else NotImplemented)
