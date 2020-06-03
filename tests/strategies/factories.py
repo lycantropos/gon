@@ -10,7 +10,8 @@ from gon.linear import (Contour,
                         Multisegment,
                         Segment)
 from gon.primitive import Point
-from gon.shaped import Polygon
+from gon.shaped import (Multipolygon,
+                        Polygon)
 from tests.utils import Strategy
 
 
@@ -51,6 +52,7 @@ def coordinates_to_contours(coordinates: Strategy[Coordinate],
 
 
 def coordinates_to_polygons(coordinates: Strategy[Coordinate],
+                            *,
                             min_size: int = planar.TRIANGULAR_CONTOUR_SIZE,
                             max_size: Optional[int] = None,
                             min_holes_size: int
@@ -68,3 +70,29 @@ def coordinates_to_polygons(coordinates: Strategy[Coordinate],
                             min_hole_size=min_hole_size,
                             max_hole_size=max_hole_size)
             .map(Polygon.from_raw))
+
+
+def coordinates_to_multipolygons(coordinates: Strategy[Coordinate],
+                                 *,
+                                 min_size: int = 1,
+                                 max_size: Optional[int] = None,
+                                 min_border_size: int
+                                 = planar.TRIANGULAR_CONTOUR_SIZE,
+                                 max_border_size: Optional[int] = None,
+                                 min_holes_size: int
+                                 = planar.EMPTY_MULTICONTOUR_SIZE,
+                                 max_holes_size: Optional[int] = None,
+                                 min_hole_size: int
+                                 = planar.TRIANGULAR_CONTOUR_SIZE,
+                                 max_hole_size: Optional[int] = None
+                                 ) -> Strategy[Multipolygon]:
+    return (planar.multipolygons(coordinates,
+                                 min_size=min_size,
+                                 max_size=max_size,
+                                 min_border_size=min_border_size,
+                                 max_border_size=max_border_size,
+                                 min_holes_size=min_holes_size,
+                                 max_holes_size=max_holes_size,
+                                 min_hole_size=min_hole_size,
+                                 max_hole_size=max_hole_size)
+            .map(Multipolygon.from_raw))
