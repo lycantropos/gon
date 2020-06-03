@@ -14,6 +14,7 @@ from gon.angular import (Orientation,
 from gon.compound import (Compound,
                           Indexable,
                           Linear,
+                          Location,
                           Relation)
 from gon.discrete import Multipoint
 from gon.geometry import Geometry
@@ -30,7 +31,7 @@ from .utils import (relate_multipoint_to_linear_compound,
 
 
 class Contour(Indexable, Linear):
-    __slots__ = '_contains', '_min_index', '_raw', '_vertices'
+    __slots__ = '_raw_locate', '_min_index', '_raw', '_vertices'
 
     def __init__(self, vertices: Vertices) -> None:
         """
@@ -47,7 +48,7 @@ class Contour(Indexable, Linear):
         self._min_index = min(range(len(vertices)),
                               key=vertices.__getitem__)
         self._raw = [vertex.raw() for vertex in vertices]
-        self._contains = partial(_plain_contains, self._raw)
+        self._raw_locate = partial(raw_locate_point, self._raw)
 
     __repr__ = generate_repr(__init__)
 
@@ -67,7 +68,7 @@ class Contour(Indexable, Linear):
         >>> all(vertex in contour for vertex in contour.vertices)
         True
         """
-        return isinstance(other, Point) and self._contains(other.raw())
+        return isinstance(other, Point) and bool(self.locate(other))
 
     def __eq__(self, other: 'Contour') -> bool:
         """
@@ -315,7 +316,25 @@ class Contour(Indexable, Linear):
         raw = self._raw
         graph = multisegment_trapezoidal([(raw[index - 1], raw[index])
                                           for index in range(len(raw))])
-        self._contains = graph.__contains__
+        self._raw_locate = graph.locate
+
+    def locate(self, point: Point) -> Location:
+        """
+        Finds location of the point relative to the contour.
+
+        Time complexity:
+            ``O(log vertices_count)`` expected after indexing,
+            ``O(vertices_count)`` worst after indexing or without it.
+        Memory complexity:
+            ``O(1)``
+
+        where ``vertices_count = len(self.vertices)``.
+
+        >>> contour = Contour.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> all(vertex in contour for vertex in contour.vertices)
+        True
+        """
+        return self._raw_locate(point.raw())
 
     def raw(self) -> RawContour:
         """
@@ -449,5 +468,7 @@ class Contour(Indexable, Linear):
             raise ValueError('Contour should not be self-intersecting.')
 
 
-def _plain_contains(raw_contour: RawContour, raw_point: RawPoint) -> bool:
-    return bool(point_in_contour(raw_point, raw_contour))
+def raw_locate_point(raw_contour: RawContour, raw_point: RawPoint) -> Location:
+    return (Location.BOUNDARY
+            if point_in_contour(raw_point, raw_contour)
+            else Location.EXTERIOR)
