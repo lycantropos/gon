@@ -6,12 +6,12 @@ from orient.planar import (multisegment_in_multisegment,
                            point_in_multisegment,
                            segment_in_multisegment)
 from reprit.base import generate_repr
-from sect.decomposition import (Location,
-                                multisegment_trapezoidal)
+from sect.decomposition import multisegment_trapezoidal
 
 from gon.compound import (Compound,
                           Indexable,
                           Linear,
+                          Location,
                           Relation)
 from gon.degenerate import EMPTY
 from gon.discrete import Multipoint
@@ -313,6 +313,28 @@ class Multisegment(Indexable, Linear):
         if len(self._segments) > 1:
             graph = multisegment_trapezoidal(self._raw)
             self._raw_locate = graph.locate
+
+    def locate(self, point: Point) -> Location:
+        """
+        Finds location of the point relative to the multisegment.
+
+        Time complexity:
+            ``O(log segments_count)`` expected after indexing,
+            ``O(segments_count)`` worst after indexing or without it.
+        Memory complexity:
+            ``O(1)``
+
+        where ``segments_count = len(self.segments)``.
+
+        >>> multisegment = Multisegment.from_raw([((0, 0), (1, 0)),
+        ...                                       ((0, 1), (1, 1))])
+        >>> all(multisegment.locate(segment.start)
+        ...     is multisegment.locate(segment.end)
+        ...     is Location.BOUNDARY
+        ...     for segment in multisegment.segments)
+        True
+        """
+        return self._raw_locate(point.raw())
 
     def raw(self) -> RawMultisegment:
         """
