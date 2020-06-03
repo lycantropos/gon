@@ -145,6 +145,17 @@ class Empty(Compound):
                 else NotImplemented)
 
     def locate(self, point: Point) -> Location:
+        """
+        Finds location of the point relative to the empty geometry.
+
+        Time complexity:
+            ``O(1)``
+        Memory complexity:
+            ``O(1)``
+
+        >>> EMPTY.locate(Point(0, 0)) is Location.EXTERIOR
+        True
+        """
         return Location.EXTERIOR
 
     def relate(self, other: Compound) -> Relation:
