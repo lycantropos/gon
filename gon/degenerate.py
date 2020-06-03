@@ -49,7 +49,7 @@ class Empty(Compound):
         """
         return False
 
-    def __eq__(self, other: Geometry) -> bool:
+    def __eq__(self, other: 'Empty') -> bool:
         return (self is other
                 if isinstance(other, Geometry)
                 else NotImplemented)
