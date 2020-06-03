@@ -28,10 +28,12 @@ from .polygon import Polygon
 
 
 class Multipolygon(Indexable, Shaped):
+    __slots__ = '_polygons', '_polygons_set', '_raw', '_locate'
+
     def __init__(self, *polygons: Polygon) -> None:
         self._polygons = polygons
-        self._raw = [polygon.raw() for polygon in polygons]
         self._polygons_set = frozenset(polygons)
+        self._raw = [polygon.raw() for polygon in polygons]
         self._locate = partial(locate_point_in_polygons, self._polygons)
 
     __repr__ = generate_repr(__init__)
