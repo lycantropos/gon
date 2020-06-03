@@ -1,11 +1,13 @@
 from abc import abstractmethod
 
 from orient.planar import Relation
+from sect.decomposition import Location
 
 from .geometry import Geometry
 from .hints import Coordinate
 
 Relation = Relation
+Location = Location
 
 
 class Compound(Geometry):
