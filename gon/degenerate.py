@@ -164,6 +164,16 @@ class Empty(Compound):
         return Location.EXTERIOR
 
     def raw(self) -> RawEmpty:
+        """
+        Returns the empty geometry as combination of Python built-ins.
+
+        Time complexity:
+            ``O(1)``
+        Memory complexity:
+            ``O(1)``
+
+        >>> EMPTY.raw()
+        """
         return RAW_EMPTY
 
     def relate(self, other: Compound) -> Relation:
