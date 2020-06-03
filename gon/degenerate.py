@@ -7,7 +7,8 @@ from .geometry import Geometry
 from .hints import Domain
 from .primitive import Point
 
-RawEmpty = type(None)
+RAW_EMPTY = None
+RawEmpty = type(RAW_EMPTY)
 
 
 class Empty(Compound):
@@ -73,11 +74,11 @@ class Empty(Compound):
 
     @classmethod
     def from_raw(cls, raw: RawEmpty) -> Domain:
-        assert raw is None
+        assert raw is RAW_EMPTY
         return cls()
 
     def raw(self) -> RawEmpty:
-        return None
+        return RAW_EMPTY
 
     def validate(self) -> None:
         """
