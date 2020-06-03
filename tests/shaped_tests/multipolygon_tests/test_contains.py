@@ -4,29 +4,19 @@ from hypothesis import given
 
 from gon.primitive import Point
 from gon.shaped import Multipolygon
-from tests.utils import (equivalence,
-                         implication)
+from tests.utils import equivalence
 from . import strategies
 
 
 @given(strategies.multipolygons)
-def test_border_vertices(multipolygon: Multipolygon) -> None:
+def test_vertices(multipolygon: Multipolygon) -> None:
     assert all(vertex in multipolygon
-               for vertex in multipolygon.border.vertices)
-
-
-@given(strategies.multipolygons)
-def test_holes_vertices(multipolygon: Multipolygon) -> None:
+               for polygon in multipolygon.polygons
+               for vertex in polygon.border.vertices)
     assert all(vertex in multipolygon
-               for hole in multipolygon.holes
+               for polygon in multipolygon.polygons
+               for hole in polygon.holes
                for vertex in hole.vertices)
-
-
-@given(strategies.multipolygons_with_points)
-def test_convex_hull(multipolygon_with_point: Tuple[Multipolygon, Point]) -> None:
-    multipolygon, point = multipolygon_with_point
-
-    assert implication(point in multipolygon, point in multipolygon.convex_hull)
 
 
 @given(strategies.multipolygons_with_points)
