@@ -43,6 +43,12 @@ class Segment(Compound, Linear):
             ``O(1)``
         Memory complexity:
             ``O(1)``
+
+        >>> segment = Segment.from_raw(((0, 0), (2, 0)))
+        >>> segment.start in segment
+        True
+        >>> segment.end in segment
+        True
         """
         return (isinstance(other, Point)
                 and (point_in_segment(other.raw(), self._raw)
