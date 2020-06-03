@@ -113,6 +113,17 @@ class Empty(Compound):
         return 0
 
     def __le__(self, other: Compound) -> bool:
+        """
+        Checks if the empty geometry is a subset of the other geometry.
+
+        Time complexity:
+            ``O(1)``
+        Memory complexity:
+            ``O(1)``
+
+        >>> EMPTY <= EMPTY
+        True
+        """
         return (True
                 if isinstance(other, Compound)
                 else NotImplemented)
