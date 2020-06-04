@@ -88,6 +88,20 @@ class Multipolygon(Indexable, Shaped):
         return isinstance(other, Point) and bool(self._locate(other))
 
     def __eq__(self, other: 'Multipolygon') -> bool:
+        """
+        Checks if multipolygons are equal.
+
+        Time complexity:
+            ``O(min(len(self.polygons), len(other.polygons)))``
+        Memory complexity:
+            ``O(1)``
+
+        >>> multipolygon = Multipolygon.from_raw(
+        ...         [([(0, 0), (6, 0), (6, 6), (0, 6)],
+        ...           [[(2, 2), (2, 4), (4, 4), (4, 2)]])])
+        >>> multipolygon == multipolygon
+        True
+        """
         return (self is other
                 or (self._polygons_set == other._polygons_set
                     if isinstance(other, Multipolygon)
