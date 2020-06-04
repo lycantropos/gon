@@ -146,6 +146,17 @@ class Empty(Compound):
 
     @classmethod
     def from_raw(cls, raw: RawEmpty) -> Domain:
+        """
+        Constructs empty geometry from the combination of Python built-ins.
+
+        Time complexity:
+            ``O(1)``
+        Memory complexity:
+            ``O(1)``
+
+        >>> Empty.from_raw(RAW_EMPTY) is EMPTY
+        True
+        """
         assert raw is RAW_EMPTY
         return cls()
 
