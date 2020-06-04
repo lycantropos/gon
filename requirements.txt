@@ -1,4 +1,5 @@
 bentley_ottmann>=0.8.1
+locus>=0.5.0
 orient>=0.9.0
 reprit>=0.2.2
 robust>=0.2.4
