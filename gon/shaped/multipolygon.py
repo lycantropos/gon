@@ -2,6 +2,7 @@ from functools import partial
 from typing import (List,
                     Sequence)
 
+from locus import r
 from orient.planar import (contour_in_multipolygon,
                            multipolygon_in_multipolygon,
                            multisegment_in_multipolygon,
@@ -149,8 +150,23 @@ class Multipolygon(Indexable, Shaped):
         return list(self._polygons)
 
     def index(self) -> None:
-        for polygon in self._polygons:
+        polygons = self._polygons
+        for polygon in polygons:
             polygon.index()
+
+        def polygon_to_interval(polygon: Polygon) -> r.Interval:
+            vertices = iter(polygon.border.vertices)
+            first_vertex = next(vertices)
+            x_min = x_max = first_vertex.x
+            y_min = y_max = first_vertex.y
+            for vertex in vertices:
+                x_min, x_max = min(x_min, vertex.x), max(x_max, vertex.x)
+                y_min, y_max = min(y_min, vertex.y), max(y_max, vertex.y)
+            return (x_min, x_max), (y_min, y_max)
+
+        tree = r.Tree([polygon_to_interval(polygon) for polygon in polygons])
+        self._locate = partial(locate_point_in_indexed_polygons,
+                               tree, polygons)
 
     def locate(self, point: Point) -> Location:
         return self._locate(point)
@@ -188,6 +204,17 @@ def locate_point_in_polygons(polygons: Sequence[Polygon],
                              point: Point) -> Location:
     for polygon in polygons:
         location = polygon.locate(point)
+        if location is not Location.EXTERIOR:
+            return location
+    return Location.EXTERIOR
+
+
+def locate_point_in_indexed_polygons(tree: r.Tree, polygons: Sequence[Polygon],
+                                     point: Point) -> Location:
+    candidates_indices = tree.find_supersets_indices(((point.x, point.x),
+                                                      (point.y, point.y)))
+    for candidate_index in candidates_indices:
+        location = polygons[candidate_index].locate(point)
         if location is not Location.EXTERIOR:
             return location
     return Location.EXTERIOR
