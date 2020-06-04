@@ -1,4 +1,5 @@
 from functools import partial
+from itertools import chain
 from typing import (List,
                     Sequence)
 
@@ -454,6 +455,36 @@ class Multipolygon(Indexable, Shaped):
                    else (multipolygon_in_multipolygon(other._raw, self._raw)
                          if isinstance(other, Multipolygon)
                          else other.relate(self).complement)))))
+
+    def triangulate(self) -> List[Polygon]:
+        """
+        Returns triangulation of the multipolygon.
+
+        Time complexity:
+            ``O(vertices_count ** 2)``
+        Memory complexity:
+            ``O(vertices_count)``
+
+        where ``vertices_count = sum(len(polygon.border.vertices)\
+ + sum(len(hole.vertices) for hole in polygon.holes)\
+ for polygon in self.polygons)``.
+
+        >>> multipolygon = Multipolygon.from_raw(
+        ...         [([(0, 0), (6, 0), (6, 6), (0, 6)],
+        ...           [[(2, 2), (2, 4), (4, 4), (4, 2)]])])
+        >>> (multipolygon.triangulate()
+        ...  == [Polygon.from_raw(([(4, 4), (6, 0), (6, 6)], [])),
+        ...      Polygon.from_raw(([(4, 2), (6, 0), (4, 4)], [])),
+        ...      Polygon.from_raw(([(0, 6), (4, 4), (6, 6)], [])),
+        ...      Polygon.from_raw(([(0, 0), (2, 2), (0, 6)], [])),
+        ...      Polygon.from_raw(([(0, 0), (6, 0), (4, 2)], [])),
+        ...      Polygon.from_raw(([(0, 6), (2, 4), (4, 4)], [])),
+        ...      Polygon.from_raw(([(0, 6), (2, 2), (2, 4)], [])),
+        ...      Polygon.from_raw(([(0, 0), (4, 2), (2, 2)], []))])
+        True
+        """
+        return list(chain.from_iterable(polygon.triangulate()
+                                        for polygon in self._polygons))
 
     def validate(self) -> None:
         """
