@@ -531,7 +531,7 @@ class Polygon(Indexable, Shaped):
 
     def validate(self) -> None:
         """
-        Checks if contours are valid.
+        Checks if the polygon is valid.
 
         Time complexity:
             ``O(vertices_count * log (vertices_count))``
