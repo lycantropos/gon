@@ -51,6 +51,39 @@ class Multipolygon(Indexable, Shaped):
     __repr__ = generate_repr(__init__)
 
     def __contains__(self, other: Geometry) -> bool:
+        """
+        Checks if the multipolygon contains the other geometry.
+
+        Time complexity:
+            ``O(log vertices_count)`` expected after indexing,
+            ``O(vertices_count)`` worst after indexing or without it
+        Memory complexity:
+            ``O(1)``
+
+        where ``vertices_count = sum(len(polygon.border.vertices)\
+ + sum(len(hole.vertices) for hole in polygon.holes)\
+ for polygon in self.polygons)``.
+
+        >>> multipolygon = Multipolygon.from_raw(
+        ...         [([(0, 0), (6, 0), (6, 6), (0, 6)],
+        ...           [[(2, 2), (2, 4), (4, 4), (4, 2)]])])
+        >>> Point(0, 0) in multipolygon
+        True
+        >>> Point(1, 1) in multipolygon
+        True
+        >>> Point(2, 2) in multipolygon
+        True
+        >>> Point(3, 3) in multipolygon
+        False
+        >>> Point(4, 3) in multipolygon
+        True
+        >>> Point(5, 2) in multipolygon
+        True
+        >>> Point(6, 1) in multipolygon
+        True
+        >>> Point(7, 0) in multipolygon
+        False
+        """
         return isinstance(other, Point) and bool(self._locate(other))
 
     def __eq__(self, other: 'Multipolygon') -> bool:
