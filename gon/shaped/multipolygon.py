@@ -399,6 +399,25 @@ class Multipolygon(Indexable, Shaped):
         return self._locate(point)
 
     def raw(self) -> RawMultipolygon:
+        """
+        Returns the multipolygon as combination of Python built-ins.
+
+        Time complexity:
+            ``O(vertices_count)``
+        Memory complexity:
+            ``O(vertices_count)``
+
+        where ``vertices_count = sum(len(polygon.border.vertices)\
+ + sum(len(hole.vertices) for hole in polygon.holes)\
+ for polygon in self.polygons)``.
+
+        >>> multipolygon = Multipolygon.from_raw(
+        ...         [([(0, 0), (6, 0), (6, 6), (0, 6)],
+        ...           [[(2, 2), (2, 4), (4, 4), (4, 2)]])])
+        >>> multipolygon.raw()
+        [([(0, 0), (6, 0), (6, 6), (0, 6)],\
+ [[(2, 2), (2, 4), (4, 4), (4, 2)]])]
+        """
         return [(raw_border, [raw_hole[:] for raw_hole in raw_holes])
                 for raw_border, raw_holes in self._raw]
 
