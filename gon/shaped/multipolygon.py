@@ -287,6 +287,24 @@ class Multipolygon(Indexable, Shaped):
 
     @property
     def polygons(self) -> List[Polygon]:
+        """
+        Returns polygons of the multipolygon.
+
+        Time complexity:
+            ``O(polygons_count)``
+        Memory complexity:
+            ``O(polygons_count)``
+
+        where ``polygons_count = len(self.polygons)``.
+
+        >>> multipolygon = Multipolygon.from_raw(
+        ...         [([(0, 0), (6, 0), (6, 6), (0, 6)],
+        ...           [[(2, 2), (2, 4), (4, 4), (4, 2)]])])
+        >>> multipolygon.polygons
+        [Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),\
+ Point(0, 6)]), [Contour([Point(2, 2), Point(2, 4), Point(4, 4),\
+ Point(4, 2)])])]
+        """
         return list(self._polygons)
 
     def index(self) -> None:
