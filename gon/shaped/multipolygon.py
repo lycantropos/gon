@@ -31,6 +31,18 @@ class Multipolygon(Indexable, Shaped):
     __slots__ = '_polygons', '_polygons_set', '_raw', '_locate'
 
     def __init__(self, *polygons: Polygon) -> None:
+        """
+        Initializes multipolygon.
+
+        Time complexity:
+            ``O(vertices_count)``
+        Memory complexity:
+            ``O(vertices_count)``
+
+        where ``vertices_count = sum(len(polygon.border.vertices)\
+ + sum(len(hole.vertices) for hole in polygon.holes)\
+ for polygon in polygons)``.
+        """
         self._polygons = polygons
         self._polygons_set = frozenset(polygons)
         self._raw = [polygon.raw() for polygon in polygons]
