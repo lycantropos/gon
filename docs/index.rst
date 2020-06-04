@@ -34,6 +34,13 @@ primitive module
     :members:
     :special-members:
 
+degenerate module
+=================
+
+.. automodule:: gon.degenerate
+    :members:
+    :special-members:
+
 discrete module
 ===============
 
