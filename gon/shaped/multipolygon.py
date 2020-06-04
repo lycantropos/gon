@@ -326,6 +326,24 @@ class Multipolygon(Indexable, Shaped):
         return list(self._polygons)
 
     def index(self) -> None:
+        """
+        Pre-processes multipolygon to potentially improve queries.
+
+        Time complexity:
+            ``O(vertices_count * log vertices_count)`` expected,
+            ``O(vertices_count ** 2)`` worst
+        Memory complexity:
+            ``O(vertices_count)``
+
+        where ``vertices_count = sum(len(polygon.border.vertices)\
+ + sum(len(hole.vertices) for hole in polygon.holes)\
+ for polygon in self.polygons)``.
+
+        >>> multipolygon = Multipolygon.from_raw(
+        ...         [([(0, 0), (6, 0), (6, 6), (0, 6)],
+        ...           [[(2, 2), (2, 4), (4, 4), (4, 2)]])])
+        >>> multipolygon.index()
+        """
         polygons = self._polygons
         for polygon in polygons:
             polygon.index()
