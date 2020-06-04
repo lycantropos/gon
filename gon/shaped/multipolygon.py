@@ -207,6 +207,24 @@ class Multipolygon(Indexable, Shaped):
                     else NotImplemented))
 
     def __lt__(self, other: Compound) -> bool:
+        """
+        Checks if the multipolygon is a strict subset of the other geometry.
+
+        Time complexity:
+            ``O(vertices_count * log vertices_count)``
+        Memory complexity:
+            ``O(1)``
+
+        where ``vertices_count = sum(len(polygon.border.vertices)\
+ + sum(len(hole.vertices) for hole in polygon.holes)\
+ for polygon in self.polygons)``.
+
+        >>> multipolygon = Multipolygon.from_raw(
+        ...         [([(0, 0), (6, 0), (6, 6), (0, 6)],
+        ...           [[(2, 2), (2, 4), (4, 4), (4, 2)]])])
+        >>> multipolygon < multipolygon
+        False
+        """
         return (self != other
                 and (not isinstance(other, (Multipoint, Linear))
                      and self.relate(other) in (Relation.COVER,
