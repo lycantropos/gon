@@ -283,6 +283,24 @@ class Multipolygon(Indexable, Shaped):
 
     @property
     def perimeter(self) -> Coordinate:
+        """
+        Returns perimeter of the multipolygon.
+
+        Time complexity:
+            ``O(vertices_count)``
+        Memory complexity:
+            ``O(1)``
+
+        where ``vertices_count = sum(len(polygon.border.vertices)\
+ + sum(len(hole.vertices) for hole in polygon.holes)\
+ for polygon in self.polygons)``.
+
+        >>> multipolygon = Multipolygon.from_raw(
+        ...         [([(0, 0), (6, 0), (6, 6), (0, 6)],
+        ...           [[(2, 2), (2, 4), (4, 4), (4, 2)]])])
+        >>> multipolygon.perimeter == 32
+        True
+        """
         return sum(polygon.perimeter for polygon in self._polygons)
 
     @property
