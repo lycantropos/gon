@@ -162,6 +162,20 @@ class Multipolygon(Indexable, Shaped):
                      else NotImplemented))
 
     def __hash__(self) -> int:
+        """
+        Returns hash value of the polygon.
+
+        Time complexity:
+            ``O(len(self.polygons))``
+        Memory complexity:
+            ``O(1)``
+
+        >>> multipolygon = Multipolygon.from_raw(
+        ...         [([(0, 0), (6, 0), (6, 6), (0, 6)],
+        ...           [[(2, 2), (2, 4), (4, 4), (4, 2)]])])
+        >>> hash(multipolygon) == hash(multipolygon)
+        True
+        """
         return hash(self._polygons_set)
 
     def __le__(self, other: Compound) -> bool:
