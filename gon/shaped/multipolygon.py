@@ -456,6 +456,23 @@ class Multipolygon(Indexable, Shaped):
                          else other.relate(self).complement)))))
 
     def validate(self) -> None:
+        """
+        Checks if the multipolygon is valid.
+
+        Time complexity:
+            ``O(vertices_count * log (vertices_count))``
+        Memory complexity:
+            ``O(vertices_count)``
+
+        where ``vertices_count = sum(len(polygon.border.vertices)\
+ + sum(len(hole.vertices) for hole in polygon.holes)\
+ for polygon in self.polygons)``.
+
+        >>> multipolygon = Multipolygon.from_raw(
+        ...         [([(0, 0), (6, 0), (6, 6), (0, 6)],
+        ...           [[(2, 2), (2, 4), (4, 4), (4, 2)]])])
+        >>> multipolygon.validate()
+        """
         if not self._polygons:
             raise ValueError('Multipolygon is empty.')
         elif len(self._polygons) > len(self._polygons_set):
