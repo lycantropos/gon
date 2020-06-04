@@ -1,4 +1,3 @@
-import math
 from fractions import Fraction
 from functools import reduce
 from itertools import chain
@@ -14,7 +13,8 @@ from gon.angular import (Orientation,
 from gon.hints import Coordinate
 from gon.primitive import Point
 from .hints import Vertices
-from .utils import squared_points_distance
+from .utils import (robust_sqrt,
+                    squared_points_distance)
 
 MIN_COUNT = 3
 
@@ -27,12 +27,6 @@ def length(vertices: Vertices) -> Coordinate:
     return sum(robust_sqrt(squared_points_distance(vertices[index - 1],
                                                    vertices[index]))
                for index in range(len(vertices)))
-
-
-def robust_sqrt(value: Coordinate) -> Coordinate:
-    value = Fraction(value)
-    return (Fraction(math.sqrt(value.numerator))
-            / Fraction(math.sqrt(value.denominator)))
 
 
 def form_convex_polygon(vertices: Vertices) -> bool:
