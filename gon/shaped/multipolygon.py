@@ -235,6 +235,28 @@ class Multipolygon(Indexable, Shaped):
 
     @classmethod
     def from_raw(cls, raw: RawMultipolygon) -> 'Multipolygon':
+        """
+        Constructs multipolygon from the combination of Python built-ins.
+
+        Time complexity:
+            ``O(raw_vertices_count)``
+        Memory complexity:
+            ``O(raw_vertices_count)``
+
+        where ``raw_vertices_count = sum(len(raw_border)\
+ + sum(len(raw_hole) for raw_hole in raw_holes)\
+ for raw_border, raw_holes in raw)``.
+
+        >>> multipolygon = Multipolygon.from_raw(
+        ...         [([(0, 0), (6, 0), (6, 6), (0, 6)],
+        ...           [[(2, 2), (2, 4), (4, 4), (4, 2)]])])
+        >>> (multipolygon
+        ...  == Multipolygon(Polygon(Contour([Point(0, 0), Point(6, 0),
+        ...                                   Point(6, 6), Point(0, 6)]),
+        ...                          [Contour([Point(2, 2), Point(2, 4),
+        ...                                    Point(4, 4), Point(4, 2)])])))
+        True
+        """
         return cls(*map(Polygon.from_raw, raw))
 
     @property
