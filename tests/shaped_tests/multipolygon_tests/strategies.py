@@ -20,7 +20,7 @@ raw_multipolygons = (coordinates_strategies
 multipolygons = raw_multipolygons.map(Multipolygon.from_raw)
 polygons = coordinates_strategies.flatmap(coordinates_to_polygons)
 repeated_polygons = (strategies.builds(repeat, polygons,
-                                       strategies.integers(1, 100))
+                                       strategies.integers(2, 100))
                      .map(list))
 invalid_multipolygons = (strategies.builds(pack(Multipolygon),
                                            strategies.lists(invalid_polygons)
