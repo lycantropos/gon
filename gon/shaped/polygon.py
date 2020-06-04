@@ -99,11 +99,11 @@ class Polygon(Indexable, Shaped):
         Checks if polygons are equal.
 
         Time complexity:
-            ``O(total_vertices_count)``
+            ``O(vertices_count)``
         Memory complexity:
             ``O(1)``
 
-        where ``total_vertices_count = min_border_vertices_count\
+        where ``vertices_count = min_border_vertices_count\
  + min_holes_vertices_count``,
         ``min_border_vertices_count =\
  min(border_vertices_count, other_border_vertices_count)``
