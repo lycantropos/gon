@@ -24,10 +24,15 @@ def rotate(vertices: Vertices) -> Vertices:
 
 
 def length(vertices: Vertices) -> Coordinate:
-    return reduce(sum_expansions,
-                  ((math.sqrt(squared_points_distance(vertices[index - 1],
-                                                      vertices[index])),)
-                   for index in range(len(vertices))))[-1]
+    return sum(robust_sqrt(squared_points_distance(vertices[index - 1],
+                                                   vertices[index]))
+               for index in range(len(vertices)))
+
+
+def robust_sqrt(value: Coordinate) -> Coordinate:
+    value = Fraction(value)
+    return (Fraction(math.sqrt(value.numerator))
+            / Fraction(math.sqrt(value.denominator)))
 
 
 def form_convex_polygon(vertices: Vertices) -> bool:
