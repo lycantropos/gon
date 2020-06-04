@@ -1,3 +1,5 @@
+import math
+from fractions import Fraction
 from typing import Sequence
 
 from gon.compound import (Compound,
@@ -38,3 +40,9 @@ def shift_sequence(sequence: Sequence[Domain], step: int) -> Sequence[Domain]:
     return (sequence[step:] + sequence[:step]
             if step
             else sequence)
+
+
+def robust_sqrt(value: Coordinate) -> Coordinate:
+    value = Fraction(value)
+    return (Fraction(math.sqrt(value.numerator))
+            / Fraction(math.sqrt(value.denominator)))
