@@ -422,6 +422,24 @@ class Multipolygon(Indexable, Shaped):
                 for raw_border, raw_holes in self._raw]
 
     def relate(self, other: Compound) -> Relation:
+        """
+        Finds relation between the multipolygon and the other geometry.
+
+        Time complexity:
+            ``O(vertices_count * log vertices_count)``
+        Memory complexity:
+            ``O(vertices_count)``
+
+        where ``vertices_count = sum(len(polygon.border.vertices)\
+ + sum(len(hole.vertices) for hole in polygon.holes)\
+ for polygon in self.polygons)``.
+
+        >>> multipolygon = Multipolygon.from_raw(
+        ...         [([(0, 0), (6, 0), (6, 6), (0, 6)],
+        ...           [[(2, 2), (2, 4), (4, 4), (4, 2)]])])
+        >>> multipolygon.relate(multipolygon) is Relation.EQUAL
+        True
+        """
         return (segment_in_multipolygon(other.raw(), self._raw)
                 if isinstance(other, Segment)
                 else
