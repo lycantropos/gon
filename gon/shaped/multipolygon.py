@@ -363,6 +363,39 @@ class Multipolygon(Indexable, Shaped):
                                tree, polygons)
 
     def locate(self, point: Point) -> Location:
+        """
+        Finds location of the point relative to the multipolygon.
+
+        Time complexity:
+            ``O(log vertices_count)`` expected after indexing,
+            ``O(vertices_count)`` worst after indexing or without it
+        Memory complexity:
+            ``O(1)``
+
+        where ``vertices_count = sum(len(polygon.border.vertices)\
+ + sum(len(hole.vertices) for hole in polygon.holes)\
+ for polygon in self.polygons)``.
+
+        >>> multipolygon = Multipolygon.from_raw(
+        ...         [([(0, 0), (6, 0), (6, 6), (0, 6)],
+        ...           [[(2, 2), (2, 4), (4, 4), (4, 2)]])])
+        >>> multipolygon.locate(Point(0, 0)) is Location.BOUNDARY
+        True
+        >>> multipolygon.locate(Point(1, 1)) is Location.INTERIOR
+        True
+        >>> multipolygon.locate(Point(2, 2)) is Location.BOUNDARY
+        True
+        >>> multipolygon.locate(Point(3, 3)) is Location.EXTERIOR
+        True
+        >>> multipolygon.locate(Point(4, 3)) is Location.BOUNDARY
+        True
+        >>> multipolygon.locate(Point(5, 2)) is Location.INTERIOR
+        True
+        >>> multipolygon.locate(Point(6, 1)) is Location.BOUNDARY
+        True
+        >>> multipolygon.locate(Point(7, 0)) is Location.EXTERIOR
+        True
+        """
         return self._locate(point)
 
     def raw(self) -> RawMultipolygon:
