@@ -1,4 +1,4 @@
-import math
+from decimal import Decimal
 from fractions import Fraction
 from typing import Sequence
 
@@ -43,6 +43,10 @@ def shift_sequence(sequence: Sequence[Domain], step: int) -> Sequence[Domain]:
 
 
 def robust_sqrt(value: Coordinate) -> Coordinate:
-    value = Fraction(value)
-    return (Fraction(math.sqrt(value.numerator))
-            / Fraction(math.sqrt(value.denominator)))
+    return Fraction.from_decimal(to_decimal(value).sqrt())
+
+
+def to_decimal(value: Coordinate) -> Decimal:
+    return (Decimal(value.numerator) / value.denominator
+            if isinstance(value, Fraction)
+            else Decimal(value))
