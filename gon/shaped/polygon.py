@@ -398,7 +398,7 @@ class Polygon(Indexable, Shaped):
 
     def index(self) -> None:
         """
-        Pre-processes contour to potentially improve queries.
+        Pre-processes polygon to potentially improve queries.
 
         Time complexity:
             ``O(vertices_count * log vertices_count)`` expected,
