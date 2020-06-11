@@ -4,6 +4,7 @@ from orient.planar import (point_in_segment,
                            segment_in_segment)
 from reprit.base import generate_repr
 from robust.hints import Point
+from robust.linear import segments_intersections
 
 from gon.compound import (Compound,
                           Linear,
@@ -36,6 +37,25 @@ class Segment(Compound, Linear):
         self._raw = start.raw(), end.raw()
 
     __repr__ = generate_repr(__init__)
+
+    def __and__(self, other: Compound) -> Compound:
+        """
+        Returns intersection of the segment with the other geometry.
+
+        Time complexity:
+            ``O(1)``
+        Memory complexity:
+            ``O(1)``
+
+        >>> segment = Segment.from_raw(((0, 0), (2, 0)))
+        >>> segment & segment == segment
+        True
+        """
+        return (Multipoint(*[point for point in other.points if point in self])
+                if isinstance(other, Multipoint)
+                else (self._intersect_with_segment(other)
+                      if isinstance(other, Segment)
+                      else other & self))
 
     def __contains__(self, other: Geometry) -> bool:
         """
@@ -337,6 +357,16 @@ class Segment(Compound, Linear):
         self._end.validate()
         if self._start == self._end:
             raise ValueError('Segment is degenerate.')
+
+    def _intersect_with_segment(self, other: 'Segment') -> Compound:
+        intersections = [Point.from_raw(raw_point)
+                         for raw_point in segments_intersections(self._raw,
+                                                                 other._raw)]
+        return (EMPTY
+                if not intersections
+                else (Multipoint(*intersections)
+                      if len(intersections) == 1
+                      else Segment(*intersections)))
 
 
 def raw_locate_point(raw_segment: RawSegment, raw_point: RawPoint) -> Location:
