@@ -37,6 +37,22 @@ class Empty(Compound):
 
     __repr__ = generate_repr(__new__)
 
+    def __and__(self, other: Compound) -> Compound:
+        """
+        Returns intersection of the empty geometry with the other geometry.
+
+        Time complexity:
+            ``O(1)``
+        Memory complexity:
+            ``O(1)``
+
+        >>> EMPTY & EMPTY is EMPTY
+        True
+        """
+        return (self
+                if isinstance(other, Compound)
+                else NotImplemented)
+
     def __contains__(self, other: Geometry) -> bool:
         """
         Checks if the empty geometry contains the other geometry.
