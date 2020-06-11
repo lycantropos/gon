@@ -1,3 +1,5 @@
+from typing import Union
+
 from reprit.base import generate_repr
 
 from .compound import (Compound,
@@ -213,4 +215,5 @@ class Empty(Compound):
         # empty geometry considered to be always valid
 
 
+Maybe = Union[Empty, Domain]
 EMPTY = Empty()
