@@ -65,15 +65,11 @@ class Multisegment(Indexable, Linear):
         """
         return (Multipoint(*[point for point in other.points if point in self])
                 if isinstance(other, Multipoint)
-                else
-                (Multisegment.from_raw(intersect_multisegments(self._raw,
-                                                               [other.raw()]))
-                 if isinstance(other, Segment)
-                 else
-                 (Multisegment.from_raw(intersect_multisegments(self._raw,
-                                                                other._raw))
-                  if isinstance(other, Multisegment)
-                  else other & self)))
+                else (self._intersect_with_raw_multisegment([other.raw()])
+                      if isinstance(other, Segment)
+                      else (self._intersect_with_raw_multisegment(other._raw)
+                            if isinstance(other, Multisegment)
+                            else other & self)))
 
     def __contains__(self, other: Geometry) -> bool:
         """
@@ -428,6 +424,11 @@ class Multisegment(Indexable, Linear):
             segment.validate()
         if segments_cross_or_overlap(self._raw):
             raise ValueError('Crossing or overlapping segments found.')
+
+    def _intersect_with_raw_multisegment(self, other_raw: RawMultisegment
+                                         ) -> Compound:
+        raw_result = intersect_multisegments(self._raw, other_raw)
+        return Multisegment.from_raw(raw_result) if raw_result else EMPTY
 
 
 def raw_locate_point(raw_multisegment: RawMultisegment,
