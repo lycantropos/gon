@@ -1,6 +1,8 @@
 from decimal import Decimal
 from fractions import Fraction
-from typing import Sequence
+from typing import (List,
+                    Sequence,
+                    Tuple)
 
 from gon.compound import (Compound,
                           Relation)
@@ -50,3 +52,8 @@ def to_decimal(value: Coordinate) -> Decimal:
     return (Decimal(value.numerator) / value.denominator
             if isinstance(value, Fraction)
             else Decimal(value))
+
+
+def to_pairs_chain(sequence: Sequence[Domain]) -> List[Tuple[Domain, Domain]]:
+    return [(sequence[index - 1], sequence[index])
+            for index in range(len(sequence))]

@@ -1,6 +1,7 @@
 from functools import partial
 
 from bentley_ottmann.planar import edges_intersect
+from clipping.planar import intersect_multisegments
 from orient.planar import (contour_in_contour,
                            multisegment_in_contour,
                            point_in_contour,
@@ -27,7 +28,8 @@ from .hints import (RawContour,
 from .multisegment import Multisegment
 from .segment import Segment
 from .utils import (relate_multipoint_to_linear_compound,
-                    shift_sequence)
+                    shift_sequence,
+                    to_pairs_chain)
 
 
 class Contour(Indexable, Linear):
@@ -51,6 +53,38 @@ class Contour(Indexable, Linear):
         self._raw_locate = partial(raw_locate_point, self._raw)
 
     __repr__ = generate_repr(__init__)
+
+    def __and__(self, other: Compound) -> Compound:
+        """
+        Returns intersection of the contour with the other geometry.
+
+        Time complexity:
+            ``O(vertices_count * log vertices_count)``
+        Memory complexity:
+            ``O(vertices_count)``
+
+        where ``vertices_count = len(self.vertices)``.
+
+        >>> contour = Contour.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> (contour & contour
+        ...  == Multisegment.from_raw([((0, 0), (1, 0)), ((1, 0), (0, 1)),
+        ...                            ((0, 1), (0, 0))]))
+        True
+        """
+        return (Multipoint(*[point for point in other.points if point in self])
+                if isinstance(other, Multipoint)
+                else
+                (Multisegment.from_raw(intersect_multisegments(
+                        to_pairs_chain(self._raw), [other.raw()]))
+                 if isinstance(other, Segment)
+                 else (Multisegment.from_raw(intersect_multisegments(
+                        to_pairs_chain(self._raw), other.raw()))
+                       if isinstance(other, Multisegment)
+                       else (Multisegment.from_raw(intersect_multisegments(
+                        to_pairs_chain(self._raw),
+                        to_pairs_chain(other._raw)))
+                             if isinstance(other, Contour)
+                             else other & self))))
 
     def __contains__(self, other: Geometry) -> bool:
         """
