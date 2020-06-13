@@ -17,6 +17,7 @@ from gon.compound import (Compound,
                           Linear,
                           Location,
                           Relation)
+from gon.degenerate import EMPTY
 from gon.discrete import Multipoint
 from gon.geometry import Geometry
 from gon.hints import Coordinate
@@ -24,6 +25,7 @@ from gon.primitive import (Point,
                            RawPoint)
 from . import vertices as _vertices
 from .hints import (RawContour,
+                    RawMultisegment,
                     Vertices)
 from .multisegment import Multisegment
 from .segment import Segment
@@ -73,16 +75,13 @@ class Contour(Indexable, Linear):
         """
         return (Multipoint(*[point for point in other.points if point in self])
                 if isinstance(other, Multipoint)
-                else
-                (Multisegment.from_raw(intersect_multisegments(
-                        to_pairs_chain(self._raw), [other.raw()]))
-                 if isinstance(other, Segment)
-                 else (Multisegment.from_raw(intersect_multisegments(
-                        to_pairs_chain(self._raw), other.raw()))
-                       if isinstance(other, Multisegment)
-                       else (Multisegment.from_raw(intersect_multisegments(
-                        to_pairs_chain(self._raw),
-                        to_pairs_chain(other._raw)))
+                else (self._intersect_with_raw_multisegment([other.raw()])
+                      if isinstance(other, Segment)
+                      else (self._intersect_with_raw_multisegment(other.raw())
+                            if isinstance(other, Multisegment)
+                            else
+                            (self._intersect_with_raw_multisegment(
+                                    to_pairs_chain(other._raw))
                              if isinstance(other, Contour)
                              else other & self))))
 
@@ -500,6 +499,12 @@ class Contour(Indexable, Linear):
                              'should not be on the same line.')
         if edges_intersect(self._raw):
             raise ValueError('Contour should not be self-intersecting.')
+
+    def _intersect_with_raw_multisegment(self, other_raw: RawMultisegment
+                                         ) -> Compound:
+        raw_result = intersect_multisegments(to_pairs_chain(self._raw),
+                                             other_raw)
+        return Multisegment.from_raw(raw_result) if raw_result else EMPTY
 
 
 def raw_locate_point(raw_contour: RawContour, raw_point: RawPoint) -> Location:
