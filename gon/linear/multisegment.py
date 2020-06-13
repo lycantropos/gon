@@ -2,6 +2,7 @@ from functools import partial
 from typing import List
 
 from bentley_ottmann.planar import segments_cross_or_overlap
+from clipping.planar import intersect_multisegments
 from orient.planar import (multisegment_in_multisegment,
                            point_in_multisegment,
                            segment_in_multisegment)
@@ -45,6 +46,34 @@ class Multisegment(Indexable, Linear):
         self._raw_locate = partial(raw_locate_point, self._raw)
 
     __repr__ = generate_repr(__init__)
+
+    def __and__(self, other: Compound) -> Compound:
+        """
+        Returns intersection of the multisegment with the other geometry.
+
+        Time complexity:
+            ``O(segments_count)``
+        Memory complexity:
+            ``O(segments_count)``
+
+        where ``segments_count = len(self.segments)``.
+
+        >>> multisegment = Multisegment.from_raw([((0, 0), (1, 0)),
+        ...                                       ((0, 1), (1, 1))])
+        >>> multisegment & multisegment == multisegment
+        True
+        """
+        return (Multipoint(*[point for point in other.points if point in self])
+                if isinstance(other, Multipoint)
+                else
+                (Multisegment.from_raw(intersect_multisegments(self._raw,
+                                                               [other.raw()]))
+                 if isinstance(other, Segment)
+                 else
+                 (Multisegment.from_raw(intersect_multisegments(self._raw,
+                                                                other._raw))
+                  if isinstance(other, Multisegment)
+                  else other & self)))
 
     def __contains__(self, other: Geometry) -> bool:
         """
