@@ -362,11 +362,11 @@ class Segment(Compound, Linear):
         intersections = [Point.from_raw(raw_point)
                          for raw_point in segments_intersections(self._raw,
                                                                  other._raw)]
-        return (EMPTY
-                if not intersections
-                else (Multipoint(*intersections)
-                      if len(intersections) == 1
-                      else Segment(*intersections)))
+        return ((Multipoint(*intersections)
+                 if len(intersections) == 1
+                 else Segment(*intersections))
+                if intersections
+                else EMPTY)
 
 
 def raw_locate_point(raw_segment: RawSegment, raw_point: RawPoint) -> Location:
