@@ -15,6 +15,12 @@ class Compound(Geometry):
     __slots__ = ()
 
     @abstractmethod
+    def __and__(self, other: 'Compound') -> 'Compound':
+        """
+        Returns intersection of the geometry with the other geometry.
+        """
+
+    @abstractmethod
     def __contains__(self, other: 'Geometry') -> bool:
         """
         Checks if the geometry contains the other.
