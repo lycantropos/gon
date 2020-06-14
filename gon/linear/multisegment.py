@@ -428,7 +428,11 @@ class Multisegment(Indexable, Linear):
     def _intersect_with_raw_multisegment(self, other_raw: RawMultisegment
                                          ) -> Compound:
         raw_result = intersect_multisegments(self._raw, other_raw)
-        return Multisegment.from_raw(raw_result) if raw_result else EMPTY
+        return ((Segment.from_raw(raw_result[0])
+                 if len(raw_result) == 1
+                 else Multisegment.from_raw(raw_result))
+                if raw_result
+                else EMPTY)
 
 
 def raw_locate_point(raw_multisegment: RawMultisegment,
