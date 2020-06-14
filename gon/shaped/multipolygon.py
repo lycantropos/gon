@@ -77,7 +77,7 @@ class Multipolygon(Indexable, Shaped):
         ...                      [[(2, 2), (2, 4), (4, 4), (4, 2)]])))
         True
         """
-        return (Multipoint(*[point for point in other.points if point in self])
+        return (self._intersect_with_multipoint(other)
                 if isinstance(other, Multipoint)
                 else (self._intersect_with_raw_multisegment([other.raw()])
                       if isinstance(other, Segment)
@@ -554,6 +554,10 @@ class Multipolygon(Indexable, Shaped):
             raise ValueError('Duplicate polygons found.')
         for polygon in self._polygons:
             polygon.validate()
+
+    def _intersect_with_multipoint(self, other: Multipoint) -> Compound:
+        points = [point for point in other.points if point in self]
+        return Multipoint(*points) if points else EMPTY
 
     def _intersect_with_raw_multipolygon(self,
                                          raw_multipolygon: RawMultipolygon
