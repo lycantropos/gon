@@ -73,7 +73,7 @@ class Contour(Indexable, Linear):
         ...                            ((0, 1), (0, 0))]))
         True
         """
-        return (Multipoint(*[point for point in other.points if point in self])
+        return (self._intersect_with_multipoint(other)
                 if isinstance(other, Multipoint)
                 else (self._intersect_with_raw_multisegment([other.raw()])
                       if isinstance(other, Segment)
@@ -499,6 +499,10 @@ class Contour(Indexable, Linear):
                              'should not be on the same line.')
         if edges_intersect(self._raw):
             raise ValueError('Contour should not be self-intersecting.')
+
+    def _intersect_with_multipoint(self, other: Multipoint) -> Compound:
+        points = [point for point in other.points if point in self]
+        return Multipoint(*points) if points else EMPTY
 
     def _intersect_with_raw_multisegment(self, other_raw: RawMultisegment
                                          ) -> Compound:
