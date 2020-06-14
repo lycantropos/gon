@@ -608,9 +608,12 @@ class Polygon(Indexable, Shaped):
     def _intersect_with_raw_multisegment(self,
                                          raw_multisegment: RawMultisegment
                                          ) -> Compound:
-        raw_result = intersect_multisegment_with_multipolygon(self._raw,
-                                                              raw_multisegment)
-        return Multisegment.from_raw(raw_result) if raw_result else EMPTY
+        raw_result = intersect_multisegment_with_multipolygon(
+                raw_multisegment, [(self._raw_border, self._raw_holes)])
+        return ((Segment.from_raw(raw_result[0])
+                 if len(raw_result) == 1
+                 else Multisegment.from_raw(raw_result))
+                if raw_result else EMPTY)
 
 
 def raw_locate_point(raw_polygon: RawPolygon, raw_point: RawPoint) -> Location:
