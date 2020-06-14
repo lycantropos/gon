@@ -3,6 +3,8 @@ from typing import (List,
                     Optional,
                     Sequence)
 
+from clipping.planar import (intersect_multipolygons,
+                             intersect_multisegment_with_multipolygon)
 from orient.planar import (contour_in_polygon,
                            multisegment_in_polygon,
                            point_in_polygon,
@@ -25,12 +27,15 @@ from gon.geometry import Geometry
 from gon.hints import Coordinate
 from gon.linear import (Contour,
                         Multisegment,
+                        RawMultisegment,
                         Segment,
                         vertices)
+from gon.linear.utils import to_pairs_chain
 from gon.primitive import (Point,
                            RawPoint)
-from gon.shaped.utils import to_convex_hull
-from .hints import RawPolygon
+from .hints import (RawMultipolygon,
+                    RawPolygon)
+from .utils import to_convex_hull
 
 
 class Polygon(Indexable, Shaped):
@@ -59,6 +64,39 @@ class Polygon(Indexable, Shaped):
                                    (self._raw_border, self._raw_holes))
 
     __repr__ = generate_repr(__init__)
+
+    def __and__(self, other: Compound) -> Compound:
+        """
+        Returns intersection of the polygon with the other geometry.
+
+        Time complexity:
+            ``O(vertices_count * log vertices_count)``
+        Memory complexity:
+            ``O(vertices_count)``
+
+        where ``vertices_count = len(self.border.vertices)\
+ + sum(len(hole.vertices) for hole in self.holes)``.
+
+        >>> polygon = Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
+        ...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]]))
+        >>> polygon & polygon == polygon
+        True
+        """
+        return (Multipoint(*[point for point in other.points if point in self])
+                if isinstance(other, Multipoint)
+                else (self._intersect_with_raw_multisegment([other.raw()])
+                      if isinstance(other, Segment)
+                      else (self._intersect_with_raw_multisegment(other.raw())
+                            if isinstance(other, Multisegment)
+                            else
+                            (self._intersect_with_raw_multisegment(
+                                    to_pairs_chain(other.raw()))
+                             if isinstance(other, Contour)
+                             else
+                             (self._intersect_with_raw_multipolygon(
+                                     [(other._raw_border, other._raw_holes)])
+                              if isinstance(other, Polygon)
+                              else other & self)))))
 
     def __contains__(self, other: Geometry) -> bool:
         """
@@ -553,6 +591,26 @@ class Polygon(Indexable, Shaped):
             if (relation is not Relation.COVER
                     and relation is not Relation.ENCLOSES):
                 raise ValueError('Holes should lie inside border.')
+
+    def _intersect_with_raw_multipolygon(self,
+                                         raw_multipolygon: RawMultipolygon
+                                         ) -> Compound:
+        # importing inside of method to avoid cyclic imports
+        from .multipolygon import Multipolygon
+        raw_result = intersect_multipolygons([(self._raw_border,
+                                               self._raw_holes)],
+                                             raw_multipolygon)
+        return ((Polygon.from_raw(raw_result[0])
+                 if len(raw_result) == 1
+                 else Multipolygon.from_raw(raw_result))
+                if raw_result else EMPTY)
+
+    def _intersect_with_raw_multisegment(self,
+                                         raw_multisegment: RawMultisegment
+                                         ) -> Compound:
+        raw_result = intersect_multisegment_with_multipolygon(self._raw,
+                                                              raw_multisegment)
+        return Multisegment.from_raw(raw_result) if raw_result else EMPTY
 
 
 def raw_locate_point(raw_polygon: RawPolygon, raw_point: RawPoint) -> Location:
