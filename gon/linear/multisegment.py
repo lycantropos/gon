@@ -63,7 +63,7 @@ class Multisegment(Indexable, Linear):
         >>> multisegment & multisegment == multisegment
         True
         """
-        return (Multipoint(*[point for point in other.points if point in self])
+        return (self._intersect_with_multipoint(other)
                 if isinstance(other, Multipoint)
                 else (self._intersect_with_raw_multisegment([other.raw()])
                       if isinstance(other, Segment)
@@ -424,6 +424,10 @@ class Multisegment(Indexable, Linear):
             segment.validate()
         if segments_cross_or_overlap(self._raw):
             raise ValueError('Crossing or overlapping segments found.')
+
+    def _intersect_with_multipoint(self, other: Multipoint) -> Compound:
+        points = [point for point in other.points if point in self]
+        return Multipoint(*points) if points else EMPTY
 
     def _intersect_with_raw_multisegment(self, other_raw: RawMultisegment
                                          ) -> Compound:
