@@ -51,7 +51,7 @@ class Segment(Compound, Linear):
         >>> segment & segment == segment
         True
         """
-        return (Multipoint(*[point for point in other.points if point in self])
+        return (self._intersect_with_multipoint(other)
                 if isinstance(other, Multipoint)
                 else (self._intersect_with_segment(other)
                       if isinstance(other, Segment)
@@ -357,6 +357,10 @@ class Segment(Compound, Linear):
         self._end.validate()
         if self._start == self._end:
             raise ValueError('Segment is degenerate.')
+
+    def _intersect_with_multipoint(self, other: Multipoint) -> Compound:
+        points = [point for point in other.points if point in self]
+        return Multipoint(*points) if points else EMPTY
 
     def _intersect_with_segment(self, other: 'Segment') -> Compound:
         intersections = [Point.from_raw(raw_point)
