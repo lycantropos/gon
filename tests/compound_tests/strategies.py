@@ -25,7 +25,8 @@ from tests.strategies import (coordinates_strategies,
                               coordinates_to_multisegments,
                               coordinates_to_points,
                               coordinates_to_polygons,
-                              coordinates_to_segments)
+                              coordinates_to_segments,
+                              rational_coordinates_strategies)
 from tests.utils import Strategy
 
 CompoundsFactory = Callable[[Strategy[Coordinate]], Strategy[Compound]]
@@ -59,6 +60,11 @@ non_empty_compounds = (strategies.builds(coordinates_to_compounds,
 compounds = (strategies.builds(coordinates_to_compounds,
                                coordinates_strategies, compounds_factories)
              .flatmap(identity))
+rational_compounds = (strategies.builds(coordinates_to_compounds,
+                                        rational_coordinates_strategies,
+                                        compounds_factories)
+                      .flatmap(identity))
+empty_compounds_with_compounds = strategies.tuples(empty_compounds, compounds)
 
 
 def coordinates_to_compounds_with_points(coordinates: Strategy[Coordinate],
@@ -112,6 +118,11 @@ def compound_to_compound_with_multipoint(compound: Compound
                         .format(type=type(compound)))
 
 
+rational_compounds_pairs = (strategies.builds(coordinates_to_compounds_tuples,
+                                              rational_coordinates_strategies,
+                                              compounds_factories,
+                                              compounds_factories)
+                            .flatmap(identity))
 compounds_pairs = ((non_empty_compounds
                     .map(compound_to_compound_with_multipoint))
                    | (strategies.builds(coordinates_to_compounds_tuples,
