@@ -3,6 +3,8 @@ from itertools import chain
 from typing import (List,
                     Sequence)
 
+from clipping.planar import (intersect_multipolygons,
+                             intersect_multisegment_with_multipolygon)
 from locus import r
 from orient.planar import (contour_in_multipolygon,
                            multipolygon_in_multipolygon,
@@ -23,7 +25,9 @@ from gon.geometry import Geometry
 from gon.hints import Coordinate
 from gon.linear import (Contour,
                         Multisegment,
+                        RawMultisegment,
                         Segment)
+from gon.linear.utils import to_pairs_chain
 from gon.primitive import Point
 from .hints import RawMultipolygon
 from .polygon import Polygon
@@ -51,6 +55,46 @@ class Multipolygon(Indexable, Shaped):
         self._locate = partial(locate_point_in_polygons, self._polygons)
 
     __repr__ = generate_repr(__init__)
+
+    def __and__(self, other: Compound) -> Compound:
+        """
+        Returns intersection of the multipolygon with the other geometry.
+
+        Time complexity:
+            ``O(vertices_count * log vertices_count)``
+        Memory complexity:
+            ``O(vertices_count)``
+
+        where ``vertices_count = sum(len(polygon.border.vertices)\
+ + sum(len(hole.vertices) for hole in polygon.holes)\
+ for polygon in self.polygons)``.
+
+        >>> multipolygon = Multipolygon.from_raw(
+        ...         [([(0, 0), (6, 0), (6, 6), (0, 6)],
+        ...           [[(2, 2), (2, 4), (4, 4), (4, 2)]])])
+        >>> (multipolygon & multipolygon
+        ...  == Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
+        ...                      [[(2, 2), (2, 4), (4, 4), (4, 2)]])))
+        True
+        """
+        return (Multipoint(*[point for point in other.points if point in self])
+                if isinstance(other, Multipoint)
+                else (self._intersect_with_raw_multisegment([other.raw()])
+                      if isinstance(other, Segment)
+                      else (self._intersect_with_raw_multisegment(other.raw())
+                            if isinstance(other, Multisegment)
+                            else
+                            (self._intersect_with_raw_multisegment(
+                                    to_pairs_chain(other.raw()))
+                             if isinstance(other, Contour)
+                             else
+                             (self._intersect_with_raw_multipolygon(
+                                     [other.raw()])
+                              if isinstance(other, Polygon)
+                              else (self._intersect_with_raw_multipolygon(
+                                     other._raw)
+                                    if isinstance(other, Multipolygon)
+                                    else other & self))))))
 
     def __contains__(self, other: Geometry) -> bool:
         """
@@ -510,6 +554,25 @@ class Multipolygon(Indexable, Shaped):
             raise ValueError('Duplicate polygons found.')
         for polygon in self._polygons:
             polygon.validate()
+
+    def _intersect_with_raw_multipolygon(self,
+                                         raw_multipolygon: RawMultipolygon
+                                         ) -> Compound:
+        raw_result = intersect_multipolygons(self._raw, raw_multipolygon)
+        return ((Polygon.from_raw(raw_result[0])
+                 if len(raw_result) == 1
+                 else Multipolygon.from_raw(raw_result))
+                if raw_result else EMPTY)
+
+    def _intersect_with_raw_multisegment(self,
+                                         raw_multisegment: RawMultisegment
+                                         ) -> Compound:
+        raw_result = intersect_multisegment_with_multipolygon(raw_multisegment,
+                                                              self._raw)
+        return ((Segment.from_raw(raw_result[0])
+                 if len(raw_result) == 1
+                 else Multisegment.from_raw(raw_result))
+                if raw_result else EMPTY)
 
 
 def locate_point_in_polygons(polygons: Sequence[Polygon],
