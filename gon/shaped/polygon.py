@@ -82,7 +82,7 @@ class Polygon(Indexable, Shaped):
         >>> polygon & polygon == polygon
         True
         """
-        return (Multipoint(*[point for point in other.points if point in self])
+        return (self._intersect_with_multipoint(other)
                 if isinstance(other, Multipoint)
                 else (self._intersect_with_raw_multisegment([other.raw()])
                       if isinstance(other, Segment)
@@ -604,6 +604,10 @@ class Polygon(Indexable, Shaped):
                  if len(raw_result) == 1
                  else Multipolygon.from_raw(raw_result))
                 if raw_result else EMPTY)
+
+    def _intersect_with_multipoint(self, other: Multipoint) -> Compound:
+        points = [point for point in other.points if point in self]
+        return Multipoint(*points) if points else EMPTY
 
     def _intersect_with_raw_multisegment(self,
                                          raw_multisegment: RawMultisegment
