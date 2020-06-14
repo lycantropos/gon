@@ -504,7 +504,11 @@ class Contour(Indexable, Linear):
                                          ) -> Compound:
         raw_result = intersect_multisegments(to_pairs_chain(self._raw),
                                              other_raw)
-        return Multisegment.from_raw(raw_result) if raw_result else EMPTY
+        return ((Segment.from_raw(raw_result[0])
+                 if len(raw_result) == 1
+                 else Multisegment.from_raw(raw_result))
+                if raw_result
+                else EMPTY)
 
 
 def raw_locate_point(raw_contour: RawContour, raw_point: RawPoint) -> Location:
