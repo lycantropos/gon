@@ -346,9 +346,7 @@ class Contour(Indexable, Linear):
         >>> contour = Contour.from_raw([(0, 0), (1, 0), (0, 1)])
         >>> contour.index()
         """
-        raw = self._raw
-        graph = multisegment_trapezoidal([(raw[index - 1], raw[index])
-                                          for index in range(len(raw))])
+        graph = multisegment_trapezoidal(to_pairs_chain(self._raw))
         self._raw_locate = graph.locate
 
     def locate(self, point: Point) -> Location:
