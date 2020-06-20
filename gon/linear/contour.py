@@ -1,7 +1,8 @@
 from functools import partial
 
 from bentley_ottmann.planar import edges_intersect
-from clipping.planar import intersect_multisegments
+from clipping.planar import (intersect_multisegments,
+                             subtract_multisegments)
 from orient.planar import (contour_in_contour,
                            multisegment_in_contour,
                            point_in_contour,
@@ -263,6 +264,33 @@ class Contour(Indexable, Linear):
                      if isinstance(other, Compound)
                      else NotImplemented))
 
+    def __sub__(self, other: Compound) -> Compound:
+        """
+        Returns difference of the contour with the other geometry.
+
+        Time complexity:
+            ``O(vertices_count * log vertices_count)``
+        Memory complexity:
+            ``O(vertices_count)``
+
+        where ``vertices_count = len(self.vertices)``.
+
+        >>> contour = Contour.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> contour - contour is EMPTY
+        True
+        """
+        return (self
+                if isinstance(other, Multipoint)
+                else (self._subtract_raw_multisegment([other.raw()])
+                      if isinstance(other, Segment)
+                      else (self._subtract_raw_multisegment(other.raw())
+                            if isinstance(other, Multisegment)
+                            else
+                            (self._subtract_raw_multisegment(
+                                    to_pairs_chain(other._raw))
+                             if isinstance(other, Contour)
+                             else NotImplemented))))
+
     @classmethod
     def from_raw(cls, raw: RawContour) -> 'Contour':
         """
@@ -508,6 +536,16 @@ class Contour(Indexable, Linear):
                                          ) -> Compound:
         raw_result = intersect_multisegments(to_pairs_chain(self._raw),
                                              other_raw)
+        return ((Segment.from_raw(raw_result[0])
+                 if len(raw_result) == 1
+                 else Multisegment.from_raw(raw_result))
+                if raw_result
+                else EMPTY)
+
+    def _subtract_raw_multisegment(self, other_raw: RawMultisegment
+                                   ) -> Compound:
+        raw_result = subtract_multisegments(to_pairs_chain(self._raw),
+                                            other_raw)
         return ((Segment.from_raw(raw_result[0])
                  if len(raw_result) == 1
                  else Multisegment.from_raw(raw_result))
