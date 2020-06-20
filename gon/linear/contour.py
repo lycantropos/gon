@@ -264,6 +264,25 @@ class Contour(Indexable, Linear):
                      if isinstance(other, Compound)
                      else NotImplemented))
 
+    def __rsub__(self, other: Compound) -> Compound:
+        """
+        Returns difference of the other geometry with the contour.
+
+        Time complexity:
+            ``O(vertices_count * log vertices_count)``
+        Memory complexity:
+            ``O(vertices_count)``
+
+        where ``vertices_count = len(self.vertices)``.
+        """
+        return (self._subtract_from_multipoint(other)
+                if isinstance(other, Multipoint)
+                else (self._subtract_from_raw_multisegment([other.raw()])
+                      if isinstance(other, Segment)
+                      else (self._subtract_from_raw_multisegment(other.raw())
+                            if isinstance(other, Multisegment)
+                            else NotImplemented)))
+
     def __sub__(self, other: Compound) -> Compound:
         """
         Returns difference of the contour with the other geometry.
@@ -545,10 +564,19 @@ class Contour(Indexable, Linear):
         return self._from_raw_multisegment(intersect_multisegments(
                 to_pairs_chain(self._raw), other_raw))
 
+    def _subtract_from_multipoint(self, other: Multipoint) -> Compound:
+        points = [point for point in other.points if point not in self]
+        return Multipoint(*points) if points else EMPTY
+
     def _subtract_raw_multisegment(self, other_raw: RawMultisegment
                                    ) -> Compound:
         return self._from_raw_multisegment(subtract_multisegments(
                 to_pairs_chain(self._raw), other_raw))
+
+    def _subtract_from_raw_multisegment(self, other_raw: RawMultisegment
+                                        ) -> Compound:
+        return self._from_raw_multisegment(subtract_multisegments(
+                other_raw, to_pairs_chain(self._raw)))
 
 
 def raw_locate_point(raw_contour: RawContour, raw_point: RawPoint) -> Location:
