@@ -227,6 +227,19 @@ class Segment(Compound, Linear):
                      if isinstance(other, Compound)
                      else NotImplemented))
 
+    def __rsub__(self, other: Compound) -> Compound:
+        """
+        Returns difference of the other geometry with the segment.
+
+        Time complexity:
+            ``O(1)``
+        Memory complexity:
+            ``O(1)``
+        """
+        return (self._subtract_from_multipoint(other)
+                if isinstance(other, Multipoint)
+                else NotImplemented)
+
     def __sub__(self, other: Compound) -> Compound:
         """
         Returns difference of the segment with the other geometry.
@@ -401,6 +414,10 @@ class Segment(Compound, Linear):
                  else Segment(*intersections))
                 if intersections
                 else EMPTY)
+
+    def _subtract_from_multipoint(self, other: Multipoint) -> Compound:
+        points = [point for point in other.points if point not in self]
+        return Multipoint(*points) if points else EMPTY
 
     def _subtract_segment(self, other: 'Segment') -> Compound:
         relation = segment_in_segment(self._raw, other._raw)
