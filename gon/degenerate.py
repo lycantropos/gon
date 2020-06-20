@@ -53,6 +53,8 @@ class Empty(Compound):
                 if isinstance(other, Compound)
                 else NotImplemented)
 
+    __rand__ = __and__
+
     def __contains__(self, other: Geometry) -> bool:
         """
         Checks if the empty geometry contains the other geometry.

@@ -55,7 +55,9 @@ class Segment(Compound, Linear):
                 if isinstance(other, Multipoint)
                 else (self._intersect_with_segment(other)
                       if isinstance(other, Segment)
-                      else other & self))
+                      else NotImplemented))
+
+    __rand__ = __and__
 
     def __contains__(self, other: Geometry) -> bool:
         """

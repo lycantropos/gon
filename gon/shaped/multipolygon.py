@@ -94,7 +94,9 @@ class Multipolygon(Indexable, Shaped):
                               else (self._intersect_with_raw_multipolygon(
                                      other._raw)
                                     if isinstance(other, Multipolygon)
-                                    else other & self))))))
+                                    else NotImplemented))))))
+
+    __rand__ = __and__
 
     def __contains__(self, other: Geometry) -> bool:
         """
