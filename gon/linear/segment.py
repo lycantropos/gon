@@ -16,7 +16,8 @@ from gon.geometry import Geometry
 from gon.hints import Coordinate
 from gon.primitive import (Point,
                            RawPoint)
-from .hints import RawSegment
+from .hints import (RawMultisegment,
+                    RawSegment)
 from .utils import (relate_multipoint_to_linear_compound,
                     squared_points_distance)
 
@@ -226,6 +227,25 @@ class Segment(Compound, Linear):
                      if isinstance(other, Compound)
                      else NotImplemented))
 
+    def __sub__(self, other: Compound) -> Compound:
+        """
+        Returns difference of the segment with the other geometry.
+
+        Time complexity:
+            ``O(1)``
+        Memory complexity:
+            ``O(1)``
+
+        >>> segment = Segment.from_raw(((0, 0), (2, 0)))
+        >>> segment - segment is EMPTY
+        True
+        """
+        return (self
+                if isinstance(other, Multipoint)
+                else (self._subtract_segment(other)
+                      if isinstance(other, Segment)
+                      else NotImplemented))
+
     @classmethod
     def from_raw(cls, raw: RawSegment) -> 'Segment':
         """
@@ -360,6 +380,13 @@ class Segment(Compound, Linear):
         if self._start == self._end:
             raise ValueError('Segment is degenerate.')
 
+    @classmethod
+    def _from_raw_multisegment(cls, raw: RawMultisegment) -> Compound:
+        from .multisegment import Multisegment
+        return (cls.from_raw(raw[0])
+                if len(raw) == 1
+                else Multisegment.from_raw(raw))
+
     def _intersect_with_multipoint(self, other: Multipoint) -> Compound:
         points = [point for point in other.points if point in self]
         return Multipoint(*points) if points else EMPTY
@@ -373,6 +400,41 @@ class Segment(Compound, Linear):
                  else Segment(*intersections))
                 if intersections
                 else EMPTY)
+
+    def _subtract_segment(self, other: 'Segment') -> Compound:
+        relation = segment_in_segment(self._raw, other._raw)
+        return (EMPTY
+                if relation is Relation.EQUAL or relation is Relation.COMPONENT
+                else
+                (self
+                 if relation is Relation.DISJOINT or relation is Relation.TOUCH
+                 else (Segment.from_raw(_raw_subtract_overlap(self._raw,
+                                                              other._raw))
+                       if relation is Relation.OVERLAP
+                       else self._from_raw_multisegment(
+                        _raw_subtract_composite(self._raw, other._raw)))))
+
+
+def _raw_subtract_overlap(minuend: RawSegment,
+                          subtrahend: RawSegment) -> RawSegment:
+    left_start, left_end, right_start, right_end = sorted(minuend + subtrahend)
+    return ((left_start, left_end)
+            if left_start in minuend
+            else (right_start, right_end))
+
+
+def _raw_subtract_composite(minuend: RawSegment,
+                            subtrahend: RawSegment) -> RawMultisegment:
+    left_start, left_end, right_start, right_end = sorted(minuend + subtrahend)
+    return ([(right_start, right_end)]
+            if left_start in subtrahend
+            else ((([(left_start, left_end)]
+                    if right_start == right_end
+                    else [(left_start, left_end), (right_start, right_end)])
+                   if right_start in subtrahend
+                   else [(left_start, left_end)])
+                  if left_end in subtrahend
+                  else [(left_start, right_start)]))
 
 
 def raw_locate_point(raw_segment: RawSegment, raw_point: RawPoint) -> Location:
