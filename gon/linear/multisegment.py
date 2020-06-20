@@ -452,27 +452,27 @@ class Multisegment(Indexable, Linear):
         if segments_cross_or_overlap(self._raw):
             raise ValueError('Crossing or overlapping segments found.')
 
+    @classmethod
+    def _from_raw_multisegment(cls, raw: RawMultisegment) -> Compound:
+        return ((Segment.from_raw(raw[0])
+                 if len(raw) == 1
+                 else Multisegment.from_raw(raw))
+                if raw
+                else EMPTY)
+
     def _intersect_with_multipoint(self, other: Multipoint) -> Compound:
         points = [point for point in other.points if point in self]
         return Multipoint(*points) if points else EMPTY
 
     def _intersect_with_raw_multisegment(self, other_raw: RawMultisegment
                                          ) -> Compound:
-        raw_result = intersect_multisegments(self._raw, other_raw)
-        return ((Segment.from_raw(raw_result[0])
-                 if len(raw_result) == 1
-                 else Multisegment.from_raw(raw_result))
-                if raw_result
-                else EMPTY)
+        return self._from_raw_multisegment(intersect_multisegments(self._raw,
+                                                                   other_raw))
 
     def _subtract_raw_multisegment(self, other_raw: RawMultisegment
                                    ) -> Compound:
-        raw_result = subtract_multisegments(self._raw, other_raw)
-        return ((Segment.from_raw(raw_result[0])
-                 if len(raw_result) == 1
-                 else Multisegment.from_raw(raw_result))
-                if raw_result
-                else EMPTY)
+        return self._from_raw_multisegment(subtract_multisegments(self._raw,
+                                                                  other_raw))
 
 
 def raw_locate_point(raw_multisegment: RawMultisegment,
