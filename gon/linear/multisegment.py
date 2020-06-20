@@ -98,7 +98,7 @@ class Multisegment(Indexable, Linear):
         Checks if multisegments are equal.
 
         Time complexity:
-            ``O(min(len(self.segments), len(other.segments)))``
+            ``O(len(self.segments))``
         Memory complexity:
             ``O(1)``
 
