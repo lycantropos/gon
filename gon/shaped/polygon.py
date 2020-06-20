@@ -4,7 +4,8 @@ from typing import (List,
                     Sequence)
 
 from clipping.planar import (intersect_multipolygons,
-                             intersect_multisegment_with_multipolygon)
+                             intersect_multisegment_with_multipolygon,
+                             subtract_multipolygons)
 from orient.planar import (contour_in_polygon,
                            multisegment_in_polygon,
                            point_in_polygon,
@@ -286,6 +287,30 @@ class Polygon(Indexable, Shaped):
                                                 Relation.COMPOSITE)
                      if isinstance(other, Compound)
                      else NotImplemented))
+
+    def __sub__(self, other: Compound) -> Compound:
+        """
+        Returns intersection of the polygon with the other geometry.
+
+        Time complexity:
+            ``O(vertices_count * log vertices_count)``
+        Memory complexity:
+            ``O(vertices_count)``
+
+        where ``vertices_count = len(self.border.vertices)\
+ + sum(len(hole.vertices) for hole in self.holes)``.
+
+        >>> polygon = Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
+        ...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]]))
+        >>> polygon - polygon is EMPTY
+        True
+        """
+        return (self
+                if isinstance(other, (Multipoint, Linear))
+                else (self._subtract_raw_multipolygon([(other._raw_border,
+                                                        other._raw_holes)])
+                      if isinstance(other, Polygon)
+                      else NotImplemented))
 
     @classmethod
     def from_raw(cls, raw: RawPolygon) -> 'Polygon':
@@ -594,32 +619,45 @@ class Polygon(Indexable, Shaped):
                     and relation is not Relation.ENCLOSES):
                 raise ValueError('Holes should lie inside border.')
 
-    def _intersect_with_raw_multipolygon(self,
-                                         raw_multipolygon: RawMultipolygon
-                                         ) -> Compound:
+    @classmethod
+    def _from_raw_multipolygon(cls, raw: RawMultipolygon) -> Compound:
         # importing inside of method to avoid cyclic imports
         from .multipolygon import Multipolygon
-        raw_result = intersect_multipolygons([(self._raw_border,
-                                               self._raw_holes)],
-                                             raw_multipolygon)
-        return ((Polygon.from_raw(raw_result[0])
-                 if len(raw_result) == 1
-                 else Multipolygon.from_raw(raw_result))
-                if raw_result else EMPTY)
+        return ((Polygon.from_raw(raw[0])
+                 if len(raw) == 1
+                 else Multipolygon.from_raw(raw))
+                if raw else EMPTY)
+
+    @classmethod
+    def _from_raw_multisegment(cls, raw: RawMultisegment) -> Compound:
+        # importing inside of method to avoid cyclic imports
+        return ((Segment.from_raw(raw[0])
+                 if len(raw) == 1
+                 else Multisegment.from_raw(raw))
+                if raw else EMPTY)
 
     def _intersect_with_multipoint(self, other: Multipoint) -> Compound:
         points = [point for point in other.points if point in self]
         return Multipoint(*points) if points else EMPTY
 
+    def _intersect_with_raw_multipolygon(self,
+                                         raw_multipolygon: RawMultipolygon
+                                         ) -> Compound:
+        return self._from_raw_multipolygon(intersect_multipolygons(
+                [(self._raw_border, self._raw_holes)], raw_multipolygon))
+
     def _intersect_with_raw_multisegment(self,
                                          raw_multisegment: RawMultisegment
                                          ) -> Compound:
-        raw_result = intersect_multisegment_with_multipolygon(
-                raw_multisegment, [(self._raw_border, self._raw_holes)])
-        return ((Segment.from_raw(raw_result[0])
-                 if len(raw_result) == 1
-                 else Multisegment.from_raw(raw_result))
-                if raw_result else EMPTY)
+        return self._from_raw_multisegment(
+                intersect_multisegment_with_multipolygon(
+                        raw_multisegment,
+                        [(self._raw_border, self._raw_holes)]))
+
+    def _subtract_raw_multipolygon(self, raw_multipolygon: RawMultipolygon
+                                   ) -> Compound:
+        return self._from_raw_multipolygon(subtract_multipolygons(
+                [(self._raw_border, self._raw_holes)], raw_multipolygon))
 
 
 def raw_locate_point(raw_polygon: RawPolygon, raw_point: RawPoint) -> Location:
