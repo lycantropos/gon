@@ -473,7 +473,7 @@ class Multisegment(Indexable, Linear):
     def _from_raw_multisegment(cls, raw: RawMultisegment) -> Compound:
         return ((Segment.from_raw(raw[0])
                  if len(raw) == 1
-                 else Multisegment.from_raw(raw))
+                 else cls.from_raw(raw))
                 if raw
                 else EMPTY)
 
