@@ -266,6 +266,23 @@ class Multisegment(Indexable, Linear):
                      if isinstance(other, Compound)
                      else NotImplemented))
 
+    def __rsub__(self, other: Compound) -> Compound:
+        """
+        Returns difference of the other geometry with the multisegment.
+
+        Time complexity:
+            ``O(segments_count * log segments_count)``
+        Memory complexity:
+            ``O(segments_count)``
+
+        where ``segments_count = len(self.segments)``.
+        """
+        return (self._subtract_from_multipoint(other)
+                if isinstance(other, Multipoint)
+                else (self._subtract_from_raw_multisegment([other.raw()])
+                      if isinstance(other, Segment)
+                      else NotImplemented))
+
     def __sub__(self, other: Compound) -> Compound:
         """
         Returns difference of the multisegment with the other geometry.
@@ -469,10 +486,19 @@ class Multisegment(Indexable, Linear):
         return self._from_raw_multisegment(intersect_multisegments(self._raw,
                                                                    other_raw))
 
+    def _subtract_from_multipoint(self, other: Multipoint) -> Compound:
+        points = [point for point in other.points if point not in self]
+        return Multipoint(*points) if points else EMPTY
+
     def _subtract_raw_multisegment(self, other_raw: RawMultisegment
                                    ) -> Compound:
         return self._from_raw_multisegment(subtract_multisegments(self._raw,
                                                                   other_raw))
+
+    def _subtract_from_raw_multisegment(self, other_raw: RawMultisegment
+                                        ) -> Compound:
+        return self._from_raw_multisegment(subtract_multisegments(other_raw,
+                                                                  self._raw))
 
 
 def raw_locate_point(raw_multisegment: RawMultisegment,
