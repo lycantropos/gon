@@ -50,7 +50,7 @@ class Multipoint(Compound):
         >>> multipoint & multipoint == multipoint
         True
         """
-        return (Multipoint(*(self._points_set & other._points_set))
+        return (self._intersect_with_multipoint(other)
                 if isinstance(other, Multipoint)
                 else other & self)
 
@@ -314,6 +314,10 @@ class Multipoint(Compound):
             raise ValueError('Duplicate points found.')
         for point in self._points:
             point.validate()
+
+    def _intersect_with_multipoint(self, other: 'Multipoint') -> Compound:
+        points = self._points_set & other._points_set
+        return Multipoint(*points) if points else EMPTY
 
     def _relate_geometry(self, other: Compound) -> Relation:
         disjoint = is_subset = not_interior = not_boundary = True
