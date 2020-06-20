@@ -52,7 +52,7 @@ class Multisegment(Indexable, Linear):
         Returns intersection of the multisegment with the other geometry.
 
         Time complexity:
-            ``O(segments_count)``
+            ``O(segments_count * log segments_count)``
         Memory complexity:
             ``O(segments_count)``
 
