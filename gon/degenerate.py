@@ -164,6 +164,35 @@ class Empty(Compound):
                 if isinstance(other, Compound)
                 else NotImplemented)
 
+    def __sub__(self, other: Compound) -> Compound:
+        """
+        Returns difference of the empty geometry with the other geometry.
+
+        Time complexity:
+            ``O(1)``
+        Memory complexity:
+            ``O(1)``
+
+        >>> EMPTY - EMPTY is EMPTY
+        True
+        """
+        return (self
+                if isinstance(other, Compound)
+                else NotImplemented)
+
+    def __rsub__(self, other: Compound) -> Compound:
+        """
+        Returns difference of the the other geometry with empty geometry.
+
+        Time complexity:
+            ``O(1)``
+        Memory complexity:
+            ``O(1)``
+        """
+        return (other
+                if isinstance(other, Compound)
+                else NotImplemented)
+
     @classmethod
     def from_raw(cls, raw: RawEmpty) -> Domain:
         """
