@@ -83,7 +83,9 @@ class Contour(Indexable, Linear):
                             (self._intersect_with_raw_multisegment(
                                     to_pairs_chain(other._raw))
                              if isinstance(other, Contour)
-                             else other & self))))
+                             else NotImplemented))))
+
+    __rand__ = __and__
 
     def __contains__(self, other: Geometry) -> bool:
         """

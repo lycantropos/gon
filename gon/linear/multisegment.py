@@ -69,7 +69,9 @@ class Multisegment(Indexable, Linear):
                       if isinstance(other, Segment)
                       else (self._intersect_with_raw_multisegment(other._raw)
                             if isinstance(other, Multisegment)
-                            else other & self)))
+                            else NotImplemented)))
+
+    __rand__ = __and__
 
     def __contains__(self, other: Geometry) -> bool:
         """

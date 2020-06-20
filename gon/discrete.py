@@ -52,7 +52,9 @@ class Multipoint(Compound):
         """
         return (self._intersect_with_multipoint(other)
                 if isinstance(other, Multipoint)
-                else other & self)
+                else NotImplemented)
+
+    __rand__ = __and__
 
     def __contains__(self, other: Geometry) -> bool:
         """
