@@ -207,6 +207,25 @@ class Multipoint(Compound):
                 if isinstance(other, Compound)
                 else NotImplemented)
 
+    def __sub__(self, other: Compound) -> Compound:
+        """
+        Returns intersection of the multipoint with the other geometry.
+
+        Time complexity:
+            ``O(points_count)``
+        Memory complexity:
+            ``O(points_count)``
+
+        where ``points_count = len(self.points)``.
+
+        >>> multipoint = Multipoint.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> multipoint - multipoint is EMPTY
+        True
+        """
+        return (self._subtract_multipoint(other)
+                if isinstance(other, Multipoint)
+                else NotImplemented)
+
     @classmethod
     def from_raw(cls, raw: RawMultipoint) -> Domain:
         """
@@ -348,6 +367,10 @@ class Multipoint(Compound):
                              else Relation.ENCLOSES)
                             if is_subset
                             else Relation.CROSS)))
+
+    def _subtract_multipoint(self, other: 'Multipoint') -> Compound:
+        points = self._points_set - other._points_set
+        return Multipoint(*points) if points else EMPTY
 
 
 def _relate_sets(left: Set[Domain], right: Set[Domain]) -> Relation:
