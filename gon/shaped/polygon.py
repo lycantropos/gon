@@ -38,7 +38,8 @@ from gon.primitive import (Point,
                            RawPoint)
 from .hints import (RawMultipolygon,
                     RawPolygon)
-from .utils import to_convex_hull
+from .utils import (from_raw_multipolygon,
+                    to_convex_hull)
 
 
 class Polygon(Indexable, Shaped):
@@ -645,15 +646,6 @@ class Polygon(Indexable, Shaped):
                     and relation is not Relation.ENCLOSES):
                 raise ValueError('Holes should lie inside border.')
 
-    @classmethod
-    def _from_raw_multipolygon(cls, raw: RawMultipolygon) -> Compound:
-        # importing inside of method to avoid cyclic imports
-        from .multipolygon import Multipolygon
-        return ((Polygon.from_raw(raw[0])
-                 if len(raw) == 1
-                 else Multipolygon.from_raw(raw))
-                if raw else EMPTY)
-
     def _intersect_with_multipoint(self, other: Multipoint) -> Compound:
         points = [point for point in other.points if point in self]
         return Multipoint(*points) if points else EMPTY
@@ -661,7 +653,7 @@ class Polygon(Indexable, Shaped):
     def _intersect_with_raw_multipolygon(self,
                                          raw_multipolygon: RawMultipolygon
                                          ) -> Compound:
-        return self._from_raw_multipolygon(intersect_multipolygons(
+        return from_raw_multipolygon(intersect_multipolygons(
                 [(self._raw_border, self._raw_holes)], raw_multipolygon))
 
     def _intersect_with_raw_multisegment(self,
@@ -681,7 +673,7 @@ class Polygon(Indexable, Shaped):
 
     def _subtract_raw_multipolygon(self, raw_multipolygon: RawMultipolygon
                                    ) -> Compound:
-        return self._from_raw_multipolygon(subtract_multipolygons(
+        return from_raw_multipolygon(subtract_multipolygons(
                 [(self._raw_border, self._raw_holes)], raw_multipolygon))
 
 
