@@ -418,7 +418,8 @@ class Segment(Compound, Linear):
                 if relation is Relation.EQUAL or relation is Relation.COMPONENT
                 else
                 (self
-                 if relation is Relation.DISJOINT or relation is Relation.TOUCH
+                 if relation in (Relation.DISJOINT, Relation.TOUCH,
+                                 Relation.CROSS)
                  else (Segment.from_raw(_raw_subtract_overlap(self._raw,
                                                               other._raw))
                        if relation is Relation.OVERLAP
