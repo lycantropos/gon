@@ -32,6 +32,7 @@ from gon.linear.utils import (from_raw_multisegment,
 from gon.primitive import Point
 from .hints import RawMultipolygon
 from .polygon import Polygon
+from .utils import from_raw_multipolygon
 
 
 class Multipolygon(Indexable, Shaped):
@@ -562,14 +563,10 @@ class Multipolygon(Indexable, Shaped):
         points = [point for point in other.points if point in self]
         return Multipoint(*points) if points else EMPTY
 
-    def _intersect_with_raw_multipolygon(self,
-                                         raw_multipolygon: RawMultipolygon
+    def _intersect_with_raw_multipolygon(self, other_raw: RawMultipolygon
                                          ) -> Compound:
-        raw_result = intersect_multipolygons(self._raw, raw_multipolygon)
-        return ((Polygon.from_raw(raw_result[0])
-                 if len(raw_result) == 1
-                 else Multipolygon.from_raw(raw_result))
-                if raw_result else EMPTY)
+        return from_raw_multipolygon(intersect_multipolygons(self._raw,
+                                                             other_raw))
 
     def _intersect_with_raw_multisegment(self,
                                          raw_multisegment: RawMultisegment
