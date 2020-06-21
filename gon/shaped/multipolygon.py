@@ -27,7 +27,8 @@ from gon.linear import (Contour,
                         Multisegment,
                         RawMultisegment,
                         Segment)
-from gon.linear.utils import to_pairs_chain
+from gon.linear.utils import (from_raw_multisegment,
+                              to_pairs_chain)
 from gon.primitive import Point
 from .hints import RawMultipolygon
 from .polygon import Polygon
@@ -573,12 +574,8 @@ class Multipolygon(Indexable, Shaped):
     def _intersect_with_raw_multisegment(self,
                                          raw_multisegment: RawMultisegment
                                          ) -> Compound:
-        raw_result = intersect_multisegment_with_multipolygon(raw_multisegment,
-                                                              self._raw)
-        return ((Segment.from_raw(raw_result[0])
-                 if len(raw_result) == 1
-                 else Multisegment.from_raw(raw_result))
-                if raw_result else EMPTY)
+        return from_raw_multisegment(intersect_multisegment_with_multipolygon(
+                raw_multisegment, self._raw))
 
 
 def locate_point_in_polygons(polygons: Sequence[Polygon],
