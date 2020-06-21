@@ -332,7 +332,7 @@ class Polygon(Indexable, Shaped):
         True
         """
         return (self
-                if isinstance(other, (Multipoint, Linear))
+                if isinstance(other, (Linear, Multipoint))
                 else (self._subtract_raw_multipolygon([(other._raw_border,
                                                         other._raw_holes)])
                       if isinstance(other, Polygon)
