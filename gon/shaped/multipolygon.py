@@ -5,6 +5,7 @@ from typing import (List,
 
 from clipping.planar import (intersect_multipolygons,
                              intersect_multisegment_with_multipolygon,
+                             subtract_multipolygon_from_multisegment,
                              subtract_multipolygons)
 from locus import r
 from orient.planar import (contour_in_multipolygon,
@@ -282,6 +283,34 @@ class Multipolygon(Indexable, Shaped):
                                                 Relation.COMPOSITE)
                      if isinstance(other, Compound)
                      else NotImplemented))
+
+    def __rsub__(self, other: Compound) -> Compound:
+        """
+        Returns difference of the other geometry with the multipolygon.
+
+        Time complexity:
+            ``O(vertices_count * log vertices_count)``
+        Memory complexity:
+            ``O(vertices_count)``
+
+        where ``vertices_count = sum(len(polygon.border.vertices)\
+ + sum(len(hole.vertices) for hole in polygon.holes)\
+ for polygon in self.polygons)``.
+        """
+        return (self._subtract_from_multipoint(other)
+                if isinstance(other, Multipoint)
+                else (self._subtract_from_raw_multisegment([other.raw()])
+                      if isinstance(other, Segment)
+                      else (self._subtract_from_raw_multisegment(other.raw())
+                            if isinstance(other, Multisegment)
+                            else
+                            (self._subtract_from_raw_multisegment(
+                                    to_pairs_chain(other.raw()))
+                             if isinstance(other, Contour)
+                             else (self._subtract_from_raw_multipolygon(
+                                    [other.raw()])
+                                   if isinstance(other, Polygon)
+                                   else NotImplemented)))))
 
     def __sub__(self, other: Compound) -> Compound:
         """
@@ -601,6 +630,20 @@ class Multipolygon(Indexable, Shaped):
                                          ) -> Compound:
         return from_raw_multisegment(intersect_multisegment_with_multipolygon(
                 raw_multisegment, self._raw))
+
+    def _subtract_from_multipoint(self, other: Multipoint) -> Compound:
+        points = [point for point in other.points if point not in self]
+        return Multipoint(*points) if points else EMPTY
+
+    def _subtract_from_raw_multipolygon(self, other_raw: RawMultipolygon
+                                        ) -> Compound:
+        return from_raw_multipolygon(subtract_multipolygons(other_raw,
+                                                            self._raw))
+
+    def _subtract_from_raw_multisegment(self, other_raw: RawMultisegment
+                                        ) -> Compound:
+        return from_raw_multisegment(subtract_multipolygon_from_multisegment(
+                other_raw, self._raw))
 
     def _subtract_raw_multipolygon(self, other_raw: RawMultipolygon
                                    ) -> Compound:
