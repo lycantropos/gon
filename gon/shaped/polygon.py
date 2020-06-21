@@ -290,7 +290,7 @@ class Polygon(Indexable, Shaped):
 
     def __sub__(self, other: Compound) -> Compound:
         """
-        Returns intersection of the polygon with the other geometry.
+        Returns difference of the polygon with the other geometry.
 
         Time complexity:
             ``O(vertices_count * log vertices_count)``
