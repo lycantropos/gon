@@ -568,7 +568,7 @@ class Contour(Indexable, Linear):
 
     def _subtract_from_raw_multisegment(self, other_raw: RawMultisegment
                                         ) -> Compound:
-        return self._from_raw_multisegment(subtract_multisegments(
+        return from_raw_multisegment(subtract_multisegments(
                 other_raw, to_pairs_chain(self._raw)))
 
 
