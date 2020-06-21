@@ -654,14 +654,6 @@ class Polygon(Indexable, Shaped):
                  else Multipolygon.from_raw(raw))
                 if raw else EMPTY)
 
-    @classmethod
-    def _from_raw_multisegment(cls, raw: RawMultisegment) -> Compound:
-        # importing inside of method to avoid cyclic imports
-        return ((Segment.from_raw(raw[0])
-                 if len(raw) == 1
-                 else Multisegment.from_raw(raw))
-                if raw else EMPTY)
-
     def _intersect_with_multipoint(self, other: Multipoint) -> Compound:
         points = [point for point in other.points if point in self]
         return Multipoint(*points) if points else EMPTY
@@ -675,10 +667,8 @@ class Polygon(Indexable, Shaped):
     def _intersect_with_raw_multisegment(self,
                                          raw_multisegment: RawMultisegment
                                          ) -> Compound:
-        return self._from_raw_multisegment(
-                intersect_multisegment_with_multipolygon(
-                        raw_multisegment,
-                        [(self._raw_border, self._raw_holes)]))
+        return from_raw_multisegment(intersect_multisegment_with_multipolygon(
+                raw_multisegment, [(self._raw_border, self._raw_holes)]))
 
     def _subtract_from_multipoint(self, other: Multipoint) -> Compound:
         points = [point for point in other.points if point not in self]
