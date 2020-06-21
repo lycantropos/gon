@@ -30,7 +30,8 @@ from .hints import (RawContour,
                     Vertices)
 from .multisegment import Multisegment
 from .segment import Segment
-from .utils import (relate_multipoint_to_linear_compound,
+from .utils import (from_raw_multisegment,
+                    relate_multipoint_to_linear_compound,
                     shift_sequence,
                     to_pairs_chain)
 
@@ -547,21 +548,13 @@ class Contour(Indexable, Linear):
         if edges_intersect(self._raw):
             raise ValueError('Contour should not be self-intersecting.')
 
-    @classmethod
-    def _from_raw_multisegment(cls, raw: RawMultisegment) -> Compound:
-        return ((Segment.from_raw(raw[0])
-                 if len(raw) == 1
-                 else Multisegment.from_raw(raw))
-                if raw
-                else EMPTY)
-
     def _intersect_with_multipoint(self, other: Multipoint) -> Compound:
         points = [point for point in other.points if point in self]
         return Multipoint(*points) if points else EMPTY
 
     def _intersect_with_raw_multisegment(self, other_raw: RawMultisegment
                                          ) -> Compound:
-        return self._from_raw_multisegment(intersect_multisegments(
+        return from_raw_multisegment(intersect_multisegments(
                 to_pairs_chain(self._raw), other_raw))
 
     def _subtract_from_multipoint(self, other: Multipoint) -> Compound:
@@ -570,7 +563,7 @@ class Contour(Indexable, Linear):
 
     def _subtract_raw_multisegment(self, other_raw: RawMultisegment
                                    ) -> Compound:
-        return self._from_raw_multisegment(subtract_multisegments(
+        return from_raw_multisegment(subtract_multisegments(
                 to_pairs_chain(self._raw), other_raw))
 
     def _subtract_from_raw_multisegment(self, other_raw: RawMultisegment

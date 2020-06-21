@@ -18,7 +18,8 @@ from gon.primitive import (Point,
                            RawPoint)
 from .hints import (RawMultisegment,
                     RawSegment)
-from .utils import (relate_multipoint_to_linear_compound,
+from .utils import (from_raw_multisegment,
+                    relate_multipoint_to_linear_compound,
                     squared_points_distance)
 
 
@@ -393,14 +394,6 @@ class Segment(Compound, Linear):
         if self._start == self._end:
             raise ValueError('Segment is degenerate.')
 
-    @classmethod
-    def _from_raw_multisegment(cls, raw: RawMultisegment) -> Compound:
-        # importing inside of method to avoid cyclic imports
-        from .multisegment import Multisegment
-        return (cls.from_raw(raw[0])
-                if len(raw) == 1
-                else Multisegment.from_raw(raw))
-
     def _intersect_with_multipoint(self, other: Multipoint) -> Compound:
         points = [point for point in other.points if point in self]
         return Multipoint(*points) if points else EMPTY
@@ -429,8 +422,8 @@ class Segment(Compound, Linear):
                  else (Segment.from_raw(_raw_subtract_overlap(self._raw,
                                                               other._raw))
                        if relation is Relation.OVERLAP
-                       else self._from_raw_multisegment(
-                        _raw_subtract_composite(self._raw, other._raw)))))
+                       else from_raw_multisegment(_raw_subtract_composite(
+                        self._raw, other._raw)))))
 
 
 def _raw_subtract_overlap(minuend: RawSegment,

@@ -6,11 +6,13 @@ from typing import (List,
 
 from gon.compound import (Compound,
                           Relation)
+from gon.degenerate import EMPTY
 from gon.discrete import Multipoint
 from gon.hints import (Coordinate,
                        Domain)
 from gon.primitive import (Point,
                            RawPoint)
+from .hints import RawMultisegment
 
 
 def squared_points_distance(left: Point, right: Point) -> Coordinate:
@@ -57,3 +59,14 @@ def to_decimal(value: Coordinate) -> Decimal:
 def to_pairs_chain(sequence: Sequence[Domain]) -> List[Tuple[Domain, Domain]]:
     return [(sequence[index - 1], sequence[index])
             for index in range(len(sequence))]
+
+
+def from_raw_multisegment(raw: RawMultisegment) -> Compound:
+    # importing here to avoid cyclic imports
+    from .segment import Segment
+    from .multisegment import Multisegment
+    return ((Segment.from_raw(raw[0])
+             if len(raw) == 1
+             else Multisegment.from_raw(raw))
+            if raw
+            else EMPTY)

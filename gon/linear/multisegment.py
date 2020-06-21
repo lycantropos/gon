@@ -24,7 +24,8 @@ from gon.primitive import (Point,
                            RawPoint)
 from .hints import RawMultisegment
 from .segment import Segment
-from .utils import relate_multipoint_to_linear_compound
+from .utils import (from_raw_multisegment,
+                    relate_multipoint_to_linear_compound)
 
 
 class Multisegment(Indexable, Linear):
@@ -469,22 +470,14 @@ class Multisegment(Indexable, Linear):
         if segments_cross_or_overlap(self._raw):
             raise ValueError('Crossing or overlapping segments found.')
 
-    @classmethod
-    def _from_raw_multisegment(cls, raw: RawMultisegment) -> Compound:
-        return ((Segment.from_raw(raw[0])
-                 if len(raw) == 1
-                 else cls.from_raw(raw))
-                if raw
-                else EMPTY)
-
     def _intersect_with_multipoint(self, other: Multipoint) -> Compound:
         points = [point for point in other.points if point in self]
         return Multipoint(*points) if points else EMPTY
 
     def _intersect_with_raw_multisegment(self, other_raw: RawMultisegment
                                          ) -> Compound:
-        return self._from_raw_multisegment(intersect_multisegments(self._raw,
-                                                                   other_raw))
+        return from_raw_multisegment(intersect_multisegments(self._raw,
+                                                             other_raw))
 
     def _subtract_from_multipoint(self, other: Multipoint) -> Compound:
         points = [point for point in other.points if point not in self]
@@ -492,13 +485,13 @@ class Multisegment(Indexable, Linear):
 
     def _subtract_raw_multisegment(self, other_raw: RawMultisegment
                                    ) -> Compound:
-        return self._from_raw_multisegment(subtract_multisegments(self._raw,
-                                                                  other_raw))
+        return from_raw_multisegment(subtract_multisegments(self._raw,
+                                                            other_raw))
 
     def _subtract_from_raw_multisegment(self, other_raw: RawMultisegment
                                         ) -> Compound:
-        return self._from_raw_multisegment(subtract_multisegments(other_raw,
-                                                                  self._raw))
+        return from_raw_multisegment(subtract_multisegments(other_raw,
+                                                            self._raw))
 
 
 def raw_locate_point(raw_multisegment: RawMultisegment,
