@@ -50,6 +50,12 @@ class Compound(Geometry):
         Checks if the geometry is a strict subset of the other.
         """
 
+    @abstractmethod
+    def __sub__(self, other: 'Compound') -> 'Compound':
+        """
+        Returns difference of the geometry with the other geometry.
+        """
+
     def disjoint(self, other: 'Compound') -> bool:
         """
         Checks if the geometry is disjoint with the other.
