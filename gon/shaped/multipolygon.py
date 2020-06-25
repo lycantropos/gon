@@ -6,7 +6,8 @@ from typing import (List,
 from clipping.planar import (intersect_multipolygons,
                              intersect_multisegment_with_multipolygon,
                              subtract_multipolygon_from_multisegment,
-                             subtract_multipolygons)
+                             subtract_multipolygons,
+                             unite_multipolygons)
 from locus import r
 from orient.planar import (contour_in_multipolygon,
                            multipolygon_in_multipolygon,
@@ -283,6 +284,35 @@ class Multipolygon(Indexable, Shaped):
                                                 Relation.COMPOSITE)
                      if isinstance(other, Compound)
                      else NotImplemented))
+
+    def __or__(self, other: Compound) -> Compound:
+        """
+        Returns union of the multipolygon with the other geometry.
+
+        Time complexity:
+            ``O(vertices_count * log vertices_count)``
+        Memory complexity:
+            ``O(vertices_count)``
+
+        where ``vertices_count = sum(len(polygon.border.vertices)\
+ + sum(len(hole.vertices) for hole in polygon.holes)\
+ for polygon in self.polygons)``.
+
+        >>> multipolygon = Multipolygon.from_raw(
+        ...         [([(0, 0), (6, 0), (6, 6), (0, 6)],
+        ...           [[(2, 2), (2, 4), (4, 4), (4, 2)]])])
+        >>> (multipolygon | multipolygon
+        ...  == Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
+        ...                      [[(2, 2), (2, 4), (4, 4), (4, 2)]])))
+        True
+        """
+        return (self._unite_with_raw_multipolygon([other.raw()])
+                if isinstance(other, Polygon)
+                else (self._unite_with_raw_multipolygon(other._raw)
+                      if isinstance(other, Multipolygon)
+                      else NotImplemented))
+
+    __ror__ = __or__
 
     def __rsub__(self, other: Compound) -> Compound:
         """
@@ -649,6 +679,10 @@ class Multipolygon(Indexable, Shaped):
                                    ) -> Compound:
         return from_raw_multipolygon(subtract_multipolygons(self._raw,
                                                             other_raw))
+
+    def _unite_with_raw_multipolygon(self, other_raw: RawMultipolygon
+                                     ) -> Compound:
+        return from_raw_multipolygon(unite_multipolygons(self._raw, other_raw))
 
 
 def locate_point_in_polygons(polygons: Sequence[Polygon],
