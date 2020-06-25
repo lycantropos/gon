@@ -4,9 +4,6 @@ from typing import (Callable,
                     Tuple)
 
 from hypothesis import strategies
-from lz.functional import (identity,
-                           to_constant)
-from lz.iterating import flatten
 
 from gon.compound import Compound
 from gon.degenerate import EMPTY
@@ -27,7 +24,10 @@ from tests.strategies import (coordinates_strategies,
                               coordinates_to_polygons,
                               coordinates_to_segments,
                               rational_coordinates_strategies)
-from tests.utils import Strategy
+from tests.utils import (Strategy,
+                         flatten,
+                         identity,
+                         to_constant)
 
 CompoundsFactory = Callable[[Strategy[Coordinate]], Strategy[Compound]]
 

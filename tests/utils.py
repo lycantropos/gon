@@ -1,20 +1,15 @@
 from fractions import Fraction
 from functools import partial
-from itertools import repeat
-from typing import (Callable,
-                    Hashable,
+from itertools import (chain,
+                       repeat)
+from typing import (Any,
+                    Callable,
                     Iterable,
-                    Tuple)
+                    Tuple,
+                    TypeVar)
 
 from hypothesis import strategies
 from hypothesis.strategies import SearchStrategy
-from lz.functional import (cleave,
-                           compose,
-                           pack)
-from lz.hints import (Domain,
-                      Map,
-                      Range)
-from lz.replication import replicator
 
 from gon.discrete import Multipoint
 from gon.hints import Coordinate
@@ -24,6 +19,8 @@ from gon.linear import (Contour,
 from gon.linear.utils import shift_sequence
 from gon.primitive import Point
 
+Domain = TypeVar('Domain')
+Range = TypeVar('Range')
 Strategy = SearchStrategy
 
 
@@ -35,25 +32,18 @@ def implication(antecedent: bool, consequent: bool) -> bool:
     return not antecedent or consequent
 
 
-def unique_everseen(iterable: Iterable[Domain],
-                    *,
-                    key: Map[Domain, Hashable] = None) -> Iterable[Domain]:
-    seen = set()
-    seen_add = seen.add
-    if key is None:
-        for element in iterable:
-            if element not in seen:
-                seen_add(element)
-                yield element
-    else:
-        for element in iterable:
-            value = key(element)
-            if value not in seen:
-                seen_add(value)
-                yield element
+flatten = chain.from_iterable
 
 
-triplicate = replicator(3)
+def identity(argument: Domain) -> Domain:
+    return argument
+
+
+def to_constant(value: Domain) -> Callable[..., Domain]:
+    def constant(*_: Any, **__: Any) -> Domain:
+        return value
+
+    return constant
 
 
 def to_tuples(elements: Strategy[Domain],
@@ -72,7 +62,19 @@ to_triplets = partial(to_tuples,
 def cleave_in_tuples(*functions: Callable[[Strategy[Domain]], Strategy[Range]]
                      ) -> Callable[[Strategy[Domain]],
                                    Strategy[Tuple[Range, ...]]]:
-    return compose(pack(strategies.tuples), cleave(*functions))
+    def cleaved(base: Strategy[Domain]) -> Strategy[Tuple[Range, ...]]:
+        return strategies.tuples(*[function(base) for function in functions])
+
+    return cleaved
+
+
+def pack(function: Callable[..., Range]
+         ) -> Callable[[Iterable[Domain]], Range]:
+    return partial(apply, function)
+
+
+def apply(function: Callable[..., Range], args: Tuple[Domain, ...]) -> Range:
+    return function(*args)
 
 
 def scale_segment(segment: Segment,
