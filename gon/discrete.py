@@ -207,6 +207,27 @@ class Multipoint(Compound):
                 if isinstance(other, Compound)
                 else NotImplemented)
 
+    def __or__(self, other: Compound) -> Compound:
+        """
+        Returns union of the multipoint with the other geometry.
+
+        Time complexity:
+            ``O(points_count)``
+        Memory complexity:
+            ``O(points_count)``
+
+        where ``points_count = len(self.points)``.
+
+        >>> multipoint = Multipoint.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> multipoint | multipoint == multipoint
+        True
+        """
+        return (Multipoint(*(self._points_set | other._points_set))
+                if isinstance(other, Multipoint)
+                else NotImplemented)
+
+    __ror__ = __or__
+
     def __sub__(self, other: Compound) -> Compound:
         """
         Returns intersection of the multipoint with the other geometry.
