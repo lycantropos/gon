@@ -7,14 +7,14 @@ from typing import (List,
 
 from hypothesis import strategies
 from hypothesis_geometry import planar
-from lz.functional import identity
 
 from gon.hints import Coordinate
 from gon.linear import vertices
 from gon.linear.hints import Vertices
 from gon.primitive import (Point,
                            RawPoint)
-from tests.utils import Strategy
+from tests.utils import (Strategy,
+                         identity)
 from .base import coordinates_strategies
 from .factories import coordinates_to_points
 

@@ -3,16 +3,17 @@ from typing import Tuple
 
 from hypothesis import strategies
 from hypothesis_geometry import planar
-from lz.functional import pack
 
 from gon.discrete import Multipoint
 from gon.hints import Coordinate
 from gon.primitive import Point
 from tests.strategies import (coordinates_strategies,
                               coordinates_to_multipoints,
-                              coordinates_to_points, invalid_points,
+                              coordinates_to_points,
+                              invalid_points,
                               repeated_raw_points)
 from tests.utils import (Strategy,
+                         pack,
                          to_pairs,
                          to_triplets)
 

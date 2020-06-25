@@ -2,7 +2,6 @@ from typing import Optional
 
 from hypothesis import strategies
 from hypothesis_geometry import planar
-from lz.functional import pack
 
 from gon.discrete import Multipoint
 from gon.hints import Coordinate
@@ -12,7 +11,8 @@ from gon.linear import (Contour,
 from gon.primitive import Point
 from gon.shaped import (Multipolygon,
                         Polygon)
-from tests.utils import Strategy
+from tests.utils import (Strategy,
+                         pack)
 
 
 def coordinates_to_points(coordinates: Strategy[Coordinate]

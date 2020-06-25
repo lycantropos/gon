@@ -3,14 +3,15 @@ from itertools import repeat
 
 from hypothesis import strategies
 from hypothesis_geometry import planar
-from lz.functional import pack
 
-from gon.shaped import Multipolygon, Polygon
+from gon.shaped import Multipolygon
 from tests.strategies import (coordinates_strategies,
                               coordinates_to_multipolygons,
                               coordinates_to_points,
-                              coordinates_to_polygons, invalid_polygons)
+                              coordinates_to_polygons,
+                              invalid_polygons)
 from tests.utils import (cleave_in_tuples,
+                         pack,
                          to_pairs,
                          to_triplets)
 

@@ -6,7 +6,6 @@ from typing import (List,
 
 from hypothesis import strategies
 from hypothesis_geometry import planar
-from lz.functional import pack
 
 from gon.linear import (Multisegment,
                         Segment)
@@ -19,6 +18,7 @@ from tests.strategies import (coordinates_strategies,
 from tests.utils import (Strategy,
                          cleave_in_tuples,
                          divide_by_int,
+                         pack,
                          to_pairs,
                          to_triplets)
 
