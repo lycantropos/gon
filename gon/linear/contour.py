@@ -2,7 +2,8 @@ from functools import partial
 
 from bentley_ottmann.planar import edges_intersect
 from clipping.planar import (intersect_multisegments,
-                             subtract_multisegments)
+                             subtract_multisegments,
+                             unite_multisegments)
 from orient.planar import (contour_in_contour,
                            multisegment_in_contour,
                            point_in_contour,
@@ -264,6 +265,35 @@ class Contour(Indexable, Linear):
                       else other > self)
                      if isinstance(other, Compound)
                      else NotImplemented))
+
+    def __or__(self, other: Compound) -> Compound:
+        """
+        Returns union of the contour with the other geometry.
+
+        Time complexity:
+            ``O(vertices_count * log vertices_count)``
+        Memory complexity:
+            ``O(vertices_count)``
+
+        where ``vertices_count = len(self.vertices)``.
+
+        >>> contour = Contour.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> (contour | contour
+        ...  == Multisegment.from_raw([((0, 0), (1, 0)), ((1, 0), (0, 1)),
+        ...                            ((0, 1), (0, 0))]))
+        True
+        """
+        return (self._unite_with_raw_multisegment([other.raw()])
+                if isinstance(other, Segment)
+                else (self._unite_with_raw_multisegment(other.raw())
+                      if isinstance(other, Multisegment)
+                      else
+                      (self._unite_with_raw_multisegment(
+                              to_pairs_chain(other._raw))
+                       if isinstance(other, Contour)
+                       else NotImplemented)))
+
+    __ror__ = __or__
 
     def __rsub__(self, other: Compound) -> Compound:
         """
@@ -570,6 +600,11 @@ class Contour(Indexable, Linear):
                                         ) -> Compound:
         return from_raw_multisegment(subtract_multisegments(
                 other_raw, to_pairs_chain(self._raw)))
+
+    def _unite_with_raw_multisegment(self, other_raw: RawMultisegment
+                                     ) -> Compound:
+        return from_raw_multisegment(unite_multisegments(
+                to_pairs_chain(self._raw), other_raw))
 
 
 def raw_locate_point(raw_contour: RawContour, raw_point: RawPoint) -> Location:
