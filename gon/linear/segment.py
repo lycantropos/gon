@@ -4,7 +4,8 @@ from orient.planar import (point_in_segment,
                            segment_in_segment)
 from reprit.base import generate_repr
 from robust.hints import Point
-from robust.linear import segments_intersections
+from robust.linear import (segments_intersection,
+                           segments_intersections)
 
 from gon.compound import (Compound,
                           Linear,
@@ -228,6 +229,25 @@ class Segment(Compound, Linear):
                      if isinstance(other, Compound)
                      else NotImplemented))
 
+    def __or__(self, other: Compound) -> Compound:
+        """
+        Returns union of the segment with the other geometry.
+
+        Time complexity:
+            ``O(1)``
+        Memory complexity:
+            ``O(1)``
+
+        >>> segment = Segment.from_raw(((0, 0), (2, 0)))
+        >>> segment | segment == segment
+        True
+        """
+        return (self._unite_with_segment(other)
+                if isinstance(other, Segment)
+                else NotImplemented)
+
+    __ror__ = __or__
+
     def __rsub__(self, other: Compound) -> Compound:
         """
         Returns difference of the other geometry with the segment.
@@ -408,6 +428,21 @@ class Segment(Compound, Linear):
                 if intersections
                 else EMPTY)
 
+    def _unite_with_segment(self, other: 'Segment') -> Compound:
+        from .multisegment import Multisegment
+        relation = segment_in_segment(self._raw, other._raw)
+        return (self
+                if relation is Relation.EQUAL or relation is Relation.COMPOSITE
+                else (other
+                      if relation is Relation.COMPONENT
+                      else
+                      (_raw_unite_overlap(self._raw, other._raw)
+                       if relation is Relation.OVERLAP
+                       else (Multisegment.from_raw(
+                              _raw_unite_cross(self._raw, other._raw))
+                             if relation is Relation.CROSS
+                             else Multisegment(self, other)))))
+
     def _subtract_from_multipoint(self, other: Multipoint) -> Compound:
         points = [point for point in other.points if point not in self]
         return Multipoint(*points) if points else EMPTY
@@ -425,6 +460,12 @@ class Segment(Compound, Linear):
                        if relation is Relation.OVERLAP
                        else from_raw_multisegment(_raw_subtract_composite(
                         self._raw, other._raw)))))
+
+
+def raw_locate_point(raw_segment: RawSegment, raw_point: RawPoint) -> Location:
+    return (Location.BOUNDARY
+            if point_in_segment(raw_point, raw_segment)
+            else Location.EXTERIOR)
 
 
 def _raw_subtract_overlap(minuend: RawSegment,
@@ -449,7 +490,18 @@ def _raw_subtract_composite(minuend: RawSegment,
                   else [(left_start, right_start)]))
 
 
-def raw_locate_point(raw_segment: RawSegment, raw_point: RawPoint) -> Location:
-    return (Location.BOUNDARY
-            if point_in_segment(raw_point, raw_segment)
-            else Location.EXTERIOR)
+def _raw_unite_overlap(first_addend: RawSegment,
+                       second_addend: RawSegment) -> RawSegment:
+    start, _, _, end = sorted(first_addend + second_addend)
+    return start, end
+
+
+def _raw_unite_cross(first_addend: RawSegment,
+                     second_addend: RawSegment) -> RawMultisegment:
+    cross_point = segments_intersection(first_addend, second_addend)
+    first_addend_start, first_addend_end = first_addend
+    second_addend_start, second_addend_end = second_addend
+    return [(first_addend_start, cross_point),
+            (second_addend_start, cross_point),
+            (cross_point, first_addend_end),
+            (cross_point, second_addend_end)]
