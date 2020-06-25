@@ -26,6 +26,14 @@ class Mix(Indexable):
     def __init__(self, multipoint: Maybe[Multipoint],
                  multisegment: Maybe[Multisegment],
                  multipolygon: Maybe[Multipolygon]) -> None:
+        """
+        Initializes mix.
+
+        Time complexity:
+            ``O(1)``
+        Memory complexity:
+            ``O(1)``
+        """
         self._multipoint = multipoint
         self._multisegment = multisegment
         self._multipolygon = multipolygon
