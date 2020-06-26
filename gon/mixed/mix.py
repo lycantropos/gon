@@ -204,8 +204,14 @@ class Mix(Indexable):
         """
         return (other is EMPTY
                 or self == other
-                or (self.relate(other) in (Relation.EQUAL, Relation.COMPONENT,
-                                           Relation.ENCLOSED, Relation.WITHIN)
+                or ((self._multipolygon is not EMPTY
+                     or not isinstance(other, Shaped)
+                     and (not isinstance(other, Mix)
+                          or other._multipolygon is EMPTY))
+                    and self.relate(other) in (Relation.EQUAL,
+                                               Relation.COMPONENT,
+                                               Relation.ENCLOSED,
+                                               Relation.WITHIN)
                     if isinstance(other, Compound)
                     else NotImplemented))
 
