@@ -259,7 +259,7 @@ class Mix(Indexable):
 
     def __hash__(self) -> int:
         """
-        Returns hash value of the polygon.
+        Returns hash value of the mix.
 
         Time complexity:
             ``O(components_size)``
