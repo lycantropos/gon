@@ -626,6 +626,36 @@ class Mix(Indexable):
         return Location.EXTERIOR
 
     def raw(self) -> RawMix:
+        """
+        Returns the mix as combination of Python built-ins.
+
+        Time complexity:
+            ``O(elements_count)``
+        Memory complexity:
+            ``O(elements_count)``
+
+        where ``elements_count = multipoint_size + multisegment_size\
+ + multipolygon_vertices_count``,
+        ``multipoint_size = len(points)``,
+        ``multisegment_size = len(segments)``,
+        ``multipolygon_vertices_count = sum(len(polygon.border.vertices)\
+ + sum(len(hole.vertices) for hole in polygon.holes)\
+ for polygon in polygons)``,
+        ``points = [] if self.multipoint is EMPTY\
+ else self.multipoint.points``,
+        ``segments = [] if self.multisegment is EMPTY\
+ else self.multisegment.segments``,
+        ``polygons = [] if self.multipolygon is EMPTY\
+ else self.multipolygon.polygons``.
+
+        >>> mix = Mix.from_raw(([(3, 3), (7, 7)],
+        ...                     [((0, 6), (0, 8)), ((6, 6), (6, 8))],
+        ...                     [([(0, 0), (6, 0), (6, 6), (0, 6)],
+        ...                       [[(2, 2), (2, 4), (4, 4), (4, 2)]])]))
+        >>> mix.raw()
+        ([(3, 3), (7, 7)], [((0, 6), (0, 8)), ((6, 6), (6, 8))],\
+ [([(0, 0), (6, 0), (6, 6), (0, 6)], [[(2, 2), (2, 4), (4, 4), (4, 2)]])])
+        """
         return (self._multipoint.raw(), self._multisegment.raw(),
                 self._multipolygon.raw())
 
