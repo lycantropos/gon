@@ -117,9 +117,8 @@ class Mix(Indexable):
                      else NotImplemented))
 
     def __rsub__(self, other: Compound) -> Compound:
-        return _from_mix_components(other - self._multipoint,
-                                    other - self._multisegment,
-                                    other - self._multipolygon)
+        return ((other - self._multipoint) & (other - self._multisegment)
+                & other - self._multipolygon)
 
     def __sub__(self, other: Compound) -> Compound:
         return _from_mix_components(self._multipoint - other,
