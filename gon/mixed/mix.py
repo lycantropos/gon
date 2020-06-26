@@ -52,10 +52,10 @@ class Mix(Indexable):
             ``O(elements_count)``
 
         where ``elements_count = multipoint_size + multisegment_size\
- + multipolygon_size``,
+ + multipolygon_vertices_count``,
         ``multipoint_size = len(points)``,
         ``multisegment_size = len(segments)``,
-        ``multipolygon_size = sum(len(polygon.border.vertices)\
+        ``multipolygon_vertices_count = sum(len(polygon.border.vertices)\
  + sum(len(hole.vertices) for hole in polygon.holes)\
  for polygon in polygons)``,
         ``points = [] if self.multipoint is EMPTY\
@@ -100,10 +100,10 @@ class Mix(Indexable):
             ``O(1)``
 
         where ``elements_count = multipoint_size + multisegment_size\
- + multipolygon_size``,
+ + multipolygon_vertices_count``,
         ``multipoint_size = len(points)``,
         ``multisegment_size = len(segments)``,
-        ``multipolygon_size = sum(len(polygon.border.vertices)\
+        ``multipolygon_vertices_count = sum(len(polygon.border.vertices)\
  + sum(len(hole.vertices) for hole in polygon.holes)\
  for polygon in polygons)``,
         ``points = [] if self.multipoint is EMPTY\
@@ -146,10 +146,10 @@ class Mix(Indexable):
             ``O(1)``
 
         where ``elements_count = multipoint_size + multisegment_size\
- + multipolygon_size``,
+ + multipolygon_vertices_count``,
         ``multipoint_size = len(points)``,
         ``multisegment_size = len(segments)``,
-        ``multipolygon_size = sum(len(polygon.border.vertices)\
+        ``multipolygon_vertices_count = sum(len(polygon.border.vertices)\
  + sum(len(hole.vertices) for hole in polygon.holes)\
  for polygon in polygons)``,
         ``points = [] if self.multipoint is EMPTY\
@@ -182,10 +182,10 @@ class Mix(Indexable):
             ``O(1)``
 
         where ``elements_count = multipoint_size + multisegment_size\
- + multipolygon_size``,
+ + multipolygon_vertices_count``,
         ``multipoint_size = len(points)``,
         ``multisegment_size = len(segments)``,
-        ``multipolygon_size = sum(len(polygon.border.vertices)\
+        ``multipolygon_vertices_count = sum(len(polygon.border.vertices)\
  + sum(len(hole.vertices) for hole in polygon.holes)\
  for polygon in polygons)``,
         ``points = [] if self.multipoint is EMPTY\
@@ -225,10 +225,10 @@ class Mix(Indexable):
             ``O(1)``
 
         where ``elements_count = multipoint_size + multisegment_size\
- + multipolygon_size``,
+ + multipolygon_vertices_count``,
         ``multipoint_size = len(points)``,
         ``multisegment_size = len(segments)``,
-        ``multipolygon_size = sum(len(polygon.border.vertices)\
+        ``multipolygon_vertices_count = sum(len(polygon.border.vertices)\
  + sum(len(hole.vertices) for hole in polygon.holes)\
  for polygon in polygons)``,
         ``points = [] if self.multipoint is EMPTY\
@@ -270,10 +270,10 @@ class Mix(Indexable):
             ``O(1)``
 
         where ``elements_count = multipoint_size + multisegment_size\
- + multipolygon_size``,
+ + multipolygon_vertices_count``,
         ``multipoint_size = len(points)``,
         ``multisegment_size = len(segments)``,
-        ``multipolygon_size = sum(len(polygon.border.vertices)\
+        ``multipolygon_vertices_count = sum(len(polygon.border.vertices)\
  + sum(len(hole.vertices) for hole in polygon.holes)\
  for polygon in polygons)``,
         ``points = [] if self.multipoint is EMPTY\
@@ -313,10 +313,10 @@ class Mix(Indexable):
             ``O(1)``
 
         where ``elements_count = multipoint_size + multisegment_size\
- + multipolygon_size``,
+ + multipolygon_vertices_count``,
         ``multipoint_size = len(points)``,
         ``multisegment_size = len(segments)``,
-        ``multipolygon_size = sum(len(polygon.border.vertices)\
+        ``multipolygon_vertices_count = sum(len(polygon.border.vertices)\
  + sum(len(hole.vertices) for hole in polygon.holes)\
  for polygon in polygons)``,
         ``points = [] if self.multipoint is EMPTY\
