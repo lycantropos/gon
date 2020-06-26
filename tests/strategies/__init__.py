@@ -7,6 +7,7 @@ from .factories import (coordinates_to_contours,
                         coordinates_to_multisegments,
                         coordinates_to_points,
                         coordinates_to_polygons,
+                        coordinates_to_raw_mixes,
                         coordinates_to_segments)
 from .linear import (contours_with_repeated_points,
                      invalid_segments,
