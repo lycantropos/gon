@@ -1,7 +1,13 @@
+from itertools import chain
+
 from hypothesis import strategies
 
 from gon.degenerate import Empty
+from gon.discrete import Multipoint
+from gon.linear import Multisegment
+from gon.linear.utils import to_pairs_chain
 from gon.mixed import Mix
+from gon.shaped import Multipolygon
 from tests.strategies import (coordinates_strategies,
                               coordinates_to_mixes,
                               coordinates_to_multipoints,
@@ -12,7 +18,10 @@ from tests.strategies import (coordinates_strategies,
                               invalid_multipoints,
                               invalid_multipolygons,
                               invalid_multisegments)
-from tests.utils import (cleave_in_tuples,
+from tests.utils import (Strategy,
+                         cleave_in_tuples,
+                         flatten,
+                         sub_lists,
                          to_pairs,
                          to_triplets)
 
@@ -21,9 +30,26 @@ mixes = coordinates_strategies.flatmap(coordinates_to_mixes)
 empty_geometries = strategies.builds(Empty)
 multipoints = coordinates_strategies.flatmap(coordinates_to_multipoints)
 multisegments = coordinates_strategies.flatmap(coordinates_to_multisegments)
-multipolygons = coordinates_strategies.map(coordinates_to_multipolygons)
-invalid_mixes = (strategies.builds(Mix, empty_geometries | multipoints,
-                                   empty_geometries, empty_geometries)
+multipolygons = coordinates_strategies.flatmap(coordinates_to_multipolygons)
+
+
+def multipolygon_to_invalid_mix(multipolygon: Multipolygon) -> Strategy[Mix]:
+    raw_vertices = list(flatten(chain(polygon.border.raw(),
+                                      flatten(hole.raw()
+                                              for hole in polygon.holes))
+                                for polygon in multipolygon.polygons))
+    return strategies.builds(Mix,
+                             empty_geometries
+                             | (sub_lists(raw_vertices)
+                                .map(Multipoint.from_raw)),
+                             sub_lists(to_pairs_chain(raw_vertices))
+                             .map(Multisegment.from_raw),
+                             strategies.just(multipolygon))
+
+
+invalid_mixes = (multipolygons.flatmap(multipolygon_to_invalid_mix)
+                 | strategies.builds(Mix, empty_geometries | multipoints,
+                                     empty_geometries, empty_geometries)
                  | strategies.builds(Mix, empty_geometries,
                                      empty_geometries | multisegments,
                                      empty_geometries)

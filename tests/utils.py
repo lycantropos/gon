@@ -2,10 +2,12 @@ from fractions import Fraction
 from functools import partial
 from itertools import (chain,
                        repeat)
+from operator import getitem
 from typing import (Any,
                     Callable,
                     Iterable,
                     List,
+                    Sequence,
                     Tuple,
                     TypeVar)
 
@@ -71,6 +73,12 @@ def cleave_in_tuples(*functions: Callable[[Strategy[Domain]], Strategy[Range]]
         return strategies.tuples(*[function(base) for function in functions])
 
     return cleaved
+
+
+def sub_lists(sequence: Sequence[Domain]) -> SearchStrategy[List[Domain]]:
+    return strategies.builds(getitem,
+                             strategies.permutations(sequence),
+                             strategies.slices(max(len(sequence), 1)))
 
 
 def pack(function: Callable[..., Range]
