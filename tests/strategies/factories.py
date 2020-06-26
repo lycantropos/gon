@@ -57,24 +57,28 @@ def coordinates_to_contours(coordinates: Strategy[Coordinate],
 
 def coordinates_to_mixes(coordinates: Strategy[Coordinate]
                          ) -> Strategy[Contour]:
+    return coordinates_to_raw_mixes(coordinates).map(Mix.from_raw)
+
+
+def coordinates_to_raw_mixes(coordinates: Strategy[Coordinate]
+                             ) -> Strategy[RawMix]:
     def coordinate_to_raw_empty(index: int, raw_mix: RawMix) -> RawMix:
         return (raw_mix
                 if raw_mix[index]
                 else raw_mix[:index] + (RAW_EMPTY,) + raw_mix[index + 1:])
 
-    return (((planar.mixes(coordinates,
-                           min_multipoint_size=1,
-                           min_multisegment_size=1)
-              .map(partial(coordinate_to_raw_empty, 2)))
-             | (planar.mixes(coordinates,
-                             min_multipoint_size=1,
-                             min_multipolygon_size=1)
-                .map(partial(coordinate_to_raw_empty, 1)))
-             | (planar.mixes(coordinates,
-                             min_multisegment_size=1,
-                             min_multipolygon_size=1)
-                .map(partial(coordinate_to_raw_empty, 0))))
-            .map(Mix.from_raw))
+    return ((planar.mixes(coordinates,
+                          min_multipoint_size=1,
+                          min_multisegment_size=1)
+             .map(partial(coordinate_to_raw_empty, 2)))
+            | (planar.mixes(coordinates,
+                            min_multipoint_size=1,
+                            min_multipolygon_size=1)
+               .map(partial(coordinate_to_raw_empty, 1)))
+            | (planar.mixes(coordinates,
+                            min_multisegment_size=1,
+                            min_multipolygon_size=1)
+               .map(partial(coordinate_to_raw_empty, 0))))
 
 
 def coordinates_to_polygons(coordinates: Strategy[Coordinate],
