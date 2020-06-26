@@ -373,6 +373,28 @@ class Mix(Indexable):
                      else NotImplemented))
 
     def __rsub__(self, other: Compound) -> Compound:
+        """
+        Returns difference of the other geometry with the mix.
+
+        Time complexity:
+            ``O(elements_count * log elements_count)``
+        Memory complexity:
+            ``O(1)``
+
+        where ``elements_count = multipoint_size + multisegment_size\
+ + multipolygon_vertices_count``,
+        ``multipoint_size = len(points)``,
+        ``multisegment_size = len(segments)``,
+        ``multipolygon_vertices_count = sum(len(polygon.border.vertices)\
+ + sum(len(hole.vertices) for hole in polygon.holes)\
+ for polygon in polygons)``,
+        ``points = [] if self.multipoint is EMPTY\
+ else self.multipoint.points``,
+        ``segments = [] if self.multisegment is EMPTY\
+ else self.multisegment.segments``,
+        ``polygons = [] if self.multipolygon is EMPTY\
+ else self.multipolygon.polygons``.
+        """
         return ((other - self._multipoint) & (other - self._multisegment)
                 & other - self._multipolygon)
 
