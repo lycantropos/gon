@@ -73,9 +73,8 @@ class Mix(Indexable):
     def __ge__(self, other: Compound) -> bool:
         return (other is EMPTY
                 or self == other
-                or (self.relate(other) in (
-                    Relation.EQUAL, Relation.COMPONENT,
-                    Relation.ENCLOSED, Relation.WITHIN)
+                or (self.relate(other) in (Relation.EQUAL, Relation.COMPONENT,
+                                           Relation.ENCLOSED, Relation.WITHIN)
                     if isinstance(other, Compound)
                     else NotImplemented))
 
@@ -83,8 +82,7 @@ class Mix(Indexable):
         return (other is EMPTY
                 or self != other
                 and (self.relate(other) in (Relation.COMPONENT,
-                                            Relation.ENCLOSED,
-                                            Relation.WITHIN)
+                                            Relation.ENCLOSED, Relation.WITHIN)
                      if isinstance(other, Compound)
                      else NotImplemented))
 
