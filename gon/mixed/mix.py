@@ -902,10 +902,10 @@ def _from_mix_components(multipoint: Maybe[Multipoint],
                          shaped: Maybe[Shaped]) -> Compound:
     return (Mix(multipoint,
                 linear
-                if isinstance(linear, Multisegment)
+                if linear is EMPTY or isinstance(linear, Multisegment)
                 else Multisegment(linear),
                 shaped
-                if isinstance(shaped, Multipolygon)
+                if shaped is EMPTY or isinstance(shaped, Multipolygon)
                 else Multipolygon(shaped))
             if (((multipoint is not EMPTY)
                  + (linear is not EMPTY)
