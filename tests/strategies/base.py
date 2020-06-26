@@ -7,9 +7,10 @@ from typing import Optional
 from hypothesis import strategies
 
 from gon.hints import Coordinate
-from tests.utils import Strategy
+from tests.utils import (MAX_COORDINATE_EXPONENT,
+                         Strategy)
 
-MAX_COORDINATE = 10 ** 15
+MAX_COORDINATE = 10 ** MAX_COORDINATE_EXPONENT
 MIN_COORDINATE = -MAX_COORDINATE
 
 
