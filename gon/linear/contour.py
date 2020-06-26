@@ -1,7 +1,7 @@
 from functools import partial
 
 from bentley_ottmann.planar import edges_intersect
-from clipping.planar import (intersect_multisegments,
+from clipping.planar import (complete_intersect_multisegments,
                              subtract_multisegments,
                              unite_multisegments)
 from orient.planar import (contour_in_contour,
@@ -31,7 +31,8 @@ from .hints import (RawContour,
                     Vertices)
 from .multisegment import Multisegment
 from .segment import Segment
-from .utils import (from_raw_multisegment,
+from .utils import (from_raw_mix_components,
+                    from_raw_multisegment,
                     relate_multipoint_to_linear_compound,
                     shift_sequence,
                     to_pairs_chain)
@@ -584,8 +585,9 @@ class Contour(Indexable, Linear):
 
     def _intersect_with_raw_multisegment(self, other_raw: RawMultisegment
                                          ) -> Compound:
-        return from_raw_multisegment(intersect_multisegments(
-                to_pairs_chain(self._raw), other_raw))
+        raw_multipoint, raw_multisegment, _ = complete_intersect_multisegments(
+                to_pairs_chain(self._raw), other_raw)
+        return from_raw_mix_components(raw_multipoint, raw_multisegment)
 
     def _subtract_from_multipoint(self, other: Multipoint) -> Compound:
         points = [point for point in other.points if point not in self]
