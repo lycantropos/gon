@@ -524,6 +524,22 @@ class Mix(Indexable):
 
     @property
     def multisegment(self) -> Maybe[Multisegment]:
+        """
+        Returns multisegment of the mix.
+
+        Time complexity:
+            ``O(1)``
+        Memory complexity:
+            ``O(1)``
+
+        >>> mix = Mix.from_raw(([(3, 3), (7, 7)],
+        ...                     [((0, 6), (0, 8)), ((6, 6), (6, 8))],
+        ...                     [([(0, 0), (6, 0), (6, 6), (0, 6)],
+        ...                       [[(2, 2), (2, 4), (4, 4), (4, 2)]])]))
+        >>> mix.multisegment == Multisegment(Segment(Point(0, 6), Point(0, 8)),
+        ...                                  Segment(Point(6, 6), Point(6, 8)))
+        True
+        """
         return self._multisegment
 
     def index(self) -> None:
