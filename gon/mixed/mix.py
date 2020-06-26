@@ -51,8 +51,7 @@ class Mix(Indexable):
         Memory complexity:
             ``O(elements_count)``
 
-        where
-        ``elements_count = multipoint_size + multisegment_size\
+        where ``elements_count = multipoint_size + multisegment_size\
  + multipolygon_size``,
         ``multipoint_size = len(points)``,
         ``multisegment_size = len(segments)``,
@@ -100,8 +99,7 @@ class Mix(Indexable):
         Memory complexity:
             ``O(1)``
 
-        where
-        ``elements_count = multipoint_size + multisegment_size\
+        where ``elements_count = multipoint_size + multisegment_size\
  + multipolygon_size``,
         ``multipoint_size = len(points)``,
         ``multisegment_size = len(segments)``,
