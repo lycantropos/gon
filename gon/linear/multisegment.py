@@ -2,7 +2,7 @@ from functools import partial
 from typing import List
 
 from bentley_ottmann.planar import segments_cross_or_overlap
-from clipping.planar import (intersect_multisegments,
+from clipping.planar import (complete_intersect_multisegments,
                              subtract_multisegments,
                              unite_multisegments)
 from orient.planar import (multisegment_in_multisegment,
@@ -25,7 +25,8 @@ from gon.primitive import (Point,
                            RawPoint)
 from .hints import RawMultisegment
 from .segment import Segment
-from .utils import (from_raw_multisegment,
+from .utils import (from_raw_mix_components,
+                    from_raw_multisegment,
                     relate_multipoint_to_linear_compound)
 
 
@@ -501,8 +502,9 @@ class Multisegment(Indexable, Linear):
 
     def _intersect_with_raw_multisegment(self, other_raw: RawMultisegment
                                          ) -> Compound:
-        return from_raw_multisegment(intersect_multisegments(self._raw,
-                                                             other_raw))
+        raw_multipoint, raw_multisegment, _ = complete_intersect_multisegments(
+                self._raw, other_raw)
+        return from_raw_mix_components(raw_multipoint, raw_multisegment)
 
     def _subtract_from_multipoint(self, other: Multipoint) -> Compound:
         points = [point for point in other.points if point not in self]

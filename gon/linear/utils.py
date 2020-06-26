@@ -7,7 +7,8 @@ from typing import (List,
 from gon.compound import (Compound,
                           Relation)
 from gon.degenerate import EMPTY
-from gon.discrete import Multipoint
+from gon.discrete import (Multipoint,
+                          RawMultipoint)
 from gon.hints import (Coordinate,
                        Domain)
 from gon.primitive import (Point,
@@ -59,6 +60,17 @@ def to_decimal(value: Coordinate) -> Decimal:
 def to_pairs_chain(sequence: Sequence[Domain]) -> List[Tuple[Domain, Domain]]:
     return [(sequence[index - 1], sequence[index])
             for index in range(len(sequence))]
+
+
+def from_raw_mix_components(raw_multipoint: RawMultipoint,
+                            raw_multisegment: RawMultisegment) -> Compound:
+    # importing here to avoid cyclic imports
+    from gon.mixed.mix import from_mix_components
+    return from_mix_components(Multipoint.from_raw(raw_multipoint)
+                               if raw_multipoint
+                               else EMPTY,
+                               from_raw_multisegment(raw_multisegment),
+                               EMPTY)
 
 
 def from_raw_multisegment(raw: RawMultisegment) -> Compound:
