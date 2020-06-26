@@ -258,6 +258,33 @@ class Mix(Indexable):
                      else NotImplemented))
 
     def __hash__(self) -> int:
+        """
+        Returns hash value of the polygon.
+
+        Time complexity:
+            ``O(components_size)``
+        Memory complexity:
+            ``O(1)``
+
+        where ``components_size = multipoint_size + multisegment_size\
+ + multipolygon_size``,
+        ``multipoint_size = len(points)``,
+        ``multisegment_size = len(segments)``,
+        ``multipolygon_size = len(polygons)``,
+        ``points = [] if self.multipoint is EMPTY\
+ else self.multipoint.points``,
+        ``segments = [] if self.multisegment is EMPTY\
+ else self.multisegment.segments``,
+        ``polygons = [] if self.multipolygon is EMPTY\
+ else self.multipolygon.polygons``.
+
+        >>> mix = Mix.from_raw(([(3, 3), (7, 7)],
+        ...                     [((0, 6), (0, 8)), ((6, 6), (6, 8))],
+        ...                     [([(0, 0), (6, 0), (6, 6), (0, 6)],
+        ...                       [[(2, 2), (2, 4), (4, 4), (4, 2)]])]))
+        >>> hash(mix) == hash(mix)
+        True
+        """
         return hash(self._components)
 
     def __le__(self, other: Compound) -> bool:
