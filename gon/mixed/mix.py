@@ -543,6 +543,32 @@ class Mix(Indexable):
         return self._multisegment
 
     def index(self) -> None:
+        """
+        Pre-processes mix to potentially improve queries.
+
+        Time complexity:
+            ``O(elements_count * log elements_count)`` expected,
+            ``O(elements_count ** 2)`` worst
+        Memory complexity:
+            ``O(elements_count)``
+
+        where ``elements_count = multisegment_size +\
+ multipolygon_vertices_count``,
+        ``multisegment_size = len(segments)``,
+        ``multipolygon_vertices_count = sum(len(polygon.border.vertices)\
+ + sum(len(hole.vertices) for hole in polygon.holes)\
+ for polygon in polygons)``,
+        ``segments = [] if self.multisegment is EMPTY\
+ else self.multisegment.segments``,
+        ``polygons = [] if self.multipolygon is EMPTY\
+ else self.multipolygon.polygons``.
+
+        >>> mix = Mix.from_raw(([(3, 3), (7, 7)],
+        ...                     [((0, 6), (0, 8)), ((6, 6), (6, 8))],
+        ...                     [([(0, 0), (6, 0), (6, 6), (0, 6)],
+        ...                       [[(2, 2), (2, 4), (4, 4), (4, 2)]])]))
+        >>> mix.index()
+        """
         if self._multisegment is not EMPTY:
             self._multisegment.index()
         if self._multipolygon is not EMPTY:
