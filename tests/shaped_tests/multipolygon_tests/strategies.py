@@ -14,7 +14,7 @@ from tests.utils import (cleave_in_tuples,
 raw_multipolygons = (coordinates_strategies
                      .flatmap(partial(planar.multipolygons,
                                       min_size=1)))
-multipolygons = coordinates_strategies.map(coordinates_to_multipolygons)
+multipolygons = coordinates_strategies.flatmap(coordinates_to_multipolygons)
 polygons = coordinates_strategies.flatmap(coordinates_to_polygons)
 invalid_multipolygons = invalid_multipolygons
 multipolygons_strategies = (coordinates_strategies
