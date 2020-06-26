@@ -481,6 +481,21 @@ class Mix(Indexable):
 
     @property
     def multipoint(self) -> Maybe[Multipoint]:
+        """
+        Returns multipoint of the mix.
+
+        Time complexity:
+            ``O(1)``
+        Memory complexity:
+            ``O(1)``
+
+        >>> mix = Mix.from_raw(([(3, 3), (7, 7)],
+        ...                     [((0, 6), (0, 8)), ((6, 6), (6, 8))],
+        ...                     [([(0, 0), (6, 0), (6, 6), (0, 6)],
+        ...                       [[(2, 2), (2, 4), (4, 4), (4, 2)]])]))
+        >>> mix.multipoint == Multipoint(Point(3, 3), Point(7, 7))
+        True
+        """
         return self._multipoint
 
     @property
