@@ -500,6 +500,26 @@ class Mix(Indexable):
 
     @property
     def multipolygon(self) -> Maybe[Multipolygon]:
+        """
+        Returns multipolygon of the mix.
+
+        Time complexity:
+            ``O(1)``
+        Memory complexity:
+            ``O(1)``
+
+        >>> mix = Mix.from_raw(([(3, 3), (7, 7)],
+        ...                     [((0, 6), (0, 8)), ((6, 6), (6, 8))],
+        ...                     [([(0, 0), (6, 0), (6, 6), (0, 6)],
+        ...                       [[(2, 2), (2, 4), (4, 4), (4, 2)]])]))
+        >>> from gon.linear import Contour
+        >>> (mix.multipolygon
+        ...  == Multipolygon(Polygon(Contour([Point(0, 0), Point(6, 0),
+        ...                                   Point(6, 6), Point(0, 6)]),
+        ...                  [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
+        ...                            Point(4, 2)])])))
+        True
+        """
         return self._multipolygon
 
     @property
