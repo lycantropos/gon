@@ -218,8 +218,13 @@ class Mix(Indexable):
     def __gt__(self, other: Compound) -> bool:
         return (other is EMPTY
                 or self != other
-                and (self.relate(other) in (Relation.COMPONENT,
-                                            Relation.ENCLOSED, Relation.WITHIN)
+                and ((self._multipolygon is not EMPTY
+                      or not isinstance(other, Shaped)
+                      and (not isinstance(other, Mix)
+                           or other._multipolygon is EMPTY))
+                     and self.relate(other) in (Relation.COMPONENT,
+                                                Relation.ENCLOSED,
+                                                Relation.WITHIN)
                      if isinstance(other, Compound)
                      else NotImplemented))
 
