@@ -1,9 +1,15 @@
 from hypothesis import given
 
 from gon.shaped import Polygon
+from tests.utils import equivalence
 from . import strategies
 
 
 @given(strategies.polygons)
-def test_convex_hull(polygon: Polygon) -> None:
-    assert polygon.perimeter >= polygon.convex_hull.perimeter
+def test_convexity(polygon: Polygon) -> None:
+    result = polygon.perimeter
+
+    is_polygon_convex = polygon.is_convex
+    convex_hull_perimeter = polygon.convex_hull.perimeter
+    assert equivalence(not is_polygon_convex, result > convex_hull_perimeter)
+    assert equivalence(is_polygon_convex, result == convex_hull_perimeter)
