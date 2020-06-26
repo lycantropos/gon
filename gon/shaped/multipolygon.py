@@ -3,8 +3,8 @@ from itertools import chain
 from typing import (List,
                     Sequence)
 
-from clipping.planar import (intersect_multipolygons,
-                             intersect_multisegment_with_multipolygon,
+from clipping.planar import (complete_intersect_multipolygons,
+                             complete_intersect_multisegment_with_multipolygon,
                              subtract_multipolygon_from_multisegment,
                              subtract_multipolygons,
                              unite_multipolygons)
@@ -35,7 +35,8 @@ from gon.linear.utils import (from_raw_multisegment,
 from gon.primitive import Point
 from .hints import RawMultipolygon
 from .polygon import Polygon
-from .utils import from_raw_multipolygon
+from .utils import (from_raw_mix_components,
+                    from_raw_multipolygon)
 
 
 class Multipolygon(Indexable, Shaped):
@@ -652,14 +653,15 @@ class Multipolygon(Indexable, Shaped):
 
     def _intersect_with_raw_multipolygon(self, other_raw: RawMultipolygon
                                          ) -> Compound:
-        return from_raw_multipolygon(intersect_multipolygons(self._raw,
-                                                             other_raw))
+        return from_raw_mix_components(
+                *complete_intersect_multipolygons(self._raw, other_raw))
 
     def _intersect_with_raw_multisegment(self,
                                          raw_multisegment: RawMultisegment
                                          ) -> Compound:
-        return from_raw_multisegment(intersect_multisegment_with_multipolygon(
-                raw_multisegment, self._raw))
+        return from_raw_mix_components(
+                *complete_intersect_multisegment_with_multipolygon(
+                        raw_multisegment, self._raw))
 
     def _subtract_from_multipoint(self, other: Multipoint) -> Compound:
         points = [point for point in other.points if point not in self]
