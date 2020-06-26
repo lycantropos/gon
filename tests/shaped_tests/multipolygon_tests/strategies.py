@@ -1,31 +1,22 @@
 from functools import partial
-from itertools import repeat
 
-from hypothesis import strategies
 from hypothesis_geometry import planar
 
-from gon.shaped import Multipolygon
 from tests.strategies import (coordinates_strategies,
                               coordinates_to_multipolygons,
                               coordinates_to_points,
                               coordinates_to_polygons,
-                              invalid_polygons)
+                              invalid_multipolygons)
 from tests.utils import (cleave_in_tuples,
-                         pack,
                          to_pairs,
                          to_triplets)
 
 raw_multipolygons = (coordinates_strategies
                      .flatmap(partial(planar.multipolygons,
                                       min_size=1)))
-multipolygons = raw_multipolygons.map(Multipolygon.from_raw)
+multipolygons = coordinates_strategies.map(coordinates_to_multipolygons)
 polygons = coordinates_strategies.flatmap(coordinates_to_polygons)
-repeated_polygons = (strategies.builds(repeat, polygons,
-                                       strategies.integers(2, 100))
-                     .map(list))
-invalid_multipolygons = (strategies.builds(pack(Multipolygon),
-                                           strategies.lists(invalid_polygons)
-                                           | repeated_polygons))
+invalid_multipolygons = invalid_multipolygons
 multipolygons_strategies = (coordinates_strategies
                             .map(coordinates_to_multipolygons))
 multipolygons_pairs = multipolygons_strategies.flatmap(to_pairs)

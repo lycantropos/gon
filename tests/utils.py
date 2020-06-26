@@ -5,6 +5,7 @@ from itertools import (chain,
 from typing import (Any,
                     Callable,
                     Iterable,
+                    List,
                     Tuple,
                     TypeVar)
 
@@ -134,3 +135,31 @@ def divide_by_int(dividend: Coordinate, divisor: int) -> Coordinate:
 def mix_to_components(mix: Mix
                       ) -> Tuple[Multipoint, Multisegment, Multipolygon]:
     return mix.multipoint, mix.multisegment, mix.multipolygon
+
+
+def segment_to_rotations(segment: Segment,
+                         pythagorean_triplets: List[Tuple[int, int, int]]
+                         ) -> List[Segment]:
+    return [segment] + [rotate_segment(segment, pythagorean_triplet)
+                        for pythagorean_triplet in pythagorean_triplets]
+
+
+def rotate_segment(segment: Segment,
+                   pythagorean_triplet: Tuple[int, int, int]) -> Segment:
+    area_sine, area_cosine, area = pythagorean_triplet
+    center_x, center_y = (divide_by_int(segment.start.x + segment.end.x, 2),
+                          divide_by_int(segment.start.y + segment.end.y, 2))
+    start_dx, start_dy = segment.start.x - center_x, segment.start.y - center_y
+    end_dx, end_dy = segment.end.x - center_x, segment.end.y - center_y
+    return Segment(Point(center_x + divide_by_int(area_cosine * start_dx
+                                                  - area_sine * start_dy,
+                                                  area),
+                         center_y + divide_by_int(area_sine * start_dx
+                                                  + area_cosine * start_dy,
+                                                  area)),
+                   Point(center_x + divide_by_int(area_cosine * end_dx
+                                                  - area_sine * end_dy,
+                                                  area),
+                         center_y + divide_by_int(area_sine * end_dx
+                                                  + area_cosine * end_dy,
+                                                  area)))
