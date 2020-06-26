@@ -91,6 +91,51 @@ class Mix(Indexable):
     __rand__ = __and__
 
     def __contains__(self, other: Geometry) -> bool:
+        """
+        Returns intersection of the multipolygon with the other geometry.
+
+        Time complexity:
+            ``O(log elements_count)`` expected after indexing,
+            ``O(elements_count)`` worst after indexing or without it
+        Memory complexity:
+            ``O(1)``
+
+        where
+        ``elements_count = multipoint_size + multisegment_size\
+ + multipolygon_size``,
+        ``multipoint_size = len(points)``,
+        ``multisegment_size = len(segments)``,
+        ``multipolygon_size = sum(len(polygon.border.vertices)\
+ + sum(len(hole.vertices) for hole in polygon.holes)\
+ for polygon in polygons)``,
+        ``points = [] if self.multipoint is EMPTY\
+ else self.multipoint.points``,
+        ``segments = [] if self.multisegment is EMPTY\
+ else self.multisegment.segments``,
+        ``polygons = [] if self.multipolygon is EMPTY\
+ else self.multipolygon.polygons``.
+
+        >>> mix = Mix.from_raw(([(3, 3), (7, 7)],
+        ...                     [((0, 6), (0, 8)), ((6, 6), (6, 8))],
+        ...                     [([(0, 0), (6, 0), (6, 6), (0, 6)],
+        ...                       [[(2, 2), (2, 4), (4, 4), (4, 2)]])]))
+        >>> Point(0, 0) in mix
+        True
+        >>> Point(1, 1) in mix
+        True
+        >>> Point(2, 2) in mix
+        True
+        >>> Point(3, 3) in mix
+        True
+        >>> Point(4, 3) in mix
+        True
+        >>> Point(5, 2) in mix
+        True
+        >>> Point(6, 1) in mix
+        True
+        >>> Point(7, 0) in mix
+        False
+        """
         return isinstance(other, Point) and bool(self.locate(other))
 
     def __eq__(self, other: Geometry) -> bool:
