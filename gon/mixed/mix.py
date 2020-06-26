@@ -6,9 +6,7 @@ from gon.compound import (Compound,
                           Location,
                           Relation,
                           Shaped)
-from gon.degenerate import (EMPTY,
-                            RAW_EMPTY,
-                            Maybe)
+from gon.degenerate import (EMPTY, Maybe, RAW_EMPTY)
 from gon.discrete import Multipoint
 from gon.geometry import Geometry
 from gon.hints import Domain
@@ -671,6 +669,34 @@ class Mix(Indexable):
                                   else other.relate(self).complement))))
 
     def validate(self) -> None:
+        """
+        Checks if the mix is valid.
+
+        Time complexity:
+            ``O(elements_count * log elements_count)``
+        Memory complexity:
+            ``O(elements_count)``
+
+        where ``elements_count = multipoint_size + multisegment_size\
+ + multipolygon_vertices_count``,
+        ``multipoint_size = len(points)``,
+        ``multisegment_size = len(segments)``,
+        ``multipolygon_vertices_count = sum(len(polygon.border.vertices)\
+ + sum(len(hole.vertices) for hole in polygon.holes)\
+ for polygon in polygons)``,
+        ``points = [] if self.multipoint is EMPTY\
+ else self.multipoint.points``,
+        ``segments = [] if self.multisegment is EMPTY\
+ else self.multisegment.segments``,
+        ``polygons = [] if self.multipolygon is EMPTY\
+ else self.multipolygon.polygons``.
+
+        >>> mix = Mix.from_raw(([(3, 3), (7, 7)],
+        ...                     [((0, 6), (0, 8)), ((6, 6), (6, 8))],
+        ...                     [([(0, 0), (6, 0), (6, 6), (0, 6)],
+        ...                       [[(2, 2), (2, 4), (4, 4), (4, 2)]])]))
+        >>> mix.validate()
+        """
         if (sum(component is not EMPTY for component in self._components)
                 < MIN_MIX_NON_EMPTY_COMPONENTS):
             raise ValueError('At least {count} components should not be empty.'
@@ -694,9 +720,11 @@ class Mix(Indexable):
                                      else 'be subset of'))
         elif (multipolygon_multisegment_relation is Relation.TOUCH
               and any(polygon.border.relate(self._multisegment)
-                      is Relation.OVERLAP
+                      in (Relation.OVERLAP,
+                          Relation.COMPOSITE)
                       or any(hole.relate(self._multisegment)
-                             is Relation.OVERLAP
+                             in (Relation.OVERLAP,
+                                 Relation.COMPOSITE)
                              for hole in polygon.holes)
                       for polygon in self._multipolygon.polygons)):
             raise ValueError('Multisegment should not overlap '
