@@ -1,6 +1,7 @@
 from .base import (coordinates_strategies,
                    rational_coordinates_strategies)
 from .factories import (coordinates_to_contours,
+                        coordinates_to_mixes,
                         coordinates_to_multipoints,
                         coordinates_to_multipolygons,
                         coordinates_to_multisegments,

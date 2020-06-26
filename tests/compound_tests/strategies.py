@@ -1,6 +1,7 @@
 from collections import OrderedDict
 from itertools import chain
 from typing import (Callable,
+                    Iterable,
                     Tuple)
 
 from hypothesis import strategies
@@ -12,11 +13,13 @@ from gon.hints import Coordinate
 from gon.linear import (Contour,
                         Multisegment,
                         Segment)
+from gon.mixed import Mix
 from gon.primitive import Point
 from gon.shaped import (Multipolygon,
                         Polygon)
 from tests.strategies import (coordinates_strategies,
                               coordinates_to_contours,
+                              coordinates_to_mixes,
                               coordinates_to_multipoints,
                               coordinates_to_multipolygons,
                               coordinates_to_multisegments,
@@ -35,7 +38,8 @@ empty_compounds = strategies.just(EMPTY)
 indexables_factories = strategies.sampled_from([coordinates_to_multisegments,
                                                 coordinates_to_contours,
                                                 coordinates_to_polygons,
-                                                coordinates_to_multipolygons])
+                                                coordinates_to_multipolygons,
+                                                coordinates_to_mixes])
 non_empty_compounds_factories = (
         strategies.sampled_from([coordinates_to_multipoints,
                                  coordinates_to_segments])
@@ -90,29 +94,36 @@ def coordinates_to_compounds_tuples(coordinates: Strategy[Coordinate],
 
 def compound_to_compound_with_multipoint(compound: Compound
                                          ) -> Tuple[Compound, Multipoint]:
+    return compound, Multipoint(*compound_to_points(compound))
+
+
+def compound_to_points(compound: Compound) -> Iterable[Point]:
     if isinstance(compound, Multipoint):
-        return compound, compound
+        return compound.points
     elif isinstance(compound, Segment):
-        return compound, Multipoint(compound.start, compound.end)
+        return [compound.start, compound.end]
     elif isinstance(compound, Multisegment):
-        return compound, Multipoint(*flatten((segment.start, segment.end)
-                                             for segment in compound.segments))
+        return list(flatten((segment.start, segment.end)
+                            for segment in compound.segments))
     elif isinstance(compound, Contour):
-        return compound, Multipoint(*compound.vertices)
+        return compound.vertices
     elif isinstance(compound, Polygon):
-        unique_vertices = OrderedDict.fromkeys(
-                chain(compound.border.vertices,
-                      chain.from_iterable(hole.vertices
-                                          for hole in compound.holes)))
-        return compound, Multipoint(*unique_vertices)
+        return OrderedDict.fromkeys(chain(compound.border.vertices,
+                                          flatten(hole.vertices
+                                                  for hole in compound.holes)))
     elif isinstance(compound, Multipolygon):
-        unique_vertices = OrderedDict.fromkeys(
-                chain.from_iterable(
-                        chain(polygon.border.vertices,
-                              chain.from_iterable(hole.vertices
-                                                  for hole in polygon.holes))
-                        for polygon in compound.polygons))
-        return compound, Multipoint(*unique_vertices)
+        return flatten(compound_to_points(polygon)
+                       for polygon in compound.polygons)
+    elif isinstance(compound, Mix):
+        return chain([]
+                     if compound.multipoint is EMPTY
+                     else compound_to_points(compound.multipoint),
+                     []
+                     if compound.multisegment is EMPTY
+                     else compound_to_points(compound.multisegment),
+                     []
+                     if compound.multipolygon is EMPTY
+                     else compound_to_points(compound.multipolygon))
     else:
         raise TypeError('Unsupported geometry type: {type}.'
                         .format(type=type(compound)))

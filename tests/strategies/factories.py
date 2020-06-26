@@ -1,13 +1,17 @@
+from functools import partial
 from typing import Optional
 
 from hypothesis import strategies
 from hypothesis_geometry import planar
 
+from gon.degenerate import RAW_EMPTY
 from gon.discrete import Multipoint
 from gon.hints import Coordinate
 from gon.linear import (Contour,
                         Multisegment,
                         Segment)
+from gon.mixed import (Mix,
+                       RawMix)
 from gon.primitive import Point
 from gon.shaped import (Multipolygon,
                         Polygon)
@@ -49,6 +53,28 @@ def coordinates_to_contours(coordinates: Strategy[Coordinate],
                             min_size=min_size,
                             max_size=max_size)
             .map(Contour.from_raw))
+
+
+def coordinates_to_mixes(coordinates: Strategy[Coordinate]
+                         ) -> Strategy[Contour]:
+    def coordinate_to_raw_empty(index: int, raw_mix: RawMix) -> RawMix:
+        return (raw_mix
+                if raw_mix[index]
+                else raw_mix[:index] + (RAW_EMPTY,) + raw_mix[index + 1:])
+
+    return (((planar.mixes(coordinates,
+                           min_multipoint_size=1,
+                           min_multisegment_size=1)
+              .map(partial(coordinate_to_raw_empty, 2)))
+             | (planar.mixes(coordinates,
+                             min_multipoint_size=1,
+                             min_multipolygon_size=1)
+                .map(partial(coordinate_to_raw_empty, 1)))
+             | (planar.mixes(coordinates,
+                             min_multisegment_size=1,
+                             min_multipolygon_size=1)
+                .map(partial(coordinate_to_raw_empty, 0))))
+            .map(Mix.from_raw))
 
 
 def coordinates_to_polygons(coordinates: Strategy[Coordinate],
