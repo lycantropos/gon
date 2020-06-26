@@ -137,6 +137,35 @@ class Mix(Indexable):
         return isinstance(other, Point) and bool(self.locate(other))
 
     def __eq__(self, other: Geometry) -> bool:
+        """
+        Checks if mixes are equal.
+
+        Time complexity:
+            ``O(elements_count)``
+        Memory complexity:
+            ``O(1)``
+
+        where ``elements_count = multipoint_size + multisegment_size\
+ + multipolygon_size``,
+        ``multipoint_size = len(points)``,
+        ``multisegment_size = len(segments)``,
+        ``multipolygon_size = sum(len(polygon.border.vertices)\
+ + sum(len(hole.vertices) for hole in polygon.holes)\
+ for polygon in polygons)``,
+        ``points = [] if self.multipoint is EMPTY\
+ else self.multipoint.points``,
+        ``segments = [] if self.multisegment is EMPTY\
+ else self.multisegment.segments``,
+        ``polygons = [] if self.multipolygon is EMPTY\
+ else self.multipolygon.polygons``.
+
+        >>> mix = Mix.from_raw(([(3, 3), (7, 7)],
+        ...                     [((0, 6), (0, 8)), ((6, 6), (6, 8))],
+        ...                     [([(0, 0), (6, 0), (6, 6), (0, 6)],
+        ...                       [[(2, 2), (2, 4), (4, 4), (4, 2)]])]))
+        >>> mix == mix
+        True
+        """
         return self is other or (self._components == other._components
                                  if isinstance(other, Mix)
                                  else (False
