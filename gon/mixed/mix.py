@@ -12,10 +12,12 @@ from gon.degenerate import (EMPTY,
 from gon.discrete import Multipoint
 from gon.geometry import Geometry
 from gon.hints import Domain
-from gon.linear import Multisegment
+from gon.linear import (Multisegment,
+                        Segment)
 from gon.mixed import RawMix
 from gon.primitive import Point
-from gon.shaped import Multipolygon
+from gon.shaped import (Multipolygon,
+                        Polygon)
 
 MIN_MIX_NON_EMPTY_COMPONENTS = 2
 
@@ -1133,12 +1135,12 @@ def _from_mix_components(multipoint: Maybe[Multipoint],
                          linear: Maybe[Linear],
                          shaped: Maybe[Shaped]) -> Compound:
     return (Mix(multipoint,
-                linear
-                if linear is EMPTY or isinstance(linear, Multisegment)
-                else Multisegment(linear),
-                shaped
-                if shaped is EMPTY or isinstance(shaped, Multipolygon)
-                else Multipolygon(shaped))
+                Multisegment(linear)
+                if isinstance(linear, Segment)
+                else linear,
+                Multipolygon(shaped)
+                if isinstance(shaped, Polygon)
+                else shaped)
             if (((multipoint is not EMPTY)
                  + (linear is not EMPTY)
                  + (shaped is not EMPTY))
