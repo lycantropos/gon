@@ -144,7 +144,7 @@ class Multipolygon(Indexable, Shaped):
         Checks if multipolygons are equal.
 
         Time complexity:
-            ``O(min(len(self.polygons), len(other.polygons)))``
+            ``O(len(self.polygons))``
         Memory complexity:
             ``O(1)``
 
