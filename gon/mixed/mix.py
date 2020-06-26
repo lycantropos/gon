@@ -249,7 +249,7 @@ class Mix(Indexable):
         return (self != other
                 and (not isinstance(other, Multipoint)
                      and (self._multipolygon is EMPTY
-                          or not isinstance(other, (Multipoint, Linear))
+                          or not isinstance(other, Linear)
                           and (not isinstance(other, Mix)
                                or other._multipolygon is not EMPTY))
                      and self.relate(other) in (Relation.COVER,
