@@ -436,6 +436,38 @@ class Mix(Indexable):
 
     @classmethod
     def from_raw(cls, raw: RawMix) -> Domain:
+        """
+        Constructs mix from the combination of Python built-ins.
+
+        Time complexity:
+            ``O(raw_elements_count)``
+        Memory complexity:
+            ``O(raw_elements_count)``
+
+        where ``raw_elements_count = raw_multipoint_size +\
+ raw_multisegment_size + raw_multipolygon_vertices_count``,
+        ``raw_multipoint_size = len(raw_multipoint)``,
+        ``raw_multisegment_size = len(raw_multisegment)``,
+        ``raw_multipolygon_vertices_count = sum(len(raw_border)\
+ + sum(len(raw_hole) for raw_hole in raw_holes)\
+ for raw_border, raw_holes in raw_multipolygon)``,
+        ``raw_multipoint, raw_multisegment, raw_multipolygon = raw``.
+
+        >>> mix = Mix.from_raw(([(3, 3), (7, 7)],
+        ...                     [((0, 6), (0, 8)), ((6, 6), (6, 8))],
+        ...                     [([(0, 0), (6, 0), (6, 6), (0, 6)],
+        ...                       [[(2, 2), (2, 4), (4, 4), (4, 2)]])]))
+        >>> from gon.linear import Contour
+        >>> (mix
+        ...  == Mix(Multipoint(Point(3, 3), Point(7, 7)),
+        ...         Multisegment(Segment(Point(0, 6), Point(0, 8)),
+        ...                      Segment(Point(6, 6), Point(6, 8))),
+        ...         Multipolygon(Polygon(Contour([Point(0, 0), Point(6, 0),
+        ...                                       Point(6, 6), Point(0, 6)]),
+        ...                      [Contour([Point(2, 2), Point(2, 4),
+        ...                                Point(4, 4), Point(4, 2)])]))))
+        True
+        """
         raw_multipoint, raw_multisegment, raw_multipolygon = raw
         return cls(EMPTY
                    if raw_multipoint is RAW_EMPTY
