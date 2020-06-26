@@ -17,7 +17,9 @@ from gon.linear import (Contour,
                         Multisegment,
                         Segment)
 from gon.linear.utils import shift_sequence
+from gon.mixed import Mix
 from gon.primitive import Point
+from gon.shaped import Multipolygon
 
 Domain = TypeVar('Domain')
 Range = TypeVar('Range')
@@ -127,3 +129,8 @@ def divide_by_int(dividend: Coordinate, divisor: int) -> Coordinate:
     return (Fraction(dividend, divisor)
             if isinstance(dividend, int)
             else dividend / divisor)
+
+
+def mix_to_components(mix: Mix
+                      ) -> Tuple[Multipoint, Multisegment, Multipolygon]:
+    return mix.multipoint, mix.multisegment, mix.multipolygon
