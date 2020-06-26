@@ -66,11 +66,15 @@ def from_raw_mix_components(raw_multipoint: RawMultipoint,
                             raw_multisegment: RawMultisegment) -> Compound:
     # importing here to avoid cyclic imports
     from gon.mixed.mix import from_mix_components
-    return from_mix_components(Multipoint.from_raw(raw_multipoint)
-                               if raw_multipoint
-                               else EMPTY,
+    return from_mix_components(from_raw_multipoint(raw_multipoint),
                                from_raw_multisegment(raw_multisegment),
                                EMPTY)
+
+
+def from_raw_multipoint(raw_multipoint: RawMultipoint) -> Multipoint:
+    return (Multipoint.from_raw(raw_multipoint)
+            if raw_multipoint
+            else EMPTY)
 
 
 def from_raw_multisegment(raw: RawMultisegment) -> Compound:
