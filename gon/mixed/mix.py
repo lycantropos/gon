@@ -265,35 +265,34 @@ class Mix(Indexable):
                             is other._relate_multipoint(self._multipoint)
                             is multisegments_relation)
                         else Relation.TOUCH)
-            elif multisegments_relation in (Relation.TOUCH,
-                                            Relation.CROSS,
-                                            Relation.OVERLAP):
-                return multisegments_relation
-            elif multisegments_relation is Relation.COMPONENT:
-                other_multipoint_relation = self._relate_multipoint(
-                        other._multipoint)
-                return (multisegments_relation
-                        if other_multipoint_relation is Relation.COMPONENT
-                        else Relation.OVERLAP)
             elif multisegments_relation is Relation.COMPOSITE:
                 multipoint_relation = other._relate_multipoint(
                         self._multipoint)
                 return (multisegments_relation
                         if multipoint_relation is Relation.COMPONENT
                         else Relation.OVERLAP)
-            else:
-                assert multisegments_relation is Relation.EQUAL
-                multipoints_relation = self._multipoint.relate(
+            elif multisegments_relation is Relation.EQUAL:
+                other_multipoint_relation = self._multipoint.relate(
                         other._multipoint)
                 return (multisegments_relation
-                        if multipoints_relation is Relation.EQUAL
+                        if other_multipoint_relation is Relation.EQUAL
                         else Relation.OVERLAP)
+            elif multisegments_relation is Relation.COMPONENT:
+                other_multipoint_relation = self._relate_multipoint(
+                        other._multipoint)
+                return (multisegments_relation
+                        if other_multipoint_relation is Relation.COMPONENT
+                        else Relation.OVERLAP)
+            else:
+                return multisegments_relation
         elif self._multipolygon is EMPTY:
             multisegment_relation = other._relate_linear(
                     self._multisegment)
+            if multisegment_relation is Relation.CROSS:
+                return multisegment_relation
+            multipoint_relation = other._relate_multipoint(
+                    self._multipoint)
             if multisegment_relation is Relation.DISJOINT:
-                multipoint_relation = other._relate_multipoint(
-                        self._multipoint)
                 return (multipoint_relation
                         if multipoint_relation in (Relation.DISJOINT,
                                                    Relation.TOUCH,
@@ -302,16 +301,12 @@ class Mix(Indexable):
                               if multipoint_relation is Relation.COMPONENT
                               else Relation.CROSS))
             elif multisegment_relation is Relation.TOUCH:
-                multipoint_relation = other._relate_multipoint(
-                        self._multipoint)
                 return (Relation.CROSS
                         if multipoint_relation in (Relation.CROSS,
                                                    Relation.ENCLOSED,
                                                    Relation.WITHIN)
                         else multisegment_relation)
             elif multisegment_relation is Relation.COMPONENT:
-                multipoint_relation = other._relate_multipoint(
-                        self._multipoint)
                 return (Relation.TOUCH
                         if (multipoint_relation is Relation.DISJOINT
                             or multipoint_relation is Relation.TOUCH)
@@ -322,214 +317,68 @@ class Mix(Indexable):
                                if multipoint_relation is Relation.COMPONENT
                                else Relation.ENCLOSES)))
             elif multisegment_relation is Relation.ENCLOSED:
-                multipoint_relation = other._relate_multipoint(
-                        self._multipoint)
                 return (Relation.CROSS
                         if multipoint_relation in (Relation.DISJOINT,
                                                    Relation.TOUCH,
                                                    Relation.CROSS)
                         else Relation.ENCLOSES)
-            elif multisegment_relation is Relation.WITHIN:
-                multipoint_relation = other._relate_multipoint(
-                        self._multipoint)
+            else:
                 return (Relation.CROSS
                         if multipoint_relation in (Relation.DISJOINT,
                                                    Relation.TOUCH,
                                                    Relation.CROSS)
                         else (Relation.COVER
-                              if multipoint_relation is multisegment_relation
+                              if multipoint_relation is Relation.WITHIN
                               else Relation.ENCLOSES))
-            else:
-                assert multisegment_relation is Relation.CROSS
-                return multisegment_relation
         elif other._multipolygon is EMPTY:
-            multisegment_relation = self._relate_linear(
+            other_multisegment_relation = self._relate_linear(
                     other._multisegment)
-            if multisegment_relation is Relation.DISJOINT:
-                multipoint_relation = self._relate_multipoint(
-                        other._multipoint)
-                return (multipoint_relation
-                        if multipoint_relation in (Relation.DISJOINT,
-                                                   Relation.TOUCH,
-                                                   Relation.CROSS)
+            if other_multisegment_relation is Relation.CROSS:
+                return other_multisegment_relation
+            other_multipoint_relation = self._relate_multipoint(
+                    other._multipoint)
+            if other_multisegment_relation is Relation.DISJOINT:
+                return (other_multipoint_relation
+                        if other_multipoint_relation in (Relation.DISJOINT,
+                                                         Relation.TOUCH,
+                                                         Relation.CROSS)
                         else (Relation.TOUCH
-                              if multipoint_relation is Relation.COMPONENT
+                              if (other_multipoint_relation
+                                  is Relation.COMPONENT)
                               else Relation.CROSS))
-            elif multisegment_relation is Relation.TOUCH:
-                multipoint_relation = self._relate_multipoint(
-                        other._multipoint)
+            elif other_multisegment_relation is Relation.TOUCH:
                 return (Relation.CROSS
-                        if multipoint_relation in (Relation.CROSS,
-                                                   Relation.ENCLOSED,
-                                                   Relation.WITHIN)
-                        else multisegment_relation)
-            elif multisegment_relation is Relation.COMPONENT:
-                multipoint_relation = self._relate_multipoint(
-                        other._multipoint)
-                return (Relation.TOUCH
-                        if (multipoint_relation is Relation.DISJOINT
-                            or multipoint_relation is Relation.TOUCH)
-                        else (multipoint_relation
-                              if (multipoint_relation is Relation.CROSS
-                                  or multipoint_relation is Relation.COMPONENT)
-                              else Relation.ENCLOSED))
-            elif multisegment_relation is Relation.ENCLOSED:
-                multipoint_relation = self._relate_multipoint(
-                        other._multipoint)
-                return (Relation.CROSS
-                        if multipoint_relation in (Relation.DISJOINT,
-                                                   Relation.TOUCH,
-                                                   Relation.CROSS)
-                        else multisegment_relation)
-            elif multisegment_relation is Relation.WITHIN:
-                multipoint_relation = other._relate_multipoint(
-                        self._multipoint)
-                return (Relation.CROSS
-                        if multipoint_relation in (Relation.DISJOINT,
-                                                   Relation.TOUCH,
-                                                   Relation.CROSS)
-                        else (multisegment_relation
-                              if multipoint_relation is multisegment_relation
-                              else Relation.ENCLOSED))
-            else:
-                assert multisegment_relation is Relation.CROSS
-                return multisegment_relation
-        multipolygons_relation = self._multipolygon.relate(
-                other._multipolygon)
-        if multipolygons_relation is Relation.OVERLAP:
-            return multipolygons_relation
-        elif multipolygons_relation is Relation.EQUAL:
-            multisegments_relation = self._multisegment.relate(
-                    other._multisegment)
-            if (self._multisegment is other._multisegment is EMPTY
-                    or multisegments_relation is Relation.EQUAL):
-                multipoints_relation = self._multipoint.relate(
-                        other._multipoint)
-                if (self._multipoint is other._multipoint is EMPTY
-                        or multipoints_relation is Relation.EQUAL):
-                    return Relation.EQUAL
-                elif self._multipoint is EMPTY:
-                    return Relation.COMPONENT
-                elif other._multipoint is EMPTY:
-                    return Relation.COMPOSITE
-                elif (multipoints_relation is Relation.COMPONENT
-                      or multipoints_relation is Relation.COMPOSITE):
-                    return multipoints_relation
-                else:
-                    return Relation.OVERLAP
-            elif (self._multisegment is EMPTY
-                  or multisegments_relation is Relation.COMPOSITE):
-                multipoints_relation = self._multipoint.relate(
-                        other._multipoint)
-                return (Relation.COMPOSITE
-                        if (multipoints_relation is Relation.EQUAL
-                            or multipoints_relation is Relation.COMPOSITE)
-                        else Relation.OVERLAP)
-            elif (other._multisegment is EMPTY
-                  or multisegments_relation is Relation.COMPONENT):
-                multipoints_relation = self._multipoint.relate(
-                        other._multipoint)
-                return (Relation.COMPONENT
-                        if (multipoints_relation is Relation.EQUAL
-                            or multipoints_relation is Relation.COMPONENT)
-                        else Relation.OVERLAP)
-            else:
-                return Relation.OVERLAP
-        elif multipolygons_relation in (Relation.COVER,
-                                        Relation.ENCLOSES,
-                                        Relation.COMPOSITE):
-            if self._multisegment is EMPTY:
-                multipoint_relation = other._relate_multipoint(
-                        self._multipoint).complement
-                return (multipolygons_relation
-                        if multipoint_relation is multipolygons_relation
-                        else (Relation.ENCLOSES
-                              if multipoint_relation in (Relation.COVER,
-                                                         Relation.ENCLOSES,
-                                                         Relation.COMPOSITE)
-                              else Relation.OVERLAP))
-            else:
-                multisegment_relation = other._relate_linear(
-                        self._multisegment).complement
-                if multisegment_relation is multipolygons_relation:
-                    if self._multipoint is EMPTY:
-                        return multipolygons_relation
-                    else:
-                        multipoint_relation = other._relate_multipoint(
-                                self._multipoint).complement
-                        return (multipolygons_relation
-                                if (multipoint_relation
-                                    is multipolygons_relation)
-                                else
-                                (Relation.ENCLOSES
-                                 if multipoint_relation in (Relation.COVER,
-                                                            Relation.ENCLOSES,
-                                                            Relation.COMPOSITE)
-                                 else Relation.OVERLAP))
-                elif multisegment_relation in (Relation.COVER,
-                                               Relation.ENCLOSES,
-                                               Relation.COMPOSITE):
-                    if self._multipoint is EMPTY:
-                        return Relation.ENCLOSES
-                    else:
-                        multipoint_relation = other._relate_multipoint(
-                                self._multipoint).complement
-                        return (Relation.ENCLOSES
-                                if multipoint_relation in (Relation.COVER,
-                                                           Relation.ENCLOSES,
-                                                           Relation.COMPOSITE)
-                                else Relation.OVERLAP)
-                else:
-                    return Relation.OVERLAP
-        elif multipolygons_relation in (Relation.COMPONENT,
-                                        Relation.ENCLOSED,
-                                        Relation.WITHIN):
-            if other._multisegment is EMPTY:
-                multipoint_relation = self._relate_multipoint(
-                        other._multipoint)
-                return (multipolygons_relation
-                        if multipoint_relation is multipolygons_relation
-                        else (Relation.ENCLOSED
-                              if multipoint_relation in (Relation.COMPONENT,
+                        if other_multipoint_relation in (Relation.CROSS,
                                                          Relation.ENCLOSED,
                                                          Relation.WITHIN)
-                              else Relation.OVERLAP))
+                        else other_multisegment_relation)
+            elif other_multisegment_relation is Relation.COMPONENT:
+                return (Relation.TOUCH
+                        if (other_multipoint_relation is Relation.DISJOINT
+                            or other_multipoint_relation is Relation.TOUCH)
+                        else (other_multipoint_relation
+                              if (other_multipoint_relation is Relation.CROSS
+                                  or (other_multipoint_relation
+                                      is Relation.COMPONENT))
+                              else Relation.ENCLOSED))
+            elif other_multisegment_relation is Relation.ENCLOSED:
+                return (Relation.CROSS
+                        if other_multipoint_relation in (Relation.DISJOINT,
+                                                         Relation.TOUCH,
+                                                         Relation.CROSS)
+                        else other_multisegment_relation)
             else:
-                multisegment_relation = self._relate_linear(
-                        other._multisegment)
-                if multisegment_relation is multipolygons_relation:
-                    if other._multipoint is EMPTY:
-                        return multipolygons_relation
-                    else:
-                        multipoint_relation = self._relate_multipoint(
-                                other._multipoint)
-                        return (multipolygons_relation
-                                if (multipoint_relation
-                                    is multipolygons_relation)
-                                else
-                                (Relation.ENCLOSED
-                                 if multipoint_relation in (Relation.COMPONENT,
-                                                            Relation.ENCLOSED,
-                                                            Relation.WITHIN)
-                                 else Relation.OVERLAP))
-                elif multisegment_relation in (Relation.COMPONENT,
-                                               Relation.ENCLOSED,
-                                               Relation.WITHIN):
-                    if other._multipoint is EMPTY:
-                        return Relation.ENCLOSED
-                    else:
-                        multipoint_relation = self._relate_multipoint(
-                                other._multipoint)
-                        return (Relation.ENCLOSED
-                                if multipoint_relation in (Relation.COMPONENT,
-                                                           Relation.ENCLOSED,
-                                                           Relation.WITHIN)
-                                else Relation.OVERLAP)
-                else:
-                    return Relation.OVERLAP
-        else:
-            assert (multipolygons_relation is Relation.DISJOINT
-                    or multipolygons_relation is Relation.TOUCH)
+                return (Relation.CROSS
+                        if other_multipoint_relation in (Relation.DISJOINT,
+                                                         Relation.TOUCH,
+                                                         Relation.CROSS)
+                        else (other_multisegment_relation
+                              if other_multipoint_relation is Relation.WITHIN
+                              else Relation.ENCLOSED))
+        multipolygons_relation = self._multipolygon.relate(
+                other._multipolygon)
+        if (multipolygons_relation is Relation.DISJOINT
+                or multipolygons_relation is Relation.TOUCH):
             if self._multisegment is other._multisegment is EMPTY:
                 other_multipoint_relation = self._relate_multipoint(
                         other._multipoint)
@@ -700,6 +549,139 @@ class Mix(Indexable):
                                                is other_multisegment_relation
                                                is Relation.DISJOINT)
                                            else Relation.TOUCH)))
+        elif multipolygons_relation in (Relation.COVER,
+                                        Relation.ENCLOSES,
+                                        Relation.COMPOSITE):
+            if self._multisegment is EMPTY:
+                multipoint_relation = other._relate_multipoint(
+                        self._multipoint).complement
+                return (multipolygons_relation
+                        if multipoint_relation is multipolygons_relation
+                        else (Relation.ENCLOSES
+                              if multipoint_relation in (Relation.COVER,
+                                                         Relation.ENCLOSES,
+                                                         Relation.COMPOSITE)
+                              else Relation.OVERLAP))
+            else:
+                multisegment_relation = other._relate_linear(
+                        self._multisegment).complement
+                if multisegment_relation is multipolygons_relation:
+                    if self._multipoint is EMPTY:
+                        return multipolygons_relation
+                    else:
+                        multipoint_relation = other._relate_multipoint(
+                                self._multipoint).complement
+                        return (multipolygons_relation
+                                if (multipoint_relation
+                                    is multipolygons_relation)
+                                else
+                                (Relation.ENCLOSES
+                                 if multipoint_relation in (Relation.COVER,
+                                                            Relation.ENCLOSES,
+                                                            Relation.COMPOSITE)
+                                 else Relation.OVERLAP))
+                elif multisegment_relation in (Relation.COVER,
+                                               Relation.ENCLOSES,
+                                               Relation.COMPOSITE):
+                    if self._multipoint is EMPTY:
+                        return Relation.ENCLOSES
+                    else:
+                        multipoint_relation = other._relate_multipoint(
+                                self._multipoint).complement
+                        return (Relation.ENCLOSES
+                                if multipoint_relation in (Relation.COVER,
+                                                           Relation.ENCLOSES,
+                                                           Relation.COMPOSITE)
+                                else Relation.OVERLAP)
+                else:
+                    return Relation.OVERLAP
+        elif multipolygons_relation is Relation.EQUAL:
+            multisegments_relation = self._multisegment.relate(
+                    other._multisegment)
+            if (self._multisegment is other._multisegment is EMPTY
+                    or multisegments_relation is Relation.EQUAL):
+                multipoints_relation = self._multipoint.relate(
+                        other._multipoint)
+                return (multipolygons_relation
+                        if (self._multipoint is other._multipoint is EMPTY
+                            or multipoints_relation is Relation.EQUAL)
+                        else
+                        (Relation.COMPONENT
+                         if self._multipoint is EMPTY
+                         else
+                         (Relation.COMPOSITE
+                          if other._multipoint is EMPTY
+                          else
+                          (multipoints_relation
+                           if (multipoints_relation is Relation.COMPONENT
+                               or multipoints_relation is Relation.COMPOSITE)
+                           else Relation.OVERLAP))))
+            elif (self._multisegment is EMPTY
+                  or multisegments_relation is Relation.COMPOSITE):
+                multipoints_relation = self._multipoint.relate(
+                        other._multipoint)
+                return (Relation.COMPOSITE
+                        if (multipoints_relation is Relation.EQUAL
+                            or multipoints_relation is Relation.COMPOSITE)
+                        else Relation.OVERLAP)
+            elif (other._multisegment is EMPTY
+                  or multisegments_relation is Relation.COMPONENT):
+                multipoints_relation = self._multipoint.relate(
+                        other._multipoint)
+                return (Relation.COMPONENT
+                        if (multipoints_relation is Relation.EQUAL
+                            or multipoints_relation is Relation.COMPONENT)
+                        else Relation.OVERLAP)
+            else:
+                return Relation.OVERLAP
+        elif multipolygons_relation in (Relation.COMPONENT,
+                                        Relation.ENCLOSED,
+                                        Relation.WITHIN):
+            if other._multisegment is EMPTY:
+                multipoint_relation = self._relate_multipoint(
+                        other._multipoint)
+                return (multipolygons_relation
+                        if multipoint_relation is multipolygons_relation
+                        else (Relation.ENCLOSED
+                              if multipoint_relation in (Relation.COMPONENT,
+                                                         Relation.ENCLOSED,
+                                                         Relation.WITHIN)
+                              else Relation.OVERLAP))
+            else:
+                multisegment_relation = self._relate_linear(
+                        other._multisegment)
+                if multisegment_relation is multipolygons_relation:
+                    if other._multipoint is EMPTY:
+                        return multipolygons_relation
+                    else:
+                        multipoint_relation = self._relate_multipoint(
+                                other._multipoint)
+                        return (multipolygons_relation
+                                if (multipoint_relation
+                                    is multipolygons_relation)
+                                else
+                                (Relation.ENCLOSED
+                                 if multipoint_relation in (Relation.COMPONENT,
+                                                            Relation.ENCLOSED,
+                                                            Relation.WITHIN)
+                                 else Relation.OVERLAP))
+                elif multisegment_relation in (Relation.COMPONENT,
+                                               Relation.ENCLOSED,
+                                               Relation.WITHIN):
+                    if other._multipoint is EMPTY:
+                        return Relation.ENCLOSED
+                    else:
+                        multipoint_relation = self._relate_multipoint(
+                                other._multipoint)
+                        return (Relation.ENCLOSED
+                                if multipoint_relation in (Relation.COMPONENT,
+                                                           Relation.ENCLOSED,
+                                                           Relation.WITHIN)
+                                else Relation.OVERLAP)
+                else:
+                    return Relation.OVERLAP
+        else:
+            return multipolygons_relation
 
     def _relate_multipoint(self, other: Multipoint) -> Relation:
         if self._multipolygon is EMPTY:
