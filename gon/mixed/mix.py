@@ -203,7 +203,7 @@ class Mix(Indexable):
         elif (multipolygon_multisegment_relation is Relation.TOUCH
               and any(polygon.border.relate(self._multisegment)
                       is Relation.OVERLAP
-                      or any(hole.border.relate(self._multisegment)
+                      or any(hole.relate(self._multisegment)
                              is Relation.OVERLAP
                              for hole in polygon.holes)
                       for polygon in self._multipolygon.polygons)):
