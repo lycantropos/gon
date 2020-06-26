@@ -84,8 +84,8 @@ class Mix(Indexable):
         elif isinstance(multipolygon_part, Linear):
             multisegment_part |= multipolygon_part
             multipolygon_part = EMPTY
-        return _from_mix_components(multipoint_part, multisegment_part,
-                                    multipolygon_part)
+        return from_mix_components(multipoint_part, multisegment_part,
+                                   multipolygon_part)
 
     __rand__ = __and__
 
@@ -428,9 +428,9 @@ class Mix(Indexable):
         >>> mix - mix is EMPTY
         True
         """
-        return _from_mix_components(self._multipoint - other,
-                                    self._multisegment - other,
-                                    self._multipolygon - other)
+        return from_mix_components(self._multipoint - other,
+                                   self._multisegment - other,
+                                   self._multipolygon - other)
 
     @classmethod
     def from_raw(cls, raw: RawMix) -> Domain:
@@ -1371,9 +1371,9 @@ class Mix(Indexable):
                         else Relation.OVERLAP)
 
 
-def _from_mix_components(multipoint: Maybe[Multipoint],
-                         linear: Maybe[Linear],
-                         shaped: Maybe[Shaped]) -> Compound:
+def from_mix_components(multipoint: Maybe[Multipoint],
+                        linear: Maybe[Linear],
+                        shaped: Maybe[Shaped]) -> Compound:
     return (Mix(multipoint,
                 Multisegment(linear)
                 if isinstance(linear, Segment)
