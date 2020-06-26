@@ -63,3 +63,11 @@ shaped module
     :members:
     :imported-members:
     :special-members:
+
+mixed module
+============
+
+.. automodule:: gon.mixed
+    :members:
+    :imported-members:
+    :special-members:
