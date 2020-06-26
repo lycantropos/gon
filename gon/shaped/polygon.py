@@ -148,18 +148,8 @@ class Polygon(Indexable, Shaped):
         Memory complexity:
             ``O(1)``
 
-        where ``vertices_count = min_border_vertices_count\
- + min_holes_vertices_count``,
-        ``min_border_vertices_count =\
- min(border_vertices_count, other_border_vertices_count)``
-        ``min_holes_vertices_count =\
- min(holes_vertices_count, other_holes_vertices_count)``,
-        ``border_vertices_count = len(self.border.vertices)``,
-        ``other_border_vertices_count = len(other.border.vertices)``
-        ``holes_vertices_count =\
- sum(len(hole.vertices) for hole in self.holes)``,
-        ``other_holes_vertices_count =\
- sum(len(hole.vertices) for hole in other.holes)``.
+        where ``vertices_count = len(self.border.vertices)\
+ + sum(len(hole.vertices) for hole in self.holes)``.
 
         >>> polygon = Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
         ...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]]))
