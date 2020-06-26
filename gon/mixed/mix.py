@@ -823,15 +823,21 @@ class Mix(Indexable):
 
 
 def _from_mix_components(multipoint: Maybe[Multipoint],
-                         multisegment: Maybe[Multisegment],
-                         multipolygon: Maybe[Multipolygon]) -> Compound:
-    return (Mix(multipoint, multisegment, multipolygon)
+                         linear: Maybe[Linear],
+                         shaped: Maybe[Shaped]) -> Compound:
+    return (Mix(multipoint,
+                linear
+                if isinstance(linear, Multisegment)
+                else Multisegment(linear),
+                shaped
+                if isinstance(shaped, Multipolygon)
+                else Multipolygon(shaped))
             if (((multipoint is not EMPTY)
-                 + (multisegment is not EMPTY)
-                 + (multipolygon is not EMPTY))
+                 + (linear is not EMPTY)
+                 + (shaped is not EMPTY))
                 >= MIN_MIX_NON_EMPTY_COMPONENTS)
             else (multipoint
                   if multipoint is not EMPTY
-                  else (multisegment
-                        if multisegment is not EMPTY
-                        else multipolygon)))
+                  else (linear
+                        if linear is not EMPTY
+                        else shaped)))
