@@ -216,6 +216,35 @@ class Mix(Indexable):
                     else NotImplemented))
 
     def __gt__(self, other: Compound) -> bool:
+        """
+        Checks if the mix is a strict superset of the other geometry.
+
+        Time complexity:
+            ``O(elements_count * log elements_count)``
+        Memory complexity:
+            ``O(1)``
+
+        where ``elements_count = multipoint_size + multisegment_size\
+ + multipolygon_size``,
+        ``multipoint_size = len(points)``,
+        ``multisegment_size = len(segments)``,
+        ``multipolygon_size = sum(len(polygon.border.vertices)\
+ + sum(len(hole.vertices) for hole in polygon.holes)\
+ for polygon in polygons)``,
+        ``points = [] if self.multipoint is EMPTY\
+ else self.multipoint.points``,
+        ``segments = [] if self.multisegment is EMPTY\
+ else self.multisegment.segments``,
+        ``polygons = [] if self.multipolygon is EMPTY\
+ else self.multipolygon.polygons``.
+
+        >>> mix = Mix.from_raw(([(3, 3), (7, 7)],
+        ...                     [((0, 6), (0, 8)), ((6, 6), (6, 8))],
+        ...                     [([(0, 0), (6, 0), (6, 6), (0, 6)],
+        ...                       [[(2, 2), (2, 4), (4, 4), (4, 2)]])]))
+        >>> mix > mix
+        False
+        """
         return (other is EMPTY
                 or self != other
                 and ((self._multipolygon is not EMPTY
