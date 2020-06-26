@@ -137,11 +137,11 @@ class Mix(Indexable):
         return isinstance(other, Point) and bool(self.locate(other))
 
     def __eq__(self, other: Geometry) -> bool:
-        return (self._components == other._components
-                if isinstance(other, Mix)
-                else (False
-                      if isinstance(other, Geometry)
-                      else NotImplemented))
+        return self is other or (self._components == other._components
+                                 if isinstance(other, Mix)
+                                 else (False
+                                       if isinstance(other, Geometry)
+                                       else NotImplemented))
 
     def __ge__(self, other: Compound) -> bool:
         return (other is EMPTY
