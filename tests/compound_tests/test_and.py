@@ -45,6 +45,17 @@ def test_right_absorbing_element(empty_compound_with_compound
     assert result is EMPTY
 
 
+@given(strategies.rational_compounds_pairs)
+def test_absorption_identity(compounds_pair: Tuple[Compound, Compound]
+                             ) -> None:
+    left_compound, right_compound = compounds_pair
+
+    result = left_compound & (left_compound | right_compound)
+
+    assert (result is left_compound is EMPTY
+            or result.relate(left_compound) is Relation.EQUAL)
+
+
 @given(strategies.compounds_pairs)
 def test_commutativity(compounds_pair: Tuple[Compound, Compound]) -> None:
     left_compound, right_compound = compounds_pair
