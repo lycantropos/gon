@@ -242,9 +242,11 @@ class Segment(Compound, Linear):
         >>> segment | segment == segment
         True
         """
-        return (self._unite_with_segment(other)
-                if isinstance(other, Segment)
-                else NotImplemented)
+        return (self._unite_with_multipoint(other)
+                if isinstance(other, Multipoint)
+                else (self._unite_with_segment(other)
+                      if isinstance(other, Segment)
+                      else NotImplemented))
 
     __ror__ = __or__
 
@@ -414,6 +416,11 @@ class Segment(Compound, Linear):
                  else Segment(*intersections))
                 if intersections
                 else EMPTY)
+
+    def _unite_with_multipoint(self, other: Multipoint) -> Compound:
+        # importing here to avoid cyclic imports
+        from gon.mixed.mix import from_mix_components
+        return from_mix_components(other - self, self, EMPTY)
 
     def _unite_with_segment(self, other: 'Segment') -> Compound:
         from .multisegment import Multisegment
