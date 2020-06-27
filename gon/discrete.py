@@ -230,7 +230,7 @@ class Multipoint(Compound):
 
     def __sub__(self, other: Compound) -> Compound:
         """
-        Returns intersection of the multipoint with the other geometry.
+        Returns difference of the multipoint with the other geometry.
 
         Time complexity:
             ``O(points_count)``
