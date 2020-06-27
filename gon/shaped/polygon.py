@@ -319,17 +319,15 @@ class Polygon(Indexable, Shaped):
         where ``vertices_count = len(self.border.vertices)\
  + sum(len(hole.vertices) for hole in self.holes)``.
         """
-        return (self._subtract_from_multipoint(other)
-                if isinstance(other, Multipoint)
-                else (self._subtract_from_raw_multisegment([other.raw()])
-                      if isinstance(other, Segment)
-                      else (self._subtract_from_raw_multisegment(other.raw())
-                            if isinstance(other, Multisegment)
-                            else
-                            (self._subtract_from_raw_multisegment(
-                                    to_pairs_chain(other.raw()))
-                             if isinstance(other, Contour)
-                             else NotImplemented))))
+        return (self._subtract_from_raw_multisegment([other.raw()])
+                if isinstance(other, Segment)
+                else (self._subtract_from_raw_multisegment(other.raw())
+                      if isinstance(other, Multisegment)
+                      else
+                      (self._subtract_from_raw_multisegment(
+                              to_pairs_chain(other.raw()))
+                       if isinstance(other, Contour)
+                       else NotImplemented)))
 
     def __sub__(self, other: Compound) -> Compound:
         """
@@ -679,10 +677,6 @@ class Polygon(Indexable, Shaped):
                 *complete_intersect_multisegment_with_multipolygon(
                         raw_multisegment,
                         [(self._raw_border, self._raw_holes)]))
-
-    def _subtract_from_multipoint(self, other: Multipoint) -> Compound:
-        points = [point for point in other.points if point not in self]
-        return Multipoint(*points) if points else EMPTY
 
     def _subtract_from_raw_multisegment(self, other_raw: RawMultisegment
                                         ) -> Compound:
