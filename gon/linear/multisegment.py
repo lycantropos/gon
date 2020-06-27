@@ -285,11 +285,13 @@ class Multisegment(Indexable, Linear):
         >>> multisegment | multisegment == multisegment
         True
         """
-        return (self._unite_with_raw_multisegment([other.raw()])
-                if isinstance(other, Segment)
-                else (self._unite_with_raw_multisegment(other._raw)
-                      if isinstance(other, Multisegment)
-                      else NotImplemented))
+        return (self._unite_with_multipoint(other)
+                if isinstance(other, Multipoint)
+                else (self._unite_with_raw_multisegment([other.raw()])
+                      if isinstance(other, Segment)
+                      else (self._unite_with_raw_multisegment(other._raw)
+                            if isinstance(other, Multisegment)
+                            else NotImplemented)))
 
     __ror__ = __or__
 
@@ -513,6 +515,11 @@ class Multisegment(Indexable, Linear):
                                         ) -> Compound:
         return from_raw_multisegment(subtract_multisegments(other_raw,
                                                             self._raw))
+
+    def _unite_with_multipoint(self, other: Multipoint) -> Compound:
+        # importing here to avoid cyclic imports
+        from gon.mixed.mix import from_mix_components
+        return from_mix_components(other - self, self, EMPTY)
 
     def _unite_with_raw_multisegment(self, other_raw: RawMultisegment
                                      ) -> Compound:
