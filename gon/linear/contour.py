@@ -284,15 +284,17 @@ class Contour(Indexable, Linear):
         ...                            ((0, 1), (0, 0))]))
         True
         """
-        return (self._unite_with_raw_multisegment([other.raw()])
-                if isinstance(other, Segment)
-                else (self._unite_with_raw_multisegment(other.raw())
-                      if isinstance(other, Multisegment)
-                      else
-                      (self._unite_with_raw_multisegment(
-                              to_pairs_chain(other._raw))
-                       if isinstance(other, Contour)
-                       else NotImplemented)))
+        return (self._unite_with_multipoint(other)
+                if isinstance(other, Multipoint)
+                else (self._unite_with_raw_multisegment([other.raw()])
+                      if isinstance(other, Segment)
+                      else (self._unite_with_raw_multisegment(other.raw())
+                            if isinstance(other, Multisegment)
+                            else
+                            (self._unite_with_raw_multisegment(
+                                    to_pairs_chain(other._raw))
+                             if isinstance(other, Contour)
+                             else NotImplemented))))
 
     __ror__ = __or__
 
@@ -596,6 +598,11 @@ class Contour(Indexable, Linear):
                                         ) -> Compound:
         return from_raw_multisegment(subtract_multisegments(
                 other_raw, to_pairs_chain(self._raw)))
+
+    def _unite_with_multipoint(self, other: Multipoint) -> Compound:
+        # importing here to avoid cyclic imports
+        from gon.mixed.mix import from_mix_components
+        return from_mix_components(other - self, self, EMPTY)
 
     def _unite_with_raw_multisegment(self, other_raw: RawMultisegment
                                      ) -> Compound:
