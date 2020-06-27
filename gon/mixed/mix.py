@@ -84,14 +84,20 @@ class Mix(Indexable):
             multisegment_part = multisegment_part._multisegment
         multipolygon_part = self._multipolygon & other
         if isinstance(multipolygon_part, Multipoint):
-            multipoint_part |= multipolygon_part
+            multisegment_part |= multipolygon_part
+            if isinstance(multisegment_part, Mix):
+                multipoint_part |= multisegment_part._multipoint
+                multisegment_part = multisegment_part._multisegment
             multipolygon_part = EMPTY
         elif isinstance(multipolygon_part, Linear):
             multisegment_part |= multipolygon_part
             multipolygon_part = EMPTY
         elif isinstance(multipolygon_part, Mix):
-            multipoint_part |= multipolygon_part._multipoint
+            multisegment_part |= multipolygon_part._multipoint
             multisegment_part |= multipolygon_part._multisegment
+            if isinstance(multisegment_part, Mix):
+                multipoint_part |= multisegment_part._multipoint
+                multisegment_part = multisegment_part._multisegment
             multipolygon_part = multipolygon_part._multipolygon
         return from_mix_components(multipoint_part, multisegment_part,
                                    multipolygon_part)
