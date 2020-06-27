@@ -387,6 +387,78 @@ class Mix(Indexable):
                      if isinstance(other, Compound)
                      else NotImplemented))
 
+    def __or__(self, other: Compound) -> Compound:
+        """
+        Returns union of the mix with the other geometry.
+
+        Time complexity:
+            ``O(elements_count * log elements_count)``
+        Memory complexity:
+            ``O(elements_count)``
+
+        where ``elements_count = multipoint_size + multisegment_size\
+ + multipolygon_vertices_count``,
+        ``multipoint_size = len(points)``,
+        ``multisegment_size = len(segments)``,
+        ``multipolygon_vertices_count = sum(len(polygon.border.vertices)\
+ + sum(len(hole.vertices) for hole in polygon.holes)\
+ for polygon in polygons)``,
+        ``points = [] if self.multipoint is EMPTY\
+ else self.multipoint.points``,
+        ``segments = [] if self.multisegment is EMPTY\
+ else self.multisegment.segments``,
+        ``polygons = [] if self.multipolygon is EMPTY\
+ else self.multipolygon.polygons``.
+
+        >>> mix = Mix.from_raw(([(3, 3), (7, 7)],
+        ...                     [((0, 6), (0, 8)), ((6, 6), (6, 8))],
+        ...                     [([(0, 0), (6, 0), (6, 6), (0, 6)],
+        ...                       [[(2, 2), (2, 4), (4, 4), (4, 2)]])]))
+        >>> mix | mix == mix
+        True
+        """
+        if isinstance(other, Multipoint):
+            multipoint_part, multisegment_part = (self._multipoint,
+                                                  self._multisegment)
+            multipolygon_part = self._multipolygon | other
+            if isinstance(multipolygon_part, Mix):
+                other = multipolygon_part._multipoint
+                multipolygon_part = multipolygon_part._multipolygon
+            else:
+                return from_mix_components(multipoint_part, multisegment_part,
+                                           multipolygon_part)
+            multisegment_part |= other
+            if isinstance(multisegment_part, Mix):
+                other = multisegment_part._multipoint
+                multisegment_part = multisegment_part._multisegment
+            else:
+                return from_mix_components(multipoint_part, multisegment_part,
+                                           multipolygon_part)
+            return from_mix_components(multipoint_part | other,
+                                       multisegment_part, multipolygon_part)
+        elif isinstance(other, Linear):
+            multipoint_part, multisegment_part = (self._multipoint,
+                                                  self._multisegment)
+            multipolygon_part = self._multipolygon | other
+            if isinstance(multipolygon_part, Mix):
+                other = multipolygon_part._multisegment
+                multipolygon_part = multipolygon_part._multipolygon
+            else:
+                return from_mix_components(multipoint_part, multisegment_part,
+                                           multipolygon_part)
+            multisegment_part |= other | multipoint_part
+            return (from_mix_components(multisegment_part._multipoint,
+                                        multisegment_part._multisegment,
+                                        multipolygon_part)
+                    if isinstance(multisegment_part, Mix)
+                    else from_mix_components(EMPTY, multisegment_part,
+                                             multipolygon_part))
+        else:
+            return (self._multipolygon | other | self._multipoint
+                    | self._multisegment)
+
+    __ror__ = __or__
+
     def __rsub__(self, other: Compound) -> Compound:
         """
         Returns difference of the other geometry with the mix.
