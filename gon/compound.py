@@ -51,6 +51,12 @@ class Compound(Geometry):
         """
 
     @abstractmethod
+    def __or__(self, other: 'Compound') -> 'Compound':
+        """
+        Returns union of the geometry with the other geometry.
+        """
+
+    @abstractmethod
     def __sub__(self, other: 'Compound') -> 'Compound':
         """
         Returns difference of the geometry with the other geometry.
