@@ -307,11 +307,23 @@ class Multipolygon(Indexable, Shaped):
         ...                      [[(2, 2), (2, 4), (4, 4), (4, 2)]])))
         True
         """
-        return (self._unite_with_raw_multipolygon([other.raw()])
-                if isinstance(other, Polygon)
-                else (self._unite_with_raw_multipolygon(other._raw)
-                      if isinstance(other, Multipolygon)
-                      else NotImplemented))
+        return (self._unite_with_multipoint(other)
+                if isinstance(other, Multipoint)
+                else
+                (self._unite_with_raw_multisegment([other.raw()])
+                 if isinstance(other, Segment)
+                 else
+                 (self._unite_with_raw_multisegment(other.raw())
+                  if isinstance(other, Multisegment)
+                  else
+                  (self._unite_with_raw_multisegment(
+                          to_pairs_chain(other.raw()))
+                   if isinstance(other, Contour)
+                   else (self._unite_with_raw_multipolygon([other.raw()])
+                         if isinstance(other, Polygon)
+                         else (self._unite_with_raw_multipolygon(other._raw)
+                               if isinstance(other, Multipolygon)
+                               else NotImplemented))))))
 
     __ror__ = __or__
 
@@ -675,6 +687,17 @@ class Multipolygon(Indexable, Shaped):
                                    ) -> Compound:
         return from_raw_multipolygon(subtract_multipolygons(self._raw,
                                                             other_raw))
+
+    def _unite_with_multipoint(self, other: Multipoint) -> Compound:
+        # importing here to avoid cyclic imports
+        from gon.mixed.mix import from_mix_components
+        return from_mix_components(other - self, EMPTY, self)
+
+    def _unite_with_raw_multisegment(self, other_raw: RawMultisegment
+                                     ) -> Compound:
+        raw_multisegment = subtract_multipolygon_from_multisegment(other_raw,
+                                                                   self._raw)
+        return from_raw_mix_components([], raw_multisegment, self._raw)
 
     def _unite_with_raw_multipolygon(self, other_raw: RawMultipolygon
                                      ) -> Compound:
