@@ -304,11 +304,9 @@ class Multisegment(Indexable, Linear):
 
         where ``segments_count = len(self.segments)``.
         """
-        return (self._subtract_from_multipoint(other)
-                if isinstance(other, Multipoint)
-                else (self._subtract_from_raw_multisegment([other.raw()])
-                      if isinstance(other, Segment)
-                      else NotImplemented))
+        return (self._subtract_from_raw_multisegment([other.raw()])
+                if isinstance(other, Segment)
+                else NotImplemented)
 
     def __sub__(self, other: Compound) -> Compound:
         """
@@ -505,10 +503,6 @@ class Multisegment(Indexable, Linear):
         raw_multipoint, raw_multisegment, _ = complete_intersect_multisegments(
                 self._raw, other_raw)
         return from_raw_mix_components(raw_multipoint, raw_multisegment)
-
-    def _subtract_from_multipoint(self, other: Multipoint) -> Compound:
-        points = [point for point in other.points if point not in self]
-        return Multipoint(*points) if points else EMPTY
 
     def _subtract_raw_multisegment(self, other_raw: RawMultisegment
                                    ) -> Compound:
