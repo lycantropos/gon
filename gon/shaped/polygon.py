@@ -300,10 +300,21 @@ class Polygon(Indexable, Shaped):
         >>> polygon | polygon == polygon
         True
         """
-        return (self._unite_with_raw_multipolygon([(other._raw_border,
-                                                    other._raw_holes)])
-                if isinstance(other, Polygon)
-                else NotImplemented)
+        return (self._unite_with_multipoint(other)
+                if isinstance(other, Multipoint)
+                else
+                (self._unite_with_raw_multisegment([other.raw()])
+                 if isinstance(other, Segment)
+                 else
+                 (self._unite_with_raw_multisegment(other.raw())
+                  if isinstance(other, Multisegment)
+                  else
+                  (self._unite_with_raw_multisegment(
+                          to_pairs_chain(other.raw()))
+                   if isinstance(other, Contour)
+                   else (self._unite_with_raw_multipolygon([other.raw()])
+                         if isinstance(other, Polygon)
+                         else NotImplemented)))))
 
     __ror__ = __or__
 
@@ -687,6 +698,18 @@ class Polygon(Indexable, Shaped):
                                    ) -> Compound:
         return from_raw_multipolygon(subtract_multipolygons(
                 [(self._raw_border, self._raw_holes)], raw_multipolygon))
+
+    def _unite_with_multipoint(self, other: Multipoint) -> Compound:
+        # importing here to avoid cyclic imports
+        from gon.mixed.mix import from_mix_components
+        return from_mix_components(other - self, EMPTY, self)
+
+    def _unite_with_raw_multisegment(self, other_raw: RawMultisegment
+                                     ) -> Compound:
+        raw_multipolygon = [(self._raw_border, self._raw_holes)]
+        raw_multisegment = subtract_multipolygon_from_multisegment(
+                other_raw, raw_multipolygon)
+        return from_raw_mix_components([], raw_multisegment, raw_multipolygon)
 
     def _unite_with_raw_multipolygon(self, raw_multipolygon: RawMultipolygon
                                      ) -> Compound:
