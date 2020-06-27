@@ -46,7 +46,7 @@ class Mix(Indexable):
 
     def __and__(self, other: Compound) -> Compound:
         """
-        Returns intersection of the multipolygon with the other geometry.
+        Returns intersection of the mix with the other geometry.
 
         Time complexity:
             ``O(elements_count * log elements_count)``
@@ -106,7 +106,7 @@ class Mix(Indexable):
 
     def __contains__(self, other: Geometry) -> bool:
         """
-        Returns intersection of the multipolygon with the other geometry.
+        Returns intersection of the mix with the other geometry.
 
         Time complexity:
             ``O(log elements_count)`` expected after indexing,
@@ -589,7 +589,7 @@ class Mix(Indexable):
 
     def locate(self, point: Point) -> Location:
         """
-        Finds location of the point relative to the multipolygon.
+        Finds location of the point relative to the mix.
 
         Time complexity:
             ``O(log elements_count)`` expected after indexing,
