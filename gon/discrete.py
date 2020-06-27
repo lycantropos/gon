@@ -245,7 +245,9 @@ class Multipoint(Compound):
         """
         return (self._subtract_multipoint(other)
                 if isinstance(other, Multipoint)
-                else NotImplemented)
+                else (self._subtract_compound(other)
+                      if isinstance(other, Compound)
+                      else NotImplemented))
 
     @classmethod
     def from_raw(cls, raw: RawMultipoint) -> Domain:
@@ -388,6 +390,10 @@ class Multipoint(Compound):
                              else Relation.ENCLOSES)
                             if is_subset
                             else Relation.CROSS)))
+
+    def _subtract_compound(self, other: Compound) -> Compound:
+        points = [point for point in self._points if point not in other]
+        return Multipoint(*points) if points else EMPTY
 
     def _subtract_multipoint(self, other: 'Multipoint') -> Compound:
         points = self._points_set - other._points_set
