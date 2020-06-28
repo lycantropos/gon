@@ -228,11 +228,12 @@ class Contour(Indexable, Linear):
         True
         """
         return (self == other
-                or (not isinstance(other, Segment)
-                    and self.relate(other) in (Relation.EQUAL,
-                                               Relation.COMPOSITE)
-                    if isinstance(other, Linear)
-                    else NotImplemented))
+                or not isinstance(other, Multipoint)
+                and (not isinstance(other, Segment)
+                     and self.relate(other) in (Relation.EQUAL,
+                                                Relation.COMPOSITE)
+                     if isinstance(other, Linear)
+                     else NotImplemented))
 
     def __lt__(self, other: Compound) -> bool:
         """
