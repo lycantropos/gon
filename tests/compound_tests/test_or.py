@@ -62,7 +62,7 @@ def test_commutativity(compounds_pair: Tuple[Compound, Compound]) -> None:
     assert result == right_compound | left_compound
 
 
-@given(strategies.compounds_triplets)
+@given(strategies.rational_compounds_triplets)
 def test_associativity(compounds_triplet: Tuple[Compound, Compound, Compound]
                        ) -> None:
     left_compound, mid_compound, right_compound = compounds_triplet
