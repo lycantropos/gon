@@ -178,10 +178,8 @@ class Multipoint(Compound):
         >>> multipoint <= Multipoint.from_raw([(1, 0), (0, 0), (0, 1)])
         True
         """
-        return ((self._points_set <= other._points_set
-                 if isinstance(other, Multipoint)
-                 else other >= self)
-                if isinstance(other, Compound)
+        return (self._points_set <= other._points_set
+                if isinstance(other, Multipoint)
                 else NotImplemented)
 
     def __lt__(self, other: Compound) -> bool:
