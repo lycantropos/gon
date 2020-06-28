@@ -2,9 +2,9 @@ from typing import Tuple
 
 from hypothesis import given
 
-from gon.compound import (Compound,
-                          Relation)
+from gon.compound import Compound
 from gon.degenerate import EMPTY
+from tests.utils import are_compounds_equivalent
 from . import strategies
 
 
@@ -19,10 +19,7 @@ def test_basic(compounds_pair: Tuple[Compound, Compound]) -> None:
 
 @given(strategies.rational_compounds)
 def test_idempotence(compound: Compound) -> None:
-    result = compound & compound
-
-    assert (compound is result is EMPTY
-            or result.relate(compound) is Relation.EQUAL)
+    assert are_compounds_equivalent(compound & compound, compound)
 
 
 @given(strategies.empty_compounds_with_compounds)
@@ -52,8 +49,7 @@ def test_absorption_identity(compounds_pair: Tuple[Compound, Compound]
 
     result = left_compound & (left_compound | right_compound)
 
-    assert (result is left_compound is EMPTY
-            or result.relate(left_compound) is Relation.EQUAL)
+    assert are_compounds_equivalent(result, left_compound)
 
 
 @given(strategies.compounds_pairs)
@@ -73,6 +69,19 @@ def test_associativity(compounds_triplet: Tuple[Compound, Compound, Compound]
     result = (left_compound & mid_compound) & right_compound
 
     assert result == left_compound & (mid_compound & right_compound)
+
+
+@given(strategies.rational_compounds_triplets)
+def test_distribution_over_union(compounds_triplet
+                                 : Tuple[Compound, Compound, Compound]
+                                 ) -> None:
+    left_compound, mid_compound, right_compound = compounds_triplet
+
+    result = left_compound & (mid_compound | right_compound)
+
+    assert are_compounds_equivalent(result,
+                                    (left_compound & mid_compound)
+                                    | (left_compound & right_compound))
 
 
 @given(strategies.rational_compounds_pairs)

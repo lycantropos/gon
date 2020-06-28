@@ -134,6 +134,12 @@ rational_compounds_pairs = (strategies.builds(coordinates_to_compounds_tuples,
                                               compounds_factories,
                                               compounds_factories)
                             .flatmap(identity))
+rational_compounds_triplets = (
+    strategies.builds(coordinates_to_compounds_tuples,
+                      rational_coordinates_strategies,
+                      compounds_factories,
+                      compounds_factories,
+                      compounds_factories).flatmap(identity))
 compounds_pairs = ((non_empty_compounds
                     .map(compound_to_compound_with_multipoint))
                    | (strategies.builds(coordinates_to_compounds_tuples,
