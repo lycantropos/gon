@@ -45,7 +45,8 @@ def to_digits_count(number: float,
     else:
         decimal *= 10 ** (-exponent - significant_digits_count)
         whole_digits_count = 1
-    decimal = round(decimal, max(max_digits_count - whole_digits_count, 0))
+    decimal = round(decimal, min(max(max_digits_count - whole_digits_count, 0),
+                                 significant_digits_count))
     return float(str(decimal))
 
 
