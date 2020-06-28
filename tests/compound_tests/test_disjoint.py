@@ -17,7 +17,7 @@ def test_basic(compounds_pair: Tuple[Compound, Compound]) -> None:
     assert isinstance(result, bool)
 
 
-@given(strategies.empty_compounds)
+@given(strategies.compounds)
 def test_reflexivity_criteria(compound: Compound) -> None:
     assert equivalence(compound.disjoint(compound),
                        compound is EMPTY)
