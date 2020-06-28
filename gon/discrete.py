@@ -218,8 +218,6 @@ class Multipoint(Compound):
                 if isinstance(other, Multipoint)
                 else NotImplemented)
 
-    __ror__ = __or__
-
     def __sub__(self, other: Compound) -> Compound:
         """
         Returns difference of the multipoint with the other geometry.
