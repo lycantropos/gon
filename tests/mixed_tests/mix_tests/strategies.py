@@ -34,15 +34,17 @@ multipolygons = coordinates_strategies.flatmap(coordinates_to_multipolygons)
 
 
 def multipolygon_to_invalid_mix(multipolygon: Multipolygon) -> Strategy[Mix]:
-    raw_vertices = list(flatten(chain(polygon.border.raw(),
-                                      flatten(hole.raw()
-                                              for hole in polygon.holes))
+    raw_contours = list(flatten(chain((polygon.border.raw(),),
+                                      (hole.raw() for hole in polygon.holes))
                                 for polygon in multipolygon.polygons))
+    raw_vertices = list(flatten(raw_contours))
     return strategies.builds(Mix,
                              empty_geometries
                              | (sub_lists(raw_vertices)
                                 .map(Multipoint.from_raw)),
-                             sub_lists(to_pairs_chain(raw_vertices))
+                             sub_lists(list(flatten(map(to_pairs_chain,
+                                                        raw_contours)))
+                                       + to_pairs_chain(raw_vertices))
                              .map(Multisegment.from_raw),
                              strategies.just(multipolygon))
 
