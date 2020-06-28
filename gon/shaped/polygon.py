@@ -672,7 +672,8 @@ class Polygon(Indexable, Shaped):
                                          raw_multipolygon: RawMultipolygon
                                          ) -> Compound:
         return from_raw_mix_components(*complete_intersect_multipolygons(
-                [(self._raw_border, self._raw_holes)], raw_multipolygon))
+                [(self._raw_border, self._raw_holes)], raw_multipolygon,
+                accurate=False))
 
     def _intersect_with_raw_multisegment(self,
                                          raw_multisegment: RawMultisegment
@@ -680,17 +681,20 @@ class Polygon(Indexable, Shaped):
         return from_raw_mix_components(
                 *complete_intersect_multisegment_with_multipolygon(
                         raw_multisegment,
-                        [(self._raw_border, self._raw_holes)]))
+                        [(self._raw_border, self._raw_holes)],
+                        accurate=False))
 
     def _subtract_from_raw_multisegment(self, other_raw: RawMultisegment
                                         ) -> Compound:
         return from_raw_multisegment(subtract_multipolygon_from_multisegment(
-                other_raw, [(self._raw_border, self._raw_holes)]))
+                other_raw, [(self._raw_border, self._raw_holes)],
+                accurate=False))
 
     def _subtract_raw_multipolygon(self, raw_multipolygon: RawMultipolygon
                                    ) -> Compound:
         return from_raw_multipolygon(subtract_multipolygons(
-                [(self._raw_border, self._raw_holes)], raw_multipolygon))
+                [(self._raw_border, self._raw_holes)], raw_multipolygon,
+                accurate=False))
 
     def _unite_with_multipoint(self, other: Multipoint) -> Compound:
         # importing here to avoid cyclic imports
@@ -701,14 +705,16 @@ class Polygon(Indexable, Shaped):
                                      ) -> Compound:
         raw_multipolygon = [(self._raw_border, self._raw_holes)]
         raw_multisegment = subtract_multipolygon_from_multisegment(
-                other_raw, raw_multipolygon)
+                other_raw, raw_multipolygon,
+                accurate=False)
         return from_raw_mix_components([], raw_multisegment, raw_multipolygon)
 
     def _unite_with_raw_multipolygon(self, raw_multipolygon: RawMultipolygon
                                      ) -> Compound:
         return from_raw_multipolygon(unite_multipolygons([(self._raw_border,
                                                            self._raw_holes)],
-                                                         raw_multipolygon))
+                                                         raw_multipolygon,
+                                                         accurate=False))
 
 
 def raw_locate_point(raw_polygon: RawPolygon, raw_point: RawPoint) -> Location:
