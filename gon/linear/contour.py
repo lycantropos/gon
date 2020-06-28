@@ -228,14 +228,10 @@ class Contour(Indexable, Linear):
         True
         """
         return (self == other
-                or (((self.relate(other) in (Relation.EQUAL,
-                                             Relation.COMPOSITE)
-                      if isinstance(other, Contour)
-                      # contour cannot be subset of segment
-                      else False)
-                     if isinstance(other, Linear)
-                     else other >= self)
-                    if isinstance(other, Compound)
+                or (not isinstance(other, Segment)
+                    and self.relate(other) in (Relation.EQUAL,
+                                               Relation.COMPOSITE)
+                    if isinstance(other, Linear)
                     else NotImplemented))
 
     def __lt__(self, other: Compound) -> bool:
