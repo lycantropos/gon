@@ -13,7 +13,8 @@ from gon.linear import (Contour,
 from tests.utils import (Strategy,
                          pack,
                          segment_to_rotations)
-from .base import coordinates_strategies
+from .base import (coordinates_strategies,
+                   rational_coordinates_strategies)
 from .factories import (coordinates_to_points,
                         coordinates_to_segments)
 from .primitive import (invalid_points,
@@ -21,6 +22,8 @@ from .primitive import (invalid_points,
                         repeated_raw_points)
 
 segments = coordinates_strategies.flatmap(coordinates_to_segments)
+rational_segments = (rational_coordinates_strategies
+                     .flatmap(coordinates_to_segments))
 invalid_segments = (points.map(lambda point: Segment(point, point))
                     | strategies.builds(Segment, points, invalid_points)
                     | strategies.builds(Segment, invalid_points, points))
@@ -77,7 +80,7 @@ def to_repeated_segments(segments: Strategy[Segment]
 invalid_multisegments = ((strategies.builds(list)
                           | strategies.lists(invalid_segments,
                                              min_size=1)
-                          | to_segments_rotations(segments)
+                          | to_segments_rotations(rational_segments)
                           | to_repeated_segments(segments))
                          .map(pack(Multisegment)))
 small_contours = (
