@@ -15,7 +15,7 @@ def test_basic(compounds_pair: Tuple[Compound, Compound]) -> None:
     assert isinstance(result, Compound)
 
 
-@given(strategies.compounds)
+@given(strategies.rational_compounds)
 def test_idempotence(compound: Compound) -> None:
     result = compound | compound
 
@@ -42,14 +42,14 @@ def test_right_neutral_element(empty_compound_with_compound
     assert result == compound
 
 
-@given(strategies.compounds_pairs)
+@given(strategies.rational_compounds_pairs)
 def test_absorption_identity(compounds_pair: Tuple[Compound, Compound]
                              ) -> None:
     left_compound, right_compound = compounds_pair
 
     result = left_compound | (left_compound & right_compound)
 
-    assert result == left_compound
+    assert are_compounds_equivalent(result, left_compound)
 
 
 @given(strategies.compounds_pairs)
@@ -68,7 +68,8 @@ def test_associativity(compounds_triplet: Tuple[Compound, Compound, Compound]
 
     result = (left_compound | mid_compound) | right_compound
 
-    assert result == left_compound | (mid_compound | right_compound)
+    assert are_compounds_equivalent(
+            result, left_compound | (mid_compound | right_compound))
 
 
 @given(strategies.rational_compounds_triplets)
@@ -79,8 +80,9 @@ def test_distribution_over_intersection(compounds_triplet
 
     result = left_compound | (mid_compound & right_compound)
 
-    assert result == ((left_compound | mid_compound)
-                      & (left_compound | right_compound))
+    assert are_compounds_equivalent(result,
+                                    (left_compound | mid_compound)
+                                    & (left_compound | right_compound))
 
 
 @given(strategies.rational_compounds_pairs)
