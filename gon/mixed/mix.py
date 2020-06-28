@@ -1242,10 +1242,10 @@ class Mix(Indexable):
                         if (self._multipoint is other._multipoint is EMPTY
                             or multipoints_relation is Relation.EQUAL)
                         else
-                        (Relation.COMPONENT
+                        (Relation.COMPOSITE
                          if self._multipoint is EMPTY
                          else
-                         (Relation.COMPOSITE
+                         (Relation.COMPONENT
                           if other._multipoint is EMPTY
                           else
                           (multipoints_relation
@@ -1254,15 +1254,15 @@ class Mix(Indexable):
                            else Relation.OVERLAP))))
             elif (self._multisegment is EMPTY
                   or multisegments_relation is Relation.COMPOSITE):
-                multipoints_relation = self._multipoint.relate(
-                        other._multipoint)
+                multipoints_relation = other._relate_multipoint(
+                        self._multipoint)
                 return (Relation.COMPOSITE
                         if (multipoints_relation is Relation.EQUAL
-                            or multipoints_relation is Relation.COMPOSITE)
+                            or multipoints_relation is Relation.COMPONENT)
                         else Relation.OVERLAP)
             elif (other._multisegment is EMPTY
                   or multisegments_relation is Relation.COMPONENT):
-                multipoints_relation = self._multipoint.relate(
+                multipoints_relation = self._relate_multipoint(
                         other._multipoint)
                 return (Relation.COMPONENT
                         if (multipoints_relation is Relation.EQUAL
