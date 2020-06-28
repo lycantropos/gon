@@ -430,7 +430,8 @@ class Segment(Compound, Linear):
                 else (other
                       if relation is Relation.COMPONENT
                       else
-                      (_raw_unite_overlap(self._raw, other._raw)
+                      (Segment.from_raw(_raw_unite_overlap(self._raw,
+                                                           other._raw))
                        if relation is Relation.OVERLAP
                        else (Multisegment.from_raw(
                               _raw_unite_cross(self._raw, other._raw))
