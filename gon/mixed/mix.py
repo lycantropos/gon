@@ -1234,8 +1234,40 @@ class Mix(Indexable):
         elif multipolygons_relation is Relation.EQUAL:
             multisegments_relation = self._multisegment.relate(
                     other._multisegment)
-            if (self._multisegment is other._multisegment is EMPTY
-                    or multisegments_relation is Relation.EQUAL):
+            if self._multisegment is other._multisegment is EMPTY:
+                multipoints_relation = self._multipoint.relate(
+                        other._multipoint)
+                return (multipolygons_relation
+                        if (self._multipoint is other._multipoint is EMPTY
+                            or multipoints_relation is Relation.EQUAL)
+                        else
+                        (multipoints_relation
+                         if (multipoints_relation is Relation.COMPOSITE
+                             or multipoints_relation is Relation.COMPONENT)
+                         else Relation.OVERLAP))
+            elif self._multisegment is EMPTY:
+                multipoints_relation = other._relate_multipoint(
+                        self._multipoint)
+                return (Relation.COMPOSITE
+                        if (multipoints_relation is Relation.EQUAL
+                            or multipoints_relation is Relation.COMPONENT)
+                        else Relation.OVERLAP)
+            elif other._multisegment is EMPTY:
+                multipoints_relation = self._relate_multipoint(
+                        other._multipoint)
+                return (Relation.COMPONENT
+                        if (multipoints_relation is Relation.EQUAL
+                            or multipoints_relation is Relation.COMPONENT)
+                        else Relation.OVERLAP)
+            elif multisegments_relation is Relation.COMPOSITE:
+                multipoints_relation = other._relate_multipoint(
+                        self._multipoint)
+                return (Relation.COMPOSITE
+                        if (self._multipoint is other._multipoint is EMPTY
+                            or multipoints_relation is Relation.EQUAL
+                            or multipoints_relation is Relation.COMPONENT)
+                        else Relation.OVERLAP)
+            elif multisegments_relation is Relation.EQUAL:
                 multipoints_relation = self._multipoint.relate(
                         other._multipoint)
                 return (multipolygons_relation
@@ -1252,20 +1284,12 @@ class Mix(Indexable):
                            if (multipoints_relation is Relation.COMPONENT
                                or multipoints_relation is Relation.COMPOSITE)
                            else Relation.OVERLAP))))
-            elif (self._multisegment is EMPTY
-                  or multisegments_relation is Relation.COMPOSITE):
-                multipoints_relation = other._relate_multipoint(
-                        self._multipoint)
-                return (Relation.COMPOSITE
-                        if (multipoints_relation is Relation.EQUAL
-                            or multipoints_relation is Relation.COMPONENT)
-                        else Relation.OVERLAP)
-            elif (other._multisegment is EMPTY
-                  or multisegments_relation is Relation.COMPONENT):
+            elif multisegments_relation is Relation.COMPONENT:
                 multipoints_relation = self._relate_multipoint(
                         other._multipoint)
                 return (Relation.COMPONENT
-                        if (multipoints_relation is Relation.EQUAL
+                        if (self._multipoint is other._multipoint is EMPTY
+                            or multipoints_relation is Relation.EQUAL
                             or multipoints_relation is Relation.COMPONENT)
                         else Relation.OVERLAP)
             else:
@@ -1335,7 +1359,7 @@ class Mix(Indexable):
                 multipoint_relation = self._multipoint.relate(rest_other)
                 return (Relation.COMPONENT
                         if (multipoint_relation is Relation.EQUAL
-                            or multipoint_relation is Relation.COMPOSITE)
+                            or multipoint_relation is Relation.COMPONENT)
                         else multisegment_relation)
             else:
                 return multisegment_relation
