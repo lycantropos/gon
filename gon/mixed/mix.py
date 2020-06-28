@@ -910,9 +910,9 @@ class Mix(Indexable):
             elif multisegments_relation is Relation.EQUAL:
                 other_multipoint_relation = self._multipoint.relate(
                         other._multipoint)
-                return (multisegments_relation
-                        if other_multipoint_relation is Relation.EQUAL
-                        else Relation.OVERLAP)
+                return (Relation.OVERLAP
+                        if other_multipoint_relation is Relation.DISJOINT
+                        else other_multipoint_relation)
             elif multisegments_relation is Relation.COMPONENT:
                 other_multipoint_relation = self._relate_multipoint(
                         other._multipoint)
