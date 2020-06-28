@@ -17,7 +17,7 @@ def test_basic(compounds_pair: Tuple[Compound, Compound]) -> None:
     assert isinstance(result, Compound)
 
 
-@given(strategies.rational_compounds)
+@given(strategies.compounds)
 def test_idempotence(compound: Compound) -> None:
     assert are_compounds_equivalent(compound & compound, compound)
 
