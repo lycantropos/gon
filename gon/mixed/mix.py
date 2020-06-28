@@ -421,44 +421,40 @@ class Mix(Indexable):
         True
         """
         if isinstance(other, Multipoint):
-            multipoint_part, multisegment_part = (self._multipoint,
-                                                  self._multisegment)
-            multipolygon_part = self._multipolygon | other
-            if isinstance(multipolygon_part, Mix):
-                other = multipolygon_part._multipoint
-                multipolygon_part = multipolygon_part._multipolygon
-            else:
-                return from_mix_components(multipoint_part, multisegment_part,
-                                           multipolygon_part)
-            multisegment_part |= other
-            if isinstance(multisegment_part, Mix):
-                other = multisegment_part._multipoint
-                multisegment_part = multisegment_part._multisegment
-            else:
-                return from_mix_components(multipoint_part, multisegment_part,
-                                           multipolygon_part)
-            return from_mix_components(multipoint_part | other,
-                                       multisegment_part, multipolygon_part)
+            return Mix(self._multipoint
+                       | (other - self._multipolygon - self._multisegment),
+                       self._multisegment,
+                       self._multipolygon)
         elif isinstance(other, Linear):
             multipoint_part, multisegment_part = (self._multipoint,
                                                   self._multisegment)
             multipolygon_part = self._multipolygon | other
-            if isinstance(multipolygon_part, Mix):
-                other = multipolygon_part._multisegment
+            if isinstance(multipolygon_part, Linear):
+                multisegment_part = (multisegment_part | multipolygon_part
+                                     | multipoint_part)
+                multipolygon_part = EMPTY
+            elif isinstance(multipolygon_part, Mix):
+                multisegment_part = (multisegment_part
+                                     | multipolygon_part._multisegment
+                                     | multipoint_part)
                 multipolygon_part = multipolygon_part._multipolygon
             else:
+                # other is subset of the multipolygon
                 return from_mix_components(multipoint_part, multisegment_part,
                                            multipolygon_part)
-            multisegment_part |= other | multipoint_part
-            return (from_mix_components(multisegment_part._multipoint,
-                                        multisegment_part._multisegment,
-                                        multipolygon_part)
-                    if isinstance(multisegment_part, Mix)
-                    else from_mix_components(EMPTY, multisegment_part,
-                                             multipolygon_part))
+            if isinstance(multisegment_part, Mix):
+                multipoint_part, multisegment_part = (
+                    multisegment_part._multipoint,
+                    multisegment_part._multisegment)
+            else:
+                multipoint_part = EMPTY
+            return from_mix_components(multipoint_part, multisegment_part,
+                                       multipolygon_part)
+        elif isinstance(other, (Shaped, Mix)):
+            return (self._multipolygon | other
+                    | self._multisegment | self._multipoint)
         else:
-            return (self._multipolygon | other | self._multipoint
-                    | self._multisegment)
+            return NotImplemented
 
     __ror__ = __or__
 
