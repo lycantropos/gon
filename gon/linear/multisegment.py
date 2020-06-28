@@ -495,18 +495,21 @@ class Multisegment(Indexable, Linear):
     def _intersect_with_raw_multisegment(self, other_raw: RawMultisegment
                                          ) -> Compound:
         raw_multipoint, raw_multisegment, _ = complete_intersect_multisegments(
-                self._raw, other_raw)
+                self._raw, other_raw,
+                accurate=False)
         return from_raw_mix_components(raw_multipoint, raw_multisegment)
 
     def _subtract_raw_multisegment(self, other_raw: RawMultisegment
                                    ) -> Compound:
         return from_raw_multisegment(subtract_multisegments(self._raw,
-                                                            other_raw))
+                                                            other_raw,
+                                                            accurate=False))
 
     def _subtract_from_raw_multisegment(self, other_raw: RawMultisegment
                                         ) -> Compound:
         return from_raw_multisegment(subtract_multisegments(other_raw,
-                                                            self._raw))
+                                                            self._raw,
+                                                            accurate=False))
 
     def _unite_with_multipoint(self, other: Multipoint) -> Compound:
         # importing here to avoid cyclic imports
@@ -515,7 +518,8 @@ class Multisegment(Indexable, Linear):
 
     def _unite_with_raw_multisegment(self, other_raw: RawMultisegment
                                      ) -> Compound:
-        return from_raw_multisegment(unite_multisegments(self._raw, other_raw))
+        return from_raw_multisegment(unite_multisegments(self._raw, other_raw,
+                                                         accurate=False))
 
 
 def raw_locate_point(raw_multisegment: RawMultisegment,
