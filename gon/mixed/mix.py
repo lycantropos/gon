@@ -93,8 +93,9 @@ class Mix(Indexable):
             multisegment_part |= multipolygon_part
             multipolygon_part = EMPTY
         elif isinstance(multipolygon_part, Mix):
-            multisegment_part |= (multipolygon_part._multisegment
-                                  | multipolygon_part._multipoint)
+            multisegment_part = (multisegment_part
+                                 | multipolygon_part._multisegment
+                                 | multipolygon_part._multipoint)
             multipolygon_part = multipolygon_part._multipolygon
         if isinstance(multisegment_part, Multipoint):
             multipoint_part |= multisegment_part
