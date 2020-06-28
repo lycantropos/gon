@@ -276,11 +276,11 @@ class Polygon(Indexable, Shaped):
         False
         """
         return (self != other
-                and (not isinstance(other, (Multipoint, Linear))
-                     and self.relate(other) in (Relation.COVER,
-                                                Relation.ENCLOSES,
-                                                Relation.COMPOSITE)
-                     if isinstance(other, Compound)
+                and not isinstance(other, (Multipoint, Linear))
+                and (self.relate(other) in (Relation.COVER,
+                                            Relation.ENCLOSES,
+                                            Relation.COMPOSITE)
+                     if isinstance(other, Shaped)
                      else NotImplemented))
 
     def __or__(self, other: Compound) -> Compound:
