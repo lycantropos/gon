@@ -88,21 +88,18 @@ class Polygon(Indexable, Shaped):
         >>> polygon & polygon == polygon
         True
         """
-        return (self._intersect_with_multipoint(other)
-                if isinstance(other, Multipoint)
-                else (self._intersect_with_raw_multisegment([other.raw()])
-                      if isinstance(other, Segment)
-                      else (self._intersect_with_raw_multisegment(other.raw())
-                            if isinstance(other, Multisegment)
-                            else
-                            (self._intersect_with_raw_multisegment(
-                                    to_pairs_chain(other.raw()))
-                             if isinstance(other, Contour)
-                             else
-                             (self._intersect_with_raw_multipolygon(
-                                     [(other._raw_border, other._raw_holes)])
-                              if isinstance(other, Polygon)
-                              else NotImplemented)))))
+        return (self._intersect_with_raw_multisegment([other.raw()])
+                if isinstance(other, Segment)
+                else (self._intersect_with_raw_multisegment(other.raw())
+                      if isinstance(other, Multisegment)
+                      else
+                      (self._intersect_with_raw_multisegment(
+                              to_pairs_chain(other.raw()))
+                       if isinstance(other, Contour)
+                       else (self._intersect_with_raw_multipolygon(
+                              [(other._raw_border, other._raw_holes)])
+                             if isinstance(other, Polygon)
+                             else NotImplemented))))
 
     __rand__ = __and__
 
@@ -670,10 +667,6 @@ class Polygon(Indexable, Shaped):
             if (relation is not Relation.COVER
                     and relation is not Relation.ENCLOSES):
                 raise ValueError('Holes should lie inside border.')
-
-    def _intersect_with_multipoint(self, other: Multipoint) -> Compound:
-        points = [point for point in other.points if point in self]
-        return Multipoint(*points) if points else EMPTY
 
     def _intersect_with_raw_multipolygon(self,
                                          raw_multipolygon: RawMultipolygon
