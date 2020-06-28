@@ -233,11 +233,10 @@ class Multisegment(Indexable, Linear):
         True
         """
         return (self == other
-                or ((self.relate(other) in (Relation.EQUAL, Relation.COMPOSITE)
+                or not isinstance(other, Multipoint)
+                and (self.relate(other) in (Relation.EQUAL, Relation.COMPOSITE)
                      if isinstance(other, Linear)
-                     else other >= self)
-                    if isinstance(other, Compound)
-                    else NotImplemented))
+                     else NotImplemented))
 
     def __lt__(self, other: Compound) -> bool:
         """
