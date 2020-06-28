@@ -656,29 +656,34 @@ class Multipolygon(Indexable, Shaped):
     def _intersect_with_raw_multipolygon(self, other_raw: RawMultipolygon
                                          ) -> Compound:
         return from_raw_mix_components(
-                *complete_intersect_multipolygons(self._raw, other_raw))
+                *complete_intersect_multipolygons(self._raw, other_raw,
+                                                  accurate=False))
 
     def _intersect_with_raw_multisegment(self,
                                          raw_multisegment: RawMultisegment
                                          ) -> Compound:
         return from_raw_mix_components(
                 *complete_intersect_multisegment_with_multipolygon(
-                        raw_multisegment, self._raw))
+                        raw_multisegment, self._raw,
+                        accurate=False))
 
     def _subtract_from_raw_multipolygon(self, other_raw: RawMultipolygon
                                         ) -> Compound:
         return from_raw_multipolygon(subtract_multipolygons(other_raw,
-                                                            self._raw))
+                                                            self._raw,
+                                                            accurate=False))
 
     def _subtract_from_raw_multisegment(self, other_raw: RawMultisegment
                                         ) -> Compound:
         return from_raw_multisegment(subtract_multipolygon_from_multisegment(
-                other_raw, self._raw))
+                other_raw, self._raw,
+                accurate=False))
 
     def _subtract_raw_multipolygon(self, other_raw: RawMultipolygon
                                    ) -> Compound:
         return from_raw_multipolygon(subtract_multipolygons(self._raw,
-                                                            other_raw))
+                                                            other_raw,
+                                                            accurate=False))
 
     def _unite_with_multipoint(self, other: Multipoint) -> Compound:
         # importing here to avoid cyclic imports
@@ -687,13 +692,15 @@ class Multipolygon(Indexable, Shaped):
 
     def _unite_with_raw_multisegment(self, other_raw: RawMultisegment
                                      ) -> Compound:
-        raw_multisegment = subtract_multipolygon_from_multisegment(other_raw,
-                                                                   self._raw)
+        raw_multisegment = subtract_multipolygon_from_multisegment(
+                other_raw, self._raw,
+                accurate=False)
         return from_raw_mix_components([], raw_multisegment, self._raw)
 
     def _unite_with_raw_multipolygon(self, other_raw: RawMultipolygon
                                      ) -> Compound:
-        return from_raw_multipolygon(unite_multipolygons(self._raw, other_raw))
+        return from_raw_multipolygon(unite_multipolygons(self._raw, other_raw,
+                                                         accurate=False))
 
 
 def locate_point_in_polygons(polygons: Sequence[Polygon],
