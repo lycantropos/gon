@@ -255,6 +255,7 @@ class Contour(Indexable, Linear):
         False
         """
         return (self != other
+                and not isinstance(other, Multipoint)
                 and (not isinstance(other, Segment)
                      and self.relate(other) is Relation.COMPOSITE
                      if isinstance(other, Linear)
