@@ -211,6 +211,25 @@ class Empty(Compound):
                 if isinstance(other, Compound)
                 else NotImplemented)
 
+    def __xor__(self, other: Compound) -> Compound:
+        """
+        Returns symmetric difference of the empty geometry
+        with the other geometry.
+
+        Time complexity:
+            ``O(1)``
+        Memory complexity:
+            ``O(1)``
+
+        >>> EMPTY ^ EMPTY is EMPTY
+        True
+        """
+        return (other
+                if isinstance(other, Compound)
+                else NotImplemented)
+
+    __rxor__ = __xor__
+
     @classmethod
     def from_raw(cls, raw: RawEmpty) -> Domain:
         """
