@@ -574,18 +574,21 @@ class Contour(Indexable, Linear):
     def _intersect_with_raw_multisegment(self, other_raw: RawMultisegment
                                          ) -> Compound:
         raw_multipoint, raw_multisegment, _ = complete_intersect_multisegments(
-                to_pairs_chain(self._raw), other_raw)
+                to_pairs_chain(self._raw), other_raw,
+                accurate=False)
         return from_raw_mix_components(raw_multipoint, raw_multisegment)
 
     def _subtract_raw_multisegment(self, other_raw: RawMultisegment
                                    ) -> Compound:
         return from_raw_multisegment(subtract_multisegments(
-                to_pairs_chain(self._raw), other_raw))
+                to_pairs_chain(self._raw), other_raw,
+                accurate=False))
 
     def _subtract_from_raw_multisegment(self, other_raw: RawMultisegment
                                         ) -> Compound:
         return from_raw_multisegment(subtract_multisegments(
-                other_raw, to_pairs_chain(self._raw)))
+                other_raw, to_pairs_chain(self._raw),
+                accurate=False))
 
     def _unite_with_multipoint(self, other: Multipoint) -> Compound:
         # importing here to avoid cyclic imports
@@ -595,7 +598,8 @@ class Contour(Indexable, Linear):
     def _unite_with_raw_multisegment(self, other_raw: RawMultisegment
                                      ) -> Compound:
         return from_raw_multisegment(unite_multisegments(
-                to_pairs_chain(self._raw), other_raw))
+                to_pairs_chain(self._raw), other_raw,
+                accurate=False))
 
 
 def raw_locate_point(raw_contour: RawContour, raw_point: RawPoint) -> Location:
