@@ -1,4 +1,5 @@
-from typing import (List,
+from typing import (AbstractSet,
+                    List,
                     Set)
 
 from reprit.base import generate_repr
@@ -230,11 +231,13 @@ class Multipoint(Compound):
         >>> multipoint - multipoint is EMPTY
         True
         """
-        return (self._subtract_multipoint(other)
-                if isinstance(other, Multipoint)
-                else (self._subtract_compound(other)
-                      if isinstance(other, Compound)
-                      else NotImplemented))
+        return (from_points(self._points_set - other._points_set
+                            if isinstance(other, Multipoint)
+                            else [point
+                                  for point in self._points
+                                  if point not in other])
+                if isinstance(other, Compound)
+                else NotImplemented)
 
     @classmethod
     def from_raw(cls, raw: RawMultipoint) -> Domain:
@@ -378,13 +381,9 @@ class Multipoint(Compound):
                             if is_subset
                             else Relation.CROSS)))
 
-    def _subtract_compound(self, other: Compound) -> Compound:
-        points = [point for point in self._points if point not in other]
-        return Multipoint(*points) if points else EMPTY
 
-    def _subtract_multipoint(self, other: 'Multipoint') -> Compound:
-        points = self._points_set - other._points_set
-        return Multipoint(*points) if points else EMPTY
+def from_points(points: AbstractSet[Point]) -> Compound:
+    return Multipoint(*points) if points else EMPTY
 
 
 def _relate_sets(left: Set[Domain], right: Set[Domain]) -> Relation:
