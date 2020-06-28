@@ -241,6 +241,25 @@ class Multipoint(Compound):
                 if isinstance(other, Compound)
                 else NotImplemented)
 
+    def __xor__(self, other: Compound) -> Compound:
+        """
+        Returns symmetric difference of the multipoint with the other geometry.
+
+        Time complexity:
+            ``O(points_count)``
+        Memory complexity:
+            ``O(points_count)``
+
+        where ``points_count = len(self.points)``.
+
+        >>> multipoint = Multipoint.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> multipoint ^ multipoint is EMPTY
+        True
+        """
+        return (from_points(self._points_set ^ other._points_set)
+                if isinstance(other, Multipoint)
+                else NotImplemented)
+
     @classmethod
     def from_raw(cls, raw: RawMultipoint) -> Domain:
         """
