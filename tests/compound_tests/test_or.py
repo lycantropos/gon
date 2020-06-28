@@ -20,7 +20,7 @@ def test_basic(compounds_pair: Tuple[Compound, Compound]) -> None:
 def test_idempotence(compound: Compound) -> None:
     result = compound | compound
 
-    assert result == compound
+    assert are_compounds_equivalent(result, compound)
 
 
 @given(strategies.empty_compounds_with_compounds)
