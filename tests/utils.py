@@ -14,6 +14,9 @@ from typing import (Any,
 from hypothesis import strategies
 from hypothesis.strategies import SearchStrategy
 
+from gon.compound import (Compound,
+                          Relation)
+from gon.degenerate import EMPTY
 from gon.discrete import Multipoint
 from gon.hints import Coordinate
 from gon.linear import (Contour,
@@ -88,6 +91,10 @@ def pack(function: Callable[..., Range]
 
 def apply(function: Callable[..., Range], args: Tuple[Domain, ...]) -> Range:
     return function(*args)
+
+
+def are_compounds_equivalent(left: Compound, right: Compound) -> bool:
+    return left is right is EMPTY or left.relate(right) is Relation.EQUAL
 
 
 def scale_segment(segment: Segment,
