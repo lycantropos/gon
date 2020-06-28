@@ -251,13 +251,13 @@ class Multipolygon(Indexable, Shaped):
         True
         """
         return (self == other
-                or (not isinstance(other, (Multipoint, Linear))
-                    and self.relate(other) in (Relation.COVER,
-                                               Relation.ENCLOSES,
-                                               Relation.COMPOSITE,
-                                               Relation.EQUAL)
-                    if isinstance(other, Compound)
-                    else NotImplemented))
+                or not isinstance(other, (Multipoint, Linear))
+                and (self.relate(other) in (Relation.COVER,
+                                            Relation.ENCLOSES,
+                                            Relation.COMPOSITE,
+                                            Relation.EQUAL)
+                     if isinstance(other, Shaped)
+                     else NotImplemented))
 
     def __lt__(self, other: Compound) -> bool:
         """
