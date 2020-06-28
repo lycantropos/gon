@@ -223,10 +223,9 @@ class Segment(Compound, Linear):
         False
         """
         return (self != other
-                and ((self.relate(other) is Relation.COMPOSITE
-                      if isinstance(other, Linear)
-                      else other > self)
-                     if isinstance(other, Compound)
+                and not isinstance(other, Multipoint)
+                and (self.relate(other) is Relation.COMPOSITE
+                     if isinstance(other, Linear)
                      else NotImplemented))
 
     def __or__(self, other: Compound) -> Compound:
