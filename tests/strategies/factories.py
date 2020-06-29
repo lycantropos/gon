@@ -4,6 +4,8 @@ from typing import Optional
 from hypothesis import strategies
 from hypothesis_geometry import planar
 
+from gon.compound import (Linear,
+                          Shaped)
 from gon.degenerate import RAW_EMPTY
 from gon.discrete import Multipoint
 from gon.hints import Coordinate
@@ -33,6 +35,19 @@ def coordinates_to_multipoints(coordinates: Strategy[Coordinate]
                                               unique=True))
 
 
+def coordinates_to_linear_geometries(coordinates: Strategy[Coordinate]
+                                     ) -> Strategy[Linear]:
+    return (coordinates_to_segments(coordinates)
+            | coordinates_to_multisegments(coordinates)
+            | coordinates_to_contours(coordinates))
+
+
+def coordinates_to_shaped_geometries(coordinates: Strategy[Coordinate]
+                                     ) -> Strategy[Shaped]:
+    return (coordinates_to_polygons(coordinates)
+            | coordinates_to_multipolygons(coordinates))
+
+
 def coordinates_to_segments(coordinates: Strategy[Coordinate]
                             ) -> Strategy[Segment]:
     return planar.segments(coordinates).map(Segment.from_raw)
@@ -55,8 +70,7 @@ def coordinates_to_contours(coordinates: Strategy[Coordinate],
             .map(Contour.from_raw))
 
 
-def coordinates_to_mixes(coordinates: Strategy[Coordinate]
-                         ) -> Strategy[Contour]:
+def coordinates_to_mixes(coordinates: Strategy[Coordinate]) -> Strategy[Mix]:
     return coordinates_to_raw_mixes(coordinates).map(Mix.from_raw)
 
 
