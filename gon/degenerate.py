@@ -200,7 +200,7 @@ class Empty(Compound):
 
     def __rsub__(self, other: Compound) -> Compound:
         """
-        Returns difference of the the other geometry with empty geometry.
+        Returns difference of the other geometry with the empty geometry.
 
         Time complexity:
             ``O(1)``
