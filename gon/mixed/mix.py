@@ -519,6 +519,74 @@ class Mix(Indexable):
                                    self._multisegment - other,
                                    self._multipolygon - other)
 
+    def __xor__(self, other: Compound) -> Compound:
+        """
+        Returns symmetric difference of the mix with the other geometry.
+
+        Time complexity:
+            ``O(elements_count * log elements_count)``
+        Memory complexity:
+            ``O(elements_count)``
+
+        where ``elements_count = multipoint_size + multisegment_size\
+ + multipolygon_vertices_count``,
+        ``multipoint_size = len(points)``,
+        ``multisegment_size = len(segments)``,
+        ``multipolygon_vertices_count = sum(len(polygon.border.vertices)\
+ + sum(len(hole.vertices) for hole in polygon.holes)\
+ for polygon in polygons)``,
+        ``points = [] if self.multipoint is EMPTY\
+ else self.multipoint.points``,
+        ``segments = [] if self.multisegment is EMPTY\
+ else self.multisegment.segments``,
+        ``polygons = [] if self.multipolygon is EMPTY\
+ else self.multipolygon.polygons``.
+
+        >>> mix = Mix.from_raw(([(3, 3), (7, 7)],
+        ...                     [((0, 6), (0, 8)), ((6, 6), (6, 8))],
+        ...                     [([(0, 0), (6, 0), (6, 6), (0, 6)],
+        ...                       [[(2, 2), (2, 4), (4, 4), (4, 2)]])]))
+        >>> mix ^ mix is EMPTY
+        True
+        """
+        if isinstance(other, Multipoint):
+            rest_other = other - self._multipolygon - self._multisegment
+            return from_mix_components(self._multipoint ^ rest_other,
+                                       self._multisegment,
+                                       self._multipolygon)
+        elif isinstance(other, Linear):
+            multipoint_part, multisegment_part = (self._multipoint,
+                                                  self._multisegment)
+            multipolygon_part = self._multipolygon ^ other
+            if isinstance(multipolygon_part, Linear):
+                multisegment_part = (multisegment_part ^ multipolygon_part
+                                     ^ multipoint_part)
+                multipolygon_part = EMPTY
+            elif isinstance(multipolygon_part, Mix):
+                multisegment_part = (multisegment_part
+                                     ^ multipolygon_part._multisegment
+                                     ^ multipoint_part)
+                multipolygon_part = multipolygon_part._multipolygon
+            else:
+                # other is subset of the multipolygon
+                return from_mix_components(multipoint_part, multisegment_part,
+                                           multipolygon_part)
+            if isinstance(multisegment_part, Mix):
+                multipoint_part, multisegment_part = (
+                    multisegment_part._multipoint,
+                    multisegment_part._multisegment)
+            else:
+                multipoint_part = EMPTY
+            return from_mix_components(multipoint_part, multisegment_part,
+                                       multipolygon_part)
+        elif isinstance(other, (Shaped, Mix)):
+            return (self._multipolygon ^ other
+                    ^ self._multisegment ^ self._multipoint)
+        else:
+            return NotImplemented
+
+    __rxor__ = __xor__
+
     @classmethod
     def from_raw(cls, raw: RawMix) -> Domain:
         """
