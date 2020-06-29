@@ -62,6 +62,12 @@ class Compound(Geometry):
         Returns difference of the geometry with the other geometry.
         """
 
+    @abstractmethod
+    def __xor__(self, other: 'Compound') -> 'Compound':
+        """
+        Returns symmetric difference of the geometry with the other geometry.
+        """
+
     def disjoint(self, other: 'Compound') -> bool:
         """
         Checks if the geometry is disjoint with the other.
