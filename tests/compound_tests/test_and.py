@@ -4,7 +4,8 @@ from hypothesis import given
 
 from gon.compound import Compound
 from gon.degenerate import EMPTY
-from tests.utils import are_compounds_equivalent
+from tests.utils import (are_compounds_equivalent,
+                         equivalence)
 from . import strategies
 
 
@@ -83,6 +84,16 @@ def test_distribution_over_union(compounds_triplet
     assert are_compounds_equivalent(result,
                                     (left_compound & mid_compound)
                                     | (left_compound & right_compound))
+
+
+@given(strategies.compounds_pairs)
+def test_equivalents(compounds_pair: Tuple[Compound, Compound]) -> None:
+    left_compound, right_compound = compounds_pair
+
+    result = left_compound & right_compound
+
+    assert equivalence(left_compound.disjoint(right_compound),
+                       result is EMPTY)
 
 
 @given(strategies.rational_compounds_pairs)
