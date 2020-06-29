@@ -46,7 +46,8 @@ def test_right_neutral_element(empty_compound_with_compound
 
 
 @given(strategies.compounds_pairs)
-def test_equivalents(compounds_pair: Tuple[Compound, Compound]) -> None:
+def test_connection_with_disjoint(compounds_pair: Tuple[Compound, Compound]
+                                  ) -> None:
     left_compound, right_compound = compounds_pair
 
     result = left_compound - right_compound
