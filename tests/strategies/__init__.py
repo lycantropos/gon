@@ -2,6 +2,7 @@ from .base import (coordinates_strategies,
                    rational_coordinates_strategies)
 from .discrete import invalid_multipoints
 from .factories import (coordinates_to_contours,
+                        coordinates_to_linear_geometries,
                         coordinates_to_mixes,
                         coordinates_to_multipoints,
                         coordinates_to_multipolygons,
@@ -9,7 +10,8 @@ from .factories import (coordinates_to_contours,
                         coordinates_to_points,
                         coordinates_to_polygons,
                         coordinates_to_raw_mixes,
-                        coordinates_to_segments)
+                        coordinates_to_segments,
+                        coordinates_to_shaped_geometries)
 from .linear import (contours_with_repeated_points,
                      invalid_contours,
                      invalid_multisegments,
