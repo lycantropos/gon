@@ -4,6 +4,8 @@ from hypothesis import given
 
 from gon.compound import Compound
 from gon.degenerate import EMPTY
+from tests.utils import (are_compounds_equivalent,
+                         implication)
 from . import strategies
 
 
@@ -41,6 +43,16 @@ def test_right_neutral_element(empty_compound_with_compound
     result = compound - empty_compound
 
     assert result == compound
+
+
+@given(strategies.compounds_pairs)
+def test_equivalents(compounds_pair: Tuple[Compound, Compound]) -> None:
+    left_compound, right_compound = compounds_pair
+
+    result = left_compound - right_compound
+
+    assert implication(left_compound.disjoint(right_compound),
+                       are_compounds_equivalent(result, left_compound))
 
 
 @given(strategies.rational_compounds_pairs)
