@@ -97,6 +97,7 @@ Usage
 -----
 
 ```python
+>>> from gon.degenerate import EMPTY
 >>> from gon.shaped import Polygon
 >>> raw_square = [(0, 0), (1, 0), (1, 1), (0, 1)], []
 >>> square = Polygon.from_raw(raw_square)
@@ -112,6 +113,14 @@ True
 False
 >>> square > square
 False
+>>> square & square == square
+True
+>>> square | square == square
+True
+>>> square - square is EMPTY
+True
+>>> square ^ square is EMPTY
+True
 >>> from gon.primitive import Point
 >>> Point(0, 0) in square
 True
