@@ -3,6 +3,7 @@ from functools import partial
 from bentley_ottmann.planar import edges_intersect
 from clipping.planar import (complete_intersect_multisegments,
                              subtract_multisegments,
+                             symmetric_subtract_multisegments,
                              unite_multisegments)
 from orient.planar import (contour_in_contour,
                            multisegment_in_contour,
@@ -334,6 +335,36 @@ class Contour(Indexable, Linear):
                              if isinstance(other, Contour)
                              else NotImplemented))))
 
+    def __xor__(self, other: Compound) -> Compound:
+        """
+        Returns symmetric difference of the contour with the other geometry.
+
+        Time complexity:
+            ``O(vertices_count * log vertices_count)``
+        Memory complexity:
+            ``O(vertices_count)``
+
+        where ``vertices_count = len(self.vertices)``.
+
+        >>> contour = Contour.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> contour ^ contour is EMPTY
+        True
+        """
+        return (self._unite_with_multipoint(other)
+                if isinstance(other, Multipoint)
+                else (self._symmetric_subtract_raw_multisegment([other.raw()])
+                      if isinstance(other, Segment)
+                      else
+                      (self._symmetric_subtract_raw_multisegment(other.raw())
+                       if isinstance(other, Multisegment)
+                       else
+                       (self._symmetric_subtract_raw_multisegment(
+                               to_pairs_chain(other._raw))
+                        if isinstance(other, Contour)
+                        else NotImplemented))))
+
+    __rxor__ = __xor__
+
     @classmethod
     def from_raw(cls, raw: RawContour) -> 'Contour':
         """
@@ -588,6 +619,12 @@ class Contour(Indexable, Linear):
                                         ) -> Compound:
         return from_raw_multisegment(subtract_multisegments(
                 other_raw, to_pairs_chain(self._raw),
+                accurate=False))
+
+    def _symmetric_subtract_raw_multisegment(self, other_raw: RawMultisegment
+                                             ) -> Compound:
+        return from_raw_multisegment(symmetric_subtract_multisegments(
+                to_pairs_chain(self._raw), other_raw,
                 accurate=False))
 
     def _unite_with_multipoint(self, other: Multipoint) -> Compound:
