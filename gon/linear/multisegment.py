@@ -4,6 +4,7 @@ from typing import List
 from bentley_ottmann.planar import segments_cross_or_overlap
 from clipping.planar import (complete_intersect_multisegments,
                              subtract_multisegments,
+                             symmetric_subtract_multisegments,
                              unite_multisegments)
 from orient.planar import (multisegment_in_multisegment,
                            point_in_multisegment,
@@ -330,6 +331,34 @@ class Multisegment(Indexable, Linear):
                             if isinstance(other, Multisegment)
                             else NotImplemented)))
 
+    def __xor__(self, other: Compound) -> Compound:
+        """
+        Returns symmetric difference of the multisegment
+        with the other geometry.
+
+        Time complexity:
+            ``O(segments_count * log segments_count)``
+        Memory complexity:
+            ``O(segments_count)``
+
+        where ``segments_count = len(self.segments)``.
+
+        >>> multisegment = Multisegment.from_raw([((0, 0), (1, 0)),
+        ...                                       ((0, 1), (1, 1))])
+        >>> multisegment ^ multisegment is EMPTY
+        True
+        """
+        return (self._unite_with_multipoint(other)
+                if isinstance(other, Multipoint)
+                else (self._symmetric_subtract_raw_multisegment([other.raw()])
+                      if isinstance(other, Segment)
+                      else
+                      (self._symmetric_subtract_raw_multisegment(other._raw)
+                       if isinstance(other, Multisegment)
+                       else NotImplemented)))
+
+    __rxor__ = __xor__
+
     @classmethod
     def from_raw(cls, raw: RawMultisegment) -> Domain:
         """
@@ -510,6 +539,12 @@ class Multisegment(Indexable, Linear):
         return from_raw_multisegment(subtract_multisegments(other_raw,
                                                             self._raw,
                                                             accurate=False))
+
+    def _symmetric_subtract_raw_multisegment(self, other_raw: RawMultisegment
+                                             ) -> Compound:
+        return from_raw_multisegment(
+                symmetric_subtract_multisegments(self._raw, other_raw,
+                                                 accurate=False))
 
     def _unite_with_multipoint(self, other: Multipoint) -> Compound:
         # importing here to avoid cyclic imports
