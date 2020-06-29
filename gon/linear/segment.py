@@ -451,9 +451,10 @@ class Segment(Compound, Linear):
         return (EMPTY
                 if relation is Relation.EQUAL
                 else
-                (self
+                (Multisegment(self, other)
                  if relation is Relation.DISJOINT or relation is Relation.TOUCH
-                 else (_raw_unite_cross(self._raw, other._raw)
+                 else (Multisegment.from_raw(_raw_unite_cross(self._raw,
+                                                              other._raw))
                        if relation is Relation.CROSS
                        else
                        (Multisegment.from_raw(_raw_symmetric_subtract_overlap(
