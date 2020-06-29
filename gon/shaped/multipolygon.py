@@ -7,6 +7,7 @@ from clipping.planar import (complete_intersect_multipolygons,
                              complete_intersect_multisegment_with_multipolygon,
                              subtract_multipolygon_from_multisegment,
                              subtract_multipolygons,
+                             symmetric_subtract_multipolygons,
                              unite_multipolygons)
 from locus import r
 from orient.planar import (contour_in_multipolygon,
@@ -376,6 +377,47 @@ class Multipolygon(Indexable, Shaped):
                             if isinstance(other, Multipolygon)
                             else NotImplemented)))
 
+    def __xor__(self, other: Compound) -> Compound:
+        """
+        Returns symmetric difference of the multipolygon
+        with the other geometry.
+
+        Time complexity:
+            ``O(vertices_count * log vertices_count)``
+        Memory complexity:
+            ``O(vertices_count)``
+
+        where ``vertices_count = sum(len(polygon.border.vertices)\
+ + sum(len(hole.vertices) for hole in polygon.holes)\
+ for polygon in self.polygons)``.
+
+        >>> multipolygon = Multipolygon.from_raw(
+        ...         [([(0, 0), (6, 0), (6, 6), (0, 6)],
+        ...           [[(2, 2), (2, 4), (4, 4), (4, 2)]])])
+        >>> multipolygon ^ multipolygon is EMPTY
+        True
+        """
+        return (self._unite_with_multipoint(other)
+                if isinstance(other, Multipoint)
+                else
+                (self._unite_with_raw_multisegment([other.raw()])
+                 if isinstance(other, Segment)
+                 else
+                 (self._unite_with_raw_multisegment(other.raw())
+                  if isinstance(other, Multisegment)
+                  else
+                  (self._unite_with_raw_multisegment(
+                          to_pairs_chain(other.raw()))
+                   if isinstance(other, Contour)
+                   else
+                   (self._symmetric_subtract_raw_multipolygon([other.raw()])
+                    if isinstance(other, Polygon)
+                    else (self._symmetric_subtract_raw_multipolygon(other._raw)
+                          if isinstance(other, Multipolygon)
+                          else NotImplemented))))))
+
+    __rxor__ = __xor__
+
     @classmethod
     def from_raw(cls, raw: RawMultipolygon) -> 'Multipolygon':
         """
@@ -684,6 +726,12 @@ class Multipolygon(Indexable, Shaped):
         return from_raw_multipolygon(subtract_multipolygons(self._raw,
                                                             other_raw,
                                                             accurate=False))
+
+    def _symmetric_subtract_raw_multipolygon(self, other_raw: RawMultipolygon
+                                             ) -> Compound:
+        return from_raw_multipolygon(symmetric_subtract_multipolygons(
+                self._raw, other_raw,
+                accurate=False))
 
     def _unite_with_multipoint(self, other: Multipoint) -> Compound:
         # importing here to avoid cyclic imports
