@@ -265,6 +265,27 @@ class Segment(Compound, Linear):
                       if isinstance(other, Segment)
                       else NotImplemented))
 
+    def __xor__(self, other: Compound) -> Compound:
+        """
+        Returns symmetric difference of the segment with the other geometry.
+
+        Time complexity:
+            ``O(1)``
+        Memory complexity:
+            ``O(1)``
+
+        >>> segment = Segment.from_raw(((0, 0), (2, 0)))
+        >>> segment ^ segment is EMPTY
+        True
+        """
+        return (self._unite_with_multipoint(other)
+                if isinstance(other, Multipoint)
+                else (self._symmetric_subtract_segment(other)
+                      if isinstance(other, Segment)
+                      else NotImplemented))
+
+    __rxor__ = __xor__
+
     @classmethod
     def from_raw(cls, raw: RawSegment) -> 'Segment':
         """
@@ -409,6 +430,41 @@ class Segment(Compound, Linear):
                 if intersections
                 else EMPTY)
 
+    def _subtract_segment(self, other: 'Segment') -> Compound:
+        relation = segment_in_segment(self._raw, other._raw)
+        return (EMPTY
+                if relation is Relation.EQUAL or relation is Relation.COMPONENT
+                else
+                (self
+                 if relation in (Relation.DISJOINT, Relation.TOUCH,
+                                 Relation.CROSS)
+                 else (Segment.from_raw(_raw_subtract_overlap(self._raw,
+                                                              other._raw))
+                       if relation is Relation.OVERLAP
+                       else from_raw_multisegment(_raw_subtract_composite(
+                        self._raw, other._raw)))))
+
+    def _symmetric_subtract_segment(self, other: 'Segment') -> Compound:
+        # importing here to avoid cyclic imports
+        from .multisegment import Multisegment
+        relation = segment_in_segment(self._raw, other._raw)
+        return (EMPTY
+                if relation is Relation.EQUAL
+                else
+                (self
+                 if relation is Relation.DISJOINT or relation is Relation.TOUCH
+                 else (_raw_unite_cross(self._raw, other._raw)
+                       if relation is Relation.CROSS
+                       else
+                       (Multisegment.from_raw(_raw_symmetric_subtract_overlap(
+                               self._raw, other._raw))
+                        if relation is Relation.OVERLAP
+                        else from_raw_multisegment(
+                               _raw_subtract_composite(self._raw, other._raw)
+                               if relation is Relation.COMPOSITE
+                               else _raw_subtract_composite(other._raw,
+                                                            self._raw))))))
+
     def _unite_with_multipoint(self, other: Multipoint) -> Compound:
         # importing here to avoid cyclic imports
         from gon.mixed.mix import from_mix_components
@@ -429,20 +485,6 @@ class Segment(Compound, Linear):
                               _raw_unite_cross(self._raw, other._raw))
                              if relation is Relation.CROSS
                              else Multisegment(self, other)))))
-
-    def _subtract_segment(self, other: 'Segment') -> Compound:
-        relation = segment_in_segment(self._raw, other._raw)
-        return (EMPTY
-                if relation is Relation.EQUAL or relation is Relation.COMPONENT
-                else
-                (self
-                 if relation in (Relation.DISJOINT, Relation.TOUCH,
-                                 Relation.CROSS)
-                 else (Segment.from_raw(_raw_subtract_overlap(self._raw,
-                                                              other._raw))
-                       if relation is Relation.OVERLAP
-                       else from_raw_multisegment(_raw_subtract_composite(
-                        self._raw, other._raw)))))
 
 
 def raw_locate_point(raw_segment: RawSegment, raw_point: RawPoint) -> Location:
@@ -471,6 +513,12 @@ def _raw_subtract_composite(minuend: RawSegment,
                    else [(left_start, left_end)])
                   if left_end in subtrahend
                   else [(left_start, right_start)]))
+
+
+def _raw_symmetric_subtract_overlap(minuend: RawSegment,
+                                    subtrahend: RawSegment) -> RawMultisegment:
+    left_start, left_end, right_start, right_end = sorted(minuend + subtrahend)
+    return [(left_start, left_end), (right_start, right_end)]
 
 
 def _raw_unite_overlap(first_addend: RawSegment,
