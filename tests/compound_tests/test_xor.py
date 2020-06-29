@@ -15,7 +15,7 @@ def test_basic(compounds_pair: Tuple[Compound, Compound]) -> None:
 
     result = left_compound ^ right_compound
 
-    assert isinstance(result, type(left_compound))
+    assert isinstance(result, Compound)
 
 
 @given(strategies.compounds)
@@ -77,5 +77,14 @@ def test_equivalents(compounds_pair: Tuple[Compound, Compound]) -> None:
     assert are_compounds_equivalent(result,
                                     (left_compound | right_compound)
                                     - (left_compound & right_compound))
+
+
+@given(strategies.compounds_pairs)
+def test_connection_with_disjoint(compounds_pair: Tuple[Compound, Compound]
+                                  ) -> None:
+    left_compound, right_compound = compounds_pair
+
+    result = left_compound ^ right_compound
+
     assert implication(left_compound.disjoint(right_compound),
                        result == left_compound | right_compound)
