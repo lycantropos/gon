@@ -11,7 +11,6 @@ from gon.degenerate import (EMPTY,
                             Maybe)
 from gon.discrete import Multipoint
 from gon.geometry import Geometry
-from gon.hints import Domain
 from gon.linear import (Multisegment,
                         Segment)
 from gon.mixed import RawMix
@@ -588,7 +587,7 @@ class Mix(Indexable):
     __rxor__ = __xor__
 
     @classmethod
-    def from_raw(cls, raw: RawMix) -> Domain:
+    def from_raw(cls, raw: RawMix) -> 'Mix':
         """
         Constructs mix from the combination of Python built-ins.
 
