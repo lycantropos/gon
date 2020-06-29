@@ -87,6 +87,17 @@ def test_distribution_over_intersection(compounds_triplet
 
 
 @given(strategies.rational_compounds_pairs)
+def test_equivalents(compounds_pair: Tuple[Compound, Compound]) -> None:
+    left_compound, right_compound = compounds_pair
+
+    result = left_compound | right_compound
+
+    assert are_compounds_equivalent(result,
+                                    (left_compound ^ right_compound)
+                                    ^ (left_compound & right_compound))
+
+
+@given(strategies.rational_compounds_pairs)
 def test_connection_with_subset_relation(compounds_pair
                                          : Tuple[Compound, Compound]) -> None:
     left_compound, right_compound = compounds_pair
