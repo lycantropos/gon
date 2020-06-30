@@ -6,7 +6,9 @@ from hypothesis_geometry import planar
 
 from gon.compound import (Linear,
                           Shaped)
-from gon.degenerate import RAW_EMPTY
+from gon.degenerate import (EMPTY,
+                            RAW_EMPTY,
+                            Maybe)
 from gon.discrete import Multipoint
 from gon.hints import Coordinate
 from gon.linear import (Contour,
@@ -24,6 +26,23 @@ from tests.utils import (Strategy,
 def coordinates_to_points(coordinates: Strategy[Coordinate]
                           ) -> Strategy[Point]:
     return strategies.builds(Point, coordinates, coordinates)
+
+
+def coordinates_to_maybe_multipoints(coordinates: Strategy[Coordinate]
+                                     ) -> Strategy[Maybe[Multipoint]]:
+    return strategies.just(EMPTY) | coordinates_to_multipoints(coordinates)
+
+
+def coordinates_to_maybe_linear_geometries(coordinates: Strategy[Coordinate]
+                                           ) -> Strategy[Maybe[Linear]]:
+    return (strategies.just(EMPTY)
+            | coordinates_to_linear_geometries(coordinates))
+
+
+def coordinates_to_maybe_shaped_geometries(coordinates: Strategy[Coordinate]
+                                           ) -> Strategy[Maybe[Shaped]]:
+    return (strategies.just(EMPTY)
+            | coordinates_to_shaped_geometries(coordinates))
 
 
 def coordinates_to_multipoints(coordinates: Strategy[Coordinate]
