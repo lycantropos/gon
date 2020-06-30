@@ -19,6 +19,9 @@ from gon.shaped import (Multipolygon,
                         Polygon)
 from tests.strategies import (coordinates_strategies,
                               coordinates_to_contours,
+                              coordinates_to_maybe_linear_geometries,
+                              coordinates_to_maybe_multipoints,
+                              coordinates_to_maybe_shaped_geometries,
                               coordinates_to_mixes,
                               coordinates_to_multipoints,
                               coordinates_to_multipolygons,
@@ -30,11 +33,20 @@ from tests.strategies import (coordinates_strategies,
 from tests.utils import (Strategy,
                          flatten,
                          identity,
-                         to_constant)
+                         to_constant,
+                         to_triplets)
 
 CompoundsFactory = Callable[[Strategy[Coordinate]], Strategy[Compound]]
 
 empty_compounds = strategies.just(EMPTY)
+rational_equidimensional_compounds_strategies = (
+        rational_coordinates_strategies.map(coordinates_to_maybe_multipoints)
+        | (rational_coordinates_strategies
+           .map(coordinates_to_maybe_linear_geometries))
+        | (rational_coordinates_strategies
+           .map(coordinates_to_maybe_shaped_geometries)))
+rational_equidimensional_compounds_triplets = (
+    rational_equidimensional_compounds_strategies.flatmap(to_triplets))
 indexables_factories = strategies.sampled_from([coordinates_to_multisegments,
                                                 coordinates_to_contours,
                                                 coordinates_to_polygons,
