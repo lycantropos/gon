@@ -36,7 +36,8 @@ from gon.linear.utils import (from_raw_multisegment,
 from gon.primitive import Point
 from .hints import RawMultipolygon
 from .polygon import Polygon
-from .utils import (from_raw_mix_components,
+from .utils import (flatten,
+                    from_raw_mix_components,
                     from_raw_multipolygon)
 
 
@@ -667,8 +668,8 @@ class Multipolygon(Indexable, Shaped):
         ...      Polygon.from_raw(([(0, 0), (4, 2), (2, 2)], []))])
         True
         """
-        return list(chain.from_iterable(polygon.triangulate()
-                                        for polygon in self._polygons))
+        return list(flatten(polygon.triangulate()
+                            for polygon in self._polygons))
 
     def validate(self) -> None:
         """
