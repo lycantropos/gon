@@ -3,6 +3,7 @@ from itertools import chain
 from typing import (List,
                     Sequence)
 
+from bentley_ottmann.planar import segments_cross_or_overlap
 from clipping.planar import (complete_intersect_multipolygons,
                              complete_intersect_multisegment_with_multipolygon,
                              subtract_multipolygon_from_multisegment,
@@ -695,6 +696,15 @@ class Multipolygon(Indexable, Shaped):
             raise ValueError('Duplicate polygons found.')
         for polygon in self._polygons:
             polygon.validate()
+        polygons_raw_edges = list(flatten(
+                chain(to_pairs_chain(polygon.border.raw()),
+                      flatten(to_pairs_chain(hole.raw())
+                              for hole in polygon.holes))
+                for polygon in self._polygons))
+        if segments_cross_or_overlap(polygons_raw_edges,
+                                     accurate=False):
+            raise ValueError('Polygons should only touch each other '
+                             'in discrete number of points.')
 
     def _intersect_with_raw_multipolygon(self, other_raw: RawMultipolygon
                                          ) -> Compound:
