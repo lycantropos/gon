@@ -1,3 +1,4 @@
+from itertools import chain
 from typing import (Iterable,
                     List,
                     Sequence)
@@ -12,6 +13,8 @@ from gon.linear.utils import (from_raw_multipoint,
                               from_raw_multisegment)
 from gon.primitive import Point
 from .hints import RawMultipolygon
+
+flatten = chain.from_iterable
 
 
 def to_convex_hull(points: Sequence[Point]) -> List[Point]:
