@@ -1,4 +1,5 @@
-from typing import Union
+from typing import (NoReturn,
+                    Union)
 
 from reprit.base import generate_repr
 
@@ -245,6 +246,10 @@ class Empty(Compound):
         """
         assert raw is RAW_EMPTY
         return cls()
+
+    @property
+    def centroid(self) -> NoReturn:
+        raise ValueError('Empty geometry has no points.')
 
     def locate(self, point: Point) -> Location:
         """
