@@ -602,6 +602,25 @@ class Contour(Indexable, Linear):
                 if self.orientation is Orientation.COUNTERCLOCKWISE
                 else self.reverse())
 
+    def translate(self, step_x: Coordinate, step_y: Coordinate) -> 'Contour':
+        """
+        Translates the contour by given step.
+
+        Time complexity:
+            ``O(vertices_count)``
+        Memory complexity:
+            ``O(vertices_count)``
+
+        where ``vertices_count = len(self.vertices)``.
+
+        >>> contour = Contour.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> (contour.translate(1, 2)
+        ...  == Contour.from_raw([(1, 2), (2, 2), (1, 3)]))
+        True
+        """
+        return Contour([vertex.translate(step_x, step_y)
+                        for vertex in self._vertices])
+
     def validate(self) -> None:
         """
         Checks if the contour is valid.
