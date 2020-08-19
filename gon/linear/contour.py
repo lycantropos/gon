@@ -21,7 +21,8 @@ from gon.compound import (Compound,
                           Location,
                           Relation)
 from gon.degenerate import EMPTY
-from gon.discrete import Multipoint
+from gon.discrete import (Multipoint,
+                          _to_raw_points_centroid)
 from gon.geometry import Geometry
 from gon.hints import Coordinate
 from gon.primitive import (Point,
@@ -382,6 +383,22 @@ class Contour(Indexable, Linear):
         True
         """
         return cls([Point.from_raw(raw_vertex) for raw_vertex in raw])
+
+    @property
+    def centroid(self) -> Point:
+        """
+        Returns centroid of the contour.
+
+        Time complexity:
+            ``O(len(self.vertices))``
+        Memory complexity:
+            ``O(1)``
+
+        >>> contour = Contour.from_raw([(0, 0), (2, 0), (2, 2), (0, 2)])
+        >>> contour.centroid == Point(1, 1)
+        True
+        """
+        return Point.from_raw(_to_raw_points_centroid(self._raw))
 
     @property
     def length(self) -> Coordinate:
