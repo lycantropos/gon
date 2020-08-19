@@ -31,9 +31,13 @@ from tests.strategies import (coordinates_strategies,
                               coordinates_to_segments,
                               rational_coordinates_strategies)
 from tests.utils import (Strategy,
+                         call,
+                         cleave_in_tuples,
                          flatten,
                          identity,
+                         pack,
                          to_constant,
+                         to_pairs,
                          to_triplets)
 
 CompoundsFactory = Callable[[Strategy[Coordinate]], Strategy[Compound]]
@@ -58,50 +62,27 @@ non_empty_compounds_factories = (
         | indexables_factories)
 compounds_factories = (strategies.just(to_constant(empty_compounds))
                        | non_empty_compounds_factories)
-
-
-def coordinates_to_compounds(coordinates: Strategy[Coordinate],
-                             factory: CompoundsFactory) -> Strategy[Compound]:
-    return factory(coordinates)
-
-
-indexables = (strategies.builds(coordinates_to_compounds,
-                                coordinates_strategies,
-                                indexables_factories)
+indexables = (strategies.builds(call, indexables_factories,
+                                coordinates_strategies)
               .flatmap(identity))
-non_empty_compounds = (strategies.builds(coordinates_to_compounds,
-                                         coordinates_strategies,
-                                         non_empty_compounds_factories)
+non_empty_compounds = (strategies.builds(call, non_empty_compounds_factories,
+                                         coordinates_strategies)
                        .flatmap(identity))
-compounds = (strategies.builds(coordinates_to_compounds,
-                               coordinates_strategies, compounds_factories)
+compounds = (strategies.builds(call, compounds_factories,
+                               coordinates_strategies)
              .flatmap(identity))
-rational_compounds = (strategies.builds(coordinates_to_compounds,
-                                        rational_coordinates_strategies,
-                                        compounds_factories)
+rational_compounds = (strategies.builds(call, compounds_factories,
+                                        rational_coordinates_strategies)
                       .flatmap(identity))
 empty_compounds_with_compounds = strategies.tuples(empty_compounds, compounds)
-
-
-def coordinates_to_compounds_with_points(coordinates: Strategy[Coordinate],
-                                         factory: CompoundsFactory
-                                         ) -> Strategy[Tuple[Compound, Point]]:
-    return strategies.tuples(factory(coordinates),
-                             coordinates_to_points(coordinates))
-
-
 compounds_with_points = (
-    (strategies.builds(coordinates_to_compounds_with_points,
-                       coordinates_strategies,
-                       compounds_factories)
+    (strategies.builds(call,
+                       compounds_factories
+                       .map(lambda factory
+                            : cleave_in_tuples(factory,
+                                               coordinates_to_points)),
+                       coordinates_strategies)
      .flatmap(identity)))
-
-
-def coordinates_to_compounds_tuples(coordinates: Strategy[Coordinate],
-                                    *factories: CompoundsFactory
-                                    ) -> Strategy[Tuple[Compound, ...]]:
-    return strategies.tuples(*[coordinates_to_compounds(coordinates, factory)
-                               for factory in factories])
 
 
 def compound_to_compound_with_multipoint(compound: Compound
@@ -141,27 +122,25 @@ def compound_to_points(compound: Compound) -> Iterable[Point]:
                         .format(type=type(compound)))
 
 
-rational_compounds_pairs = (strategies.builds(coordinates_to_compounds_tuples,
-                                              rational_coordinates_strategies,
-                                              compounds_factories,
-                                              compounds_factories)
+rational_compounds_pairs = (strategies.builds(call,
+                                              to_pairs(compounds_factories)
+                                              .map(pack(cleave_in_tuples)),
+                                              rational_coordinates_strategies)
                             .flatmap(identity))
 rational_compounds_triplets = (
-    strategies.builds(coordinates_to_compounds_tuples,
-                      rational_coordinates_strategies,
-                      compounds_factories,
-                      compounds_factories,
-                      compounds_factories).flatmap(identity))
+    strategies.builds(call,
+                      to_triplets(compounds_factories)
+                      .map(pack(cleave_in_tuples)),
+                      rational_coordinates_strategies).flatmap(identity))
 compounds_pairs = ((non_empty_compounds
                     .map(compound_to_compound_with_multipoint))
-                   | (strategies.builds(coordinates_to_compounds_tuples,
-                                        coordinates_strategies,
-                                        compounds_factories,
-                                        compounds_factories)
+                   | (strategies.builds(call,
+                                        to_pairs(compounds_factories)
+                                        .map(pack(cleave_in_tuples)),
+                                        coordinates_strategies)
                       .flatmap(identity)))
-compounds_triplets = (strategies.builds(coordinates_to_compounds_tuples,
-                                        coordinates_strategies,
-                                        compounds_factories,
-                                        compounds_factories,
-                                        compounds_factories)
+compounds_triplets = (strategies.builds(call,
+                                        to_triplets(compounds_factories)
+                                        .map(pack(cleave_in_tuples)),
+                                        coordinates_strategies)
                       .flatmap(identity))

@@ -92,6 +92,12 @@ def apply(function: Callable[..., Range], args: Tuple[Domain, ...]) -> Range:
     return function(*args)
 
 
+def call(function: Callable[..., Range],
+         *args: Domain,
+         **kwargs: Domain) -> Range:
+    return function(*args, **kwargs)
+
+
 def are_compounds_equivalent(left: Compound, right: Compound) -> bool:
     return left == right or left.relate(right) is Relation.EQUAL
 
