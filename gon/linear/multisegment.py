@@ -29,7 +29,8 @@ from .hints import RawMultisegment
 from .segment import Segment
 from .utils import (from_raw_mix_components,
                     from_raw_multisegment,
-                    relate_multipoint_to_linear_compound)
+                    relate_multipoint_to_linear_compound,
+                    robust_sqrt)
 
 
 class Multisegment(Indexable, Linear):
@@ -395,11 +396,14 @@ class Multisegment(Indexable, Linear):
         >>> multisegment.centroid == Point(1, 1)
         True
         """
-        accumulated_x = accumulated_y = 0
+        accumulated_x = accumulated_y = accumulated_length = 0
         for (start_x, start_y), (end_x, end_y) in self._raw:
-            accumulated_x += start_x + end_x
-            accumulated_y += start_y + end_y
-        divisor = 2 * len(self._raw)
+            length = robust_sqrt((end_x - start_x) ** 2
+                                 + (end_y - start_y) ** 2)
+            accumulated_x += (start_x + end_x) * length
+            accumulated_y += (start_y + end_y) * length
+            accumulated_length += length
+        divisor = 2 * accumulated_length
         return Point(_robust_divide(accumulated_x, divisor),
                      _robust_divide(accumulated_y, divisor))
 
