@@ -632,6 +632,38 @@ class Mix(Indexable):
                    else Multipolygon.from_raw(raw_multipolygon))
 
     @property
+    def centroid(self) -> Point:
+        """
+        Returns centroid of the mix.
+
+        Time complexity:
+            ``O(elements_count)``
+        Memory complexity:
+            ``O(1)``
+
+        where ``elements_count = multisegment_size\
+ if self.multipolygon is EMPTY else multipolygon_vertices_count``,
+        ``multisegment_size = len(segments)``,
+        ``multipolygon_vertices_count = sum(len(polygon.border.vertices)\
+ + sum(len(hole.vertices) for hole in polygon.holes)\
+ for polygon in polygons)``,
+        ``segments = [] if self.multisegment is EMPTY\
+ else self.multisegment.segments``,
+        ``polygons = [] if self.multipolygon is EMPTY\
+ else self.multipolygon.polygons``.
+
+        >>> mix = Mix.from_raw(([(3, 3), (7, 7)],
+        ...                     [((0, 6), (0, 8)), ((6, 6), (6, 8))],
+        ...                     [([(0, 0), (6, 0), (6, 6), (0, 6)],
+        ...                       [[(2, 2), (2, 4), (4, 4), (4, 2)]])]))
+        >>> mix.centroid == Point(3, 3)
+        True
+        """
+        return (self._multisegment
+                if self._multipolygon is EMPTY
+                else self._multipolygon).centroid
+
+    @property
     def multipoint(self) -> Maybe[Multipoint]:
         """
         Returns multipoint of the mix.
