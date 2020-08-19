@@ -420,6 +420,22 @@ class Segment(Compound, Linear):
                       if isinstance(other, Segment)
                       else other.relate(self).complement))
 
+    def translate(self, step_x: Coordinate, step_y: Coordinate) -> 'Segment':
+        """
+        Translates the segment by given step.
+
+        Time complexity:
+            ``O(1)``
+        Memory complexity:
+            ``O(1)``
+
+        >>> segment = Segment.from_raw(((0, 0), (2, 0)))
+        >>> segment.translate(1, 2) == Segment.from_raw(((1, 2), (3, 2)))
+        True
+        """
+        return Segment(self._start.translate(step_x, step_y),
+                       self._end.translate(step_x, step_y))
+
     def validate(self) -> None:
         """
         Checks if endpoints are valid and unequal.
