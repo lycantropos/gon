@@ -1,7 +1,8 @@
 from functools import partial
 from typing import (List,
                     Optional,
-                    Sequence)
+                    Sequence,
+                    Tuple)
 
 from clipping.planar import (complete_intersect_multipolygons,
                              complete_intersect_multisegment_with_multipolygon,
@@ -16,6 +17,11 @@ from orient.planar import (contour_in_polygon,
                            region_in_multiregion,
                            segment_in_polygon)
 from reprit.base import generate_repr
+from robust.hints import Expansion
+from robust.utils import (scale_expansion,
+                          sum_expansions,
+                          two_product,
+                          two_two_diff)
 from sect.decomposition import polygon_trapezoidal
 from sect.triangulation import constrained_delaunay_triangles
 
@@ -26,11 +32,13 @@ from gon.compound import (Compound,
                           Relation,
                           Shaped)
 from gon.degenerate import EMPTY
-from gon.discrete import Multipoint
+from gon.discrete import (Multipoint,
+                          _robust_divide)
 from gon.geometry import Geometry
 from gon.hints import Coordinate
 from gon.linear import (Contour,
                         Multisegment,
+                        RawContour,
                         RawMultisegment,
                         Segment,
                         vertices)
@@ -465,6 +473,30 @@ class Polygon(Indexable, Shaped):
         return self._border
 
     @property
+    def centroid(self) -> Point:
+        """
+        Returns centroid of the polygon.
+
+        Time complexity:
+            ``O(vertices_count)``
+        Memory complexity:
+            ``O(1)``
+
+        where ``vertices_count = len(self.border.vertices)\
+ + sum(len(hole.vertices) for hole in self.holes)``.
+
+        >>> polygon = Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
+        ...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]]))
+        >>> polygon.centroid == Point(3, 3)
+        True
+        """
+        x_numerator, y_numerator, double_area = _polygon_to_centroid_components(
+                self)
+        divisor = 3 * double_area[-1]
+        return Point(_robust_divide(x_numerator[-1], divisor),
+                     _robust_divide(y_numerator[-1], divisor))
+
+    @property
     def convex_hull(self) -> 'Polygon':
         """
         Returns convex hull of the polygon.
@@ -761,6 +793,23 @@ class Polygon(Indexable, Shaped):
                                                          accurate=False))
 
 
+def _polygon_to_centroid_components(polygon: Polygon
+                                    ) -> Tuple[Expansion, Expansion,
+                                               Expansion]:
+    (x_numerator, y_numerator,
+     double_area) = _raw_contour_to_centroid_components(
+            polygon._border.to_counterclockwise().raw())
+    for hole in polygon._holes:
+        (hole_x_numerator, hole_y_numerator,
+         hole_double_area) = _raw_contour_to_centroid_components(
+                hole.to_clockwise().raw())
+        x_numerator, y_numerator, double_area = (
+            sum_expansions(x_numerator, hole_x_numerator),
+            sum_expansions(y_numerator, hole_y_numerator),
+            sum_expansions(double_area, hole_double_area))
+    return x_numerator, y_numerator, double_area
+
+
 def raw_locate_point(raw_polygon: RawPolygon, raw_point: RawPoint) -> Location:
     relation = point_in_polygon(raw_point, raw_polygon)
     return (Location.EXTERIOR
@@ -768,3 +817,31 @@ def raw_locate_point(raw_polygon: RawPolygon, raw_point: RawPoint) -> Location:
             else (Location.BOUNDARY
                   if relation is Relation.COMPONENT
                   else Location.INTERIOR))
+
+
+def _raw_contour_to_centroid_components(contour: RawContour
+                                        ) -> Tuple[Expansion, Expansion,
+                                                   Expansion]:
+    double_area = x_numerator = y_numerator = (0,)
+    prev_x, prev_y = contour[-1]
+    for x, y in contour:
+        area_component = _to_endpoints_cross_product_z(prev_x, prev_y, x, y)
+        x_numerator, y_numerator, double_area = (
+            sum_expansions(x_numerator,
+                           scale_expansion(area_component, prev_x + x)),
+            sum_expansions(y_numerator,
+                           scale_expansion(area_component, prev_y + y)),
+            sum_expansions(double_area, area_component))
+        prev_x, prev_y = x, y
+    return x_numerator, y_numerator, double_area
+
+
+def _to_endpoints_cross_product_z(start_x: Coordinate,
+                                  start_y: Coordinate,
+                                  end_x: Coordinate,
+                                  end_y: Coordinate) -> Expansion:
+    minuend, minuend_tail = two_product(start_x, end_y)
+    subtrahend, subtrahend_tail = two_product(start_y, end_x)
+    return (two_two_diff(minuend, minuend_tail, subtrahend, subtrahend_tail)
+            if minuend_tail or subtrahend_tail
+            else (minuend - subtrahend,))
