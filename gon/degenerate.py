@@ -1,4 +1,5 @@
-from typing import Union
+from typing import (Optional,
+                    Union)
 
 from reprit.base import generate_repr
 
@@ -6,7 +7,8 @@ from .compound import (Compound,
                        Location,
                        Relation)
 from .geometry import Geometry
-from .hints import Domain
+from .hints import (Coordinate,
+                    Domain)
 from .primitive import Point
 
 try:
@@ -295,6 +297,20 @@ class Empty(Compound):
         True
         """
         return Relation.DISJOINT
+
+    def translate(self, step_x: Coordinate, step_y: Coordinate) -> 'Empty':
+        """
+        Translates the empty geometry by given step.
+
+        Time complexity:
+            ``O(1)``
+        Memory complexity:
+            ``O(1)``
+
+        >>> EMPTY.translate(1, 2) is EMPTY
+        True
+        """
+        return self
 
     def validate(self) -> None:
         """
