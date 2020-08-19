@@ -12,7 +12,8 @@ from gon.compound import (Compound,
                           Location,
                           Relation)
 from gon.degenerate import EMPTY
-from gon.discrete import Multipoint
+from gon.discrete import (Multipoint,
+                          _robust_divide)
 from gon.geometry import Geometry
 from gon.hints import Coordinate
 from gon.primitive import (Point,
@@ -303,6 +304,23 @@ class Segment(Compound, Linear):
         raw_start, raw_end = raw
         start, end = Point.from_raw(raw_start), Point.from_raw(raw_end)
         return cls(start, end)
+
+    @property
+    def centroid(self) -> Point:
+        """
+        Returns centroid of the segment.
+
+        Time complexity:
+            ``O(1)``
+        Memory complexity:
+            ``O(1)``
+
+        >>> segment = Segment.from_raw(((0, 0), (2, 0)))
+        >>> segment.centroid == Point(1, 0)
+        True
+        """
+        return Point(_robust_divide(self._start.x + self._end.x, 2),
+                     _robust_divide(self._start.y + self._end.y, 2))
 
     @property
     def end(self) -> Point:
