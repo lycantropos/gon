@@ -17,6 +17,7 @@ from orient.planar import (contour_in_multipolygon,
                            polygon_in_multipolygon,
                            segment_in_multipolygon)
 from reprit.base import generate_repr
+from robust.utils import sum_expansions
 from sect.decomposition import Location
 
 from gon.compound import (Compound,
@@ -25,7 +26,8 @@ from gon.compound import (Compound,
                           Relation,
                           Shaped)
 from gon.degenerate import EMPTY
-from gon.discrete import Multipoint
+from gon.discrete import (Multipoint,
+                          _robust_divide)
 from gon.geometry import Geometry
 from gon.hints import Coordinate
 from gon.linear import (Contour,
@@ -36,7 +38,8 @@ from gon.linear.utils import (from_raw_multisegment,
                               to_pairs_chain)
 from gon.primitive import Point
 from .hints import RawMultipolygon
-from .polygon import Polygon
+from .polygon import (Polygon,
+                      _polygon_to_centroid_components)
 from .utils import (flatten,
                     from_raw_mix_components,
                     from_raw_multipolygon)
@@ -467,6 +470,40 @@ class Multipolygon(Indexable, Shaped):
         True
         """
         return sum(polygon.area for polygon in self._polygons)
+
+    @property
+    def centroid(self) -> Point:
+        """
+        Returns centroid of the multipolygon.
+
+        Time complexity:
+            ``O(vertices_count)``
+        Memory complexity:
+            ``O(1)``
+
+        where ``vertices_count = sum(len(polygon.border.vertices)\
+ + sum(len(hole.vertices) for hole in polygon.holes)\
+ for polygon in self.polygons)``.
+
+        >>> multipolygon = Multipolygon.from_raw(
+        ...         [([(0, 0), (6, 0), (6, 6), (0, 6)],
+        ...           [[(2, 2), (2, 4), (4, 4), (4, 2)]])])
+        >>> multipolygon.centroid == Point(3, 3)
+        True
+        """
+        polygons = iter(self._polygons)
+        (x_numerator, y_numerator,
+         double_area) = _polygon_to_centroid_components(next(polygons))
+        for polygon in polygons:
+            (polygon_x_numerator, polygon_y_numerator,
+             polygon_double_area) = _polygon_to_centroid_components(polygon)
+            x_numerator, y_numerator, double_area = (
+                sum_expansions(x_numerator, polygon_x_numerator),
+                sum_expansions(y_numerator, polygon_y_numerator),
+                sum_expansions(double_area, polygon_double_area))
+        divisor = 3 * double_area[-1]
+        return Point(_robust_divide(x_numerator[-1], divisor),
+                     _robust_divide(y_numerator[-1], divisor))
 
     @property
     def perimeter(self) -> Coordinate:
