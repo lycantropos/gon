@@ -490,9 +490,11 @@ class Multisegment(Indexable, Linear):
         Returns the multisegment as combination of Python built-ins.
 
         Time complexity:
-            ``O(len(self.segments))``
+            ``O(segments_count)``
         Memory complexity:
-            ``O(len(self.segments))``
+            ``O(segments_count)``
+
+        where ``segments_count = len(self.segments)``.
 
         >>> multisegment = Multisegment.from_raw([((0, 0), (1, 0)),
         ...                                       ((0, 1), (1, 1))])
