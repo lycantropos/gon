@@ -683,6 +683,29 @@ class Polygon(Indexable, Shaped):
                                   if isinstance(other, Polygon)
                                   else other.relate(self).complement))))
 
+    def translate(self, step_x: Coordinate, step_y: Coordinate) -> 'Polygon':
+        """
+        Translates the polygon by given step.
+
+        Time complexity:
+            ``O(vertices_count)``
+        Memory complexity:
+            ``O(vertices_count)``
+
+        where ``vertices_count = len(self.border.vertices)\
+ + sum(len(hole.vertices) for hole in self.holes)``.
+
+        >>> polygon = Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
+        ...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]]))
+        >>> (polygon.translate(1, 2)
+        ...  == Polygon.from_raw(([(1, 2), (7, 2), (7, 8), (1, 8)],
+        ...                       [[(3, 4), (3, 6), (5, 6), (5, 4)]])))
+        True
+        """
+        return Polygon(self._border.translate(step_x, step_y),
+                       [hole.translate(step_x, step_y)
+                        for hole in self._holes])
+
     def triangulate(self) -> List['Polygon']:
         """
         Returns triangulation of the polygon.
