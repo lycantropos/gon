@@ -1,5 +1,3 @@
-import math
-
 from orient.planar import (point_in_segment,
                            segment_in_segment)
 from reprit.base import generate_repr
@@ -22,6 +20,7 @@ from .hints import (RawMultisegment,
                     RawSegment)
 from .utils import (from_raw_multisegment,
                     relate_multipoint_to_linear_compound,
+                    robust_sqrt,
                     squared_points_distance)
 
 
@@ -352,7 +351,7 @@ class Segment(Compound, Linear):
         >>> segment.length == 2
         True
         """
-        return math.sqrt(squared_points_distance(self.start, self.end))
+        return robust_sqrt(squared_points_distance(self.start, self.end))
 
     @property
     def start(self) -> Point:
