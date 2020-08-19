@@ -3,7 +3,8 @@ from abc import (ABC,
 from typing import (Type,
                     TypeVar)
 
-from .hints import Domain
+from .hints import (Coordinate,
+                    Domain)
 
 RawGeometry = TypeVar('RawGeometry', None, tuple, list)
 
@@ -40,6 +41,12 @@ class Geometry(ABC):
     def raw(self) -> RawGeometry:
         """
         Returns geometric object as combination of Python built-ins.
+        """
+
+    @abstractmethod
+    def translate(self, step_x: Coordinate, step_y: Coordinate) -> 'Geometry':
+        """
+        Translates geometric object by step.
         """
 
     @abstractmethod
