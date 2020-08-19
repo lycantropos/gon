@@ -22,7 +22,7 @@ from gon.compound import (Compound,
                           Relation)
 from gon.degenerate import EMPTY
 from gon.discrete import (Multipoint,
-                          _to_raw_points_centroid)
+                          _robust_divide)
 from gon.geometry import Geometry
 from gon.hints import Coordinate
 from gon.primitive import (Point,
@@ -36,6 +36,7 @@ from .segment import Segment
 from .utils import (from_raw_mix_components,
                     from_raw_multisegment,
                     relate_multipoint_to_linear_compound,
+                    robust_sqrt,
                     shift_sequence,
                     to_pairs_chain)
 
@@ -398,7 +399,18 @@ class Contour(Indexable, Linear):
         >>> contour.centroid == Point(1, 1)
         True
         """
-        return Point.from_raw(_to_raw_points_centroid(self._raw))
+        accumulated_x = accumulated_y = accumulated_length = 0
+        start_x, start_y = self._raw[-1]
+        for end_x, end_y in self._raw:
+            length = robust_sqrt((end_x - start_x) ** 2
+                                 + (end_y - start_y) ** 2)
+            accumulated_x += (start_x + end_x) * length
+            accumulated_y += (start_y + end_y) * length
+            accumulated_length += length
+            start_x, start_y = end_x, end_y
+        divisor = 2 * accumulated_length
+        return Point(_robust_divide(accumulated_x, divisor),
+                     _robust_divide(accumulated_y, divisor))
 
     @property
     def length(self) -> Coordinate:
