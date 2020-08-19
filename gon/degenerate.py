@@ -1,5 +1,4 @@
-from typing import (NoReturn,
-                    Union)
+from typing import Union
 
 from reprit.base import generate_repr
 
@@ -9,6 +8,11 @@ from .compound import (Compound,
 from .geometry import Geometry
 from .hints import Domain
 from .primitive import Point
+
+try:
+    from typing import NoReturn
+except ImportError:
+    from typing_extensions import NoReturn
 
 RAW_EMPTY = None
 RawEmpty = type(RAW_EMPTY)
