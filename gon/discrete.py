@@ -294,7 +294,13 @@ class Multipoint(Compound):
         >>> multipoint.centroid == Point(1, 1)
         True
         """
-        return Point.from_raw(_to_raw_points_centroid(self._raw))
+        accumulated_x = accumulated_y = 0
+        for x, y in self._raw:
+            accumulated_x += x
+            accumulated_y += y
+        divisor = len(self._raw)
+        return Point(_robust_divide(accumulated_x, divisor),
+                     _robust_divide(accumulated_y, divisor))
 
     @property
     def points(self) -> List[Point]:
@@ -434,16 +440,6 @@ def _relate_sets(left: Set[Domain], right: Set[Domain]) -> Relation:
                    else Relation.OVERLAP))
             if intersection
             else Relation.DISJOINT)
-
-
-def _to_raw_points_centroid(raw_points: List[RawPoint]) -> RawPoint:
-    accumulated_x = accumulated_y = 0
-    for x, y in raw_points:
-        accumulated_x += x
-        accumulated_y += y
-    divisor = len(raw_points)
-    return (_robust_divide(accumulated_x, divisor),
-            _robust_divide(accumulated_y, divisor))
 
 
 def _robust_divide(dividend: Coordinate, divisor: int) -> Coordinate:
