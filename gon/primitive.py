@@ -1,5 +1,6 @@
 import math
-from typing import Tuple
+from typing import (Optional,
+                    Tuple)
 
 from reprit.base import generate_repr
 
@@ -146,6 +147,20 @@ class Point(Geometry):
         (1, 0)
         """
         return self._raw
+
+    def translate(self, step_x: Coordinate, step_y: Coordinate) -> 'Point':
+        """
+        Translates the point by given step.
+
+        Time complexity:
+            ``O(1)``
+        Memory complexity:
+            ``O(1)``
+
+        >>> Point(1, 0).translate(1, 2) == Point(2, 2)
+        True
+        """
+        return Point(self._x + step_x, self._y + step_y)
 
     def validate(self) -> None:
         """
