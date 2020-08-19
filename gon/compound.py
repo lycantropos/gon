@@ -68,6 +68,13 @@ class Compound(Geometry):
         Returns symmetric difference of the geometry with the other geometry.
         """
 
+    @property
+    @abstractmethod
+    def centroid(self) -> Point:
+        """
+        Returns centroid of the geometry.
+        """
+
     def disjoint(self, other: 'Compound') -> bool:
         """
         Checks if the geometry is disjoint with the other.
