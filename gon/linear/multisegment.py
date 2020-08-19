@@ -527,6 +527,28 @@ class Multisegment(Indexable, Linear):
                             if isinstance(other, Multisegment)
                             else other.relate(self).complement)))
 
+    def translate(self,
+                  step_x: Coordinate,
+                  step_y: Coordinate) -> 'Multisegment':
+        """
+        Translates the multisegment by given step.
+
+        Time complexity:
+            ``O(segments_count)``
+        Memory complexity:
+            ``O(segments_count)``
+
+        where ``segments_count = len(self.segments)``.
+
+        >>> multisegment = Multisegment.from_raw([((0, 0), (1, 0)),
+        ...                                       ((0, 1), (1, 1))])
+        >>> (multisegment.translate(1, 2)
+        ...  == Multisegment.from_raw([((1, 2), (2, 2)), ((1, 3), (2, 3))]))
+        True
+        """
+        return Multisegment(*[segment.translate(step_x, step_y)
+                              for segment in self._segments])
+
     def validate(self) -> None:
         """
         Checks if the multisegment is valid.
