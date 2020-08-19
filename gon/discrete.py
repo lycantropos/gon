@@ -1,3 +1,4 @@
+from fractions import Fraction
 from typing import (AbstractSet,
                     List,
                     Set)
@@ -9,7 +10,8 @@ from .compound import (Compound,
                        Relation)
 from .degenerate import EMPTY
 from .geometry import Geometry
-from .hints import Domain
+from .hints import (Coordinate,
+                    Domain)
 from .primitive import (Point,
                         RawPoint)
 
@@ -277,6 +279,24 @@ class Multipoint(Compound):
         return cls(*map(Point.from_raw, raw))
 
     @property
+    def centroid(self) -> Point:
+        """
+        Returns centroid of the multipoint.
+
+        Time complexity:
+            ``O(points_count)``
+        Memory complexity:
+            ``O(points_count)``
+
+        where ``points_count = len(self.points)``.
+
+        >>> multipoint = Multipoint.from_raw([(0, 0), (3, 0), (0, 3)])
+        >>> multipoint.centroid == Point(1, 1)
+        True
+        """
+        return Point.from_raw(_to_raw_points_centroid(self._raw))
+
+    @property
     def points(self) -> List[Point]:
         """
         Returns points of the multipoint.
@@ -414,3 +434,19 @@ def _relate_sets(left: Set[Domain], right: Set[Domain]) -> Relation:
                    else Relation.OVERLAP))
             if intersection
             else Relation.DISJOINT)
+
+
+def _to_raw_points_centroid(raw_points: List[RawPoint]) -> RawPoint:
+    accumulated_x = accumulated_y = 0
+    for x, y in raw_points:
+        accumulated_x += x
+        accumulated_y += y
+    divisor = len(raw_points)
+    return (_robust_divide(accumulated_x, divisor),
+            _robust_divide(accumulated_y, divisor))
+
+
+def _robust_divide(dividend: Coordinate, divisor: int) -> Coordinate:
+    return (Fraction(dividend, divisor)
+            if isinstance(dividend, int)
+            else dividend / divisor)
