@@ -11,6 +11,7 @@ from gon.degenerate import (EMPTY,
                             Maybe)
 from gon.discrete import Multipoint
 from gon.geometry import Geometry
+from gon.hints import Coordinate
 from gon.linear import (Multisegment,
                         Segment)
 from gon.mixed import RawMix
@@ -882,6 +883,44 @@ class Mix(Indexable):
                             else (self._relate_mix(other)
                                   if isinstance(other, Mix)
                                   else other.relate(self).complement))))
+
+    def translate(self, step_x: Coordinate, step_y: Coordinate) -> 'Mix':
+        """
+        Translates the mix by given step.
+
+        Time complexity:
+            ``O(elements_count)``
+        Memory complexity:
+            ``O(elements_count)``
+
+        where ``elements_count = multipoint_size + multisegment_size\
+ + multipolygon_vertices_count``,
+        ``multipoint_size = len(points)``,
+        ``multisegment_size = len(segments)``,
+        ``multipolygon_vertices_count = sum(len(polygon.border.vertices)\
+ + sum(len(hole.vertices) for hole in polygon.holes)\
+ for polygon in polygons)``,
+        ``points = [] if self.multipoint is EMPTY\
+ else self.multipoint.points``,
+        ``segments = [] if self.multisegment is EMPTY\
+ else self.multisegment.segments``,
+        ``polygons = [] if self.multipolygon is EMPTY\
+ else self.multipolygon.polygons``.
+
+        >>> mix = Mix.from_raw(([(3, 3), (7, 7)],
+        ...                     [((0, 6), (0, 8)), ((6, 6), (6, 8))],
+        ...                     [([(0, 0), (6, 0), (6, 6), (0, 6)],
+        ...                       [[(2, 2), (2, 4), (4, 4), (4, 2)]])]))
+        >>> (mix.translate(1, 2)
+        ...  == Mix.from_raw(([(4, 5), (8, 9)],
+        ...                   [((1, 8), (1, 10)), ((7, 8), (7, 10))],
+        ...                   [([(1, 2), (7, 2), (7, 8), (1, 8)],
+        ...                     [[(3, 4), (3, 6), (5, 6), (5, 4)]])])))
+        True
+        """
+        return Mix(self._multipoint.translate(step_x, step_y),
+                   self._multisegment.translate(step_x, step_y),
+                   self._multipolygon.translate(step_x, step_y))
 
     def validate(self) -> None:
         """
