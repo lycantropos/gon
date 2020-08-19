@@ -18,7 +18,8 @@ from gon.compound import (Compound,
                           Location,
                           Relation)
 from gon.degenerate import EMPTY
-from gon.discrete import Multipoint
+from gon.discrete import (Multipoint,
+                          _robust_divide)
 from gon.geometry import Geometry
 from gon.hints import (Coordinate,
                        Domain)
@@ -378,6 +379,29 @@ class Multisegment(Indexable, Linear):
         True
         """
         return Multisegment(*map(Segment.from_raw, raw))
+
+    @property
+    def centroid(self) -> Point:
+        """
+        Returns centroid of the multisegment.
+
+        Time complexity:
+            ``O(len(self.segments))``
+        Memory complexity:
+            ``O(1)``
+
+        >>> multisegment = Multisegment.from_raw([((0, 0), (2, 0)),
+        ...                                       ((0, 2), (2, 2))])
+        >>> multisegment.centroid == Point(1, 1)
+        True
+        """
+        accumulated_x = accumulated_y = 0
+        for (start_x, start_y), (end_x, end_y) in self._raw:
+            accumulated_x += start_x + end_x
+            accumulated_y += start_y + end_y
+        divisor = 2 * len(self._raw)
+        return Point(_robust_divide(accumulated_x, divisor),
+                     _robust_divide(accumulated_y, divisor))
 
     @property
     def length(self) -> Coordinate:
