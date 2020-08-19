@@ -377,6 +377,27 @@ class Multipoint(Compound):
                 if isinstance(other, Multipoint)
                 else self._relate_geometry(other))
 
+    def translate(self,
+                  step_x: Coordinate,
+                  step_y: Coordinate) -> 'Multipoint':
+        """
+        Translates the multipoint by given step.
+
+        Time complexity:
+            ``O(points_count)``
+        Memory complexity:
+            ``O(points_count)``
+
+        where ``points_count = len(self.points)``.
+
+        >>> multipoint = Multipoint.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> (multipoint.translate(1, 2)
+        ...  == Multipoint.from_raw([(1, 2), (2, 2), (1, 3)]))
+        True
+        """
+        return Multipoint(*[point.translate(step_x, step_y)
+                            for point in self._points])
+
     def validate(self) -> None:
         """
         Checks if the multipoint is valid.
