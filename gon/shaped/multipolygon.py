@@ -679,6 +679,32 @@ class Multipolygon(Indexable, Shaped):
                          if isinstance(other, Multipolygon)
                          else other.relate(self).complement)))))
 
+    def translate(self,
+                  step_x: Coordinate,
+                  step_y: Coordinate) -> 'Multipolygon':
+        """
+        Translates the multipolygon by given step.
+
+        Time complexity:
+            ``O(vertices_count)``
+        Memory complexity:
+            ``O(vertices_count)``
+
+        where ``vertices_count = sum(len(polygon.border.vertices)\
+ + sum(len(hole.vertices) for hole in polygon.holes)\
+ for polygon in self.polygons)``.
+
+        >>> multipolygon = Multipolygon.from_raw(
+        ...         [([(0, 0), (6, 0), (6, 6), (0, 6)],
+        ...           [[(2, 2), (2, 4), (4, 4), (4, 2)]])])
+        >>> (multipolygon.translate(1, 2)
+        ...  == Multipolygon.from_raw([([(1, 2), (7, 2), (7, 8), (1, 8)],
+        ...                             [[(3, 4), (3, 6), (5, 6), (5, 4)]])]))
+        True
+        """
+        return Multipolygon(*[polygon.translate(step_x, step_y)
+                              for polygon in self._polygons])
+
     def triangulate(self) -> List[Polygon]:
         """
         Returns triangulation of the multipolygon.
