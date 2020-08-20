@@ -1,6 +1,9 @@
 from fractions import Fraction
+from itertools import groupby
 from typing import (AbstractSet,
+                    Iterable,
                     List,
+                    Optional,
                     Set)
 
 from reprit.base import generate_repr
@@ -13,7 +16,8 @@ from .geometry import Geometry
 from .hints import (Coordinate,
                     Domain)
 from .primitive import (Point,
-                        RawPoint)
+                        RawPoint,
+                        _scale_point)
 
 RawMultipoint = List[RawPoint]
 
@@ -377,6 +381,38 @@ class Multipoint(Compound):
                 if isinstance(other, Multipoint)
                 else self._relate_geometry(other))
 
+    def scale(self,
+              factor_x: Coordinate,
+              factor_y: Optional[Coordinate] = None) -> 'Multipoint':
+        """
+        Scales the multipoint by given factor.
+
+        Time complexity:
+            ``O(points_count)``
+        Memory complexity:
+            ``O(points_count)``
+
+        where ``points_count = len(self.points)``.
+
+        >>> multipoint = Multipoint.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> multipoint.scale(1) == multipoint
+        True
+        >>> (multipoint.scale(1, 2)
+        ...  == Multipoint.from_raw([(0, 0), (1, 0), (0, 2)]))
+        True
+        """
+        if factor_y is None:
+            factor_y = factor_x
+        return (Multipoint(*[_scale_point(point, factor_x, factor_y)
+                             for point in self._points])
+                if factor_x and factor_y
+                else (Multipoint(*_unique_just_seen(_scale_point(point,
+                                                                 factor_x,
+                                                                 factor_y)
+                                                    for point in self._points))
+                      if factor_x or factor_y
+                      else Multipoint(Point(factor_x, factor_y))))
+
     def translate(self,
                   step_x: Coordinate,
                   step_y: Coordinate) -> 'Multipoint':
@@ -467,3 +503,7 @@ def _robust_divide(dividend: Coordinate, divisor: int) -> Coordinate:
     return (Fraction(dividend, divisor)
             if isinstance(dividend, int)
             else dividend / divisor)
+
+
+def _unique_just_seen(iterable: Iterable[Domain]) -> List[Domain]:
+    return [key for key, _ in groupby(iterable)]
