@@ -298,6 +298,22 @@ class Empty(Compound):
         """
         return Relation.DISJOINT
 
+    def scale(self,
+              factor_x: Coordinate,
+              factor_y: Optional[Coordinate] = None) -> 'Empty':
+        """
+        Scales the empty geometry by given factor.
+
+        Time complexity:
+            ``O(1)``
+        Memory complexity:
+            ``O(1)``
+
+        >>> EMPTY.scale(1) is EMPTY.scale(1, 2) is EMPTY
+        True
+        """
+        return self
+
     def translate(self, step_x: Coordinate, step_y: Coordinate) -> 'Empty':
         """
         Translates the empty geometry by given step.
