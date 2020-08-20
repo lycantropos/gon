@@ -1,7 +1,6 @@
-from collections import OrderedDict
+import sys
 from fractions import Fraction
 from typing import (AbstractSet,
-                    Iterable,
                     List,
                     Optional,
                     Set)
@@ -505,5 +504,9 @@ def _robust_divide(dividend: Coordinate, divisor: int) -> Coordinate:
             else dividend / divisor)
 
 
-def _unique_ever_seen(iterable: Iterable[Domain]) -> AbstractSet[Domain]:
-    return OrderedDict.fromkeys(iterable)
+if sys.version_info < (3, 6):
+    from collections import OrderedDict
+else:
+    OrderedDict = dict
+_unique_ever_seen = OrderedDict.fromkeys
+del OrderedDict, sys
