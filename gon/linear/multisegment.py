@@ -25,8 +25,7 @@ from gon.discrete import (Multipoint,
                           _unique_just_seen,
                           from_points)
 from gon.geometry import Geometry
-from gon.hints import (Coordinate,
-                       Domain)
+from gon.hints import Coordinate
 from gon.primitive import (Point,
                            RawPoint,
                            _scale_point)
@@ -368,7 +367,7 @@ class Multisegment(Indexable, Linear):
     __rxor__ = __xor__
 
     @classmethod
-    def from_raw(cls, raw: RawMultisegment) -> Domain:
+    def from_raw(cls, raw: RawMultisegment) -> 'Multisegment':
         """
         Constructs multisegment from the combination of Python built-ins.
 
