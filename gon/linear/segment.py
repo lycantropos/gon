@@ -354,6 +354,22 @@ class Segment(Compound, Linear):
         return self._start.y == self._end.y
 
     @property
+    def is_vertical(self) -> bool:
+        """
+        Checks if the segment is vertical.
+
+        Time complexity:
+            ``O(1)``
+        Memory complexity:
+            ``O(1)``
+
+        >>> segment = Segment.from_raw(((0, 0), (2, 0)))
+        >>> segment.is_vertical
+        False
+        """
+        return self._start.x == self._end.x
+
+    @property
     def length(self) -> Coordinate:
         """
         Returns length of the segment.
