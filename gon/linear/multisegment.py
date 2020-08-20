@@ -1,5 +1,7 @@
 from functools import partial
-from typing import List
+from typing import (AbstractSet,
+                    Iterable, List,
+                    Optional)
 
 from bentley_ottmann.planar import segments_cross_or_overlap
 from clipping.planar import (complete_intersect_multisegments,
@@ -19,14 +21,18 @@ from gon.compound import (Compound,
                           Relation)
 from gon.degenerate import EMPTY
 from gon.discrete import (Multipoint,
-                          _robust_divide)
+                          _robust_divide,
+                          _unique_just_seen,
+                          from_points)
 from gon.geometry import Geometry
 from gon.hints import (Coordinate,
                        Domain)
 from gon.primitive import (Point,
-                           RawPoint)
+                           RawPoint,
+                           _scale_point)
 from .hints import RawMultisegment
-from .segment import Segment
+from .segment import (Segment,
+                      _scale_segment)
 from .utils import (from_raw_mix_components,
                     from_raw_multisegment,
                     relate_multipoint_to_linear_compound,
@@ -527,6 +533,36 @@ class Multisegment(Indexable, Linear):
                             if isinstance(other, Multisegment)
                             else other.relate(self).complement)))
 
+    def scale(self,
+              factor_x: Coordinate,
+              factor_y: Optional[Coordinate] = None) -> Compound:
+        """
+        Scales the multisegment by given factor.
+
+        Time complexity:
+            ``O(segments_count)``
+        Memory complexity:
+            ``O(segments_count)``
+
+        where ``segments_count = len(self.segments)``.
+
+        >>> multisegment = Multisegment.from_raw([((0, 0), (1, 0)),
+        ...                                       ((0, 1), (1, 1))])
+        >>> multisegment.scale(1) == multisegment
+        True
+        >>> (multisegment.scale(1, 2)
+        ...  == Multisegment.from_raw([((0, 0), (1, 0)), ((0, 2), (1, 2))]))
+        True
+        """
+        if factor_y is None:
+            factor_y = factor_x
+        return (Multisegment(*[_scale_segment(segment, factor_x, factor_y)
+                               for segment in self._segments])
+                if factor_x and factor_y
+                else (_scale_segments(self._segments, factor_x, factor_y)
+                      if factor_x or factor_y
+                      else Multipoint(Point(factor_x, factor_y))))
+
     def translate(self,
                   step_x: Coordinate,
                   step_y: Coordinate) -> 'Multisegment':
@@ -607,6 +643,28 @@ class Multisegment(Indexable, Linear):
                                      ) -> Compound:
         return from_raw_multisegment(unite_multisegments(self._raw, other_raw,
                                                          accurate=False))
+
+
+def _scale_segments(segments: Iterable[Segment],
+                    factor_x: Coordinate,
+                    factor_y: Coordinate) -> Compound:
+    scaled_points, scaled_segments = [], []
+    for segment in segments:
+        if ((factor_x or not segment.is_horizontal) and factor_y
+                or factor_x and not segment.is_vertical):
+            scaled_segments.append(Segment(_scale_point(segment.start,
+                                                        factor_x, factor_y),
+                                           _scale_point(segment.end, factor_x,
+                                                        factor_y)))
+        else:
+            scaled_points.append(_scale_point(segment.start, factor_x,
+                                              factor_y))
+    return (from_points(_unique_just_seen(scaled_points))
+            | from_segments(_unique_just_seen(scaled_segments)))
+
+
+def from_segments(segments: AbstractSet[Segment]) -> Compound:
+    return Multisegment(*segments) if segments else EMPTY
 
 
 def raw_locate_point(raw_multisegment: RawMultisegment,
