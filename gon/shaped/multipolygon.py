@@ -1,6 +1,7 @@
 from functools import partial
 from itertools import chain
 from typing import (List,
+                    Optional,
                     Sequence)
 
 from bentley_ottmann.planar import segments_cross_or_overlap
@@ -34,12 +35,15 @@ from gon.linear import (Contour,
                         Multisegment,
                         RawMultisegment,
                         Segment)
+from gon.linear.multisegment import _scale_segments
 from gon.linear.utils import (from_raw_multisegment,
                               to_pairs_chain)
 from gon.primitive import Point
 from .hints import RawMultipolygon
 from .polygon import (Polygon,
-                      _polygon_to_centroid_components)
+                      _polygon_to_centroid_components,
+                      _polygon_to_segments,
+                      _scale_polygon)
 from .utils import (flatten,
                     from_raw_mix_components,
                     from_raw_multipolygon)
@@ -678,6 +682,43 @@ class Multipolygon(Indexable, Shaped):
                    else (multipolygon_in_multipolygon(other._raw, self._raw)
                          if isinstance(other, Multipolygon)
                          else other.relate(self).complement)))))
+
+    def scale(self,
+              factor_x: Coordinate,
+              factor_y: Optional[Coordinate] = None) -> Compound:
+        """
+        Scales the multipolygon by given factor.
+
+        Time complexity:
+            ``O(vertices_count)``
+        Memory complexity:
+            ``O(vertices_count)``
+
+        where ``vertices_count = sum(len(polygon.border.vertices)\
+ + sum(len(hole.vertices) for hole in polygon.holes)\
+ for polygon in self.polygons)``.
+
+        >>> multipolygon = Multipolygon.from_raw(
+        ...         [([(0, 0), (6, 0), (6, 6), (0, 6)],
+        ...           [[(2, 2), (2, 4), (4, 4), (4, 2)]])])
+        >>> multipolygon.scale(1) == multipolygon
+        True
+        >>> (multipolygon.scale(1, 2)
+        ...  == Multipolygon.from_raw([([(0, 0), (6, 0), (6, 12), (0, 12)],
+        ...                             [[(2, 4), (2, 8), (4, 8), (4, 4)]])]))
+        True
+        """
+        if factor_y is None:
+            factor_y = factor_x
+        return (Multipolygon(*[_scale_polygon(polygon, factor_x, factor_y)
+                               for polygon in self._polygons])
+                if factor_x and factor_y
+                else
+                (_scale_segments(flatten(_polygon_to_segments(polygon)
+                                         for polygon in self._polygons),
+                                 factor_x, factor_y)
+                 if factor_x or factor_y
+                 else Multipoint(Point(factor_x, factor_y))))
 
     def translate(self,
                   step_x: Coordinate,
