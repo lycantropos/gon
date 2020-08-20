@@ -1,3 +1,5 @@
+from typing import Optional
+
 from reprit.base import generate_repr
 
 from gon.compound import (Compound,
@@ -883,6 +885,56 @@ class Mix(Indexable):
                             else (self._relate_mix(other)
                                   if isinstance(other, Mix)
                                   else other.relate(self).complement))))
+
+    def scale(self,
+              factor_x: Coordinate,
+              factor_y: Optional[Coordinate] = None) -> Compound:
+        """
+        Scales the mix by given factor.
+
+        Time complexity:
+            ``O(elements_count)``
+        Memory complexity:
+            ``O(elements_count)``
+
+        where ``elements_count = multipoint_size + multisegment_size\
+ + multipolygon_vertices_count``,
+        ``multipoint_size = len(points)``,
+        ``multisegment_size = len(segments)``,
+        ``multipolygon_vertices_count = sum(len(polygon.border.vertices)\
+ + sum(len(hole.vertices) for hole in polygon.holes)\
+ for polygon in polygons)``,
+        ``points = [] if self.multipoint is EMPTY\
+ else self.multipoint.points``,
+        ``segments = [] if self.multisegment is EMPTY\
+ else self.multisegment.segments``,
+        ``polygons = [] if self.multipolygon is EMPTY\
+ else self.multipolygon.polygons``.
+
+        >>> mix = Mix.from_raw(([(3, 3), (7, 7)],
+        ...                     [((0, 6), (0, 8)), ((6, 6), (6, 8))],
+        ...                     [([(0, 0), (6, 0), (6, 6), (0, 6)],
+        ...                       [[(2, 2), (2, 4), (4, 4), (4, 2)]])]))
+        >>> mix.scale(1) == mix
+        True
+        >>> (mix.scale(1, 2)
+        ...  == Mix.from_raw(([(3, 6), (7, 14)],
+        ...                   [((0, 12), (0, 16)), ((6, 12), (6, 16))],
+        ...                   [([(0, 0), (6, 0), (6, 12), (0, 12)],
+        ...                     [[(2, 4), (2, 8), (4, 8), (4, 4)]])])))
+        True
+        """
+        if factor_y is None:
+            factor_y = factor_x
+        return (Mix(self._multipoint.scale(factor_x, factor_y),
+                    self._multisegment.scale(factor_x, factor_y),
+                    self._multipolygon.scale(factor_x, factor_y))
+                if factor_x and factor_y
+                else ((self._multipoint.scale(factor_x, factor_y)
+                       | self._multisegment.translate(factor_x, factor_y)
+                       | self._multipolygon.translate(factor_x, factor_y))
+                      if factor_x or factor_y
+                      else Multipoint(Point(factor_x, factor_y))))
 
     def translate(self, step_x: Coordinate, step_y: Coordinate) -> 'Mix':
         """
