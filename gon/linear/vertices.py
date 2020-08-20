@@ -1,7 +1,8 @@
 from fractions import Fraction
 from functools import reduce
 from itertools import chain
-from typing import Iterator
+from typing import (Iterator,
+                    List)
 
 from robust.hints import Expansion
 from robust.utils import (sum_expansions,
@@ -11,8 +12,10 @@ from robust.utils import (sum_expansions,
 from gon.angular import (Orientation,
                          to_orientation as to_angle_orientation)
 from gon.hints import Coordinate
-from gon.primitive import Point
+from gon.primitive import (Point,
+                           _scale_point)
 from .hints import Vertices
+from .segment import Segment
 from .utils import (robust_sqrt,
                     squared_points_distance)
 
@@ -85,3 +88,14 @@ def equal(left: Vertices, right: Vertices, same_oriented: bool) -> bool:
                         else range(size - 1, index - 1, right_step)))
     return all(left[left_index] == right[right_index]
                for left_index, right_index in indices)
+
+
+def scale(vertices: Vertices,
+          factor_x: Coordinate,
+          factor_y: Coordinate) -> Vertices:
+    return [_scale_point(vertex, factor_x, factor_y) for vertex in vertices]
+
+
+def to_edges(vertices: Vertices) -> List[Segment]:
+    return [Segment(vertices[index - 1], vertices[index])
+            for index in range(len(vertices))]
