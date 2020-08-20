@@ -1,4 +1,5 @@
 from functools import partial
+from itertools import chain
 from typing import (List,
                     Optional,
                     Sequence,
@@ -42,13 +43,15 @@ from gon.linear import (Contour,
                         RawMultisegment,
                         Segment,
                         vertices)
+from gon.linear.multisegment import _scale_segments
 from gon.linear.utils import (from_raw_multisegment,
                               to_pairs_chain)
 from gon.primitive import (Point,
                            RawPoint)
 from .hints import (RawMultipolygon,
                     RawPolygon)
-from .utils import (from_raw_mix_components,
+from .utils import (flatten,
+                    from_raw_mix_components,
                     from_raw_multipolygon,
                     to_convex_hull)
 
@@ -682,6 +685,46 @@ class Polygon(Indexable, Shaped):
                                                      raw)
                                   if isinstance(other, Polygon)
                                   else other.relate(self).complement))))
+
+    def scale(self,
+              factor_x: Coordinate,
+              factor_y: Optional[Coordinate] = None) -> 'Polygon':
+        """
+        Scales the polygon by given factor.
+
+        Time complexity:
+            ``O(vertices_count)``
+        Memory complexity:
+            ``O(vertices_count)``
+
+        where ``vertices_count = len(self.border.vertices)\
+ + sum(len(hole.vertices) for hole in self.holes)``.
+
+        >>> polygon = Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
+        ...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]]))
+        >>> polygon.scale(1) == polygon
+        True
+        >>> (polygon.scale(1, 2)
+        ...  == Polygon.from_raw(([(0, 0), (6, 0), (6, 12), (0, 12)],
+        ...                       [[(2, 4), (2, 8), (4, 8), (4, 4)]])))
+        True
+        """
+        if factor_y is None:
+            factor_y = factor_x
+        return (Polygon(Contour(vertices.scale(self._border._vertices,
+                                               factor_x, factor_y)),
+                        [Contour(vertices.scale(hole._vertices, factor_x,
+                                                factor_y))
+                         for hole in self._holes])
+                if factor_x and factor_y
+                else
+                (_scale_segments(
+                        chain(vertices.to_edges(self._border._vertices),
+                              flatten(vertices.to_edges(hole._vertices)
+                                      for hole in self._holes)),
+                        factor_x, factor_y)
+                 if factor_x or factor_y
+                 else Multipoint(Point(factor_x, factor_y))))
 
     def translate(self, step_x: Coordinate, step_y: Coordinate) -> 'Polygon':
         """
