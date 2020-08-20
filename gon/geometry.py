@@ -1,6 +1,7 @@
 from abc import (ABC,
                  abstractmethod)
-from typing import (Type,
+from typing import (Optional,
+                    Type,
                     TypeVar)
 
 from .hints import (Coordinate,
@@ -41,6 +42,14 @@ class Geometry(ABC):
     def raw(self) -> RawGeometry:
         """
         Returns geometric object as combination of Python built-ins.
+        """
+
+    @abstractmethod
+    def scale(self,
+              factor_x: Coordinate,
+              factor_y: Optional[Coordinate] = None) -> 'Geometry':
+        """
+        Scales geometric object by given factor.
         """
 
     @abstractmethod
