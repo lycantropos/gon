@@ -1,5 +1,5 @@
+from collections import OrderedDict
 from fractions import Fraction
-from itertools import groupby
 from typing import (AbstractSet,
                     Iterable,
                     List,
@@ -406,7 +406,7 @@ class Multipoint(Compound):
         return (Multipoint(*[_scale_point(point, factor_x, factor_y)
                              for point in self._points])
                 if factor_x and factor_y
-                else (Multipoint(*_unique_just_seen(_scale_point(point,
+                else (Multipoint(*_unique_ever_seen(_scale_point(point,
                                                                  factor_x,
                                                                  factor_y)
                                                     for point in self._points))
@@ -505,5 +505,5 @@ def _robust_divide(dividend: Coordinate, divisor: int) -> Coordinate:
             else dividend / divisor)
 
 
-def _unique_just_seen(iterable: Iterable[Domain]) -> List[Domain]:
-    return [key for key, _ in groupby(iterable)]
+def _unique_ever_seen(iterable: Iterable[Domain]) -> AbstractSet[Domain]:
+    return OrderedDict.fromkeys(iterable)

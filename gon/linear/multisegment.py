@@ -1,10 +1,11 @@
 from functools import partial
-from typing import (AbstractSet,
-                    Iterable, List,
+from typing import (Iterable,
+                    List,
                     Optional)
 
 from bentley_ottmann.planar import segments_cross_or_overlap
 from clipping.planar import (complete_intersect_multisegments,
+                             segments_to_multisegment,
                              subtract_multisegments,
                              symmetric_subtract_multisegments,
                              unite_multisegments)
@@ -22,14 +23,16 @@ from gon.compound import (Compound,
 from gon.degenerate import EMPTY
 from gon.discrete import (Multipoint,
                           _robust_divide,
-                          _unique_just_seen,
+                          _unique_ever_seen,
                           from_points)
 from gon.geometry import Geometry
 from gon.hints import Coordinate
 from gon.primitive import (Point,
                            RawPoint,
-                           _scale_point)
-from .hints import RawMultisegment
+                           _scale_point,
+                           _scale_raw_point)
+from .hints import (RawMultisegment,
+                    RawSegment)
 from .segment import (Segment,
                       _scale_segment)
 from .utils import (from_raw_mix_components,
@@ -647,23 +650,26 @@ class Multisegment(Indexable, Linear):
 def _scale_segments(segments: Iterable[Segment],
                     factor_x: Coordinate,
                     factor_y: Coordinate) -> Compound:
-    scaled_points, scaled_segments = [], []
+    scaled_points, scaled_raw_segments = [], []
     for segment in segments:
         if ((factor_x or not segment.is_horizontal) and factor_y
                 or factor_x and not segment.is_vertical):
-            scaled_segments.append(Segment(_scale_point(segment.start,
-                                                        factor_x, factor_y),
-                                           _scale_point(segment.end, factor_x,
-                                                        factor_y)))
+            scaled_raw_segments.append((_scale_raw_point(segment.start.raw(),
+                                                         factor_x, factor_y),
+                                        _scale_raw_point(segment.end.raw(),
+                                                         factor_x, factor_y)))
         else:
             scaled_points.append(_scale_point(segment.start, factor_x,
                                               factor_y))
-    return (from_points(_unique_just_seen(scaled_points))
-            | from_segments(_unique_just_seen(scaled_segments)))
+    return (from_points(_unique_ever_seen(scaled_points))
+            | from_raw_segments(scaled_raw_segments))
 
 
-def from_segments(segments: AbstractSet[Segment]) -> Compound:
-    return Multisegment(*segments) if segments else EMPTY
+def from_raw_segments(raw_segments: List[RawSegment]) -> Compound:
+    return (Multisegment.from_raw(segments_to_multisegment(raw_segments,
+                                                           accurate=False))
+            if raw_segments
+            else EMPTY)
 
 
 def raw_locate_point(raw_multisegment: RawMultisegment,

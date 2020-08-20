@@ -200,6 +200,13 @@ def _scale_point(point: Point,
     return Point(point._x * factor_x, point._y * factor_y)
 
 
+def _scale_raw_point(point: RawPoint,
+                     factor_x: Coordinate,
+                     factor_y: Coordinate) -> RawPoint:
+    x, y = point
+    return x * factor_x, y * factor_y
+
+
 def _validate_coordinate(value: Coordinate) -> None:
     if not math.isfinite(value):
         raise ValueError('NaN/infinity coordinates are not supported.')
