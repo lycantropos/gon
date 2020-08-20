@@ -1,6 +1,7 @@
 from functools import partial
 from itertools import chain
-from typing import (List,
+from typing import (Iterable,
+                    List,
                     Optional,
                     Sequence,
                     Tuple)
@@ -711,18 +712,11 @@ class Polygon(Indexable, Shaped):
         """
         if factor_y is None:
             factor_y = factor_x
-        return (Polygon(Contour(vertices.scale(self._border._vertices,
-                                               factor_x, factor_y)),
-                        [Contour(vertices.scale(hole._vertices, factor_x,
-                                                factor_y))
-                         for hole in self._holes])
+        return (_scale_polygon(self, factor_x, factor_y)
                 if factor_x and factor_y
                 else
-                (_scale_segments(
-                        chain(vertices.to_edges(self._border._vertices),
-                              flatten(vertices.to_edges(hole._vertices)
-                                      for hole in self._holes)),
-                        factor_x, factor_y)
+                (_scale_segments(_polygon_to_segments(self), factor_x,
+                                 factor_y)
                  if factor_x or factor_y
                  else Multipoint(Point(factor_x, factor_y))))
 
@@ -876,6 +870,12 @@ def _polygon_to_centroid_components(polygon: Polygon
     return x_numerator, y_numerator, double_area
 
 
+def _polygon_to_segments(polygon: Polygon) -> Iterable[Segment]:
+    return chain(vertices.to_edges(polygon._border._vertices),
+                 flatten(vertices.to_edges(hole._vertices)
+                         for hole in polygon._holes))
+
+
 def raw_locate_point(raw_polygon: RawPolygon, raw_point: RawPoint) -> Location:
     relation = point_in_polygon(raw_point, raw_polygon)
     return (Location.EXTERIOR
@@ -900,6 +900,16 @@ def _raw_contour_to_centroid_components(contour: RawContour
             sum_expansions(double_area, area_component))
         prev_x, prev_y = x, y
     return x_numerator, y_numerator, double_area
+
+
+def _scale_polygon(polygon: Polygon,
+                   factor_x: Coordinate,
+                   factor_y: Coordinate) -> Polygon:
+    return Polygon(Contour(vertices.scale(polygon._border._vertices,
+                                          factor_x, factor_y)),
+                   [Contour(vertices.scale(hole._vertices, factor_x,
+                                           factor_y))
+                    for hole in polygon._holes])
 
 
 def _to_endpoints_cross_product_z(start_x: Coordinate,
