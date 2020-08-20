@@ -1,3 +1,5 @@
+from typing import Optional
+
 from orient.planar import (point_in_segment,
                            segment_in_segment)
 from reprit.base import generate_repr
@@ -15,7 +17,8 @@ from gon.discrete import (Multipoint,
 from gon.geometry import Geometry
 from gon.hints import Coordinate
 from gon.primitive import (Point,
-                           RawPoint)
+                           RawPoint,
+                           _scale_point)
 from .hints import (RawMultisegment,
                     RawSegment)
 from .utils import (from_raw_multisegment,
@@ -452,6 +455,24 @@ class Segment(Compound, Linear):
                       if isinstance(other, Segment)
                       else other.relate(self).complement))
 
+    def scale(self,
+              factor_x: Coordinate,
+              factor_y: Optional[Coordinate] = None) -> Compound:
+        """
+        Scales the segment by given factor.
+
+        Time complexity:
+            ``O(1)``
+        Memory complexity:
+            ``O(1)``
+
+        >>> segment = Segment.from_raw(((0, 0), (2, 0)))
+        >>> segment.scale(1) == segment.scale(1, 2) == segment
+        True
+        """
+        return _scale_segment(self, factor_x,
+                              factor_x if factor_y is None else factor_y)
+
     def translate(self, step_x: Coordinate, step_y: Coordinate) -> 'Segment':
         """
         Translates the segment by given step.
@@ -551,6 +572,16 @@ class Segment(Compound, Linear):
                               _raw_unite_cross(self._raw, other._raw))
                              if relation is Relation.CROSS
                              else Multisegment(self, other)))))
+
+
+def _scale_segment(segment: Segment,
+                   factor_x: Coordinate,
+                   factor_y: Coordinate) -> Compound:
+    return (Segment(_scale_point(segment._start, factor_x, factor_y),
+                    _scale_point(segment._end, factor_x, factor_y))
+            if ((factor_x or not segment.is_horizontal) and factor_y
+                or factor_x and not segment.is_vertical)
+            else Multipoint(_scale_point(segment._start, factor_x, factor_y)))
 
 
 def raw_locate_point(raw_segment: RawSegment, raw_point: RawPoint) -> Location:
