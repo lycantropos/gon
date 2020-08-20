@@ -338,6 +338,22 @@ class Segment(Compound, Linear):
         return self._end
 
     @property
+    def is_horizontal(self) -> bool:
+        """
+        Checks if the segment is horizontal.
+
+        Time complexity:
+            ``O(1)``
+        Memory complexity:
+            ``O(1)``
+
+        >>> segment = Segment.from_raw(((0, 0), (2, 0)))
+        >>> segment.is_horizontal
+        True
+        """
+        return self._start.y == self._end.y
+
+    @property
     def length(self) -> Coordinate:
         """
         Returns length of the segment.
