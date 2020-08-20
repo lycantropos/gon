@@ -148,6 +148,23 @@ class Point(Geometry):
         """
         return self._raw
 
+    def scale(self,
+              factor_x: Coordinate,
+              factor_y: Optional[Coordinate] = None) -> 'Point':
+        """
+        Scales the point by given factor.
+
+        Time complexity:
+            ``O(1)``
+        Memory complexity:
+            ``O(1)``
+
+        >>> Point(1, 0).scale(1) == Point(1, 0).scale(1, 2) == Point(1, 0)
+        True
+        """
+        return _scale_point(self, factor_x,
+                            factor_x if factor_y is None else factor_y)
+
     def translate(self, step_x: Coordinate, step_y: Coordinate) -> 'Point':
         """
         Translates the point by given step.
@@ -175,6 +192,12 @@ class Point(Geometry):
         """
         _validate_coordinate(self._x)
         _validate_coordinate(self._y)
+
+
+def _scale_point(point: Point,
+                 factor_x: Coordinate,
+                 factor_y: Coordinate) -> Point:
+    return Point(point._x * factor_x, point._y * factor_y)
 
 
 def _validate_coordinate(value: Coordinate) -> None:
