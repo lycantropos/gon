@@ -46,7 +46,7 @@ class Geometry(ABC):
     @abstractmethod
     def translate(self, step_x: Coordinate, step_y: Coordinate) -> 'Geometry':
         """
-        Translates geometric object by step.
+        Translates geometric object by given step.
         """
 
     @abstractmethod
