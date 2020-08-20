@@ -1,4 +1,5 @@
 from functools import partial
+from typing import Optional
 
 from bentley_ottmann.planar import edges_intersect
 from clipping.planar import (complete_intersect_multisegments,
@@ -31,7 +32,8 @@ from . import vertices as _vertices
 from .hints import (RawContour,
                     RawMultisegment,
                     Vertices)
-from .multisegment import Multisegment
+from .multisegment import (Multisegment,
+                           _scale_segments)
 from .segment import Segment
 from .utils import (from_raw_mix_components,
                     from_raw_multisegment,
@@ -558,6 +560,35 @@ class Contour(Indexable, Linear):
         True
         """
         return Contour(_vertices.rotate(self._vertices))
+
+    def scale(self,
+              factor_x: Coordinate,
+              factor_y: Optional[Coordinate] = None) -> Compound:
+        """
+        Scales the contour by given factor.
+
+        Time complexity:
+            ``O(vertices_count)``
+        Memory complexity:
+            ``O(vertices_count)``
+
+        where ``vertices_count = len(self.vertices)``.
+
+        >>> contour = Contour.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> contour.scale(1) == contour
+        True
+        >>> (contour.scale(1, 2)
+        ...  == Contour.from_raw([(0, 0), (1, 0), (0, 2)]))
+        True
+        """
+        if factor_y is None:
+            factor_y = factor_x
+        return (Contour(_vertices.scale(self._vertices, factor_x, factor_y))
+                if factor_x and factor_y
+                else (_scale_segments(_vertices.to_edges(self._vertices),
+                                      factor_x, factor_y)
+                      if factor_x or factor_y
+                      else Multipoint(Point(factor_x, factor_y))))
 
     def to_clockwise(self) -> 'Contour':
         """
