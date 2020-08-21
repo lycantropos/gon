@@ -96,6 +96,29 @@ def scale(vertices: Vertices,
     return [_scale_point(vertex, factor_x, factor_y) for vertex in vertices]
 
 
-def to_edges(vertices: Vertices) -> List[Segment]:
-    return [Segment(vertices[index - 1], vertices[index])
-            for index in range(len(vertices))]
+def scale_projecting_on_ox(vertices: Vertices,
+                           factor_x: Coordinate,
+                           factor_y: Coordinate) -> Segment:
+    vertices = iter(vertices)
+    min_x = max_x = next(vertices).x
+    for vertex in vertices:
+        if min_x > vertex.x:
+            min_x = vertex.x
+        elif max_x < vertex.x:
+            max_x = vertex.x
+    return Segment(Point(min_x * factor_x, factor_y),
+                   Point(max_x * factor_x, factor_y))
+
+
+def scale_projecting_on_oy(vertices: Vertices,
+                           factor_x: Coordinate,
+                           factor_y: Coordinate) -> Segment:
+    vertices = iter(vertices)
+    min_y = max_y = next(vertices).y
+    for vertex in vertices:
+        if min_y > vertex.y:
+            min_y = vertex.y
+        elif max_y < vertex.y:
+            max_y = vertex.y
+    return Segment(Point(factor_x, min_y * factor_y),
+                   Point(factor_x, max_y * factor_y))
