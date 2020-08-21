@@ -99,7 +99,7 @@ Usage
 ```python
 >>> from gon.degenerate import EMPTY
 >>> from gon.shaped import Polygon
->>> raw_square = [(0, 0), (1, 0), (1, 1), (0, 1)], []
+>>> raw_square = [(0, 0), (4, 0), (4, 4), (0, 4)], []
 >>> square = Polygon.from_raw(raw_square)
 >>> square.raw() == raw_square
 True
@@ -132,13 +132,21 @@ True
 True
 >>> square.convex_hull == square
 True
->>> square.area == 1
+>>> square.area == 16
 True
->>> square.perimeter == 4
+>>> square.perimeter == 16
+True
+>>> square.centroid == Point(2, 2)
+True
+>>> (square.scale(1, 2)
+...  == Polygon.from_raw(([(0, 0), (4, 0), (4, 8), (0, 8)], [])))
+True
+>>> (square.translate(1, 2)
+...  == Polygon.from_raw(([(1, 2), (5, 2), (5, 6), (1, 6)], [])))
 True
 >>> (square.triangulate()
-...  == [Polygon.from_raw(([(0, 1), (1, 0), (1, 1)], [])), 
-...      Polygon.from_raw(([(0, 0), (1, 0), (0, 1)], []))])
+...  == [Polygon.from_raw(([(0, 4), (4, 0), (4, 4)], [])), 
+...      Polygon.from_raw(([(0, 0), (4, 0), (0, 4)], []))])
 True
 
 ```
