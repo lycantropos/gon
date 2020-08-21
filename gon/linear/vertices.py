@@ -1,8 +1,8 @@
 from fractions import Fraction
 from functools import reduce
 from itertools import chain
-from typing import (Iterator,
-                    List)
+from typing import (Iterable,
+                    Iterator)
 
 from robust.hints import Expansion
 from robust.utils import (sum_expansions,
@@ -11,6 +11,8 @@ from robust.utils import (sum_expansions,
 
 from gon.angular import (Orientation,
                          to_orientation as to_angle_orientation)
+from gon.compound import Compound
+from gon.discrete import Multipoint
 from gon.hints import Coordinate
 from gon.primitive import (Point,
                            _scale_point)
@@ -96,7 +98,17 @@ def scale(vertices: Vertices,
     return [_scale_point(vertex, factor_x, factor_y) for vertex in vertices]
 
 
-def scale_projecting_on_ox(vertices: Vertices,
+def scale_degenerate(vertices: Iterable[Point],
+                     factor_x: Coordinate,
+                     factor_y: Coordinate) -> Compound:
+    return (scale_projecting_on_ox(vertices, factor_x, factor_y)
+            if factor_x
+            else (scale_projecting_on_oy(vertices, factor_x, factor_y)
+                  if factor_y
+                  else Multipoint(Point(factor_x, factor_y))))
+
+
+def scale_projecting_on_ox(vertices: Iterable[Point],
                            factor_x: Coordinate,
                            factor_y: Coordinate) -> Segment:
     vertices = iter(vertices)
@@ -110,7 +122,7 @@ def scale_projecting_on_ox(vertices: Vertices,
                    Point(max_x * factor_x, factor_y))
 
 
-def scale_projecting_on_oy(vertices: Vertices,
+def scale_projecting_on_oy(vertices: Iterable[Point],
                            factor_x: Coordinate,
                            factor_y: Coordinate) -> Segment:
     vertices = iter(vertices)

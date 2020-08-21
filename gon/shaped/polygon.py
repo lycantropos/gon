@@ -1,7 +1,5 @@
 from functools import partial
-from itertools import chain
-from typing import (Iterable,
-                    List,
+from typing import (List,
                     Optional,
                     Sequence,
                     Tuple)
@@ -44,15 +42,13 @@ from gon.linear import (Contour,
                         RawMultisegment,
                         Segment,
                         vertices)
-from gon.linear.contour import _scale_contour_degenerate
 from gon.linear.utils import (from_raw_multisegment,
                               to_pairs_chain)
 from gon.primitive import (Point,
                            RawPoint)
 from .hints import (RawMultipolygon,
                     RawPolygon)
-from .utils import (flatten,
-                    from_raw_mix_components,
+from .utils import (from_raw_mix_components,
                     from_raw_multipolygon,
                     to_convex_hull)
 
@@ -714,8 +710,8 @@ class Polygon(Indexable, Shaped):
             factor_y = factor_x
         return (_scale_polygon(self, factor_x, factor_y)
                 if factor_x and factor_y
-                else _scale_contour_degenerate(self._border, factor_x,
-                                               factor_y))
+                else vertices.scale_degenerate(self._border._vertices,
+                                               factor_x, factor_y))
 
     def translate(self, step_x: Coordinate, step_y: Coordinate) -> 'Polygon':
         """
@@ -865,12 +861,6 @@ def _polygon_to_centroid_components(polygon: Polygon
             sum_expansions(y_numerator, hole_y_numerator),
             sum_expansions(double_area, hole_double_area))
     return x_numerator, y_numerator, double_area
-
-
-def _polygon_to_segments(polygon: Polygon) -> Iterable[Segment]:
-    return chain(vertices.to_edges(polygon._border._vertices),
-                 flatten(vertices.to_edges(hole._vertices)
-                         for hole in polygon._holes))
 
 
 def raw_locate_point(raw_polygon: RawPolygon, raw_point: RawPoint) -> Location:

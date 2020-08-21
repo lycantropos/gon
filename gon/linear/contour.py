@@ -584,7 +584,8 @@ class Contour(Indexable, Linear):
             factor_y = factor_x
         return (Contour(_vertices.scale(self._vertices, factor_x, factor_y))
                 if factor_x and factor_y
-                else _scale_contour_degenerate(self, factor_x, factor_y))
+                else _vertices.scale_degenerate(self._vertices, factor_x,
+                                                factor_y))
 
     def to_clockwise(self) -> 'Contour':
         """
@@ -718,15 +719,3 @@ def raw_locate_point(raw_contour: RawContour, raw_point: RawPoint) -> Location:
     return (Location.BOUNDARY
             if point_in_contour(raw_point, raw_contour)
             else Location.EXTERIOR)
-
-
-def _scale_contour_degenerate(contour: Contour,
-                              factor_x: Coordinate,
-                              factor_y: Coordinate) -> Compound:
-    return (_vertices.scale_projecting_on_ox(contour._vertices, factor_x,
-                                             factor_y)
-            if factor_x
-            else (_vertices.scale_projecting_on_oy(contour._vertices, factor_x,
-                                                   factor_y)
-                  if factor_y
-                  else Multipoint(Point(factor_x, factor_y))))
