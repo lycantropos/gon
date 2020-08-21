@@ -34,15 +34,14 @@ from gon.hints import Coordinate
 from gon.linear import (Contour,
                         Multisegment,
                         RawMultisegment,
-                        Segment)
-from gon.linear.multisegment import _scale_segments
+                        Segment,
+                        vertices)
 from gon.linear.utils import (from_raw_multisegment,
                               to_pairs_chain)
 from gon.primitive import Point
 from .hints import RawMultipolygon
 from .polygon import (Polygon,
                       _polygon_to_centroid_components,
-                      _polygon_to_segments,
                       _scale_polygon)
 from .utils import (flatten,
                     from_raw_mix_components,
@@ -713,12 +712,10 @@ class Multipolygon(Indexable, Shaped):
         return (Multipolygon(*[_scale_polygon(polygon, factor_x, factor_y)
                                for polygon in self._polygons])
                 if factor_x and factor_y
-                else
-                (_scale_segments(flatten(_polygon_to_segments(polygon)
-                                         for polygon in self._polygons),
-                                 factor_x, factor_y)
-                 if factor_x or factor_y
-                 else Multipoint(Point(factor_x, factor_y))))
+                else vertices.scale_degenerate(
+                flatten(polygon._border._vertices
+                        for polygon in self._polygons),
+                factor_x, factor_y))
 
     def translate(self,
                   step_x: Coordinate,
