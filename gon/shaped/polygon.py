@@ -44,7 +44,7 @@ from gon.linear import (Contour,
                         RawMultisegment,
                         Segment,
                         vertices)
-from gon.linear.multisegment import _scale_segments
+from gon.linear.contour import _scale_contour_degenerate
 from gon.linear.utils import (from_raw_multisegment,
                               to_pairs_chain)
 from gon.primitive import (Point,
@@ -714,11 +714,8 @@ class Polygon(Indexable, Shaped):
             factor_y = factor_x
         return (_scale_polygon(self, factor_x, factor_y)
                 if factor_x and factor_y
-                else
-                (_scale_segments(_polygon_to_segments(self), factor_x,
-                                 factor_y)
-                 if factor_x or factor_y
-                 else Multipoint(Point(factor_x, factor_y))))
+                else _scale_contour_degenerate(self._border, factor_x,
+                                               factor_y))
 
     def translate(self, step_x: Coordinate, step_y: Coordinate) -> 'Polygon':
         """
