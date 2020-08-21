@@ -8,9 +8,9 @@ from . import strategies
 
 
 @given(strategies.geometries_with_coordinates_pairs)
-def test_basic(geometry_with_coordinates
-               : Tuple[Geometry, Coordinate, Coordinate]) -> None:
-    geometry, step_x, step_y = geometry_with_coordinates
+def test_basic(geometry_with_steps: Tuple[Geometry, Coordinate, Coordinate]
+               ) -> None:
+    geometry, step_x, step_y = geometry_with_steps
 
     result = geometry.translate(step_x, step_y)
 
@@ -25,9 +25,9 @@ def test_neutral_step(geometry: Geometry) -> None:
 
 
 @given(strategies.empty_compounds_with_coordinates_pairs)
-def test_empty(geometry_with_coordinates
-               : Tuple[Geometry, Coordinate, Coordinate]) -> None:
-    geometry, step_x, step_y = geometry_with_coordinates
+def test_empty(geometry_with_steps: Tuple[Geometry, Coordinate, Coordinate]
+               ) -> None:
+    geometry, step_x, step_y = geometry_with_steps
 
     result = geometry.translate(step_x, step_y)
 
