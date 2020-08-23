@@ -74,6 +74,13 @@ compounds = (strategies.builds(call, compounds_factories,
 rational_compounds = (strategies.builds(call, compounds_factories,
                                         rational_coordinates_strategies)
                       .flatmap(identity))
+rational_non_empty_compounds_with_coordinates_pairs = (
+    (strategies.builds(call,
+                       non_empty_compounds_factories
+                       .map(lambda factory: cleave_in_tuples(factory, identity,
+                                                             identity)),
+                       rational_coordinates_strategies)
+     .flatmap(identity)))
 empty_compounds_with_compounds = strategies.tuples(empty_compounds, compounds)
 compounds_with_points = (
     (strategies.builds(call,
