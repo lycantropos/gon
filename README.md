@@ -29,7 +29,7 @@ each operation corresponds to its mathematical definition
 and property-based tested.
 - efficiency: all operations are efficient
 in terms of both time & memory complexity,
-upper bound for time complexity is `O(n * log n)`,
+upper bound for expected time complexity is `O(n * log n)`,
 for memory complexity is `O(n)`.
 
 ---
