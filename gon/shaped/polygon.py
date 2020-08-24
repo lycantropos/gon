@@ -631,7 +631,7 @@ class Polygon(Indexable, Shaped):
         >>> polygon.locate(Point(7, 0)) is Location.EXTERIOR
         True
         """
-        return isinstance(point, Point) and self._raw_locate(point.raw())
+        return self._raw_locate(point.raw())
 
     def raw(self) -> RawPolygon:
         """
