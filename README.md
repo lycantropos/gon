@@ -98,6 +98,7 @@ Usage
 
 ```python
 >>> from gon.degenerate import EMPTY
+>>> from gon.primitive import Point
 >>> from gon.shaped import Polygon
 >>> raw_square = [(0, 0), (4, 0), (4, 4), (0, 4)], []
 >>> square = Polygon.from_raw(raw_square)
@@ -121,7 +122,6 @@ True
 True
 >>> square ^ square is EMPTY
 True
->>> from gon.primitive import Point
 >>> Point(0, 0) in square
 True
 >>> square.index()
