@@ -29,12 +29,15 @@ from gon.geometry import Geometry
 from gon.hints import Coordinate
 from gon.primitive import (Point,
                            RawPoint,
+                           _point_to_step,
                            _scale_point,
                            _scale_raw_point)
 from .hints import (RawMultisegment,
                     RawSegment)
 from .segment import (Segment,
-                      _scale_segment)
+                      _rotate_translate_segment,
+                      _scale_segment,
+                      rotate_segment_around_origin)
 from .utils import (from_raw_mix_components,
                     from_raw_multisegment,
                     relate_multipoint_to_linear_compound,
@@ -535,6 +538,33 @@ class Multisegment(Indexable, Linear):
                             if isinstance(other, Multisegment)
                             else other.relate(self).complement)))
 
+    def rotate(self,
+               cosine: Coordinate,
+               sine: Coordinate,
+               point: Optional[Point] = None) -> 'Multisegment':
+        """
+        Rotates the multisegment by given cosine & sine around given point.
+
+        Time complexity:
+            ``O(segments_count)``
+        Memory complexity:
+            ``O(segments_count)``
+
+        where ``segments_count = len(self.segments)``.
+
+        >>> multisegment = Multisegment.from_raw([((0, 0), (1, 0)),
+        ...                                       ((0, 1), (1, 1))])
+        >>> multisegment.rotate(1, 0) == multisegment
+        True
+        >>> (multisegment.rotate(0, 1)
+        ...  == Multisegment.from_raw([((0, 0), (0, 1)), ((-1, 0), (-1, 1))]))
+        True
+        """
+        return (rotate_multisegment_around_origin(self, cosine, sine)
+                if point is None
+                else rotate_multisegment_around_point(self, cosine, sine,
+                                                      point))
+
     def scale(self,
               factor_x: Coordinate,
               factor_y: Optional[Coordinate] = None) -> Compound:
@@ -645,6 +675,23 @@ class Multisegment(Indexable, Linear):
                                      ) -> Compound:
         return from_raw_multisegment(unite_multisegments(self._raw, other_raw,
                                                          accurate=False))
+
+
+def rotate_multisegment_around_origin(multisegment: Multisegment,
+                                      cosine: Coordinate,
+                                      sine: Coordinate) -> Multisegment:
+    return Multisegment(*[rotate_segment_around_origin(segment, cosine, sine)
+                          for segment in multisegment._segments])
+
+
+def rotate_multisegment_around_point(multisegment: Multisegment,
+                                     cosine: Coordinate,
+                                     sine: Coordinate,
+                                     point: Point) -> Multisegment:
+    step_x, step_y = _point_to_step(point, cosine, sine)
+    return Multisegment(*[_rotate_translate_segment(segment, cosine, sine,
+                                                    step_x, step_y)
+                          for segment in multisegment._segments])
 
 
 def _scale_segments(segments: Iterable[Segment],
