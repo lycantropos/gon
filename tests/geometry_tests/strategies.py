@@ -60,3 +60,6 @@ rational_geometries_with_points = (
      .flatmap(identity)))
 rational_geometries_points_with_cosines_sines = strategies.tuples(
         rational_geometries_with_points, rational_cosines_sines)
+rational_geometries_points_with_cosines_sines_pairs = strategies.tuples(
+        rational_geometries_with_points, rational_cosines_sines,
+        rational_cosines_sines)
