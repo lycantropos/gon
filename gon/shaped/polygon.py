@@ -42,6 +42,8 @@ from gon.linear import (Contour,
                         RawMultisegment,
                         Segment,
                         vertices)
+from gon.linear.contour import (_scale_contour,
+                                _scale_contour_degenerate)
 from gon.linear.utils import (from_raw_multisegment,
                               to_pairs_chain)
 from gon.primitive import (Point,
@@ -710,8 +712,8 @@ class Polygon(Indexable, Shaped):
             factor_y = factor_x
         return (_scale_polygon(self, factor_x, factor_y)
                 if factor_x and factor_y
-                else vertices.scale_degenerate(self._border._vertices,
-                                               factor_x, factor_y))
+                else _scale_contour_degenerate(self._border, factor_x,
+                                               factor_y))
 
     def translate(self, step_x: Coordinate, step_y: Coordinate) -> 'Polygon':
         """
@@ -892,10 +894,8 @@ def _raw_contour_to_centroid_components(contour: RawContour
 def _scale_polygon(polygon: Polygon,
                    factor_x: Coordinate,
                    factor_y: Coordinate) -> Polygon:
-    return Polygon(Contour(vertices.scale(polygon._border._vertices,
-                                          factor_x, factor_y)),
-                   [Contour(vertices.scale(hole._vertices, factor_x,
-                                           factor_y))
+    return Polygon(_scale_contour(polygon._border, factor_x, factor_y),
+                   [_scale_contour(hole, factor_x, factor_y)
                     for hole in polygon._holes])
 
 
