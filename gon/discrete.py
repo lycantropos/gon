@@ -1,6 +1,7 @@
 import sys
 from fractions import Fraction
 from typing import (AbstractSet,
+                    Iterable,
                     List,
                     Optional,
                     Set)
@@ -16,6 +17,9 @@ from .hints import (Coordinate,
                     Domain)
 from .primitive import (Point,
                         RawPoint,
+                        _point_to_step,
+                        _rotate_point_around_origin,
+                        _rotate_translate_point,
                         _scale_point)
 
 RawMultipoint = List[RawPoint]
@@ -380,6 +384,32 @@ class Multipoint(Compound):
                 if isinstance(other, Multipoint)
                 else self._relate_geometry(other))
 
+    def rotate(self,
+               cosine: Coordinate,
+               sine: Coordinate,
+               point: Optional[Point] = None) -> 'Multipoint':
+        """
+        Rotates geometric object by given cosine & sine around given point.
+
+        Time complexity:
+            ``O(points_count)``
+        Memory complexity:
+            ``O(points_count)``
+
+        where ``points_count = len(self.points)``.
+
+        >>> multipoint = Multipoint.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> multipoint.rotate(1, 0) == multipoint
+        True
+        >>> (multipoint.rotate(0, 1)
+        ...  == Multipoint.from_raw([(0, 0), (0, 1), (-1, 0)]))
+        True
+        """
+        return (_rotate_multipoint_around_origin(self, cosine, sine)
+                if point is None
+                else _rotate_multipoint_around_point(self, cosine, sine,
+                                                     point))
+
     def scale(self,
               factor_x: Coordinate,
               factor_y: Optional[Coordinate] = None) -> 'Multipoint':
@@ -483,6 +513,37 @@ class Multipoint(Compound):
 
 def from_points(points: AbstractSet[Point]) -> Compound:
     return Multipoint(*points) if points else EMPTY
+
+
+def _rotate_multipoint_around_origin(multipoint: Multipoint,
+                                     cosine: Coordinate,
+                                     sine: Coordinate) -> List[Point]:
+    return Multipoint(*_rotate_points_around_origin(multipoint._points, cosine,
+                                                    sine))
+
+
+def _rotate_multipoint_around_point(multipoint: Multipoint,
+                                    cosine: Coordinate,
+                                    sine: Coordinate,
+                                    point: Point) -> List[Point]:
+    return Multipoint(*_rotate_points_around_point(multipoint._points, cosine,
+                                                   sine, point))
+
+
+def _rotate_points_around_origin(points: Iterable[Point],
+                                 cosine: Coordinate,
+                                 sine: Coordinate) -> List[Point]:
+    return [_rotate_point_around_origin(point, cosine, sine)
+            for point in points]
+
+
+def _rotate_points_around_point(points: Iterable[Point],
+                                cosine: Coordinate,
+                                sine: Coordinate,
+                                point: Point) -> List[Point]:
+    step_x, step_y = _point_to_step(point, cosine, sine)
+    return [_rotate_translate_point(point, cosine, sine, step_x, step_y)
+            for point in points]
 
 
 def _relate_sets(left: Set[Domain], right: Set[Domain]) -> Relation:
