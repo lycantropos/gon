@@ -24,7 +24,7 @@ from .utils import (robust_sqrt,
 MIN_COUNT = 3
 
 
-def rotate(vertices: Vertices) -> Vertices:
+def rotate_positions(vertices: Vertices) -> Vertices:
     return vertices[:1] + vertices[:0:-1]
 
 
