@@ -774,6 +774,5 @@ def _scale_contour(contour: Contour,
 
 def _scale_contour_degenerate(contour: Contour,
                               factor_x: Coordinate,
-                              factor_y: Coordinate) -> Contour:
-    return Contour(_vertices.scale_degenerate(contour._vertices, factor_x,
-                                              factor_y))
+                              factor_y: Coordinate) -> Compound:
+    return _vertices.scale_degenerate(contour._vertices, factor_x, factor_y)
