@@ -18,6 +18,9 @@ from gon.geometry import Geometry
 from gon.hints import Coordinate
 from gon.primitive import (Point,
                            RawPoint,
+                           _point_to_step,
+                           _rotate_point_around_origin,
+                           _rotate_translate_point,
                            _scale_point)
 from .hints import (RawMultisegment,
                     RawSegment)
@@ -455,6 +458,29 @@ class Segment(Compound, Linear):
                       if isinstance(other, Segment)
                       else other.relate(self).complement))
 
+    def rotate(self,
+               cosine: Coordinate,
+               sine: Coordinate,
+               point: Optional[Point] = None) -> 'Segment':
+        """
+        Rotates the segment by given cosine & sine around given point.
+
+        Time complexity:
+            ``O(1)``
+        Memory complexity:
+            ``O(1)``
+
+        >>> segment = Segment.from_raw(((0, 0), (2, 0)))
+        >>> segment.rotate(1, 0) == segment
+        True
+        >>> segment.rotate(0, 1) == Segment.from_raw(((0, 0), (0, 2)))
+        True
+        """
+        return (_rotate_segment_around_origin(self, cosine, sine)
+                if point is None
+                else _rotate_translate_segment(
+                self, cosine, sine, *_point_to_step(point, cosine, sine)))
+
     def scale(self,
               factor_x: Coordinate,
               factor_y: Optional[Coordinate] = None) -> Compound:
@@ -572,6 +598,26 @@ class Segment(Compound, Linear):
                               _raw_unite_cross(self._raw, other._raw))
                              if relation is Relation.CROSS
                              else Multisegment(self, other)))))
+
+
+def _rotate_segment_around_origin(segment: Segment,
+                                  cosine: Coordinate,
+                                  sine: Coordinate) -> Segment:
+    return Segment(_rotate_point_around_origin(segment._start, cosine,
+                                               sine),
+                   _rotate_point_around_origin(segment._end, cosine,
+                                               sine))
+
+
+def _rotate_translate_segment(segment: Segment,
+                              cosine: Coordinate,
+                              sine: Coordinate,
+                              step_x: Coordinate,
+                              step_y: Coordinate) -> Segment:
+    return Segment(_rotate_translate_point(segment._start, cosine, sine,
+                                           step_x, step_y),
+                   _rotate_translate_point(segment._end, cosine, sine,
+                                           step_x, step_y))
 
 
 def _scale_segment(segment: Segment,
