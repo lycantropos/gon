@@ -886,6 +886,49 @@ class Mix(Indexable):
                                   if isinstance(other, Mix)
                                   else other.relate(self).complement))))
 
+    def rotate(self,
+               cosine: Coordinate,
+               sine: Coordinate,
+               point: Optional[Point] = None) -> 'Mix':
+        """
+        Rotates the mix by given cosine & sine around given point.
+
+        Time complexity:
+            ``O(elements_count)``
+        Memory complexity:
+            ``O(elements_count)``
+
+        where ``elements_count = multipoint_size + multisegment_size\
+ + multipolygon_vertices_count``,
+        ``multipoint_size = len(points)``,
+        ``multisegment_size = len(segments)``,
+        ``multipolygon_vertices_count = sum(len(polygon.border.vertices)\
+ + sum(len(hole.vertices) for hole in polygon.holes)\
+ for polygon in polygons)``,
+        ``points = [] if self.multipoint is EMPTY\
+ else self.multipoint.points``,
+        ``segments = [] if self.multisegment is EMPTY\
+ else self.multisegment.segments``,
+        ``polygons = [] if self.multipolygon is EMPTY\
+ else self.multipolygon.polygons``.
+
+        >>> mix = Mix.from_raw(([(3, 3), (7, 7)],
+        ...                     [((0, 6), (0, 8)), ((6, 6), (6, 8))],
+        ...                     [([(0, 0), (6, 0), (6, 6), (0, 6)],
+        ...                       [[(2, 2), (2, 4), (4, 4), (4, 2)]])]))
+        >>> mix.rotate(1, 0) == mix
+        True
+        >>> (mix.rotate(0, 1)
+        ...  == Mix.from_raw(([(-3, 3), (-7, 7)],
+        ...                   [((-6, 0), (-8, 0)), ((-6, 6), (-8, 6))],
+        ...                   [([(0, 0), (0, 6), (-6, 6), (-6, 0)],
+        ...                     [[(-2, 2), (-4, 2), (-4, 4), (-2, 4)]])])))
+        True
+        """
+        return Mix(self._multipoint.rotate(cosine, sine, point),
+                   self._multisegment.rotate(cosine, sine, point),
+                   self._multipolygon.rotate(cosine, sine, point))
+
     def scale(self,
               factor_x: Coordinate,
               factor_y: Optional[Coordinate] = None) -> Compound:
