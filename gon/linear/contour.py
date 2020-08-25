@@ -588,7 +588,8 @@ class Contour(Indexable, Linear):
         return (rotate_contour_around_origin(self, cosine, sine)
                 if point is None
                 else _rotate_translate_contour(self, cosine, sine,
-                                               *_point_to_step(point)))
+                                               *_point_to_step(point, cosine,
+                                                               sine)))
 
     def scale(self,
               factor_x: Coordinate,
