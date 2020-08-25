@@ -182,7 +182,8 @@ class Point(Geometry):
         Memory complexity:
             ``O(1)``
 
-        >>> Point(1, 0).scale(1) == Point(1, 0).scale(1, 2) == Point(1, 0)
+        >>> point = Point(1, 0)
+        >>> point.scale(1) == point.scale(1, 2) == point
         True
         """
         return _scale_point(self, factor_x,
