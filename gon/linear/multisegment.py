@@ -560,10 +560,15 @@ class Multisegment(Indexable, Linear):
         ...  == Multisegment.from_raw([((0, 0), (0, 1)), ((-1, 0), (-1, 1))]))
         True
         """
-        return (rotate_multisegment_around_origin(self, cosine, sine)
+        return (Multisegment(*[rotate_segment_around_origin(segment, cosine,
+                                                            sine)
+                               for segment in self._segments])
                 if point is None
-                else _rotate_translate_multisegment(self, cosine, sine,
-                                                    *_point_to_step(point)))
+                else Multisegment(
+                *[_rotate_translate_segment(segment, cosine, sine,
+                                            *_point_to_step(point, cosine,
+                                                            sine))
+                  for segment in self._segments]))
 
     def scale(self,
               factor_x: Coordinate,
@@ -675,23 +680,6 @@ class Multisegment(Indexable, Linear):
                                      ) -> Compound:
         return from_raw_multisegment(unite_multisegments(self._raw, other_raw,
                                                          accurate=False))
-
-
-def rotate_multisegment_around_origin(multisegment: Multisegment,
-                                      cosine: Coordinate,
-                                      sine: Coordinate) -> Multisegment:
-    return Multisegment(*[rotate_segment_around_origin(segment, cosine, sine)
-                          for segment in multisegment._segments])
-
-
-def _rotate_translate_multisegment(multisegment: Multisegment,
-                                   cosine: Coordinate,
-                                   sine: Coordinate,
-                                   step_x: Coordinate,
-                                   step_y: Coordinate) -> Multisegment:
-    return Multisegment(*[_rotate_translate_segment(segment, cosine, sine,
-                                                    step_x, step_y)
-                          for segment in multisegment._segments])
 
 
 def _scale_segments(segments: Iterable[Segment],
