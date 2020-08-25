@@ -556,8 +556,8 @@ class Multisegment(Indexable, Linear):
         ...                                       ((0, 1), (1, 1))])
         >>> multisegment.rotate(1, 0) == multisegment
         True
-        >>> (multisegment.rotate(0, 1)
-        ...  == Multisegment.from_raw([((0, 0), (0, 1)), ((-1, 0), (-1, 1))]))
+        >>> (multisegment.rotate(0, 1, Point(1, 1))
+        ...  == Multisegment.from_raw([((2, 0), (2, 1)), ((1, 0), (1, 1))]))
         True
         """
         return (Multisegment(*[rotate_segment_around_origin(segment, cosine,
