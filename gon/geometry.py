@@ -1,11 +1,15 @@
 from abc import (ABC,
                  abstractmethod)
-from typing import (Optional,
+from typing import (TYPE_CHECKING,
+                    Optional,
                     Type,
                     TypeVar)
 
 from .hints import (Coordinate,
                     Domain)
+
+if TYPE_CHECKING:
+    from .primitive import Point
 
 RawGeometry = TypeVar('RawGeometry', None, tuple, list)
 
@@ -42,6 +46,15 @@ class Geometry(ABC):
     def raw(self) -> RawGeometry:
         """
         Returns geometric object as combination of Python built-ins.
+        """
+
+    @abstractmethod
+    def rotate(self,
+               cosine: Coordinate,
+               sine: Coordinate,
+               point: Optional['Point'] = None) -> 'Geometry':
+        """
+        Rotates geometric object by given cosine & sine around given point.
         """
 
     @abstractmethod
