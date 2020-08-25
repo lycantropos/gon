@@ -476,7 +476,7 @@ class Segment(Compound, Linear):
         >>> segment.rotate(0, 1) == Segment.from_raw(((0, 0), (0, 2)))
         True
         """
-        return (_rotate_segment_around_origin(self, cosine, sine)
+        return (rotate_segment_around_origin(self, cosine, sine)
                 if point is None
                 else _rotate_translate_segment(
                 self, cosine, sine, *_point_to_step(point, cosine, sine)))
@@ -600,9 +600,9 @@ class Segment(Compound, Linear):
                              else Multisegment(self, other)))))
 
 
-def _rotate_segment_around_origin(segment: Segment,
-                                  cosine: Coordinate,
-                                  sine: Coordinate) -> Segment:
+def rotate_segment_around_origin(segment: Segment,
+                                 cosine: Coordinate,
+                                 sine: Coordinate) -> Segment:
     return Segment(_rotate_point_around_origin(segment._start, cosine,
                                                sine),
                    _rotate_point_around_origin(segment._end, cosine,
