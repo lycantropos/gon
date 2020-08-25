@@ -562,8 +562,8 @@ class Multisegment(Indexable, Linear):
         """
         return (rotate_multisegment_around_origin(self, cosine, sine)
                 if point is None
-                else rotate_multisegment_around_point(self, cosine, sine,
-                                                      point))
+                else _rotate_translate_multisegment(self, cosine, sine,
+                                                    *_point_to_step(point)))
 
     def scale(self,
               factor_x: Coordinate,
@@ -684,11 +684,11 @@ def rotate_multisegment_around_origin(multisegment: Multisegment,
                           for segment in multisegment._segments])
 
 
-def rotate_multisegment_around_point(multisegment: Multisegment,
-                                     cosine: Coordinate,
-                                     sine: Coordinate,
-                                     point: Point) -> Multisegment:
-    step_x, step_y = _point_to_step(point, cosine, sine)
+def _rotate_translate_multisegment(multisegment: Multisegment,
+                                   cosine: Coordinate,
+                                   sine: Coordinate,
+                                   step_x: Coordinate,
+                                   step_y: Coordinate) -> Multisegment:
     return Multisegment(*[_rotate_translate_segment(segment, cosine, sine,
                                                     step_x, step_y)
                           for segment in multisegment._segments])
