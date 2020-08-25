@@ -310,7 +310,7 @@ class Empty(Compound):
         Memory complexity:
             ``O(1)``
 
-        >>> EMPTY.rotate(1, 0) is EMPTY.rotate(0, 1) is EMPTY
+        >>> EMPTY.rotate(1, 0) is EMPTY.rotate(0, 1, Point(1, 1)) is EMPTY
         True
         """
         return self
