@@ -707,9 +707,9 @@ class Polygon(Indexable, Shaped):
         ...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]]))
         >>> polygon.rotate(1, 0) == polygon
         True
-        >>> (polygon.rotate(0, 1)
-        ...  == Polygon.from_raw(([(0, 0), (0, 6), (-6, 6), (-6, 0)],
-        ...                       [[(-2, 2), (-4, 2), (-4, 4), (-2, 4)]])))
+        >>> (polygon.rotate(0, 1, Point(1, 1))
+        ...  == Polygon.from_raw(([(2, 0), (2, 6), (-4, 6), (-4, 0)],
+        ...                       [[(0, 2), (-2, 2), (-2, 4), (0, 4)]])))
         True
         """
         return (rotate_polygon_around_origin(self, cosine, sine)
