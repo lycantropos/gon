@@ -405,10 +405,13 @@ class Multipoint(Compound):
         ...  == Multipoint.from_raw([(0, 0), (0, 1), (-1, 0)]))
         True
         """
-        return (_rotate_multipoint_around_origin(self, cosine, sine)
+        return (Multipoint(*_rotate_points_around_origin(self._points, cosine,
+                                                         sine))
                 if point is None
-                else _rotate_multipoint_around_point(self, cosine, sine,
-                                                     point))
+                else
+                Multipoint(*_rotate_translate_points(
+                        self._points, cosine, sine,
+                        *_point_to_step(point, cosine, sine))))
 
     def scale(self,
               factor_x: Coordinate,
@@ -513,23 +516,6 @@ class Multipoint(Compound):
 
 def from_points(points: AbstractSet[Point]) -> Compound:
     return Multipoint(*points) if points else EMPTY
-
-
-def _rotate_multipoint_around_origin(multipoint: Multipoint,
-                                     cosine: Coordinate,
-                                     sine: Coordinate) -> List[Point]:
-    return Multipoint(*_rotate_points_around_origin(multipoint._points, cosine,
-                                                    sine))
-
-
-def _rotate_multipoint_around_point(multipoint: Multipoint,
-                                    cosine: Coordinate,
-                                    sine: Coordinate,
-                                    point: Point) -> List[Point]:
-    return Multipoint(*_rotate_translate_points(multipoint._points, cosine,
-                                                sine,
-                                                *_point_to_step(point, cosine,
-                                                                sine)))
 
 
 def _rotate_points_around_origin(points: Iterable[Point],
