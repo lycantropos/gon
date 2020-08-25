@@ -148,6 +148,29 @@ class Point(Geometry):
         """
         return self._raw
 
+    def rotate(self,
+               cosine: Coordinate,
+               sine: Coordinate,
+               point: Optional['Point'] = None) -> 'Point':
+        """
+        Rotates the point by given cosine & sine around given point.
+
+        Time complexity:
+            ``O(1)``
+        Memory complexity:
+            ``O(1)``
+
+        >>> point = Point(1, 0)
+        >>> point.rotate(1, 0) == point
+        True
+        >>> point.rotate(0, 1) == Point(0, 1)
+        True
+        """
+        return (_rotate_point_around_origin(self, cosine, sine)
+                if point is None
+                else _rotate_translate_point(
+                self, cosine, sine, *_point_to_step(point, cosine, sine)))
+
     def scale(self,
               factor_x: Coordinate,
               factor_y: Optional[Coordinate] = None) -> 'Point':
@@ -192,6 +215,29 @@ class Point(Geometry):
         """
         _validate_coordinate(self._x)
         _validate_coordinate(self._y)
+
+
+def _rotate_point_around_origin(point: Point,
+                                cosine: Coordinate,
+                                sine: Coordinate) -> Point:
+    return Point(cosine * point._x - sine * point._y,
+                 sine * point._x + cosine * point._y)
+
+
+def _rotate_translate_point(point: Point,
+                            cosine: Coordinate,
+                            sine: Coordinate,
+                            step_x: Coordinate,
+                            step_y: Coordinate) -> Point:
+    return Point(cosine * point._x - sine * point._y + step_x,
+                 sine * point._x + cosine * point._y + step_y)
+
+
+def _point_to_step(point: Point,
+                   cosine: Coordinate,
+                   sine: Coordinate) -> Tuple[Coordinate, Coordinate]:
+    rotated_point = _rotate_point_around_origin(point, cosine, sine)
+    return point.x - rotated_point.x, point.y - rotated_point.y
 
 
 def _scale_point(point: Point,
