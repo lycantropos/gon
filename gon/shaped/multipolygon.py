@@ -38,11 +38,14 @@ from gon.linear import (Contour,
                         vertices)
 from gon.linear.utils import (from_raw_multisegment,
                               to_pairs_chain)
-from gon.primitive import Point
+from gon.primitive import (Point,
+                           _point_to_step)
 from .hints import RawMultipolygon
 from .polygon import (Polygon,
                       _polygon_to_centroid_components,
-                      _scale_polygon)
+                      _rotate_translate_polygon,
+                      _scale_polygon,
+                      rotate_polygon_around_origin)
 from .utils import (flatten,
                     from_raw_mix_components,
                     from_raw_multipolygon)
@@ -682,6 +685,37 @@ class Multipolygon(Indexable, Shaped):
                          if isinstance(other, Multipolygon)
                          else other.relate(self).complement)))))
 
+    def rotate(self,
+               cosine: Coordinate,
+               sine: Coordinate,
+               point: Optional[Point] = None) -> 'Multipolygon':
+        """
+        Rotates the multipolygon by given cosine & sine around given point.
+
+        Time complexity:
+            ``O(vertices_count)``
+        Memory complexity:
+            ``O(vertices_count)``
+
+        where ``vertices_count = sum(len(polygon.border.vertices)\
+ + sum(len(hole.vertices) for hole in polygon.holes)\
+ for polygon in self.polygons)``.
+
+        >>> multipolygon = Multipolygon.from_raw(
+        ...         [([(0, 0), (6, 0), (6, 6), (0, 6)],
+        ...           [[(2, 2), (2, 4), (4, 4), (4, 2)]])])
+        >>> multipolygon.rotate(1, 0) == multipolygon
+        True
+        >>> multipolygon.rotate(0, 1) == Multipolygon.from_raw(
+        ...         [([(0, 0), (0, 6), (-6, 6), (-6, 0)],
+        ...           [[(-2, 2), (-4, 2), (-4, 4), (-2, 4)]])])
+        True
+        """
+        return (rotate_multipolygon_around_origin(self, cosine, sine)
+                if point is None
+                else _rotate_translate_multipolygon(
+                self, cosine, sine, *_point_to_step(point, cosine, sine)))
+
     def scale(self,
               factor_x: Coordinate,
               factor_y: Optional[Coordinate] = None) -> Compound:
@@ -881,3 +915,20 @@ def locate_point_in_indexed_polygons(tree: r.Tree, polygons: Sequence[Polygon],
         if location is not Location.EXTERIOR:
             return location
     return Location.EXTERIOR
+
+
+def rotate_multipolygon_around_origin(multipolygon: Multipolygon,
+                                      cosine: Coordinate,
+                                      sine: Coordinate) -> Multipolygon:
+    return Multipolygon(*[rotate_polygon_around_origin(polygon, cosine, sine)
+                          for polygon in multipolygon._polygons])
+
+
+def _rotate_translate_multipolygon(multipolygon: Multipolygon,
+                                   cosine: Coordinate,
+                                   sine: Coordinate,
+                                   step_x: Coordinate,
+                                   step_y: Coordinate) -> Multipolygon:
+    return Multipolygon(*[_rotate_translate_polygon(polygon, cosine, sine,
+                                                    step_x, step_y)
+                          for polygon in multipolygon._polygons])
