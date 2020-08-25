@@ -141,6 +141,9 @@ True
 True
 >>> square.centroid == Point(2, 2)
 True
+>>> (square.rotate(0, 1, Point(4, 4))
+...  == Polygon.from_raw(([(8, 0), (8, 4), (4, 4), (4, 0)], [])))
+True
 >>> (square.scale(1, 2)
 ...  == Polygon.from_raw(([(0, 0), (4, 0), (4, 8), (0, 8)], [])))
 True
