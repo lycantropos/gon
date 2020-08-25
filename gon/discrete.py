@@ -401,8 +401,8 @@ class Multipoint(Compound):
         >>> multipoint = Multipoint.from_raw([(0, 0), (1, 0), (0, 1)])
         >>> multipoint.rotate(1, 0) == multipoint
         True
-        >>> (multipoint.rotate(0, 1)
-        ...  == Multipoint.from_raw([(0, 0), (0, 1), (-1, 0)]))
+        >>> (multipoint.rotate(0, 1, Point(1, 1))
+        ...  == Multipoint.from_raw([(2, 0), (2, 1), (1, 0)]))
         True
         """
         return (Multipoint(*_rotate_points_around_origin(self._points, cosine,
