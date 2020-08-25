@@ -582,7 +582,8 @@ class Contour(Indexable, Linear):
         >>> contour = Contour.from_raw([(0, 0), (1, 0), (0, 1)])
         >>> contour.rotate(1, 0) == contour
         True
-        >>> contour.rotate(0, 1) == Contour.from_raw([(0, 0), (0, 1), (-1, 0)])
+        >>> (contour.rotate(0, 1, Point(1, 1))
+        ...  == Contour.from_raw([(2, 0), (2, 1), (1, 0)]))
         True
         """
         return (rotate_contour_around_origin(self, cosine, sine)
