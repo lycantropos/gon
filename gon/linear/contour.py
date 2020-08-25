@@ -25,11 +25,12 @@ from gon.degenerate import EMPTY
 from gon.discrete import (Multipoint,
                           _robust_divide,
                           _rotate_points_around_origin,
-                          _rotate_points_around_point)
+                          _rotate_translate_points)
 from gon.geometry import Geometry
 from gon.hints import Coordinate
 from gon.primitive import (Point,
-                           RawPoint)
+                           RawPoint,
+                           _point_to_step)
 from . import vertices as _vertices
 from .hints import (RawContour,
                     RawMultisegment,
@@ -586,7 +587,8 @@ class Contour(Indexable, Linear):
         """
         return (rotate_contour_around_origin(self, cosine, sine)
                 if point is None
-                else rotate_contour_around_point(self, cosine, sine, point))
+                else _rotate_translate_contour(self, cosine, sine,
+                                               *_point_to_step(point)))
 
     def scale(self,
               factor_x: Coordinate,
@@ -755,12 +757,13 @@ def rotate_contour_around_origin(contour: Contour,
                                                 sine))
 
 
-def rotate_contour_around_point(contour: Contour,
-                                cosine: Coordinate,
-                                sine: Coordinate,
-                                point: Point) -> Contour:
-    return Contour(_rotate_points_around_point(contour._vertices, cosine, sine,
-                                               point))
+def _rotate_translate_contour(contour: Contour,
+                              cosine: Coordinate,
+                              sine: Coordinate,
+                              step_x: Coordinate,
+                              step_y: Coordinate) -> Contour:
+    return Contour(_rotate_translate_points(contour._vertices, cosine, sine,
+                                            step_x, step_y))
 
 
 def _scale_contour(contour: Contour,

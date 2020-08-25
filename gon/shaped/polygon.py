@@ -42,14 +42,15 @@ from gon.linear import (Contour,
                         RawMultisegment,
                         Segment,
                         vertices)
-from gon.linear.contour import (_scale_contour,
+from gon.linear.contour import (_rotate_translate_contour,
+                                _scale_contour,
                                 _scale_contour_degenerate,
-                                rotate_contour_around_origin,
-                                rotate_contour_around_point)
+                                rotate_contour_around_origin)
 from gon.linear.utils import (from_raw_multisegment,
                               to_pairs_chain)
 from gon.primitive import (Point,
-                           RawPoint)
+                           RawPoint,
+                           _point_to_step)
 from .hints import (RawMultipolygon,
                     RawPolygon)
 from .utils import (from_raw_mix_components,
@@ -713,7 +714,8 @@ class Polygon(Indexable, Shaped):
         """
         return (rotate_polygon_around_origin(self, cosine, sine)
                 if point is None
-                else rotate_polygon_around_point(self, cosine, sine, point))
+                else _rotate_translate_polygon(self, cosine, sine,
+                                               *_point_to_step(point)))
 
     def scale(self,
               factor_x: Coordinate,
@@ -937,13 +939,15 @@ def rotate_polygon_around_origin(polygon: Polygon,
                     for hole in polygon._holes])
 
 
-def rotate_polygon_around_point(polygon: Polygon,
-                                cosine: Coordinate,
-                                sine: Coordinate,
-                                point: Point) -> Polygon:
-    return Polygon(rotate_contour_around_point(polygon._border, cosine, sine,
-                                               point),
-                   [rotate_contour_around_point(hole, cosine, sine, point)
+def _rotate_translate_polygon(polygon: Polygon,
+                              cosine: Coordinate,
+                              sine: Coordinate,
+                              step_x: Coordinate,
+                              step_y: Coordinate) -> Polygon:
+    return Polygon(_rotate_translate_contour(polygon._border, cosine, sine,
+                                             step_x, step_y),
+                   [_rotate_translate_contour(hole, cosine, sine, step_x,
+                                              step_y)
                     for hole in polygon._holes])
 
 

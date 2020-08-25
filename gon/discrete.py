@@ -526,8 +526,10 @@ def _rotate_multipoint_around_point(multipoint: Multipoint,
                                     cosine: Coordinate,
                                     sine: Coordinate,
                                     point: Point) -> List[Point]:
-    return Multipoint(*_rotate_points_around_point(multipoint._points, cosine,
-                                                   sine, point))
+    return Multipoint(*_rotate_translate_points(multipoint._points, cosine,
+                                                sine,
+                                                *_point_to_step(point, cosine,
+                                                                sine)))
 
 
 def _rotate_points_around_origin(points: Iterable[Point],
@@ -537,11 +539,11 @@ def _rotate_points_around_origin(points: Iterable[Point],
             for point in points]
 
 
-def _rotate_points_around_point(points: Iterable[Point],
-                                cosine: Coordinate,
-                                sine: Coordinate,
-                                point: Point) -> List[Point]:
-    step_x, step_y = _point_to_step(point, cosine, sine)
+def _rotate_translate_points(points: Iterable[Point],
+                             cosine: Coordinate,
+                             sine: Coordinate,
+                             step_x: Coordinate,
+                             step_y: Coordinate) -> List[Point]:
     return [_rotate_translate_point(point, cosine, sine, step_x, step_y)
             for point in points]
 
