@@ -29,7 +29,8 @@ from tests.strategies import (coordinates_strategies,
                               coordinates_to_points,
                               coordinates_to_polygons,
                               coordinates_to_segments,
-                              rational_coordinates_strategies)
+                              rational_coordinates_strategies,
+                              rational_cosines_sines)
 from tests.utils import (Strategy,
                          call,
                          cleave_in_tuples,
@@ -81,6 +82,11 @@ rational_non_empty_compounds_with_coordinates_pairs = (
                                                              identity)),
                        rational_coordinates_strategies)
      .flatmap(identity)))
+rational_non_empty_compounds = (
+    strategies.builds(call, non_empty_compounds_factories,
+                      rational_coordinates_strategies).flatmap(identity))
+rational_non_empty_compounds_with_cosines_sines = strategies.tuples(
+        rational_non_empty_compounds, rational_cosines_sines)
 empty_compounds_with_compounds = strategies.tuples(empty_compounds, compounds)
 compounds_with_points = (
     (strategies.builds(call,
