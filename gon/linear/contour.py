@@ -196,11 +196,13 @@ class Contour(Indexable, Linear):
         Returns hash value of the contour.
 
         Time complexity:
-            ``O(len(self.vertices))``
+            ``O(vertices_count)``
         Memory complexity:
             ``O(1)`` if contour is counterclockwise
             and starts from the bottom leftmost vertex,
-            ``O(len(self.vertices))`` otherwise
+            ``O(vertices_count)`` otherwise
+
+        where ``vertices_count = len(self.vertices)``.
 
         >>> contour = Contour.from_raw([(0, 0), (1, 0), (0, 1)])
         >>> hash(contour) == hash(contour)
