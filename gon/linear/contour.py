@@ -208,7 +208,7 @@ class Contour(Indexable, Linear):
         return hash(vertices
                     if (to_orientation(vertices[0], vertices[- 1], vertices[1])
                         is Orientation.COUNTERCLOCKWISE)
-                    else _vertices.rotate(vertices))
+                    else _vertices.rotate_positions(vertices))
 
     def __le__(self, other: Compound) -> bool:
         """
@@ -558,7 +558,7 @@ class Contour(Indexable, Linear):
         >>> contour.reverse().reverse() == contour
         True
         """
-        return Contour(_vertices.rotate(self._vertices))
+        return Contour(_vertices.rotate_positions(self._vertices))
 
     def scale(self,
               factor_x: Coordinate,
