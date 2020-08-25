@@ -715,7 +715,8 @@ class Polygon(Indexable, Shaped):
         return (rotate_polygon_around_origin(self, cosine, sine)
                 if point is None
                 else _rotate_translate_polygon(self, cosine, sine,
-                                               *_point_to_step(point)))
+                                               *_point_to_step(point, cosine,
+                                                               sine)))
 
     def scale(self,
               factor_x: Coordinate,
