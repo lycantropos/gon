@@ -163,7 +163,7 @@ class Point(Geometry):
         >>> point = Point(1, 0)
         >>> point.rotate(1, 0) == point
         True
-        >>> point.rotate(0, 1) == Point(0, 1)
+        >>> point.rotate(0, 1, Point(1, 1)) == Point(2, 1)
         True
         """
         return (_rotate_point_around_origin(self, cosine, sine)
