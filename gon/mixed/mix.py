@@ -931,8 +931,8 @@ class Mix(Indexable):
                     self._multipolygon.scale(factor_x, factor_y))
                 if factor_x and factor_y
                 else ((self._multipoint.scale(factor_x, factor_y)
-                       | self._multisegment.translate(factor_x, factor_y)
-                       | self._multipolygon.translate(factor_x, factor_y))
+                       | self._multisegment.scale(factor_x, factor_y)
+                       | self._multipolygon.scale(factor_x, factor_y))
                       if factor_x or factor_y
                       else Multipoint(Point(factor_x, factor_y))))
 
