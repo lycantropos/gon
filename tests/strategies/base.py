@@ -7,11 +7,9 @@ from typing import Optional
 from hypothesis import strategies
 
 from gon.hints import Coordinate
-from tests.utils import (MAX_COORDINATE_EXPONENT,
+from tests.utils import (MAX_COORDINATE,
+                         MIN_COORDINATE,
                          Strategy)
-
-MAX_COORDINATE = 10 ** MAX_COORDINATE_EXPONENT
-MIN_COORDINATE = -MAX_COORDINATE
 
 
 def to_floats(min_value: Optional[Coordinate] = None,

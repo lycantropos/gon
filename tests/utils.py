@@ -31,6 +31,8 @@ Range = TypeVar('Range')
 Strategy = SearchStrategy
 
 MAX_COORDINATE_EXPONENT = 15
+MAX_COORDINATE = 10 ** MAX_COORDINATE_EXPONENT
+MIN_COORDINATE = -MAX_COORDINATE
 
 
 def equivalence(left_statement: bool, right_statement: bool) -> bool:
