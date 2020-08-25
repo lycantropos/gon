@@ -298,6 +298,23 @@ class Empty(Compound):
         """
         return Relation.DISJOINT
 
+    def rotate(self,
+               cosine: Coordinate,
+               sine: Coordinate,
+               point: Optional[Point] = None) -> 'Geometry':
+        """
+        Rotates the empty geometry by given cosine & sine around given point.
+
+        Time complexity:
+            ``O(1)``
+        Memory complexity:
+            ``O(1)``
+
+        >>> EMPTY.rotate(1, 0) is EMPTY.rotate(0, 1) is EMPTY
+        True
+        """
+        return self
+
     def scale(self,
               factor_x: Coordinate,
               factor_y: Optional[Coordinate] = None) -> 'Empty':
