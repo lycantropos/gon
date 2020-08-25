@@ -1,7 +1,8 @@
 from tests.strategies import (coordinates_strategies,
                               coordinates_to_linear_geometries,
                               rational_coordinates_strategies)
-from tests.utils import (cleave_in_tuples,
+from tests.utils import (MAX_COORDINATE,
+                         cleave_in_tuples,
                          identity)
 
 linear_geometries = coordinates_strategies.flatmap(
