@@ -43,7 +43,9 @@ from gon.linear import (Contour,
                         Segment,
                         vertices)
 from gon.linear.contour import (_scale_contour,
-                                _scale_contour_degenerate)
+                                _scale_contour_degenerate,
+                                rotate_contour_around_origin,
+                                rotate_contour_around_point)
 from gon.linear.utils import (from_raw_multisegment,
                               to_pairs_chain)
 from gon.primitive import (Point,
@@ -685,6 +687,34 @@ class Polygon(Indexable, Shaped):
                                   if isinstance(other, Polygon)
                                   else other.relate(self).complement))))
 
+    def rotate(self,
+               cosine: Coordinate,
+               sine: Coordinate,
+               point: Optional[Point] = None) -> 'Polygon':
+        """
+        Rotates the polygon by given cosine & sine around given point.
+
+        Time complexity:
+            ``O(vertices_count)``
+        Memory complexity:
+            ``O(vertices_count)``
+
+        where ``vertices_count = len(self.border.vertices)\
+ + sum(len(hole.vertices) for hole in self.holes)``.
+
+        >>> polygon = Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
+        ...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]]))
+        >>> polygon.rotate(1, 0) == polygon
+        True
+        >>> (polygon.rotate(0, 1)
+        ...  == Polygon.from_raw(([(0, 0), (0, 6), (-6, 6), (-6, 0)],
+        ...                       [[(-2, 2), (-4, 2), (-4, 4), (-2, 4)]])))
+        True
+        """
+        return (rotate_polygon_around_origin(self, cosine, sine)
+                if point is None
+                else rotate_polygon_around_point(self, cosine, sine, point))
+
     def scale(self,
               factor_x: Coordinate,
               factor_y: Optional[Coordinate] = None) -> 'Polygon':
@@ -896,6 +926,24 @@ def _scale_polygon(polygon: Polygon,
                    factor_y: Coordinate) -> Polygon:
     return Polygon(_scale_contour(polygon._border, factor_x, factor_y),
                    [_scale_contour(hole, factor_x, factor_y)
+                    for hole in polygon._holes])
+
+
+def rotate_polygon_around_origin(polygon: Polygon,
+                                 cosine: Coordinate,
+                                 sine: Coordinate) -> Polygon:
+    return Polygon(rotate_contour_around_origin(polygon._border, cosine, sine),
+                   [rotate_contour_around_origin(hole, cosine, sine)
+                    for hole in polygon._holes])
+
+
+def rotate_polygon_around_point(polygon: Polygon,
+                                cosine: Coordinate,
+                                sine: Coordinate,
+                                point: Point) -> Polygon:
+    return Polygon(rotate_contour_around_point(polygon._border, cosine, sine,
+                                               point),
+                   [rotate_contour_around_point(hole, cosine, sine, point)
                     for hole in polygon._holes])
 
 
