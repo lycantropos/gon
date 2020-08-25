@@ -473,7 +473,8 @@ class Segment(Compound, Linear):
         >>> segment = Segment.from_raw(((0, 0), (2, 0)))
         >>> segment.rotate(1, 0) == segment
         True
-        >>> segment.rotate(0, 1) == Segment.from_raw(((0, 0), (0, 2)))
+        >>> (segment.rotate(0, 1, Point(1, 1))
+        ...  == Segment.from_raw(((2, 0), (2, 2))))
         True
         """
         return (rotate_segment_around_origin(self, cosine, sine)
