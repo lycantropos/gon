@@ -706,9 +706,9 @@ class Multipolygon(Indexable, Shaped):
         ...           [[(2, 2), (2, 4), (4, 4), (4, 2)]])])
         >>> multipolygon.rotate(1, 0) == multipolygon
         True
-        >>> multipolygon.rotate(0, 1) == Multipolygon.from_raw(
-        ...         [([(0, 0), (0, 6), (-6, 6), (-6, 0)],
-        ...           [[(-2, 2), (-4, 2), (-4, 4), (-2, 4)]])])
+        >>> multipolygon.rotate(0, 1, Point(1, 1)) == Multipolygon.from_raw(
+        ...         [([(2, 0), (2, 6), (-4, 6), (-4, 0)],
+        ...           [[(0, 2), (-2, 2), (-2, 4), (0, 4)]])])
         True
         """
         return (rotate_multipolygon_around_origin(self, cosine, sine)
