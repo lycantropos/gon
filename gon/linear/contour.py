@@ -23,7 +23,9 @@ from gon.compound import (Compound,
                           Relation)
 from gon.degenerate import EMPTY
 from gon.discrete import (Multipoint,
-                          _robust_divide)
+                          _robust_divide,
+                          _rotate_points_around_origin,
+                          _rotate_points_around_point)
 from gon.geometry import Geometry
 from gon.hints import Coordinate
 from gon.primitive import (Point,
@@ -560,6 +562,30 @@ class Contour(Indexable, Linear):
         """
         return Contour(_vertices.rotate_positions(self._vertices))
 
+    def rotate(self,
+               cosine: Coordinate,
+               sine: Coordinate,
+               point: Optional[Point] = None) -> 'Contour':
+        """
+        Rotates the contour by given cosine & sine around given point.
+
+        Time complexity:
+            ``O(vertices_count)``
+        Memory complexity:
+            ``O(vertices_count)``
+
+        where ``vertices_count = len(self.vertices)``.
+
+        >>> contour = Contour.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> contour.rotate(1, 0) == contour
+        True
+        >>> contour.rotate(0, 1) == Contour.from_raw([(0, 0), (0, 1), (-1, 0)])
+        True
+        """
+        return (rotate_contour_around_origin(self, cosine, sine)
+                if point is None
+                else rotate_contour_around_point(self, cosine, sine, point))
+
     def scale(self,
               factor_x: Coordinate,
               factor_y: Optional[Coordinate] = None) -> Compound:
@@ -718,6 +744,21 @@ def raw_locate_point(raw_contour: RawContour, raw_point: RawPoint) -> Location:
     return (Location.BOUNDARY
             if point_in_contour(raw_point, raw_contour)
             else Location.EXTERIOR)
+
+
+def rotate_contour_around_origin(contour: Contour,
+                                 cosine: Coordinate,
+                                 sine: Coordinate) -> Contour:
+    return Contour(_rotate_points_around_origin(contour._vertices, cosine,
+                                                sine))
+
+
+def rotate_contour_around_point(contour: Contour,
+                                cosine: Coordinate,
+                                sine: Coordinate,
+                                point: Point) -> Contour:
+    return Contour(_rotate_points_around_point(contour._vertices, cosine, sine,
+                                               point))
 
 
 def _scale_contour(contour: Contour,
