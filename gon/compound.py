@@ -1,4 +1,6 @@
 from abc import abstractmethod
+from typing import (TYPE_CHECKING,
+                    List)
 
 from orient.planar import Relation
 from sect.decomposition import Location
@@ -6,6 +8,9 @@ from sect.decomposition import Location
 from .geometry import Geometry
 from .hints import Coordinate
 from .primitive import Point
+
+if TYPE_CHECKING:
+    from .shaped.polygon import Polygon
 
 Relation = Relation
 Location = Location
@@ -120,6 +125,12 @@ class Shaped(Geometry):
     def perimeter(self) -> Coordinate:
         """
         Returns perimeter of the geometry.
+        """
+
+    @abstractmethod
+    def triangulate(self) -> List['Polygon']:
+        """
+        Returns triangulation of the geometry.
         """
 
 
