@@ -10,6 +10,8 @@ from tests.utils import (Strategy,
                          cleave_in_tuples,
                          identity)
 
+rational_shaped_geometries = (rational_coordinates_strategies
+                              .flatmap(coordinates_to_shaped_geometries))
 shaped_geometries = (coordinates_strategies
                      .flatmap(coordinates_to_shaped_geometries))
 rational_shaped_geometries_with_coordinates_pairs = (
