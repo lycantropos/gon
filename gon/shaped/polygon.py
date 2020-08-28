@@ -5,6 +5,7 @@ from typing import (List,
                     Tuple)
 
 from clipping.planar import (complete_intersect_multipolygons,
+                             complete_intersect_multiregions,
                              complete_intersect_multisegment_with_multipolygon,
                              subtract_multipolygon_from_multisegment,
                              subtract_multipolygons,
@@ -53,7 +54,8 @@ from gon.primitive import (Point,
                            _point_to_step)
 from .hints import (RawMultipolygon,
                     RawPolygon)
-from .utils import (from_raw_mix_components,
+from .utils import (from_raw_holeless_mix_components,
+                    from_raw_mix_components,
                     from_raw_multipolygon,
                     to_convex_hull)
 
@@ -110,10 +112,19 @@ class Polygon(Indexable, Shaped):
                       (self._intersect_with_raw_multisegment(
                               to_pairs_chain(other.raw()))
                        if isinstance(other, Contour)
-                       else (self._intersect_with_raw_multipolygon(
-                              [(other._raw_border, other._raw_holes)])
-                             if isinstance(other, Polygon)
-                             else NotImplemented))))
+                       else
+                       ((from_raw_mix_components(
+                               *complete_intersect_multipolygons(
+                                       [(self._raw_border, self._raw_holes)],
+                                       [(other._raw_border, other._raw_holes)],
+                                       accurate=False))
+                         if self._holes or other._holes
+                         else from_raw_holeless_mix_components(
+                               *complete_intersect_multiregions(
+                                       [self._raw_border], [other._raw_border],
+                                       accurate=False)))
+                        if isinstance(other, Polygon)
+                        else NotImplemented))))
 
     __rand__ = __and__
 
@@ -824,13 +835,6 @@ class Polygon(Indexable, Shaped):
             if (relation is not Relation.COVER
                     and relation is not Relation.ENCLOSES):
                 raise ValueError('Holes should lie inside border.')
-
-    def _intersect_with_raw_multipolygon(self,
-                                         raw_multipolygon: RawMultipolygon
-                                         ) -> Compound:
-        return from_raw_mix_components(*complete_intersect_multipolygons(
-                [(self._raw_border, self._raw_holes)], raw_multipolygon,
-                accurate=False))
 
     def _intersect_with_raw_multisegment(self,
                                          raw_multisegment: RawMultisegment
