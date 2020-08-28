@@ -1,3 +1,4 @@
+from collections import OrderedDict
 from contextlib import contextmanager
 from fractions import Fraction
 from functools import partial
@@ -57,6 +58,7 @@ def implication(antecedent: bool, consequent: bool) -> bool:
 
 
 flatten = chain.from_iterable
+to_unique_ever_seen = OrderedDict.fromkeys
 
 
 def identity(argument: Domain) -> Domain:
