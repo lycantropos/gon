@@ -1,4 +1,3 @@
-from collections import OrderedDict
 from itertools import chain
 from typing import (Callable,
                     Iterable,
@@ -39,7 +38,8 @@ from tests.utils import (Strategy,
                          pack,
                          to_constant,
                          to_pairs,
-                         to_triplets)
+                         to_triplets,
+                         to_unique_ever_seen)
 
 CompoundsFactory = Callable[[Strategy[Coordinate]], Strategy[Compound]]
 
@@ -100,7 +100,8 @@ compounds_with_points = (
 
 def compound_to_compound_with_multipoint(compound: Compound
                                          ) -> Tuple[Compound, Multipoint]:
-    return compound, Multipoint(*compound_to_points(compound))
+    return (compound,
+            Multipoint(*to_unique_ever_seen(compound_to_points(compound))))
 
 
 def compound_to_points(compound: Compound) -> Iterable[Point]:
@@ -109,14 +110,13 @@ def compound_to_points(compound: Compound) -> Iterable[Point]:
     elif isinstance(compound, Segment):
         return [compound.start, compound.end]
     elif isinstance(compound, Multisegment):
-        return list(flatten((segment.start, segment.end)
-                            for segment in compound.segments))
+        return flatten((segment.start, segment.end)
+                       for segment in compound.segments)
     elif isinstance(compound, Contour):
         return compound.vertices
     elif isinstance(compound, Polygon):
-        return OrderedDict.fromkeys(chain(compound.border.vertices,
-                                          flatten(hole.vertices
-                                                  for hole in compound.holes)))
+        return chain(compound.border.vertices,
+                     flatten(hole.vertices for hole in compound.holes))
     elif isinstance(compound, Multipolygon):
         return flatten(compound_to_points(polygon)
                        for polygon in compound.polygons)
