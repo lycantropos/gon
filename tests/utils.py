@@ -1,3 +1,4 @@
+from contextlib import contextmanager
 from fractions import Fraction
 from functools import partial
 from itertools import (chain,
@@ -9,8 +10,10 @@ from typing import (Any,
                     List,
                     Sequence,
                     Tuple,
+                    Type,
                     TypeVar)
 
+import pytest
 from hypothesis import strategies
 from hypothesis.strategies import SearchStrategy
 
@@ -33,6 +36,16 @@ Strategy = SearchStrategy
 MAX_COORDINATE_EXPONENT = 15
 MAX_COORDINATE = 10 ** MAX_COORDINATE_EXPONENT
 MIN_COORDINATE = -MAX_COORDINATE
+
+
+@contextmanager
+def not_raises(*exceptions: Type[BaseException],
+               format_error: Callable[[BaseException], str]
+               = 'DID RAISE {}'.format) -> None:
+    try:
+        yield
+    except exceptions as error:
+        raise pytest.fail(format_error(error))
 
 
 def equivalence(left_statement: bool, right_statement: bool) -> bool:
