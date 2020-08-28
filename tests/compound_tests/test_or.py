@@ -3,7 +3,8 @@ from typing import Tuple
 from hypothesis import given
 
 from gon.compound import Compound
-from tests.utils import are_compounds_equivalent
+from tests.utils import (are_compounds_equivalent,
+                         not_raises)
 from . import strategies
 
 
@@ -14,6 +15,16 @@ def test_basic(compounds_pair: Tuple[Compound, Compound]) -> None:
     result = left_compound | right_compound
 
     assert isinstance(result, Compound)
+
+
+@given(strategies.rational_compounds_pairs)
+def test_validity(compounds_pair: Tuple[Compound, Compound]) -> None:
+    left_compound, right_compound = compounds_pair
+
+    result = left_compound | right_compound
+
+    with not_raises(ValueError):
+        result.validate()
 
 
 @given(strategies.compounds)
