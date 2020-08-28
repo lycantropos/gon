@@ -18,6 +18,13 @@ def test_basic(compounds_pair: Tuple[Compound, Compound]) -> None:
 
     assert isinstance(result, Compound)
 
+
+@given(strategies.compounds_pairs)
+def test_validity(compounds_pair: Tuple[Compound, Compound]) -> None:
+    left_compound, right_compound = compounds_pair
+
+    result = left_compound & right_compound
+
     with not_raises(ValueError):
         result.validate()
 
