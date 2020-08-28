@@ -3,5 +3,7 @@ from typing import (List,
 
 from gon.linear import RawContour
 
-RawPolygon = Tuple[RawContour, List[RawContour]]
+RawRegion = RawContour
+RawMultiregion = List[RawRegion]
+RawPolygon = Tuple[RawRegion, RawMultiregion]
 RawMultipolygon = List[RawPolygon]

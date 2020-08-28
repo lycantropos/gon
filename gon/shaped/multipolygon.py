@@ -6,6 +6,7 @@ from typing import (List,
 
 from bentley_ottmann.planar import segments_cross_or_overlap
 from clipping.planar import (complete_intersect_multipolygons,
+                             complete_intersect_multiregions,
                              complete_intersect_multisegment_with_multipolygon,
                              subtract_multipolygon_from_multisegment,
                              subtract_multipolygons,
@@ -40,13 +41,15 @@ from gon.linear.utils import (from_raw_multisegment,
                               to_pairs_chain)
 from gon.primitive import (Point,
                            _point_to_step)
-from .hints import RawMultipolygon
+from .hints import (RawMultipolygon,
+                    RawMultiregion)
 from .polygon import (Polygon,
                       _polygon_to_centroid_components,
                       _rotate_translate_polygon,
                       _scale_polygon,
                       rotate_polygon_around_origin)
 from .utils import (flatten,
+                    from_raw_holeless_mix_components,
                     from_raw_mix_components,
                     from_raw_multipolygon)
 
@@ -843,9 +846,17 @@ class Multipolygon(Indexable, Shaped):
 
     def _intersect_with_raw_multipolygon(self, other_raw: RawMultipolygon
                                          ) -> Compound:
-        return from_raw_mix_components(
-                *complete_intersect_multipolygons(self._raw, other_raw,
+        raw = self._raw
+        return (from_raw_mix_components(
+                *complete_intersect_multipolygons(raw, other_raw,
                                                   accurate=False))
+                if (raw_multipolygon_has_holes(raw)
+                    or raw_multipolygon_has_holes(other_raw))
+                else from_raw_holeless_mix_components(
+                *complete_intersect_multiregions(
+                        raw_multipolygon_to_multiregion(raw),
+                        raw_multipolygon_to_multiregion(other_raw),
+                        accurate=False)))
 
     def _intersect_with_raw_multisegment(self,
                                          raw_multisegment: RawMultisegment
@@ -895,6 +906,14 @@ class Multipolygon(Indexable, Shaped):
                                      ) -> Compound:
         return from_raw_multipolygon(unite_multipolygons(self._raw, other_raw,
                                                          accurate=False))
+
+
+def raw_multipolygon_has_holes(raw: RawMultipolygon) -> bool:
+    return any(holes for _, holes in raw)
+
+
+def raw_multipolygon_to_multiregion(raw: RawMultipolygon) -> RawMultiregion:
+    return [border for border, _ in raw]
 
 
 def locate_point_in_polygons(polygons: Sequence[Polygon],
