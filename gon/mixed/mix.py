@@ -1635,16 +1635,6 @@ class Mix(Indexable):
                         return (Relation.COMPONENT
                                 if multipolygon_relation is Relation.TOUCH
                                 else Relation.ENCLOSED)
-            elif self._multipoint is EMPTY:
-                return self._multisegment.relate(other)
-            elif self._multisegment is EMPTY:
-                multipoint_relation = self._multipoint.relate(other)
-                return (multipolygon_relation
-                        if multipoint_relation is Relation.DISJOINT
-                        else (Relation.COMPONENT
-                              if (multipoint_relation is Relation.EQUAL
-                                  or multipoint_relation is Relation.COMPONENT)
-                              else Relation.TOUCH))
             else:
                 multisegment_relation = self._multisegment.relate(other)
                 if multisegment_relation is Relation.DISJOINT:
