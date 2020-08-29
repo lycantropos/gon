@@ -1087,32 +1087,32 @@ class Mix(Indexable):
                 return (Relation.TOUCH
                         if multipoint_relation is Relation.COMPOSITE
                         else multipoint_relation)
-            elif multisegment_relation is Relation.EQUAL:
-                return Relation.COMPONENT
             elif multisegment_relation is Relation.COMPOSITE:
                 multipoint_relation = self._multipoint.relate(other)
                 return (multisegment_relation
                         if multipoint_relation is multisegment_relation
                         else Relation.OVERLAP)
             else:
-                return multisegment_relation
+                return (Relation.COMPONENT
+                        if multisegment_relation is Relation.EQUAL
+                        else multisegment_relation)
         else:
             multipolygon_relation = self._multipolygon.relate(other)
             if multipolygon_relation is Relation.DISJOINT:
                 multisegment_relation = self._multisegment.relate(other)
                 if multisegment_relation is Relation.DISJOINT:
                     multipoint_relation = self._multipoint.relate(other)
-                    return (multipolygon_relation
-                            if multipoint_relation is Relation.DISJOINT
-                            else Relation.TOUCH)
-                elif (multisegment_relation is Relation.TOUCH
-                      or multisegment_relation is Relation.CROSS):
+                    return (Relation.TOUCH
+                            if multipoint_relation is Relation.COMPOSITE
+                            else multipoint_relation)
+                elif multisegment_relation in (Relation.TOUCH,
+                                               Relation.CROSS,
+                                               Relation.COMPONENT):
                     return multisegment_relation
-                elif (multisegment_relation is Relation.EQUAL
-                      or multisegment_relation is Relation.COMPONENT):
-                    return Relation.COMPONENT
                 else:
-                    return Relation.TOUCH
+                    return (Relation.COMPONENT
+                            if multisegment_relation is Relation.EQUAL
+                            else Relation.TOUCH)
             elif (multipolygon_relation is Relation.TOUCH
                   or multipolygon_relation is Relation.CROSS):
                 rest_other = other - self._multipolygon
