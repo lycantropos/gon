@@ -1177,20 +1177,14 @@ class Mix(Indexable):
                         else multisegment_relation)
             elif multisegment_relation is Relation.COMPONENT:
                 return (Relation.TOUCH
-                        if (multipoint_relation is Relation.DISJOINT
-                            or multipoint_relation is Relation.TOUCH)
+                        if multipoint_relation is Relation.DISJOINT
                         else (multipoint_relation
-                              if multipoint_relation is Relation.CROSS
+                              if (multipoint_relation is Relation.TOUCH
+                                  or multipoint_relation is Relation.CROSS)
                               else
                               (Relation.COMPOSITE
                                if multipoint_relation is Relation.COMPONENT
                                else Relation.ENCLOSES)))
-            elif multisegment_relation is Relation.ENCLOSED:
-                return (Relation.CROSS
-                        if multipoint_relation in (Relation.DISJOINT,
-                                                   Relation.TOUCH,
-                                                   Relation.CROSS)
-                        else Relation.ENCLOSES)
             else:
                 return (Relation.CROSS
                         if multipoint_relation in (Relation.DISJOINT,
@@ -1211,10 +1205,10 @@ class Mix(Indexable):
                         if other_multipoint_relation in (Relation.DISJOINT,
                                                          Relation.TOUCH,
                                                          Relation.CROSS)
-                        else (Relation.TOUCH
-                              if (other_multipoint_relation
-                                  is Relation.COMPONENT)
-                              else Relation.CROSS))
+                        else
+                        (Relation.TOUCH
+                         if other_multipoint_relation is Relation.COMPONENT
+                         else Relation.CROSS))
             elif other_multisegment_relation is Relation.TOUCH:
                 return (Relation.CROSS
                         if other_multipoint_relation in (Relation.CROSS,
@@ -1241,9 +1235,10 @@ class Mix(Indexable):
                         if other_multipoint_relation in (Relation.DISJOINT,
                                                          Relation.TOUCH,
                                                          Relation.CROSS)
-                        else (other_multisegment_relation
-                              if other_multipoint_relation is Relation.WITHIN
-                              else Relation.ENCLOSED))
+                        else
+                        (Relation.ENCLOSED
+                         if other_multipoint_relation is Relation.COMPONENT
+                         else other_multisegment_relation))
         multipolygons_relation = self._multipolygon.relate(
                 other._multipolygon)
         if (multipolygons_relation is Relation.DISJOINT
