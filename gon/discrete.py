@@ -1,14 +1,17 @@
 import sys
 from fractions import Fraction
+from functools import partial
 from typing import (AbstractSet,
                     Iterable,
                     List,
                     Optional,
                     Set)
 
+from locus import kd
 from reprit.base import generate_repr
 
 from .compound import (Compound,
+                       Indexable,
                        Location,
                        Relation)
 from .degenerate import EMPTY
@@ -25,8 +28,8 @@ from .primitive import (Point,
 RawMultipoint = List[RawPoint]
 
 
-class Multipoint(Compound):
-    __slots__ = '_points', '_points_set', '_raw'
+class Multipoint(Indexable):
+    __slots__ = '_points', '_points_set', '_raw', '_raw_nearest_index'
 
     def __init__(self, *points: Point) -> None:
         """
@@ -41,7 +44,9 @@ class Multipoint(Compound):
         """
         self._points = points
         self._points_set = frozenset(points)
-        self._raw = [point.raw() for point in points]
+        self._raw = tuple(point.raw() for point in points)
+        self._raw_nearest_index = partial(_to_raw_multipoint_nearest_index,
+                                          self._raw)
 
     __repr__ = generate_repr(__init__)
 
@@ -327,6 +332,42 @@ class Multipoint(Compound):
         """
         return list(self._points)
 
+    def distance_to(self, other: Geometry) -> Coordinate:
+        """
+        Returns distance between the multipoint and the other geometry.
+
+        Time complexity:
+            ``O(len(self.points))``
+        Memory complexity:
+            ``O(1)``
+
+        >>> multipoint = Multipoint.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> multipoint.distance_to(multipoint) == 0
+        True
+        """
+        return (self._distance_to_point(other)
+                if isinstance(other, Point)
+                else (min(self._distance_to_point(point)
+                          for point in other._points)
+                      if isinstance(other, Multipoint)
+                      else other.distance_to(self)))
+
+    def index(self) -> None:
+        """
+        Pre-processes the multipoint to potentially improve queries.
+
+        Time complexity:
+            ``O(points_count * log points_count)``
+        Memory complexity:
+            ``O(points_count)``
+
+        where ``points_count = len(self.points)``.
+
+        >>> multipoint = Multipoint.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> multipoint.index()
+        """
+        self._raw_nearest_index = kd.Tree(self._raw).nearest_index
+
     def locate(self, point: Point) -> Location:
         """
         Finds location of the point relative to the multipoint.
@@ -361,7 +402,7 @@ class Multipoint(Compound):
         >>> multipoint.raw()
         [(0, 0), (1, 0), (0, 1)]
         """
-        return self._raw[:]
+        return list(self._raw)
 
     def relate(self, other: Compound) -> Relation:
         """
@@ -485,6 +526,10 @@ class Multipoint(Compound):
         for point in self._points:
             point.validate()
 
+    def _distance_to_point(self, other: Point) -> Coordinate:
+        return (self._points[self._raw_nearest_index(other.raw())]
+                .distance_to(other))
+
     def _relate_geometry(self, other: Compound) -> Relation:
         disjoint = is_subset = not_interior = not_boundary = True
         for point in self._points:
@@ -516,6 +561,25 @@ class Multipoint(Compound):
 
 def from_points(points: AbstractSet[Point]) -> Compound:
     return Multipoint(*points) if points else EMPTY
+
+
+def _to_raw_multipoint_nearest_index(raw_multipoint: RawMultipoint,
+                                     raw_point: RawPoint) -> int:
+    enumerated_candidates = enumerate(raw_multipoint)
+    result, candidate = next(enumerated_candidates)
+    distance_to_point = partial(_squared_raw_points_distance, raw_point)
+    min_distance = distance_to_point(candidate)
+    for index, candidate in enumerated_candidates:
+        candidate_distance = distance_to_point(candidate)
+        if candidate_distance < min_distance:
+            min_distance, result = candidate_distance, index
+    return result
+
+
+def _squared_raw_points_distance(left: RawPoint,
+                                 right: RawPoint) -> Coordinate:
+    (left_x, left_y), (right_x, right_y) = left, right
+    return (left_x - right_x) ** 2 + (left_y - right_y) ** 2
 
 
 def _rotate_points_around_origin(points: Iterable[Point],
