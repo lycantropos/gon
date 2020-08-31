@@ -454,7 +454,7 @@ class Multisegment(Indexable, Linear):
 
     def index(self) -> None:
         """
-        Pre-processes multisegment to potentially improve queries.
+        Pre-processes the multisegment to potentially improve queries.
 
         Time complexity:
             ``O(segments_count * log segments_count)`` expected,
