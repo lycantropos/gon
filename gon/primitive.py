@@ -137,6 +137,18 @@ class Point(Geometry):
         return self._y
 
     def distance_to(self, other: Geometry) -> Coordinate:
+        """
+        Returns distance between the point and the other geometry.
+
+        Time complexity:
+            ``O(1)``
+        Memory complexity:
+            ``O(1)``
+
+        >>> point = Point(1, 0)
+        >>> point.distance_to(point) == 0
+        True
+        """
         return (_robust_sqrt((self._x - other._x) ** 2
                              + (self._y - other._y) ** 2)
                 if isinstance(other, Point)
