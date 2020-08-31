@@ -560,7 +560,7 @@ class Multipolygon(Indexable, Shaped):
 
     def index(self) -> None:
         """
-        Pre-processes multipolygon to potentially improve queries.
+        Pre-processes the multipolygon to potentially improve queries.
 
         Time complexity:
             ``O(vertices_count * log vertices_count)`` expected,
