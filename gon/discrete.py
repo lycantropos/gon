@@ -366,7 +366,8 @@ class Multipoint(Indexable):
         >>> multipoint = Multipoint.from_raw([(0, 0), (1, 0), (0, 1)])
         >>> multipoint.index()
         """
-        self._raw_nearest_index = kd.Tree(self._raw).nearest_index
+        tree = kd.Tree(self._raw)
+        self._raw_nearest_index = tree.nearest_index
 
     def locate(self, point: Point) -> Location:
         """
