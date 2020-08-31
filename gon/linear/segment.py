@@ -25,9 +25,7 @@ from gon.primitive import (Point,
 from .hints import (RawMultisegment,
                     RawSegment)
 from .utils import (from_raw_multisegment,
-                    relate_multipoint_to_linear_compound,
-                    robust_sqrt,
-                    squared_points_distance)
+                    relate_multipoint_to_linear_compound)
 
 
 class Segment(Compound, Linear):
@@ -389,7 +387,7 @@ class Segment(Compound, Linear):
         >>> segment.length == 2
         True
         """
-        return robust_sqrt(squared_points_distance(self.start, self.end))
+        return self._end.distance_to(self._start)
 
     @property
     def start(self) -> Point:
