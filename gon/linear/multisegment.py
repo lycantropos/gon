@@ -40,8 +40,7 @@ from .segment import (Segment,
                       rotate_segment_around_origin)
 from .utils import (from_raw_mix_components,
                     from_raw_multisegment,
-                    relate_multipoint_to_linear_compound,
-                    robust_sqrt)
+                    relate_multipoint_to_linear_compound)
 
 
 class Multisegment(Indexable, Linear):
@@ -408,11 +407,10 @@ class Multisegment(Indexable, Linear):
         True
         """
         accumulated_x = accumulated_y = accumulated_length = 0
-        for (start_x, start_y), (end_x, end_y) in self._raw:
-            length = robust_sqrt((end_x - start_x) ** 2
-                                 + (end_y - start_y) ** 2)
-            accumulated_x += (start_x + end_x) * length
-            accumulated_y += (start_y + end_y) * length
+        for segment in self._segments:
+            length = segment.length
+            accumulated_x += (segment.start.x + segment.end.x) * length
+            accumulated_y += (segment.start.y + segment.end.y) * length
             accumulated_length += length
         divisor = 2 * accumulated_length
         return Point(_robust_divide(accumulated_x, divisor),

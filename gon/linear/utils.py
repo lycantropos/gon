@@ -1,5 +1,3 @@
-from decimal import Decimal
-from fractions import Fraction
 from typing import (List,
                     Sequence,
                     Tuple)
@@ -9,20 +7,8 @@ from gon.compound import (Compound,
 from gon.degenerate import EMPTY
 from gon.discrete import (Multipoint,
                           RawMultipoint)
-from gon.hints import (Coordinate,
-                       Domain)
-from gon.primitive import (Point,
-                           RawPoint)
+from gon.hints import Domain
 from .hints import RawMultisegment
-
-
-def squared_points_distance(left: Point, right: Point) -> Coordinate:
-    return squared_raw_points_distance(left.raw(), right.raw())
-
-
-def squared_raw_points_distance(left: RawPoint, right: RawPoint) -> Coordinate:
-    (left_x, left_y), (right_x, right_y) = left, right
-    return (left_x - right_x) ** 2 + (left_y - right_y) ** 2
 
 
 def relate_multipoint_to_linear_compound(multipoint: Multipoint,
@@ -45,16 +31,6 @@ def shift_sequence(sequence: Sequence[Domain], step: int) -> Sequence[Domain]:
     return (sequence[step:] + sequence[:step]
             if step
             else sequence)
-
-
-def robust_sqrt(value: Coordinate) -> Coordinate:
-    return Fraction.from_decimal(to_decimal(value).sqrt())
-
-
-def to_decimal(value: Coordinate) -> Decimal:
-    return (Decimal(value.numerator) / value.denominator
-            if isinstance(value, Fraction)
-            else Decimal(value))
 
 
 def to_pairs_chain(sequence: Sequence[Domain]) -> List[Tuple[Domain, Domain]]:

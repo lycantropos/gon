@@ -18,8 +18,6 @@ from gon.primitive import (Point,
                            _scale_point)
 from .hints import Vertices
 from .segment import Segment
-from .utils import (robust_sqrt,
-                    squared_points_distance)
 
 MIN_COUNT = 3
 
@@ -29,8 +27,7 @@ def rotate_positions(vertices: Vertices) -> Vertices:
 
 
 def length(vertices: Vertices) -> Coordinate:
-    return sum(robust_sqrt(squared_points_distance(vertices[index - 1],
-                                                   vertices[index]))
+    return sum(vertices[index].distance_to(vertices[index - 1])
                for index in range(len(vertices)))
 
 
