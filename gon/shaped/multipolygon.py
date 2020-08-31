@@ -582,13 +582,19 @@ class Multipolygon(Indexable, Shaped):
             polygon.index()
 
         def polygon_to_interval(polygon: Polygon) -> r.Interval:
-            vertices = iter(polygon.border.vertices)
-            first_vertex = next(vertices)
+            border_vertices = iter(polygon.border._vertices)
+            first_vertex = next(border_vertices)
             x_min = x_max = first_vertex.x
             y_min = y_max = first_vertex.y
-            for vertex in vertices:
-                x_min, x_max = min(x_min, vertex.x), max(x_max, vertex.x)
-                y_min, y_max = min(y_min, vertex.y), max(y_max, vertex.y)
+            for vertex in border_vertices:
+                if vertex.x < x_min:
+                    x_min = vertex.x
+                elif vertex.x > x_max:
+                    x_max = vertex.x
+                if vertex.y < y_min:
+                    y_min = vertex.y
+                elif vertex.y > y_max:
+                    y_max = vertex.y
             return (x_min, x_max), (y_min, y_max)
 
         tree = r.Tree([polygon_to_interval(polygon) for polygon in polygons])
