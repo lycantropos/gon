@@ -598,8 +598,8 @@ class Multipolygon(Indexable, Shaped):
             return (x_min, x_max), (y_min, y_max)
 
         tree = r.Tree([polygon_to_interval(polygon) for polygon in polygons])
-        self._locate = partial(locate_point_in_indexed_polygons,
-                               tree, polygons)
+        self._locate = partial(locate_point_in_indexed_polygons, tree,
+                               polygons)
 
     def locate(self, point: Point) -> Location:
         """
