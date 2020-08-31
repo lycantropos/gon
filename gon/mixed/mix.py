@@ -731,7 +731,7 @@ class Mix(Indexable):
 
     def index(self) -> None:
         """
-        Pre-processes mix to potentially improve queries.
+        Pre-processes the mix to potentially improve queries.
 
         Time complexity:
             ``O(elements_count * log elements_count)`` expected,
