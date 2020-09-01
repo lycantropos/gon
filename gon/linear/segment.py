@@ -556,14 +556,12 @@ class Segment(Compound, Linear):
             raise ValueError('Segment is degenerate.')
 
     def _distance_to_point(self, other: Point) -> Coordinate:
-        return _robust_sqrt(self._squared_distance_to_point(other))
+        return _robust_sqrt(_squared_raw_segment_point_distance(self._raw,
+                                                                other.raw()))
 
     def _distance_to_segment(self, other: 'Segment') -> Coordinate:
-        return (_robust_sqrt(min(self._squared_distance_to_point(other._start),
-                                 self._squared_distance_to_point(other._end)))
-                if (segments_relationship(self._raw, other._raw)
-                    is SegmentsRelationship.NONE)
-                else 0)
+        return _robust_sqrt(_squared_raw_segments_distance(self._raw,
+                                                           other._raw))
 
     def _intersect_with_segment(self, other: 'Segment') -> Compound:
         intersections = [Point.from_raw(raw_point)
@@ -574,19 +572,6 @@ class Segment(Compound, Linear):
                  else Segment(*intersections))
                 if intersections
                 else EMPTY)
-
-    def _squared_distance_to_point(self, other: Point) -> Coordinate:
-        start_raw, end_raw = self._raw
-        other_raw = other.raw()
-        factor = max(0, min(1, _robust_divide(projection.signed_length(
-                start_raw, other_raw, start_raw, end_raw),
-                _squared_raw_points_distance(end_raw, start_raw))))
-        start_x, start_y = start_raw
-        end_x, end_y = end_raw
-        return _squared_raw_points_distance(
-                (start_x + factor * (end_x - start_x),
-                 start_y + factor * (end_y - start_y)),
-                other_raw)
 
     def _subtract_segment(self, other: 'Segment') -> Compound:
         relation = segment_in_segment(self._raw, other._raw)
@@ -725,3 +710,29 @@ def _raw_unite_cross(first_addend: RawSegment,
             (second_addend_start, cross_point),
             (cross_point, first_addend_end),
             (cross_point, second_addend_end)]
+
+
+def _squared_raw_segment_point_distance(raw_segment: RawSegment,
+                                        raw_point: RawPoint) -> Coordinate:
+    start_raw, end_raw = raw_segment
+    factor = max(0, min(1, _robust_divide(projection.signed_length(
+            start_raw, raw_point, start_raw, end_raw),
+            _squared_raw_points_distance(end_raw, start_raw))))
+    start_x, start_y = start_raw
+    end_x, end_y = end_raw
+    return _squared_raw_points_distance((start_x + factor * (end_x - start_x),
+                                         start_y + factor * (end_y - start_y)),
+                                        raw_point)
+
+
+def _squared_raw_segments_distance(left: RawSegment,
+                                   right: RawSegment) -> Coordinate:
+    left_start, left_end = left
+    right_start, right_end = right
+    return (min(_squared_raw_segment_point_distance(left, right_start),
+                _squared_raw_segment_point_distance(left, right_end),
+                _squared_raw_segment_point_distance(right, left_start),
+                _squared_raw_segment_point_distance(right, left_end))
+            if (segments_relationship(left, right)
+                is SegmentsRelationship.NONE)
+            else 0)
