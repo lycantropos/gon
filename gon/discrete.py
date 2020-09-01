@@ -366,7 +366,8 @@ class Multipoint(Indexable):
         >>> multipoint = Multipoint.from_raw([(0, 0), (1, 0), (0, 1)])
         >>> multipoint.index()
         """
-        tree = kd.Tree(self._raw)
+        tree = kd.Tree(self._raw,
+                       node_cls=KdTreeSquaredDistanceNode)
         self._raw_nearest_index = tree.nearest_index
 
     def locate(self, point: Point) -> Location:
@@ -624,3 +625,8 @@ else:
     OrderedDict = dict
 _unique_ever_seen = OrderedDict.fromkeys
 del OrderedDict, sys
+
+
+class KdTreeSquaredDistanceNode(kd.Node):
+    def distance_to_point(self, point: RawPoint) -> Coordinate:
+        return _squared_raw_points_distance(self.point, point)
