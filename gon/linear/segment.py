@@ -3,9 +3,12 @@ from typing import Optional
 from orient.planar import (point_in_segment,
                            segment_in_segment)
 from reprit.base import generate_repr
+from robust import projection
 from robust.hints import Point
-from robust.linear import (segments_intersection,
-                           segments_intersections)
+from robust.linear import (SegmentsRelationship,
+                           segments_intersection,
+                           segments_intersections,
+                           segments_relationship)
 
 from gon.compound import (Compound,
                           Linear,
@@ -13,12 +16,14 @@ from gon.compound import (Compound,
                           Relation)
 from gon.degenerate import EMPTY
 from gon.discrete import (Multipoint,
-                          _robust_divide)
+                          _robust_divide,
+                          _squared_raw_points_distance)
 from gon.geometry import Geometry
 from gon.hints import Coordinate
 from gon.primitive import (Point,
                            RawPoint,
                            _point_to_step,
+                           _robust_sqrt,
                            _rotate_point_around_origin,
                            _rotate_translate_point,
                            _scale_point)
@@ -405,6 +410,25 @@ class Segment(Compound, Linear):
         """
         return self._start
 
+    def distance_to(self, other: Geometry) -> Coordinate:
+        """
+        Returns distance between the segment and the other geometry.
+
+        Time complexity:
+            ``O(1)``
+        Memory complexity:
+            ``O(1)``
+
+        >>> segment = Segment.from_raw(((0, 0), (2, 0)))
+        >>> segment.distance_to(segment) == 0
+        True
+        """
+        return (self._distance_to_point(other)
+                if isinstance(other, Point)
+                else (self._distance_to_segment(other)
+                      if isinstance(other, Segment)
+                      else other.distance_to(self)))
+
     def locate(self, point: Point) -> Location:
         """
         Finds location of the point relative to the segment.
@@ -531,6 +555,16 @@ class Segment(Compound, Linear):
         if self._start == self._end:
             raise ValueError('Segment is degenerate.')
 
+    def _distance_to_point(self, other: Point) -> Coordinate:
+        return _robust_sqrt(self._squared_distance_to_point(other))
+
+    def _distance_to_segment(self, other: 'Segment') -> Coordinate:
+        return (_robust_sqrt(min(self._squared_distance_to_point(other._start),
+                                 self._squared_distance_to_point(other._end)))
+                if (segments_relationship(self._raw, other._raw)
+                    is SegmentsRelationship.NONE)
+                else 0)
+
     def _intersect_with_segment(self, other: 'Segment') -> Compound:
         intersections = [Point.from_raw(raw_point)
                          for raw_point in segments_intersections(self._raw,
@@ -540,6 +574,19 @@ class Segment(Compound, Linear):
                  else Segment(*intersections))
                 if intersections
                 else EMPTY)
+
+    def _squared_distance_to_point(self, other: Point) -> Coordinate:
+        start_raw, end_raw = self._raw
+        other_raw = other.raw()
+        factor = max(0, min(1, _robust_divide(projection.signed_length(
+                start_raw, other_raw, start_raw, end_raw),
+                _squared_raw_points_distance(end_raw, start_raw))))
+        start_x, start_y = start_raw
+        end_x, end_y = end_raw
+        return _squared_raw_points_distance(
+                (start_x + factor * (end_x - start_x),
+                 start_y + factor * (end_y - start_y)),
+                other_raw)
 
     def _subtract_segment(self, other: 'Segment') -> Compound:
         relation = segment_in_segment(self._raw, other._raw)
