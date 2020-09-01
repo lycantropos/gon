@@ -573,7 +573,7 @@ def _to_raw_multipoint_nearest_index(raw_multipoint: RawMultipoint,
     for index, candidate in enumerated_candidates:
         candidate_distance = distance_to_point(candidate)
         if candidate_distance < min_distance:
-            min_distance, result = candidate_distance, index
+            result, min_distance = index, candidate_distance
     return result
 
 
