@@ -36,11 +36,11 @@ from gon.primitive import (Point,
 from .hints import (RawMultisegment,
                     RawSegment)
 from .segment import (Segment,
-                      _rotate_translate_segment,
-                      _scale_segment,
-                      _squared_raw_point_segment_distance,
-                      _squared_raw_segments_distance,
-                      rotate_segment_around_origin)
+                      rotate_segment_around_origin,
+                      rotate_translate_segment,
+                      scale_segment,
+                      squared_raw_point_segment_distance,
+                      squared_raw_segments_distance)
 from .utils import (from_raw_mix_components,
                     from_raw_multisegment,
                     relate_multipoint_to_linear_compound)
@@ -601,9 +601,9 @@ class Multisegment(Indexable, Linear):
                                for segment in self._segments])
                 if point is None
                 else Multisegment(
-                *[_rotate_translate_segment(segment, cosine, sine,
-                                            *_point_to_step(point, cosine,
-                                                            sine))
+                *[rotate_translate_segment(segment, cosine, sine,
+                                           *_point_to_step(point, cosine,
+                                                           sine))
                   for segment in self._segments]))
 
     def scale(self,
@@ -629,7 +629,7 @@ class Multisegment(Indexable, Linear):
         """
         if factor_y is None:
             factor_y = factor_x
-        return (Multisegment(*[_scale_segment(segment, factor_x, factor_y)
+        return (Multisegment(*[scale_segment(segment, factor_x, factor_y)
                                for segment in self._segments])
                 if factor_x and factor_y
                 else (_scale_segments(self._segments, factor_x, factor_y)
@@ -763,7 +763,7 @@ def _to_raw_point_nearest_index(raw_multisegment: RawMultisegment,
                                 raw_point: RawPoint) -> int:
     enumerated_candidates = enumerate(raw_multisegment)
     result, candidate = next(enumerated_candidates)
-    squared_distance_to_point = partial(_squared_raw_point_segment_distance,
+    squared_distance_to_point = partial(squared_raw_point_segment_distance,
                                         raw_point)
     min_squared_distance = squared_distance_to_point(candidate)
     for index, candidate in enumerated_candidates:
@@ -777,7 +777,7 @@ def _to_raw_segment_nearest_index(raw_multisegment: RawMultisegment,
                                   raw_segment: RawSegment) -> int:
     enumerated_candidates = enumerate(raw_multisegment)
     result, candidate = next(enumerated_candidates)
-    squared_distance_to_segment = partial(_squared_raw_segments_distance,
+    squared_distance_to_segment = partial(squared_raw_segments_distance,
                                           raw_segment)
     min_squared_distance = squared_distance_to_segment(candidate)
     for index, candidate in enumerated_candidates:
