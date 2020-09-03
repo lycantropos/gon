@@ -1,11 +1,13 @@
 from functools import partial
-from typing import Optional
+from typing import (Iterator,
+                    Optional)
 
 from bentley_ottmann.planar import edges_intersect
 from clipping.planar import (complete_intersect_multisegments,
                              subtract_multisegments,
                              symmetric_subtract_multisegments,
                              unite_multisegments)
+from locus import segmental
 from orient.planar import (contour_in_contour,
                            multisegment_in_contour,
                            point_in_contour,
@@ -34,9 +36,14 @@ from gon.primitive import (Point,
 from . import vertices as _vertices
 from .hints import (RawContour,
                     RawMultisegment,
+                    RawSegment,
                     Vertices)
 from .multisegment import Multisegment
-from .segment import Segment
+from .segment import (Segment,
+                      raw_segment_to_point_distance,
+                      raw_segments_distance,
+                      squared_raw_point_segment_distance,
+                      squared_raw_segments_distance)
 from .utils import (from_raw_mix_components,
                     from_raw_multisegment,
                     relate_multipoint_to_linear_compound,
@@ -45,7 +52,8 @@ from .utils import (from_raw_mix_components,
 
 
 class Contour(Indexable, Linear):
-    __slots__ = '_raw_locate', '_min_index', '_raw', '_vertices'
+    __slots__ = ('_raw_locate', '_min_index', '_raw', '_vertices',
+                 '_raw_point_nearest_index', '_raw_segment_nearest_index')
 
     def __init__(self, vertices: Vertices) -> None:
         """
@@ -63,6 +71,10 @@ class Contour(Indexable, Linear):
                               key=vertices.__getitem__)
         self._raw = [vertex.raw() for vertex in vertices]
         self._raw_locate = partial(raw_locate_point, self._raw)
+        self._raw_segment_nearest_index = partial(
+                _to_raw_segment_nearest_index, self._raw)
+        self._raw_point_nearest_index = partial(_to_raw_point_nearest_index,
+                                                self._raw)
 
     __repr__ = generate_repr(__init__)
 
@@ -468,6 +480,36 @@ class Contour(Indexable, Linear):
         """
         return list(self._vertices)
 
+    def distance_to(self, other: Geometry) -> Coordinate:
+        """
+        Returns distance between the multisegment and the other geometry.
+
+        Time complexity:
+            ``O(len(self.vertices))``
+        Memory complexity:
+            ``O(1)``
+
+        >>> contour = Contour.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> contour.distance_to(contour) == 0
+        True
+        """
+        return (self._distance_to_raw_point(other.raw())
+                if isinstance(other, Point)
+                else
+                (min(self._distance_to_raw_point(raw_point)
+                     for raw_point in other._raw)
+                 if isinstance(other, Multipoint)
+                 else
+                 (self._distance_to_raw_segment(other.raw())
+                  if isinstance(other, Segment)
+                  else (min(self._distance_to_raw_segment(raw_segment)
+                            for raw_segment in other._raw)
+                        if isinstance(other, Multisegment)
+                        else (min(self._distance_to_raw_segment(raw_segment)
+                                  for raw_segment in other._raw_edges())
+                              if isinstance(other, Contour)
+                              else other.distance_to(self))))))
+
     def index(self) -> None:
         """
         Pre-processes the contour to potentially improve queries.
@@ -483,8 +525,12 @@ class Contour(Indexable, Linear):
         >>> contour = Contour.from_raw([(0, 0), (1, 0), (0, 1)])
         >>> contour.index()
         """
-        graph = multisegment_trapezoidal(to_pairs_chain(self._raw))
+        raw_contour = self._raw
+        graph = multisegment_trapezoidal(to_pairs_chain(raw_contour))
         self._raw_locate = graph.locate
+        tree = segmental.Tree(to_pairs_chain(raw_contour))
+        self._raw_point_nearest_index = tree.nearest_to_point_index
+        self._raw_segment_nearest_index = tree.nearest_index
 
     def locate(self, point: Point) -> Location:
         """
@@ -707,12 +753,34 @@ class Contour(Indexable, Linear):
         if edges_intersect(self._raw):
             raise ValueError('Contour should not be self-intersecting.')
 
+    def _distance_to_contour(self, other: 'Contour') -> Coordinate:
+        edge_index = self._raw_segment_nearest_index(other.raw())
+        return (self._raw_edge(edge_index)
+                .distance_to(other))
+
+    def _distance_to_raw_point(self, other: RawPoint) -> Coordinate:
+        return raw_segment_to_point_distance(
+                self._raw_edge(self._raw_point_nearest_index(other)),
+                other)
+
+    def _distance_to_raw_segment(self, other: RawSegment) -> Coordinate:
+        return raw_segments_distance(
+                self._raw_edge(self._raw_segment_nearest_index(other)),
+                other)
+
     def _intersect_with_raw_multisegment(self, other_raw: RawMultisegment
                                          ) -> Compound:
         raw_multipoint, raw_multisegment, _ = complete_intersect_multisegments(
                 to_pairs_chain(self._raw), other_raw,
                 accurate=False)
         return from_raw_mix_components(raw_multipoint, raw_multisegment)
+
+    def _raw_edge(self, index: int) -> RawSegment:
+        return self._raw[index - 1], self._raw[index]
+
+    def _raw_edges(self) -> Iterator[RawSegment]:
+        raw = self._raw
+        return ((raw[index - 1], raw[index]) for index in range(len(raw)))
 
     def _subtract_raw_multisegment(self, other_raw: RawMultisegment
                                    ) -> Compound:
@@ -755,6 +823,42 @@ def rotate_contour_around_origin(contour: Contour,
                                  sine: Coordinate) -> Contour:
     return Contour(_rotate_points_around_origin(contour._vertices, cosine,
                                                 sine))
+
+
+def _to_raw_point_nearest_index(raw_contour: RawContour,
+                                raw_point: RawPoint) -> int:
+    vertex = raw_contour[-1]
+    enumerated_vertices = enumerate(raw_contour)
+    result, next_vertex = next(enumerated_vertices)
+    squared_distance_to_point = partial(squared_raw_point_segment_distance,
+                                        raw_point)
+    min_squared_distance = squared_distance_to_point((vertex, next_vertex))
+    vertex = next_vertex
+    for index, next_vertex in enumerated_vertices:
+        candidate_squared_distance = squared_distance_to_point((vertex,
+                                                                next_vertex))
+        if candidate_squared_distance < min_squared_distance:
+            result, min_squared_distance = index, candidate_squared_distance
+        vertex = next_vertex
+    return result
+
+
+def _to_raw_segment_nearest_index(raw_contour: RawContour,
+                                  raw_segment: RawSegment) -> int:
+    vertex = raw_contour[-1]
+    enumerated_vertices = enumerate(raw_contour)
+    result, next_vertex = next(enumerated_vertices)
+    squared_distance_to_segment = partial(squared_raw_segments_distance,
+                                          raw_segment)
+    min_squared_distance = squared_distance_to_segment((vertex, next_vertex))
+    vertex = next_vertex
+    for index, next_vertex in enumerated_vertices:
+        candidate_squared_distance = squared_distance_to_segment((vertex,
+                                                                  next_vertex))
+        if candidate_squared_distance < min_squared_distance:
+            result, min_squared_distance = index, candidate_squared_distance
+        vertex = next_vertex
+    return result
 
 
 def _rotate_translate_contour(contour: Contour,
