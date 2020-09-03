@@ -556,8 +556,8 @@ class Segment(Compound, Linear):
             raise ValueError('Segment is degenerate.')
 
     def _distance_to_point(self, other: Point) -> Coordinate:
-        return _robust_sqrt(_squared_raw_segment_point_distance(self._raw,
-                                                                other.raw()))
+        return _robust_sqrt(_squared_raw_point_segment_distance(other.raw(),
+                                                                self._raw))
 
     def _distance_to_segment(self, other: 'Segment') -> Coordinate:
         return _robust_sqrt(_squared_raw_segments_distance(self._raw,
@@ -712,8 +712,8 @@ def _raw_unite_cross(first_addend: RawSegment,
             (cross_point, second_addend_end)]
 
 
-def _squared_raw_segment_point_distance(raw_segment: RawSegment,
-                                        raw_point: RawPoint) -> Coordinate:
+def _squared_raw_point_segment_distance(raw_point: RawPoint,
+                                        raw_segment: RawSegment) -> Coordinate:
     start_raw, end_raw = raw_segment
     factor = max(0, min(1, _robust_divide(projection.signed_length(
             start_raw, raw_point, start_raw, end_raw),
@@ -729,10 +729,10 @@ def _squared_raw_segments_distance(left: RawSegment,
                                    right: RawSegment) -> Coordinate:
     left_start, left_end = left
     right_start, right_end = right
-    return (min(_squared_raw_segment_point_distance(left, right_start),
-                _squared_raw_segment_point_distance(left, right_end),
-                _squared_raw_segment_point_distance(right, left_start),
-                _squared_raw_segment_point_distance(right, left_end))
+    return (min(_squared_raw_point_segment_distance(right_start, left),
+                _squared_raw_point_segment_distance(right_end, left),
+                _squared_raw_point_segment_distance(left_start, right),
+                _squared_raw_point_segment_distance(left_end, right))
             if (segments_relationship(left, right)
                 is SegmentsRelationship.NONE)
             else 0)

@@ -9,6 +9,7 @@ from clipping.planar import (complete_intersect_multisegments,
                              subtract_multisegments,
                              symmetric_subtract_multisegments,
                              unite_multisegments)
+from locus import segmental
 from orient.planar import (multisegment_in_multisegment,
                            point_in_multisegment,
                            segment_in_multisegment)
@@ -37,6 +38,8 @@ from .hints import (RawMultisegment,
 from .segment import (Segment,
                       _rotate_translate_segment,
                       _scale_segment,
+                      _squared_raw_point_segment_distance,
+                      _squared_raw_segments_distance,
                       rotate_segment_around_origin)
 from .utils import (from_raw_mix_components,
                     from_raw_multisegment,
@@ -44,7 +47,8 @@ from .utils import (from_raw_mix_components,
 
 
 class Multisegment(Indexable, Linear):
-    __slots__ = '_segments', '_segments_set', '_raw', '_raw_locate'
+    __slots__ = ('_segments', '_segments_set', '_raw', '_raw_locate',
+                 '_raw_point_nearest_index', '_raw_segment_nearest_index')
 
     def __init__(self, *segments: Segment) -> None:
         """
@@ -61,6 +65,10 @@ class Multisegment(Indexable, Linear):
         self._raw = [segment.raw() for segment in segments]
         self._segments_set = frozenset(segments)
         self._raw_locate = partial(raw_locate_point, self._raw)
+        self._raw_segment_nearest_index = partial(
+                _to_raw_segment_nearest_index, self._raw)
+        self._raw_point_nearest_index = partial(_to_raw_point_nearest_index,
+                                                self._raw)
 
     __repr__ = generate_repr(__init__)
 
@@ -452,6 +460,32 @@ class Multisegment(Indexable, Linear):
         """
         return list(self._segments)
 
+    def distance_to(self, other: Geometry) -> Coordinate:
+        """
+        Returns distance between the multisegment and the other geometry.
+
+        Time complexity:
+            ``O(len(self.segments))``
+        Memory complexity:
+            ``O(1)``
+
+        >>> multisegment = Multisegment.from_raw([((0, 0), (1, 0)),
+        ...                                       ((0, 1), (1, 1))])
+        >>> multisegment.distance_to(multisegment) == 0
+        True
+        """
+        return (self._distance_to_point(other)
+                if isinstance(other, Point)
+                else (min(self._distance_to_point(point)
+                          for point in other.points)
+                      if isinstance(other, Multipoint)
+                      else (self._distance_to_segment(other)
+                            if isinstance(other, Segment)
+                            else (min(self._distance_to_segment(segment)
+                                      for segment in other._segments)
+                                  if isinstance(other, Multisegment)
+                                  else other.distance_to(self)))))
+
     def index(self) -> None:
         """
         Pre-processes the multisegment to potentially improve queries.
@@ -469,8 +503,12 @@ class Multisegment(Indexable, Linear):
         >>> multisegment.index()
         """
         if len(self._segments) > 1:
-            graph = multisegment_trapezoidal(self._raw)
+            raw_segments = self._raw
+            graph = multisegment_trapezoidal(raw_segments)
             self._raw_locate = graph.locate
+            tree = segmental.Tree(raw_segments)
+            self._raw_point_nearest_index = tree.nearest_to_point_index
+            self._raw_segment_nearest_index = tree.nearest_index
 
     def locate(self, point: Point) -> Location:
         """
@@ -644,6 +682,14 @@ class Multisegment(Indexable, Linear):
         if segments_cross_or_overlap(self._raw):
             raise ValueError('Crossing or overlapping segments found.')
 
+    def _distance_to_point(self, other: Point) -> Coordinate:
+        return (self._segments[self._raw_point_nearest_index(other.raw())]
+                .distance_to(other))
+
+    def _distance_to_segment(self, other: Segment) -> Coordinate:
+        return (self._segments[self._raw_segment_nearest_index(other.raw())]
+                .distance_to(other))
+
     def _intersect_with_raw_multisegment(self, other_raw: RawMultisegment
                                          ) -> Compound:
         raw_multipoint, raw_multisegment, _ = complete_intersect_multisegments(
@@ -711,3 +757,31 @@ def raw_locate_point(raw_multisegment: RawMultisegment,
     return (Location.EXTERIOR
             if relation is Relation.DISJOINT
             else Location.BOUNDARY)
+
+
+def _to_raw_point_nearest_index(raw_multisegment: RawMultisegment,
+                                raw_point: RawPoint) -> int:
+    enumerated_candidates = enumerate(raw_multisegment)
+    result, candidate = next(enumerated_candidates)
+    squared_distance_to_point = partial(_squared_raw_point_segment_distance,
+                                        raw_point)
+    min_squared_distance = squared_distance_to_point(candidate)
+    for index, candidate in enumerated_candidates:
+        candidate_squared_distance = squared_distance_to_point(candidate)
+        if candidate_squared_distance < min_squared_distance:
+            result, min_squared_distance = index, candidate_squared_distance
+    return result
+
+
+def _to_raw_segment_nearest_index(raw_multisegment: RawMultisegment,
+                                  raw_segment: RawSegment) -> int:
+    enumerated_candidates = enumerate(raw_multisegment)
+    result, candidate = next(enumerated_candidates)
+    squared_distance_to_segment = partial(_squared_raw_segments_distance,
+                                          raw_segment)
+    min_squared_distance = squared_distance_to_segment(candidate)
+    for index, candidate in enumerated_candidates:
+        candidate_squared_distance = squared_distance_to_segment(candidate)
+        if candidate_squared_distance < min_squared_distance:
+            result, min_squared_distance = index, candidate_squared_distance
+    return result
