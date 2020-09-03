@@ -423,11 +423,14 @@ class Segment(Compound, Linear):
         >>> segment.distance_to(segment) == 0
         True
         """
-        return (self._distance_to_point(other)
+        return (raw_segment_to_point_distance(self._raw, other.raw())
                 if isinstance(other, Point)
-                else (self._distance_to_segment(other)
-                      if isinstance(other, Segment)
-                      else other.distance_to(self)))
+                else (min(raw_segment_to_point_distance(self._raw, raw_point)
+                          for raw_point in other._raw)
+                      if isinstance(other, Multipoint)
+                      else (raw_segments_distance(self._raw, other._raw)
+                            if isinstance(other, Segment)
+                            else other.distance_to(self))))
 
     def locate(self, point: Point) -> Location:
         """
@@ -444,7 +447,7 @@ class Segment(Compound, Linear):
         >>> segment.locate(segment.end) is Location.BOUNDARY
         True
         """
-        return raw_locate_point(self._raw, point.raw())
+        return _raw_locate_point(self._raw, point.raw())
 
     def raw(self) -> RawSegment:
         """
@@ -501,7 +504,7 @@ class Segment(Compound, Linear):
         """
         return (rotate_segment_around_origin(self, cosine, sine)
                 if point is None
-                else _rotate_translate_segment(
+                else rotate_translate_segment(
                 self, cosine, sine, *_point_to_step(point, cosine, sine)))
 
     def scale(self,
@@ -519,8 +522,8 @@ class Segment(Compound, Linear):
         >>> segment.scale(1) == segment.scale(1, 2) == segment
         True
         """
-        return _scale_segment(self, factor_x,
-                              factor_x if factor_y is None else factor_y)
+        return scale_segment(self, factor_x,
+                             factor_x if factor_y is None else factor_y)
 
     def translate(self, step_x: Coordinate, step_y: Coordinate) -> 'Segment':
         """
@@ -555,13 +558,8 @@ class Segment(Compound, Linear):
         if self._start == self._end:
             raise ValueError('Segment is degenerate.')
 
-    def _distance_to_point(self, other: Point) -> Coordinate:
-        return _robust_sqrt(_squared_raw_point_segment_distance(other.raw(),
-                                                                self._raw))
-
-    def _distance_to_segment(self, other: 'Segment') -> Coordinate:
-        return _robust_sqrt(_squared_raw_segments_distance(self._raw,
-                                                           other._raw))
+    def _distance_to_point(self, raw_point: Point) -> Coordinate:
+        return
 
     def _intersect_with_segment(self, other: 'Segment') -> Compound:
         intersections = [Point.from_raw(raw_point)
@@ -631,6 +629,16 @@ class Segment(Compound, Linear):
                              else Multisegment(self, other)))))
 
 
+def raw_segment_to_point_distance(raw_segment: RawSegment,
+                                  raw_point: RawPoint) -> Coordinate:
+    return _robust_sqrt(squared_raw_point_segment_distance(raw_point,
+                                                           raw_segment))
+
+
+def raw_segments_distance(left: RawSegment, right: RawSegment) -> Coordinate:
+    return _robust_sqrt(squared_raw_segments_distance(left, right))
+
+
 def rotate_segment_around_origin(segment: Segment,
                                  cosine: Coordinate,
                                  sine: Coordinate) -> Segment:
@@ -640,20 +648,20 @@ def rotate_segment_around_origin(segment: Segment,
                                                sine))
 
 
-def _rotate_translate_segment(segment: Segment,
-                              cosine: Coordinate,
-                              sine: Coordinate,
-                              step_x: Coordinate,
-                              step_y: Coordinate) -> Segment:
+def rotate_translate_segment(segment: Segment,
+                             cosine: Coordinate,
+                             sine: Coordinate,
+                             step_x: Coordinate,
+                             step_y: Coordinate) -> Segment:
     return Segment(_rotate_translate_point(segment._start, cosine, sine,
                                            step_x, step_y),
                    _rotate_translate_point(segment._end, cosine, sine,
                                            step_x, step_y))
 
 
-def _scale_segment(segment: Segment,
-                   factor_x: Coordinate,
-                   factor_y: Coordinate) -> Compound:
+def scale_segment(segment: Segment,
+                  factor_x: Coordinate,
+                  factor_y: Coordinate) -> Compound:
     return (Segment(_scale_point(segment._start, factor_x, factor_y),
                     _scale_point(segment._end, factor_x, factor_y))
             if ((factor_x or not segment.is_horizontal) and factor_y
@@ -661,7 +669,34 @@ def _scale_segment(segment: Segment,
             else Multipoint(_scale_point(segment._start, factor_x, factor_y)))
 
 
-def raw_locate_point(raw_segment: RawSegment, raw_point: RawPoint) -> Location:
+def squared_raw_point_segment_distance(raw_point: RawPoint,
+                                       raw_segment: RawSegment) -> Coordinate:
+    raw_start, raw_end = raw_segment
+    factor = max(0, min(1, _robust_divide(projection.signed_length(
+            raw_start, raw_point, raw_start, raw_end),
+            _squared_raw_points_distance(raw_end, raw_start))))
+    start_x, start_y = raw_start
+    end_x, end_y = raw_end
+    return _squared_raw_points_distance((start_x + factor * (end_x - start_x),
+                                         start_y + factor * (end_y - start_y)),
+                                        raw_point)
+
+
+def squared_raw_segments_distance(left: RawSegment,
+                                  right: RawSegment) -> Coordinate:
+    left_start, left_end = left
+    right_start, right_end = right
+    return (min(squared_raw_point_segment_distance(right_start, left),
+                squared_raw_point_segment_distance(right_end, left),
+                squared_raw_point_segment_distance(left_start, right),
+                squared_raw_point_segment_distance(left_end, right))
+            if (segments_relationship(left, right)
+                is SegmentsRelationship.NONE)
+            else 0)
+
+
+def _raw_locate_point(raw_segment: RawSegment,
+                      raw_point: RawPoint) -> Location:
     return (Location.BOUNDARY
             if point_in_segment(raw_point, raw_segment)
             else Location.EXTERIOR)
@@ -710,29 +745,3 @@ def _raw_unite_cross(first_addend: RawSegment,
             (second_addend_start, cross_point),
             (cross_point, first_addend_end),
             (cross_point, second_addend_end)]
-
-
-def _squared_raw_point_segment_distance(raw_point: RawPoint,
-                                        raw_segment: RawSegment) -> Coordinate:
-    start_raw, end_raw = raw_segment
-    factor = max(0, min(1, _robust_divide(projection.signed_length(
-            start_raw, raw_point, start_raw, end_raw),
-            _squared_raw_points_distance(end_raw, start_raw))))
-    start_x, start_y = start_raw
-    end_x, end_y = end_raw
-    return _squared_raw_points_distance((start_x + factor * (end_x - start_x),
-                                         start_y + factor * (end_y - start_y)),
-                                        raw_point)
-
-
-def _squared_raw_segments_distance(left: RawSegment,
-                                   right: RawSegment) -> Coordinate:
-    left_start, left_end = left
-    right_start, right_end = right
-    return (min(_squared_raw_point_segment_distance(right_start, left),
-                _squared_raw_point_segment_distance(right_end, left),
-                _squared_raw_point_segment_distance(left_start, right),
-                _squared_raw_point_segment_distance(left_end, right))
-            if (segments_relationship(left, right)
-                is SegmentsRelationship.NONE)
-            else 0)
