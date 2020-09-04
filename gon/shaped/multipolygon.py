@@ -38,7 +38,7 @@ from gon.linear import (Contour,
                         Segment,
                         vertices)
 from gon.linear.utils import (from_raw_multisegment,
-                              to_pairs_chain)
+                              to_pairs_sequence)
 from gon.primitive import (Point,
                            _point_to_step)
 from .hints import (RawMultipolygon,
@@ -104,7 +104,7 @@ class Multipolygon(Indexable, Shaped):
                       if isinstance(other, Multisegment)
                       else
                       (self._intersect_with_raw_multisegment(
-                              to_pairs_chain(other.raw()))
+                              to_pairs_sequence(other.raw()))
                        if isinstance(other, Contour)
                        else
                        (self._intersect_with_raw_multipolygon([other.raw()])
@@ -328,7 +328,7 @@ class Multipolygon(Indexable, Shaped):
                   if isinstance(other, Multisegment)
                   else
                   (self._unite_with_raw_multisegment(
-                          to_pairs_chain(other.raw()))
+                          to_pairs_sequence(other.raw()))
                    if isinstance(other, Contour)
                    else (self._unite_with_raw_multipolygon([other.raw()])
                          if isinstance(other, Polygon)
@@ -357,7 +357,7 @@ class Multipolygon(Indexable, Shaped):
                       if isinstance(other, Multisegment)
                       else
                       (self._subtract_from_raw_multisegment(
-                              to_pairs_chain(other.raw()))
+                              to_pairs_sequence(other.raw()))
                        if isinstance(other, Contour)
                        else (self._subtract_from_raw_multipolygon(
                               [other.raw()])
@@ -421,7 +421,7 @@ class Multipolygon(Indexable, Shaped):
                   if isinstance(other, Multisegment)
                   else
                   (self._unite_with_raw_multisegment(
-                          to_pairs_chain(other.raw()))
+                          to_pairs_sequence(other.raw()))
                    if isinstance(other, Contour)
                    else
                    (self._symmetric_subtract_raw_multipolygon([other.raw()])
@@ -841,8 +841,8 @@ class Multipolygon(Indexable, Shaped):
         for polygon in self._polygons:
             polygon.validate()
         polygons_raw_edges = list(flatten(
-                chain(to_pairs_chain(polygon.border.raw()),
-                      flatten(to_pairs_chain(hole.raw())
+                chain(to_pairs_sequence(polygon.border.raw()),
+                      flatten(to_pairs_sequence(hole.raw())
                               for hole in polygon.holes))
                 for polygon in self._polygons))
         if segments_cross_or_overlap(polygons_raw_edges,
