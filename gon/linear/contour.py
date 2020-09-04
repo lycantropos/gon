@@ -1,6 +1,5 @@
 from functools import partial
-from typing import (Iterator,
-                    Optional)
+from typing import Optional
 
 from bentley_ottmann.planar import edges_intersect
 from clipping.planar import (complete_intersect_multisegments,
@@ -48,7 +47,8 @@ from .utils import (from_raw_mix_components,
                     from_raw_multisegment,
                     relate_multipoint_to_linear_compound,
                     shift_sequence,
-                    to_pairs_chain)
+                    to_pairs_iterable,
+                    to_pairs_sequence)
 
 
 class Contour(Indexable, Linear):
@@ -101,7 +101,7 @@ class Contour(Indexable, Linear):
                       if isinstance(other, Multisegment)
                       else
                       (self._intersect_with_raw_multisegment(
-                              to_pairs_chain(other._raw))
+                              to_pairs_sequence(other._raw))
                        if isinstance(other, Contour)
                        else NotImplemented)))
 
@@ -304,7 +304,7 @@ class Contour(Indexable, Linear):
                             if isinstance(other, Multisegment)
                             else
                             (self._unite_with_raw_multisegment(
-                                    to_pairs_chain(other._raw))
+                                    to_pairs_sequence(other._raw))
                              if isinstance(other, Contour)
                              else NotImplemented))))
 
@@ -350,7 +350,7 @@ class Contour(Indexable, Linear):
                             if isinstance(other, Multisegment)
                             else
                             (self._subtract_raw_multisegment(
-                                    to_pairs_chain(other._raw))
+                                    to_pairs_sequence(other._raw))
                              if isinstance(other, Contour)
                              else NotImplemented))))
 
@@ -378,7 +378,7 @@ class Contour(Indexable, Linear):
                        if isinstance(other, Multisegment)
                        else
                        (self._symmetric_subtract_raw_multisegment(
-                               to_pairs_chain(other._raw))
+                               to_pairs_sequence(other._raw))
                         if isinstance(other, Contour)
                         else NotImplemented))))
 
@@ -502,13 +502,14 @@ class Contour(Indexable, Linear):
                  else
                  (self._distance_to_raw_segment(other.raw())
                   if isinstance(other, Segment)
-                  else (min(self._distance_to_raw_segment(raw_segment)
-                            for raw_segment in other._raw)
-                        if isinstance(other, Multisegment)
-                        else (min(self._distance_to_raw_segment(raw_segment)
-                                  for raw_segment in other._raw_edges())
-                              if isinstance(other, Contour)
-                              else other.distance_to(self))))))
+                  else
+                  (min(self._distance_to_raw_segment(raw_segment)
+                       for raw_segment in other._raw)
+                   if isinstance(other, Multisegment)
+                   else (min(self._distance_to_raw_segment(raw_segment)
+                             for raw_segment in to_pairs_iterable(other._raw))
+                         if isinstance(other, Contour)
+                         else other.distance_to(self))))))
 
     def index(self) -> None:
         """
@@ -526,9 +527,9 @@ class Contour(Indexable, Linear):
         >>> contour.index()
         """
         raw_contour = self._raw
-        graph = multisegment_trapezoidal(to_pairs_chain(raw_contour))
+        graph = multisegment_trapezoidal(to_pairs_sequence(raw_contour))
         self._raw_locate = graph.locate
-        tree = segmental.Tree(to_pairs_chain(raw_contour))
+        tree = segmental.Tree(to_pairs_sequence(raw_contour))
         self._raw_point_nearest_index = tree.nearest_to_point_index
         self._raw_segment_nearest_index = tree.nearest_index
 
@@ -754,8 +755,7 @@ class Contour(Indexable, Linear):
             raise ValueError('Contour should not be self-intersecting.')
 
     def _distance_to_contour(self, other: 'Contour') -> Coordinate:
-        edge_index = self._raw_segment_nearest_index(other.raw())
-        return (self._raw_edge(edge_index)
+        return (self._raw_edge(self._raw_segment_nearest_index(other.raw()))
                 .distance_to(other))
 
     def _distance_to_raw_point(self, other: RawPoint) -> Coordinate:
@@ -771,33 +771,29 @@ class Contour(Indexable, Linear):
     def _intersect_with_raw_multisegment(self, other_raw: RawMultisegment
                                          ) -> Compound:
         raw_multipoint, raw_multisegment, _ = complete_intersect_multisegments(
-                to_pairs_chain(self._raw), other_raw,
+                to_pairs_sequence(self._raw), other_raw,
                 accurate=False)
         return from_raw_mix_components(raw_multipoint, raw_multisegment)
 
     def _raw_edge(self, index: int) -> RawSegment:
         return self._raw[index - 1], self._raw[index]
 
-    def _raw_edges(self) -> Iterator[RawSegment]:
-        raw = self._raw
-        return ((raw[index - 1], raw[index]) for index in range(len(raw)))
-
     def _subtract_raw_multisegment(self, other_raw: RawMultisegment
                                    ) -> Compound:
         return from_raw_multisegment(subtract_multisegments(
-                to_pairs_chain(self._raw), other_raw,
+                to_pairs_sequence(self._raw), other_raw,
                 accurate=False))
 
     def _subtract_from_raw_multisegment(self, other_raw: RawMultisegment
                                         ) -> Compound:
         return from_raw_multisegment(subtract_multisegments(
-                other_raw, to_pairs_chain(self._raw),
+                other_raw, to_pairs_sequence(self._raw),
                 accurate=False))
 
     def _symmetric_subtract_raw_multisegment(self, other_raw: RawMultisegment
                                              ) -> Compound:
         return from_raw_multisegment(symmetric_subtract_multisegments(
-                to_pairs_chain(self._raw), other_raw,
+                to_pairs_sequence(self._raw), other_raw,
                 accurate=False))
 
     def _unite_with_multipoint(self, other: Multipoint) -> Compound:
@@ -808,7 +804,7 @@ class Contour(Indexable, Linear):
     def _unite_with_raw_multisegment(self, other_raw: RawMultisegment
                                      ) -> Compound:
         return from_raw_multisegment(unite_multisegments(
-                to_pairs_chain(self._raw), other_raw,
+                to_pairs_sequence(self._raw), other_raw,
                 accurate=False))
 
 

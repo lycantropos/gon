@@ -48,7 +48,7 @@ from gon.linear.contour import (_rotate_translate_contour,
                                 _scale_contour_degenerate,
                                 rotate_contour_around_origin)
 from gon.linear.utils import (from_raw_multisegment,
-                              to_pairs_chain)
+                              to_pairs_sequence)
 from gon.primitive import (Point,
                            RawPoint,
                            _point_to_step)
@@ -110,7 +110,7 @@ class Polygon(Indexable, Shaped):
                       if isinstance(other, Multisegment)
                       else
                       (self._intersect_with_raw_multisegment(
-                              to_pairs_chain(other.raw()))
+                              to_pairs_sequence(other.raw()))
                        if isinstance(other, Contour)
                        else
                        ((from_raw_mix_components(
@@ -332,7 +332,7 @@ class Polygon(Indexable, Shaped):
                   if isinstance(other, Multisegment)
                   else
                   (self._unite_with_raw_multisegment(
-                          to_pairs_chain(other.raw()))
+                          to_pairs_sequence(other.raw()))
                    if isinstance(other, Contour)
                    else (self._unite_with_raw_multipolygon([other.raw()])
                          if isinstance(other, Polygon)
@@ -358,7 +358,7 @@ class Polygon(Indexable, Shaped):
                       if isinstance(other, Multisegment)
                       else
                       (self._subtract_from_raw_multisegment(
-                              to_pairs_chain(other.raw()))
+                              to_pairs_sequence(other.raw()))
                        if isinstance(other, Contour)
                        else NotImplemented)))
 
@@ -413,7 +413,7 @@ class Polygon(Indexable, Shaped):
                   if isinstance(other, Multisegment)
                   else
                   (self._unite_with_raw_multisegment(
-                          to_pairs_chain(other.raw()))
+                          to_pairs_sequence(other.raw()))
                    if isinstance(other, Contour)
                    else
                    (self._symmetric_subtract_raw_multipolygon([other.raw()])

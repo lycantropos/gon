@@ -1,4 +1,5 @@
-from typing import (List,
+from typing import (Iterable,
+                    List,
                     Sequence,
                     Tuple)
 
@@ -33,7 +34,14 @@ def shift_sequence(sequence: Sequence[Domain], step: int) -> Sequence[Domain]:
             else sequence)
 
 
-def to_pairs_chain(sequence: Sequence[Domain]) -> List[Tuple[Domain, Domain]]:
+def to_pairs_iterable(sequence: Sequence[Domain]
+                      ) -> Iterable[Tuple[Domain, Domain]]:
+    return ((sequence[index - 1], sequence[index])
+            for index in range(len(sequence)))
+
+
+def to_pairs_sequence(sequence: Sequence[Domain]
+                      ) -> List[Tuple[Domain, Domain]]:
     return [(sequence[index - 1], sequence[index])
             for index in range(len(sequence))]
 

@@ -5,7 +5,7 @@ from hypothesis import strategies
 from gon.degenerate import Empty
 from gon.discrete import Multipoint
 from gon.linear import Multisegment
-from gon.linear.utils import to_pairs_chain
+from gon.linear.utils import to_pairs_sequence
 from gon.mixed import Mix
 from gon.shaped import Multipolygon
 from tests.strategies import (coordinates_strategies,
@@ -42,9 +42,9 @@ def multipolygon_to_invalid_mix(multipolygon: Multipolygon) -> Strategy[Mix]:
                              empty_geometries
                              | (sub_lists(raw_vertices)
                                 .map(Multipoint.from_raw)),
-                             sub_lists(list(flatten(map(to_pairs_chain,
+                             sub_lists(list(flatten(map(to_pairs_sequence,
                                                         raw_contours)))
-                                       + to_pairs_chain(raw_vertices))
+                                       + to_pairs_sequence(raw_vertices))
                              .map(Multisegment.from_raw),
                              strategies.just(multipolygon))
 
