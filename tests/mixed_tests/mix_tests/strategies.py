@@ -1,5 +1,6 @@
 from itertools import chain
 
+from bentley_ottmann.planar import segments_cross_or_overlap
 from hypothesis import strategies
 
 from gon.degenerate import Empty
@@ -38,15 +39,17 @@ def multipolygon_to_invalid_mix(multipolygon: Multipolygon) -> Strategy[Mix]:
                                       (hole.raw() for hole in polygon.holes))
                                 for polygon in multipolygon.polygons))
     raw_vertices = list(flatten(raw_contours))
-    return strategies.builds(Mix,
-                             empty_geometries
-                             | (sub_lists(raw_vertices)
+    raw_edges = list(flatten(map(to_pairs_sequence, raw_contours)))
+    raw_segments = raw_edges + to_pairs_sequence(raw_vertices)
+    return strategies.builds(
+            Mix,
+            empty_geometries | (sub_lists(raw_vertices)
                                 .map(Multipoint.from_raw)),
-                             sub_lists(list(flatten(map(to_pairs_sequence,
-                                                        raw_contours)))
-                                       + to_pairs_sequence(raw_vertices))
-                             .map(Multisegment.from_raw),
-                             strategies.just(multipolygon))
+            sub_lists(raw_segments)
+            .filter(lambda candidates: segments_cross_or_overlap(raw_edges
+                                                                 + candidates))
+            .map(Multisegment.from_raw),
+            strategies.just(multipolygon))
 
 
 invalid_mixes = (multipolygons.flatmap(multipolygon_to_invalid_mix)
