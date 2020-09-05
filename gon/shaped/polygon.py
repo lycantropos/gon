@@ -2,7 +2,7 @@ from bisect import bisect
 from functools import partial
 from itertools import (accumulate,
                        chain)
-from typing import (Callable,
+from typing import (Iterator,
                     List,
                     Optional,
                     Sequence,
@@ -23,7 +23,6 @@ from orient.planar import (contour_in_polygon,
                            region_in_multiregion,
                            segment_in_polygon)
 from reprit.base import generate_repr
-from robust.angular import orientation
 from robust.hints import Expansion
 from robust.utils import (scale_expansion,
                           sum_expansions,
@@ -684,11 +683,6 @@ class Polygon(Indexable, Shaped):
             if self._raw_holes
             else partial(_tree_to_holeless_raw_segment_nearest_path, tree))
 
-    def _to_raw_edges(self):
-        return chain(to_pairs_iterable(self._raw_border),
-                     flatten(to_pairs_iterable(raw_hole)
-                             for raw_hole in self._raw_holes))
-
     def locate(self, point: Point) -> Location:
         """
         Finds location of the point relative to the polygon.
@@ -910,39 +904,20 @@ class Polygon(Indexable, Shaped):
                     and relation is not Relation.ENCLOSES):
                 raise ValueError('Holes should lie inside border.')
 
-    def _distance_to_raw_point(self, other: RawPoint,
-                               *,
-                               is_hole_contour: Callable[[int], bool] = bool
-                               ) -> Coordinate:
-        contour_id, edge_index = self._raw_point_nearest_path(other)
-        raw_contour_vertices = self._contour_id_to_contour(contour_id)._raw
-        raw_edge_start, raw_edge_end = (raw_contour_vertices[edge_index - 1],
-                                        raw_contour_vertices[edge_index])
-        return (raw_segment_to_point_distance((raw_edge_start, raw_edge_end),
-                                              other)
-                if (raw_point_in_angle(other,
-                                       raw_contour_vertices[edge_index - 2],
-                                       raw_edge_start, raw_edge_end)
-                    is is_hole_contour(contour_id))
+    def _distance_to_raw_point(self, other: RawPoint) -> Coordinate:
+        return (raw_segment_to_point_distance(
+                self._path_to_raw_edge(self._raw_point_nearest_path(other)),
+                other)
+                if self._raw_locate(other) is Location.EXTERIOR
                 else 0)
 
-    def _distance_to_raw_segment(self, other: RawSegment,
-                                 *,
-                                 is_hole_contour: Callable[[int], bool] = bool
-                                 ) -> Coordinate:
-        contour_id, edge_index = self._raw_segment_nearest_path(other)
-        raw_contour_vertices = self._contour_id_to_contour(contour_id)._raw
-        (prev_raw_edge_start, raw_edge_start,
-         raw_edge_end) = (raw_contour_vertices[edge_index - 2],
-                          raw_contour_vertices[edge_index - 1],
-                          raw_contour_vertices[edge_index])
+    def _distance_to_raw_segment(self, other: RawSegment) -> Coordinate:
         other_start, other_end = other
-        return (raw_segments_distance((raw_edge_start, raw_edge_end), other)
-                if (raw_point_in_angle(other_start, prev_raw_edge_start,
-                                       raw_edge_start, raw_edge_end)
-                    is raw_point_in_angle(other_end, prev_raw_edge_start,
-                                          raw_edge_start, raw_edge_end)
-                    is is_hole_contour(contour_id))
+        return (raw_segments_distance(
+                self._path_to_raw_edge(self._raw_segment_nearest_path(other)),
+                other)
+                if (self._raw_locate(other_start) is Location.EXTERIOR
+                    and self._raw_locate(other_end) is Location.EXTERIOR)
                 else 0)
 
     def _intersect_with_raw_multisegment(self,
@@ -954,8 +929,12 @@ class Polygon(Indexable, Shaped):
                         [(self._raw_border, self._raw_holes)],
                         accurate=False))
 
-    def _contour_id_to_contour(self, contour_id: int) -> Contour:
-        return self._holes[contour_id - 1] if contour_id else self._border
+    def _path_to_raw_edge(self, path: Tuple[int, int]) -> RawSegment:
+        contour_id, edge_index = path
+        raw_contour = (self._holes[contour_id - 1]
+                       if contour_id
+                       else self._border)._raw
+        return raw_contour[edge_index - 1], raw_contour[edge_index]
 
     def _subtract_from_raw_multisegment(self, other_raw: RawMultisegment
                                         ) -> Compound:
@@ -976,6 +955,11 @@ class Polygon(Indexable, Shaped):
                 [(self._raw_border, self._raw_holes)], raw_multipolygon,
                 accurate=False))
 
+    def _to_raw_edges(self) -> Iterator[RawSegment]:
+        return chain(to_pairs_iterable(self._raw_border),
+                     flatten(to_pairs_iterable(raw_hole)
+                             for raw_hole in self._raw_holes))
+
     def _unite_with_multipoint(self, other: Multipoint) -> Compound:
         # importing here to avoid cyclic imports
         from gon.mixed.mix import from_mix_components
@@ -995,15 +979,6 @@ class Polygon(Indexable, Shaped):
                                                            self._raw_holes)],
                                                          raw_multipolygon,
                                                          accurate=False))
-
-
-def raw_point_in_angle(point: RawPoint,
-                       first_ray_point: RawPoint,
-                       vertex: RawPoint,
-                       second_ray_point: RawPoint) -> bool:
-    return (orientation(first_ray_point, vertex, point)
-            is orientation(vertex, second_ray_point, point)
-            is orientation(first_ray_point, vertex, second_ray_point))
 
 
 def _polygon_to_centroid_components(polygon: Polygon
