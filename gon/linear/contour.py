@@ -482,7 +482,7 @@ class Contour(Indexable, Linear):
 
     def distance_to(self, other: Geometry) -> Coordinate:
         """
-        Returns distance between the multisegment and the other geometry.
+        Returns distance between the contour and the other geometry.
 
         Time complexity:
             ``O(len(self.vertices))``
