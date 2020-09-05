@@ -35,11 +35,14 @@ from gon.hints import Coordinate
 from gon.linear import (Contour,
                         Multisegment,
                         RawMultisegment,
+                        RawSegment,
                         Segment,
                         vertices)
 from gon.linear.utils import (from_raw_multisegment,
+                              to_pairs_iterable,
                               to_pairs_sequence)
 from gon.primitive import (Point,
+                           RawPoint,
                            _point_to_step)
 from .hints import (RawMultipolygon,
                     RawMultiregion)
@@ -558,6 +561,51 @@ class Multipolygon(Indexable, Shaped):
         """
         return list(self._polygons)
 
+    def distance_to(self, other: Geometry) -> Coordinate:
+        """
+        Returns distance between the multipolygon and the other geometry.
+
+        Time complexity:
+            ``O(vertices_count)``
+        Memory complexity:
+            ``O(1)``
+
+        where ``vertices_count = sum(len(polygon.border.vertices)\
+ + sum(len(hole.vertices) for hole in polygon.holes)\
+ for polygon in self.polygons)``.
+
+        >>> multipolygon = Multipolygon.from_raw(
+        ...         [([(0, 0), (6, 0), (6, 6), (0, 6)],
+        ...           [[(2, 2), (2, 4), (4, 4), (4, 2)]])])
+        >>> multipolygon.distance_to(multipolygon) == 0
+        True
+        """
+        return (self._distance_to_raw_point(other.raw())
+                if isinstance(other, Point)
+                else
+                (min(self._distance_to_raw_point(raw_point)
+                     for raw_point in other._raw)
+                 if isinstance(other, Multipoint)
+                 else
+                 (self._distance_to_raw_segment(other.raw())
+                  if isinstance(other, Segment)
+                  else
+                  (min(self._distance_to_raw_segment(raw_segment)
+                       for raw_segment in other._raw)
+                   if isinstance(other, Multisegment)
+                   else
+                   (min(self._distance_to_raw_segment(raw_segment)
+                        for raw_segment in to_pairs_iterable(other._raw))
+                    if isinstance(other, Contour)
+                    else (min(self._distance_to_raw_segment(raw_segment)
+                              for raw_segment in other._to_raw_edges())
+                          if isinstance(other, Polygon)
+                          else (min(self._distance_to_raw_segment(raw_segment)
+                                    for polygon in other._polygons
+                                    for raw_segment in polygon._to_raw_edges())
+                                if isinstance(other, Multipolygon)
+                                else other.distance_to(self))))))))
+
     def index(self) -> None:
         """
         Pre-processes the multipolygon to potentially improve queries.
@@ -849,6 +897,14 @@ class Multipolygon(Indexable, Shaped):
                                      accurate=False):
             raise ValueError('Polygons should only touch each other '
                              'in discrete number of points.')
+
+    def _distance_to_raw_point(self, other: RawPoint) -> Coordinate:
+        return min(polygon._distance_to_raw_point(other)
+                   for polygon in self._polygons)
+
+    def _distance_to_raw_segment(self, other: RawSegment) -> Coordinate:
+        return min(polygon._distance_to_raw_segment(other)
+                   for polygon in self._polygons)
 
     def _intersect_with_raw_multipolygon(self, other_raw: RawMultipolygon
                                          ) -> Compound:
