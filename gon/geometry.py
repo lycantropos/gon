@@ -43,6 +43,12 @@ class Geometry(ABC):
         """
 
     @abstractmethod
+    def distance_to(self, other: 'Geometry') -> Coordinate:
+        """
+        Returns distance between geometric objects.
+        """
+
+    @abstractmethod
     def raw(self) -> RawGeometry:
         """
         Returns geometric object as combination of Python built-ins.
