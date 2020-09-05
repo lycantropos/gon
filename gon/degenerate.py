@@ -257,6 +257,9 @@ class Empty(Compound):
     def centroid(self) -> NoReturn:
         raise ValueError('Empty geometry has no points.')
 
+    def distance_to(self, other: Geometry) -> NoReturn:
+        raise ValueError('Empty geometry has no points.')
+
     def locate(self, point: Point) -> Location:
         """
         Finds location of the point relative to the empty geometry.
