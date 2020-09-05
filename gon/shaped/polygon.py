@@ -644,13 +644,17 @@ class Polygon(Indexable, Shaped):
                   (min(self._distance_to_raw_segment(raw_segment)
                        for raw_segment in other._raw)
                    if isinstance(other, Multisegment)
-                   else (min(self._distance_to_raw_segment(raw_segment)
-                             for raw_segment in to_pairs_iterable(other._raw))
-                         if isinstance(other, Contour)
-                         else (min(self._distance_to_raw_segment(raw_segment)
-                                   for raw_segment in other._to_raw_edges())
-                               if isinstance(other, Polygon)
-                               else other.distance_to(self)))))))
+                   else
+                   (min(self._distance_to_raw_segment(raw_segment)
+                        for raw_segment in to_pairs_iterable(other._raw))
+                    if isinstance(other, Contour)
+                    else
+                    ((min(self._linear_distance_to_raw_segment(raw_segment)
+                          for raw_segment in other._to_raw_edges())
+                      if self.disjoint(other)
+                      else 0)
+                     if isinstance(other, Polygon)
+                     else other.distance_to(self)))))))
 
     def index(self) -> None:
         """
@@ -913,9 +917,7 @@ class Polygon(Indexable, Shaped):
 
     def _distance_to_raw_segment(self, other: RawSegment) -> Coordinate:
         other_start, other_end = other
-        return (raw_segments_distance(
-                self._path_to_raw_edge(self._raw_segment_nearest_path(other)),
-                other)
+        return (self._linear_distance_to_raw_segment(other)
                 if (self._raw_locate(other_start) is Location.EXTERIOR
                     and self._raw_locate(other_end) is Location.EXTERIOR)
                 else 0)
@@ -928,6 +930,12 @@ class Polygon(Indexable, Shaped):
                         raw_multisegment,
                         [(self._raw_border, self._raw_holes)],
                         accurate=False))
+
+    def _linear_distance_to_raw_segment(self, other: RawSegment
+                                        ) -> Coordinate:
+        return raw_segments_distance(
+                self._path_to_raw_edge(self._raw_segment_nearest_path(other)),
+                other)
 
     def _path_to_raw_edge(self, path: Tuple[int, int]) -> RawSegment:
         contour_id, edge_index = path
