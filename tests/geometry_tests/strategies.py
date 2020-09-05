@@ -20,7 +20,8 @@ from tests.utils import (Strategy,
                          call,
                          cleave_in_tuples,
                          identity,
-                         to_constant)
+                         to_constant,
+                         to_pairs)
 
 CompoundsFactory = Callable[[Strategy[Coordinate]], Strategy[Compound]]
 
@@ -34,12 +35,17 @@ non_empty_compounds_factories = (
                              coordinates_to_polygons,
                              coordinates_to_multipolygons,
                              coordinates_to_mixes]))
-geometries_factories = (strategies.sampled_from([empty_compounds_factory,
-                                                 coordinates_to_points])
-                        | non_empty_compounds_factories)
-geometries = (strategies.builds(call, geometries_factories,
-                                coordinates_strategies)
-              .flatmap(identity))
+non_empty_geometries_factories = (strategies.just(coordinates_to_points)
+                                  | non_empty_compounds_factories)
+geometries_factories = (strategies.just(empty_compounds_factory)
+                        | non_empty_geometries_factories)
+geometries_strategies = strategies.builds(call, geometries_factories,
+                                          coordinates_strategies)
+geometries = geometries_strategies.flatmap(identity)
+non_empty_geometries_pairs = (strategies.builds(call,
+                                                non_empty_geometries_factories,
+                                                coordinates_strategies)
+                              .flatmap(to_pairs))
 empty_compounds_with_coordinates_pairs = (
     coordinates_strategies.flatmap(cleave_in_tuples(empty_compounds_factory,
                                                     identity, identity)))
