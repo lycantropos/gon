@@ -735,6 +735,40 @@ class Multisegment(Indexable, Linear):
                                                          accurate=False))
 
 
+class SegmentalSquaredDistanceNode(segmental.Node):
+    def distance_to_point(self, point: RawPoint,
+                          *,
+                          _minus_inf: Coordinate = -inf) -> Coordinate:
+        return (squared_raw_point_segment_distance(point, self.segment)
+                or _minus_inf
+                if self.is_leaf
+                else squared_raw_interval_point_distance(self.interval, point))
+
+    def distance_to_segment(self, segment: RawSegment,
+                            *,
+                            _minus_inf: Coordinate = -inf) -> Coordinate:
+        return (squared_raw_segments_distance(self.segment, segment)
+                or _minus_inf
+                if self.is_leaf
+                else squared_raw_segment_interval_distance(segment,
+                                                           self.interval))
+
+
+def from_raw_segments(raw_segments: List[RawSegment]) -> Compound:
+    return (Multisegment.from_raw(segments_to_multisegment(raw_segments,
+                                                           accurate=False))
+            if raw_segments
+            else EMPTY)
+
+
+def raw_locate_point(raw_multisegment: RawMultisegment,
+                     raw_point: RawPoint) -> Location:
+    relation = point_in_multisegment(raw_point, raw_multisegment)
+    return (Location.EXTERIOR
+            if relation is Relation.DISJOINT
+            else Location.BOUNDARY)
+
+
 def _scale_segments(segments: Iterable[Segment],
                     factor_x: Coordinate,
                     factor_y: Coordinate) -> Compound:
@@ -751,21 +785,6 @@ def _scale_segments(segments: Iterable[Segment],
                                              factor_y))
     return (from_points(unique_ever_seen(scaled_points))
             | from_raw_segments(scaled_raw_segments))
-
-
-def from_raw_segments(raw_segments: List[RawSegment]) -> Compound:
-    return (Multisegment.from_raw(segments_to_multisegment(raw_segments,
-                                                           accurate=False))
-            if raw_segments
-            else EMPTY)
-
-
-def raw_locate_point(raw_multisegment: RawMultisegment,
-                     raw_point: RawPoint) -> Location:
-    relation = point_in_multisegment(raw_point, raw_multisegment)
-    return (Location.EXTERIOR
-            if relation is Relation.DISJOINT
-            else Location.BOUNDARY)
 
 
 def _to_raw_point_nearest_index(raw_multisegment: RawMultisegment,
@@ -794,22 +813,3 @@ def _to_raw_segment_nearest_index(raw_multisegment: RawMultisegment,
         if candidate_squared_distance < min_squared_distance:
             result, min_squared_distance = index, candidate_squared_distance
     return result
-
-
-class SegmentalSquaredDistanceNode(segmental.Node):
-    def distance_to_point(self, point: RawPoint,
-                          *,
-                          _minus_inf: Coordinate = -inf) -> Coordinate:
-        return (squared_raw_point_segment_distance(point, self.segment)
-                or _minus_inf
-                if self.is_leaf
-                else squared_raw_interval_point_distance(self.interval, point))
-
-    def distance_to_segment(self, segment: RawSegment,
-                            *,
-                            _minus_inf: Coordinate = -inf) -> Coordinate:
-        return (squared_raw_segments_distance(self.segment, segment)
-                or _minus_inf
-                if self.is_leaf
-                else squared_raw_segment_interval_distance(segment,
-                                                           self.interval))
