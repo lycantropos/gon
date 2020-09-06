@@ -263,16 +263,3 @@ def scale_point(point: Point,
                 factor_x: Coordinate,
                 factor_y: Coordinate) -> Point:
     return Point(point._x * factor_x, point._y * factor_y)
-
-
-def scale_raw_point(point: RawPoint,
-                    factor_x: Coordinate,
-                    factor_y: Coordinate) -> RawPoint:
-    x, y = point
-    return x * factor_x, y * factor_y
-
-
-def squared_raw_points_distance(left: RawPoint,
-                                right: RawPoint) -> Coordinate:
-    (left_x, left_y), (right_x, right_y) = left, right
-    return (left_x - right_x) ** 2 + (left_y - right_y) ** 2

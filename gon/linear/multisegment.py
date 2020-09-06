@@ -34,8 +34,8 @@ from gon.hints import Coordinate
 from gon.primitive import (Point,
                            RawPoint)
 from gon.primitive.point import (point_to_step,
-                                 scale_point,
-                                 scale_raw_point)
+                                 scale_point)
+from gon.primitive.raw import scale_raw_point
 from .hints import (RawMultisegment,
                     RawSegment)
 from .raw import (squared_raw_interval_point_distance,

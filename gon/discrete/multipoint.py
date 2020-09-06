@@ -25,8 +25,8 @@ from gon.primitive import (Point,
 from gon.primitive.point import (point_to_step,
                                  rotate_point_around_origin,
                                  rotate_translate_point,
-                                 scale_point,
-                                 squared_raw_points_distance)
+                                 scale_point)
+from gon.primitive.raw import squared_raw_points_distance
 from .hints import RawMultipoint
 
 
