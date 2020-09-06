@@ -13,7 +13,8 @@ from gon.compound import (Compound,
                           Location,
                           Relation)
 from gon.core.arithmetic import (non_negative_min,
-                                 robust_divide)
+                                 robust_divide,
+                                 robust_sqrt)
 from gon.core.iterable import unique_ever_seen
 from gon.degenerate import EMPTY
 from gon.geometry import Geometry
@@ -351,10 +352,10 @@ class Multipoint(Indexable):
         >>> multipoint.distance_to(multipoint) == 0
         True
         """
-        return (self._distance_to_point(other)
+        return (self._distance_to_raw_point(other.raw())
                 if isinstance(other, Point)
-                else (non_negative_min(self._distance_to_point(point)
-                                       for point in other._points)
+                else (non_negative_min(self._distance_to_raw_point(raw_point)
+                                       for raw_point in other._raw)
                       if isinstance(other, Multipoint)
                       else other.distance_to(self)))
 
@@ -533,9 +534,9 @@ class Multipoint(Indexable):
         for point in self._points:
             point.validate()
 
-    def _distance_to_point(self, other: Point) -> Coordinate:
-        return (self._points[self._raw_nearest_index(other.raw())]
-                .distance_to(other))
+    def _distance_to_raw_point(self, other: RawPoint) -> Coordinate:
+        return robust_sqrt(squared_raw_points_distance(
+                self._points[self._raw_nearest_index(other)], other))
 
     def _relate_geometry(self, other: Compound) -> Relation:
         disjoint = is_subset = not_interior = not_boundary = True
