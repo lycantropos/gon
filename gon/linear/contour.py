@@ -25,9 +25,9 @@ from gon.compound import (Compound,
 from gon.core.arithmetic import (non_negative_min,
                                  robust_divide)
 from gon.degenerate import EMPTY
-from gon.discrete import (Multipoint,
-                          _rotate_points_around_origin,
-                          _rotate_translate_points)
+from gon.discrete import Multipoint
+from gon.discrete.multipoint import (rotate_points_around_origin,
+                                     rotate_translate_points)
 from gon.geometry import Geometry
 from gon.hints import Coordinate
 from gon.primitive import (Point,
@@ -822,8 +822,8 @@ def raw_locate_point(raw_contour: RawContour, raw_point: RawPoint) -> Location:
 def rotate_contour_around_origin(contour: Contour,
                                  cosine: Coordinate,
                                  sine: Coordinate) -> Contour:
-    return Contour(_rotate_points_around_origin(contour._vertices, cosine,
-                                                sine))
+    return Contour(rotate_points_around_origin(contour._vertices, cosine,
+                                               sine))
 
 
 def rotate_translate_contour(contour: Contour,
@@ -831,8 +831,8 @@ def rotate_translate_contour(contour: Contour,
                              sine: Coordinate,
                              step_x: Coordinate,
                              step_y: Coordinate) -> Contour:
-    return Contour(_rotate_translate_points(contour._vertices, cosine, sine,
-                                            step_x, step_y))
+    return Contour(rotate_translate_points(contour._vertices, cosine, sine,
+                                           step_x, step_y))
 
 
 def scale_contour(contour: Contour,

@@ -8,26 +8,25 @@ from typing import (AbstractSet,
 from locus import kd
 from reprit.base import generate_repr
 
-from .compound import (Compound,
-                       Indexable,
-                       Location,
-                       Relation)
-from .core.arithmetic import (non_negative_min,
-                              robust_divide)
-from .core.iterable import unique_ever_seen
-from .degenerate import EMPTY
-from .geometry import Geometry
-from .hints import (Coordinate,
-                    Domain)
-from .primitive import (Point,
-                        RawPoint)
-from .primitive.point import (point_to_step,
-                              rotate_point_around_origin,
-                              rotate_translate_point,
-                              scale_point,
-                              squared_raw_points_distance)
-
-RawMultipoint = List[RawPoint]
+from gon.compound import (Compound,
+                          Indexable,
+                          Location,
+                          Relation)
+from gon.core.arithmetic import (non_negative_min,
+                                 robust_divide)
+from gon.core.iterable import unique_ever_seen
+from gon.degenerate import EMPTY
+from gon.geometry import Geometry
+from gon.hints import (Coordinate,
+                       Domain)
+from gon.primitive import (Point,
+                           RawPoint)
+from gon.primitive.point import (point_to_step,
+                                 rotate_point_around_origin,
+                                 rotate_translate_point,
+                                 scale_point,
+                                 squared_raw_points_distance)
+from .hints import RawMultipoint
 
 
 class Multipoint(Indexable):
@@ -450,11 +449,11 @@ class Multipoint(Indexable):
         ...  == Multipoint.from_raw([(2, 0), (2, 1), (1, 0)]))
         True
         """
-        return (Multipoint(*_rotate_points_around_origin(self._points, cosine,
-                                                         sine))
+        return (Multipoint(*rotate_points_around_origin(self._points, cosine,
+                                                        sine))
                 if point is None
                 else
-                Multipoint(*_rotate_translate_points(
+                Multipoint(*rotate_translate_points(
                         self._points, cosine, sine,
                         *point_to_step(point, cosine, sine))))
 
@@ -579,18 +578,18 @@ def _to_raw_multipoint_nearest_index(raw_multipoint: RawMultipoint,
     return result
 
 
-def _rotate_points_around_origin(points: Iterable[Point],
-                                 cosine: Coordinate,
-                                 sine: Coordinate) -> List[Point]:
+def rotate_points_around_origin(points: Iterable[Point],
+                                cosine: Coordinate,
+                                sine: Coordinate) -> List[Point]:
     return [rotate_point_around_origin(point, cosine, sine)
             for point in points]
 
 
-def _rotate_translate_points(points: Iterable[Point],
-                             cosine: Coordinate,
-                             sine: Coordinate,
-                             step_x: Coordinate,
-                             step_y: Coordinate) -> List[Point]:
+def rotate_translate_points(points: Iterable[Point],
+                            cosine: Coordinate,
+                            sine: Coordinate,
+                            step_x: Coordinate,
+                            step_y: Coordinate) -> List[Point]:
     return [rotate_translate_point(point, cosine, sine, step_x, step_y)
             for point in points]
 
