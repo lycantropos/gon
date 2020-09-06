@@ -48,10 +48,10 @@ from gon.primitive import (Point,
 from .hints import (RawMultipolygon,
                     RawMultiregion)
 from .polygon import (Polygon,
-                      _polygon_to_centroid_components,
-                      _rotate_translate_polygon,
-                      _scale_polygon,
-                      rotate_polygon_around_origin)
+                      polygon_to_centroid_components,
+                      rotate_polygon_around_origin,
+                      rotate_translate_polygon,
+                      scale_polygon)
 from .utils import (flatten,
                     from_raw_holeless_mix_components,
                     from_raw_mix_components,
@@ -506,10 +506,10 @@ class Multipolygon(Indexable, Shaped):
         """
         polygons = iter(self._polygons)
         (x_numerator, y_numerator,
-         double_area) = _polygon_to_centroid_components(next(polygons))
+         double_area) = polygon_to_centroid_components(next(polygons))
         for polygon in polygons:
             (polygon_x_numerator, polygon_y_numerator,
-             polygon_double_area) = _polygon_to_centroid_components(polygon)
+             polygon_double_area) = polygon_to_centroid_components(polygon)
             x_numerator, y_numerator, double_area = (
                 sum_expansions(x_numerator, polygon_x_numerator),
                 sum_expansions(y_numerator, polygon_y_numerator),
@@ -806,7 +806,7 @@ class Multipolygon(Indexable, Shaped):
         """
         if factor_y is None:
             factor_y = factor_x
-        return (Multipolygon(*[_scale_polygon(polygon, factor_x, factor_y)
+        return (Multipolygon(*[scale_polygon(polygon, factor_x, factor_y)
                                for polygon in self._polygons])
                 if factor_x and factor_y
                 else vertices.scale_degenerate(
@@ -1016,6 +1016,6 @@ def _rotate_translate_multipolygon(multipolygon: Multipolygon,
                                    sine: Coordinate,
                                    step_x: Coordinate,
                                    step_y: Coordinate) -> Multipolygon:
-    return Multipolygon(*[_rotate_translate_polygon(polygon, cosine, sine,
-                                                    step_x, step_y)
+    return Multipolygon(*[rotate_translate_polygon(polygon, cosine, sine,
+                                                   step_x, step_y)
                           for polygon in multipolygon._polygons])
