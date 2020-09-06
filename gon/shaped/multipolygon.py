@@ -49,6 +49,7 @@ from .hints import (RawMultipolygon,
                     RawMultiregion)
 from .polygon import (Polygon,
                       polygon_to_centroid_components,
+                      polygon_to_raw_edges,
                       rotate_polygon_around_origin,
                       rotate_translate_polygon,
                       scale_polygon)
@@ -77,7 +78,7 @@ class Multipolygon(Indexable, Shaped):
         self._polygons = polygons
         self._polygons_set = frozenset(polygons)
         self._raw = [polygon.raw() for polygon in polygons]
-        self._locate = partial(locate_point_in_polygons, self._polygons)
+        self._locate = partial(_locate_point_in_polygons, self._polygons)
 
     __repr__ = generate_repr(__init__)
 
@@ -602,13 +603,13 @@ class Multipolygon(Indexable, Shaped):
                     else
                     (non_negative_min(
                             self._distance_to_raw_segment(raw_segment)
-                            for raw_segment in other._to_raw_edges())
+                            for raw_segment in polygon_to_raw_edges(other))
                      if isinstance(other, Polygon)
                      else
                      (non_negative_min(
                              self._distance_to_raw_segment(raw_segment)
                              for polygon in other._polygons
-                             for raw_segment in polygon._to_raw_edges())
+                             for raw_segment in polygon_to_raw_edges(polygon))
                       if isinstance(other, Multipolygon)
                       else other.distance_to(self))))))))
 
@@ -652,7 +653,7 @@ class Multipolygon(Indexable, Shaped):
             return (x_min, x_max), (y_min, y_max)
 
         tree = r.Tree([polygon_to_interval(polygon) for polygon in polygons])
-        self._locate = partial(locate_point_in_indexed_polygons, tree,
+        self._locate = partial(_locate_point_in_indexed_polygons, tree,
                                polygons)
 
     def locate(self, point: Point) -> Location:
@@ -774,7 +775,7 @@ class Multipolygon(Indexable, Shaped):
         ...           [[(0, 2), (-2, 2), (-2, 4), (0, 4)]])])
         True
         """
-        return (rotate_multipolygon_around_origin(self, cosine, sine)
+        return (_rotate_multipolygon_around_origin(self, cosine, sine)
                 if point is None
                 else _rotate_translate_multipolygon(
                 self, cosine, sine, *point_to_step(point, cosine, sine)))
@@ -918,12 +919,12 @@ class Multipolygon(Indexable, Shaped):
         return (from_raw_mix_components(
                 *complete_intersect_multipolygons(raw, other_raw,
                                                   accurate=False))
-                if (raw_multipolygon_has_holes(raw)
-                    or raw_multipolygon_has_holes(other_raw))
+                if (_raw_multipolygon_has_holes(raw)
+                    or _raw_multipolygon_has_holes(other_raw))
                 else from_raw_holeless_mix_components(
                 *complete_intersect_multiregions(
-                        raw_multipolygon_to_multiregion(raw),
-                        raw_multipolygon_to_multiregion(other_raw),
+                        _raw_multipolygon_to_multiregion(raw),
+                        _raw_multipolygon_to_multiregion(other_raw),
                         accurate=False)))
 
     def _intersect_with_raw_multisegment(self,
@@ -976,16 +977,16 @@ class Multipolygon(Indexable, Shaped):
                                                          accurate=False))
 
 
-def raw_multipolygon_has_holes(raw: RawMultipolygon) -> bool:
+def _raw_multipolygon_has_holes(raw: RawMultipolygon) -> bool:
     return any(holes for _, holes in raw)
 
 
-def raw_multipolygon_to_multiregion(raw: RawMultipolygon) -> RawMultiregion:
+def _raw_multipolygon_to_multiregion(raw: RawMultipolygon) -> RawMultiregion:
     return [border for border, _ in raw]
 
 
-def locate_point_in_polygons(polygons: Sequence[Polygon],
-                             point: Point) -> Location:
+def _locate_point_in_polygons(polygons: Sequence[Polygon],
+                              point: Point) -> Location:
     for polygon in polygons:
         location = polygon.locate(point)
         if location is not Location.EXTERIOR:
@@ -993,8 +994,9 @@ def locate_point_in_polygons(polygons: Sequence[Polygon],
     return Location.EXTERIOR
 
 
-def locate_point_in_indexed_polygons(tree: r.Tree, polygons: Sequence[Polygon],
-                                     point: Point) -> Location:
+def _locate_point_in_indexed_polygons(tree: r.Tree,
+                                      polygons: Sequence[Polygon],
+                                      point: Point) -> Location:
     candidates_indices = tree.find_supersets_indices(((point.x, point.x),
                                                       (point.y, point.y)))
     for candidate_index in candidates_indices:
@@ -1004,9 +1006,9 @@ def locate_point_in_indexed_polygons(tree: r.Tree, polygons: Sequence[Polygon],
     return Location.EXTERIOR
 
 
-def rotate_multipolygon_around_origin(multipolygon: Multipolygon,
-                                      cosine: Coordinate,
-                                      sine: Coordinate) -> Multipolygon:
+def _rotate_multipolygon_around_origin(multipolygon: Multipolygon,
+                                       cosine: Coordinate,
+                                       sine: Coordinate) -> Multipolygon:
     return Multipolygon(*[rotate_polygon_around_origin(polygon, cosine, sine)
                           for polygon in multipolygon._polygons])
 
