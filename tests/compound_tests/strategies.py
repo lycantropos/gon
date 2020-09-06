@@ -1,6 +1,5 @@
 from itertools import chain
-from typing import (Callable,
-                    Iterable,
+from typing import (Iterable,
                     Tuple)
 
 from hypothesis import strategies
@@ -8,7 +7,6 @@ from hypothesis import strategies
 from gon.compound import Compound
 from gon.degenerate import EMPTY
 from gon.discrete import Multipoint
-from gon.hints import Coordinate
 from gon.linear import (Contour,
                         Multisegment,
                         Segment)
@@ -30,8 +28,7 @@ from tests.strategies import (coordinates_strategies,
                               coordinates_to_segments,
                               rational_coordinates_strategies,
                               rational_cosines_sines)
-from tests.utils import (Strategy,
-                         call,
+from tests.utils import (call,
                          cleave_in_tuples,
                          flatten,
                          identity,
@@ -40,8 +37,6 @@ from tests.utils import (Strategy,
                          to_pairs,
                          to_triplets,
                          to_unique_ever_seen)
-
-CompoundsFactory = Callable[[Strategy[Coordinate]], Strategy[Compound]]
 
 empty_compounds = strategies.just(EMPTY)
 rational_equidimensional_compounds_strategies = (
