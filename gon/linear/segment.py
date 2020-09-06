@@ -450,7 +450,9 @@ class Segment(Compound, Linear):
         >>> segment.locate(segment.end) is Location.BOUNDARY
         True
         """
-        return _raw_locate_point(self._raw, point.raw())
+        return (Location.BOUNDARY
+                if point_in_segment(point.raw(), self._raw)
+                else Location.EXTERIOR)
 
     def raw(self) -> RawSegment:
         """
@@ -561,9 +563,6 @@ class Segment(Compound, Linear):
         self._end.validate()
         if self._start == self._end:
             raise ValueError('Segment is degenerate.')
-
-    def _distance_to_point(self, raw_point: Point) -> Coordinate:
-        return
 
     def _intersect_with_segment(self, other: 'Segment') -> Compound:
         intersections = [Point.from_raw(raw_point)
@@ -695,14 +694,6 @@ def squared_raw_segments_distance(left: RawSegment,
             if (segments_relationship(left, right)
                 is SegmentsRelationship.NONE)
             else 0)
-
-
-def _raw_locate_point(raw_segment: RawSegment,
-                      raw_point: RawPoint) -> Location:
-    return (Location.BOUNDARY
-            if point_in_segment(raw_point, raw_segment)
-            else Location.EXTERIOR)
-
 
 def _raw_subtract_overlap(minuend: RawSegment,
                           subtrahend: RawSegment) -> RawSegment:
