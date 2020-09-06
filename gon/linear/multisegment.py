@@ -28,8 +28,8 @@ from gon.core.arithmetic import (non_negative_min,
                                  robust_sqrt)
 from gon.core.iterable import unique_ever_seen
 from gon.degenerate import EMPTY
-from gon.discrete import (Multipoint,
-                          from_points)
+from gon.discrete import Multipoint
+from gon.discrete.multipoint import from_points
 from gon.geometry import Geometry
 from gon.hints import Coordinate
 from gon.primitive import (Point,
