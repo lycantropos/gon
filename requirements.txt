@@ -1,6 +1,6 @@
 bentley_ottmann>=0.8.2
 clipping>=0.11.0
-locus>=0.7.0
+locus>=0.7.1
 orient>=0.9.6
 reprit>=0.2.2
 robust>=0.2.5
