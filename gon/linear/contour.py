@@ -40,11 +40,11 @@ from .hints import (RawContour,
                     Vertices)
 from .multisegment import (Multisegment,
                            SegmentalSquaredDistanceNode)
-from .segment import (Segment,
-                      raw_segment_to_point_distance,
-                      raw_segments_distance,
-                      squared_raw_point_segment_distance,
-                      squared_raw_segments_distance)
+from .raw import (raw_segment_to_point_distance,
+                  raw_segments_distance,
+                  squared_raw_point_segment_distance,
+                  squared_raw_segments_distance)
+from .segment import Segment
 from .utils import (from_raw_mix_components,
                     from_raw_multisegment,
                     relate_multipoint_to_linear_compound,

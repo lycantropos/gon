@@ -11,7 +11,6 @@ from clipping.planar import (complete_intersect_multisegments,
                              symmetric_subtract_multisegments,
                              unite_multisegments)
 from locus import segmental
-from locus.hints import Interval
 from orient.planar import (multisegment_in_multisegment,
                            point_in_multisegment,
                            segment_in_multisegment)
@@ -39,12 +38,14 @@ from gon.primitive.point import (point_to_step,
                                  scale_raw_point)
 from .hints import (RawMultisegment,
                     RawSegment)
+from .raw import (squared_raw_interval_point_distance,
+                  squared_raw_point_segment_distance,
+                  squared_raw_segment_interval_distance,
+                  squared_raw_segments_distance)
 from .segment import (Segment,
                       rotate_segment_around_origin,
                       rotate_translate_segment,
-                      scale_segment,
-                      squared_raw_point_segment_distance,
-                      squared_raw_segments_distance)
+                      scale_segment)
 from .utils import (from_raw_mix_components,
                     from_raw_multisegment,
                     relate_multipoint_to_linear_compound)
@@ -811,68 +812,3 @@ class SegmentalSquaredDistanceNode(segmental.Node):
                 if self.is_leaf
                 else squared_raw_segment_interval_distance(segment,
                                                            self.interval))
-
-
-def squared_raw_interval_point_distance(interval: Interval,
-                                        point: RawPoint) -> Coordinate:
-    x, y = point
-    (min_x, max_x), (min_y, max_y) = interval
-    return (_distance_to_linear_interval(x, min_x, max_x) ** 2
-            + _distance_to_linear_interval(y, min_y, max_y) ** 2)
-
-
-def squared_raw_segment_interval_distance(segment: RawSegment,
-                                          interval: Interval) -> Coordinate:
-    (start_x, start_y), (end_x, end_y) = segment
-    (min_x, max_x), (min_y, max_y) = interval
-    if (min_x <= start_x <= max_x and min_y <= start_y <= max_y
-            or min_x <= end_x <= max_x and min_y <= end_y <= max_y):
-        return 0
-    return (squared_raw_segments_distance(((min_x, min_y), (min_x, max_y)),
-                                          segment)
-            if min_x == max_x
-            else
-            (squared_raw_segments_distance(((min_x, min_y), (max_x, min_y)),
-                                           segment)
-             if min_y == max_y
-             else squared_raw_segment_non_degenerate_interval_distance(
-                    segment, max_x, max_y, min_x, min_y)))
-
-
-def squared_raw_segment_non_degenerate_interval_distance(segment: RawSegment,
-                                                         max_x: Coordinate,
-                                                         max_y: Coordinate,
-                                                         min_x: Coordinate,
-                                                         min_y: Coordinate
-                                                         ) -> Coordinate:
-    bottom_left = min_x, min_y
-    bottom_right = max_x, min_y
-    bottom_side_distance = squared_raw_segments_distance(
-            segment, (bottom_left, bottom_right))
-    if not bottom_side_distance:
-        return bottom_side_distance
-    top_right = max_x, max_y
-    right_side_distance = squared_raw_segments_distance(
-            segment, (bottom_right, top_right))
-    if not right_side_distance:
-        return right_side_distance
-    top_left = min_x, max_y
-    top_side_distance = squared_raw_segments_distance(segment,
-                                                      (top_left, top_right))
-    if not top_side_distance:
-        return top_side_distance
-    left_side_distance = squared_raw_segments_distance(segment,
-                                                       (bottom_left, top_left))
-    return (left_side_distance
-            and min(bottom_side_distance, right_side_distance,
-                    top_side_distance, left_side_distance))
-
-
-def _distance_to_linear_interval(coordinate: Coordinate,
-                                 min_coordinate: Coordinate,
-                                 max_coordinate: Coordinate) -> Coordinate:
-    return (min_coordinate - coordinate
-            if coordinate < min_coordinate
-            else (coordinate - max_coordinate
-                  if coordinate > max_coordinate
-                  else 0))

@@ -55,10 +55,10 @@ from gon.linear.contour import (rotate_contour_around_origin,
                                 scale_contour,
                                 scale_contour_degenerate)
 from gon.linear.multisegment import SegmentalSquaredDistanceNode
-from gon.linear.segment import (raw_segment_to_point_distance,
-                                raw_segments_distance,
-                                squared_raw_point_segment_distance,
-                                squared_raw_segments_distance)
+from gon.linear.raw import (raw_segment_to_point_distance,
+                            raw_segments_distance,
+                            squared_raw_point_segment_distance,
+                            squared_raw_segments_distance)
 from gon.linear.utils import (from_raw_multisegment,
                               to_pairs_iterable,
                               to_pairs_sequence)
