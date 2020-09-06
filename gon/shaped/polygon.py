@@ -53,6 +53,7 @@ from gon.linear.contour import (_rotate_translate_contour,
                                 _scale_contour,
                                 _scale_contour_degenerate,
                                 rotate_contour_around_origin)
+from gon.linear.multisegment import SegmentalSquaredDistanceNode
 from gon.linear.segment import (raw_segment_to_point_distance,
                                 raw_segments_distance,
                                 squared_raw_point_segment_distance,
@@ -675,17 +676,21 @@ class Polygon(Indexable, Shaped):
         """
         graph = polygon_trapezoidal(self._raw_border, self._raw_holes)
         self._raw_locate = graph.locate
-        tree = segmental.Tree(list(self._to_raw_edges()))
-        contours_offsets = tuple(accumulate(chain((0, len(self._raw_border)),
-                                                  map(len, self._raw_holes))))
-        self._raw_point_nearest_path = (
-            partial(_tree_to_raw_point_nearest_path, tree, contours_offsets)
-            if self._raw_holes
-            else partial(_tree_to_holeless_raw_point_nearest_path, tree))
-        self._raw_segment_nearest_path = (
-            partial(_tree_to_raw_segment_nearest_path, tree, contours_offsets)
-            if self._raw_holes
-            else partial(_tree_to_holeless_raw_segment_nearest_path, tree))
+        tree = segmental.Tree(list(self._to_raw_edges()),
+                              node_cls=SegmentalSquaredDistanceNode)
+        if self._raw_holes:
+            contours_offsets = tuple(
+                    accumulate(chain((0, len(self._raw_border)),
+                                     map(len, self._raw_holes))))
+            self._raw_point_nearest_path, self._raw_segment_nearest_path = (
+                partial(_tree_to_raw_point_nearest_path, tree,
+                        contours_offsets),
+                partial(_tree_to_raw_segment_nearest_path, tree,
+                        contours_offsets))
+        else:
+            self._raw_point_nearest_path, self._raw_segment_nearest_path = (
+                partial(_tree_to_holeless_raw_point_nearest_path, tree),
+                partial(_tree_to_holeless_raw_segment_nearest_path, tree))
 
     def locate(self, point: Point) -> Location:
         """
