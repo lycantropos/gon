@@ -3,7 +3,6 @@ from typing import Optional
 from orient.planar import (point_in_segment,
                            segment_in_segment)
 from reprit.base import generate_repr
-from robust.hints import Point
 from robust.linear import (segments_intersection,
                            segments_intersections)
 
