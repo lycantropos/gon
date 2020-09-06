@@ -1,10 +1,6 @@
-from typing import Callable
-
 from hypothesis import strategies
 
-from gon.compound import Compound
 from gon.degenerate import EMPTY
-from gon.hints import Coordinate
 from tests.strategies import (coordinates_strategies,
                               coordinates_to_contours,
                               coordinates_to_mixes,
@@ -16,14 +12,11 @@ from tests.strategies import (coordinates_strategies,
                               coordinates_to_segments,
                               rational_coordinates_strategies,
                               rational_cosines_sines)
-from tests.utils import (Strategy,
-                         call,
+from tests.utils import (call,
                          cleave_in_tuples,
                          identity,
                          to_constant,
                          to_pairs)
-
-CompoundsFactory = Callable[[Strategy[Coordinate]], Strategy[Compound]]
 
 empty_compounds = strategies.just(EMPTY)
 empty_compounds_factory = to_constant(empty_compounds)
