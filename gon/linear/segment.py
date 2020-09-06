@@ -3,33 +3,29 @@ from typing import Optional
 from orient.planar import (point_in_segment,
                            segment_in_segment)
 from reprit.base import generate_repr
-from robust import projection
 from robust.hints import Point
-from robust.linear import (SegmentsRelationship,
-                           segments_intersection,
-                           segments_intersections,
-                           segments_relationship)
+from robust.linear import (segments_intersection,
+                           segments_intersections)
 
 from gon.compound import (Compound,
                           Linear,
                           Location,
                           Relation)
 from gon.core.arithmetic import (non_negative_min,
-                                 robust_divide,
-                                 robust_sqrt)
+                                 robust_divide)
 from gon.degenerate import EMPTY
 from gon.discrete import Multipoint
 from gon.geometry import Geometry
 from gon.hints import Coordinate
-from gon.primitive import (Point,
-                           RawPoint)
+from gon.primitive import Point
 from gon.primitive.point import (point_to_step,
                                  rotate_point_around_origin,
                                  rotate_translate_point,
-                                 scale_point,
-                                 squared_raw_points_distance)
+                                 scale_point)
 from .hints import (RawMultisegment,
                     RawSegment)
+from .raw import (raw_segment_to_point_distance,
+                  raw_segments_distance)
 from .utils import (from_raw_multisegment,
                     relate_multipoint_to_linear_compound)
 
@@ -632,16 +628,6 @@ class Segment(Compound, Linear):
                              else Multisegment(self, other)))))
 
 
-def raw_segment_to_point_distance(raw_segment: RawSegment,
-                                  raw_point: RawPoint) -> Coordinate:
-    return robust_sqrt(squared_raw_point_segment_distance(raw_point,
-                                                          raw_segment))
-
-
-def raw_segments_distance(left: RawSegment, right: RawSegment) -> Coordinate:
-    return robust_sqrt(squared_raw_segments_distance(left, right))
-
-
 def rotate_segment_around_origin(segment: Segment,
                                  cosine: Coordinate,
                                  sine: Coordinate) -> Segment:
@@ -669,31 +655,6 @@ def scale_segment(segment: Segment,
                 or factor_x and not segment.is_vertical)
             else Multipoint(scale_point(segment._start, factor_x, factor_y)))
 
-
-def squared_raw_point_segment_distance(raw_point: RawPoint,
-                                       raw_segment: RawSegment) -> Coordinate:
-    raw_start, raw_end = raw_segment
-    factor = max(0, min(1, robust_divide(projection.signed_length(
-            raw_start, raw_point, raw_start, raw_end),
-            squared_raw_points_distance(raw_end, raw_start))))
-    start_x, start_y = raw_start
-    end_x, end_y = raw_end
-    return squared_raw_points_distance((start_x + factor * (end_x - start_x),
-                                        start_y + factor * (end_y - start_y)),
-                                       raw_point)
-
-
-def squared_raw_segments_distance(left: RawSegment,
-                                  right: RawSegment) -> Coordinate:
-    left_start, left_end = left
-    right_start, right_end = right
-    return (min(squared_raw_point_segment_distance(right_start, left),
-                squared_raw_point_segment_distance(right_end, left),
-                squared_raw_point_segment_distance(left_start, right),
-                squared_raw_point_segment_distance(left_end, right))
-            if (segments_relationship(left, right)
-                is SegmentsRelationship.NONE)
-            else 0)
 
 def _raw_subtract_overlap(minuend: RawSegment,
                           subtrahend: RawSegment) -> RawSegment:
@@ -723,12 +684,6 @@ def _raw_symmetric_subtract_overlap(minuend: RawSegment,
     return [(left_start, left_end), (right_start, right_end)]
 
 
-def _raw_unite_overlap(first_addend: RawSegment,
-                       second_addend: RawSegment) -> RawSegment:
-    start, _, _, end = sorted(first_addend + second_addend)
-    return start, end
-
-
 def _raw_unite_cross(first_addend: RawSegment,
                      second_addend: RawSegment) -> RawMultisegment:
     cross_point = segments_intersection(first_addend, second_addend)
@@ -738,3 +693,9 @@ def _raw_unite_cross(first_addend: RawSegment,
             (second_addend_start, cross_point),
             (cross_point, first_addend_end),
             (cross_point, second_addend_end)]
+
+
+def _raw_unite_overlap(first_addend: RawSegment,
+                       second_addend: RawSegment) -> RawSegment:
+    start, _, _, end = sorted(first_addend + second_addend)
+    return start, end
