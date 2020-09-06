@@ -8,7 +8,9 @@ from gon.compound import (Compound,
                           Location,
                           Relation,
                           Shaped)
-from gon.degenerate import (EMPTY, Maybe, RAW_EMPTY)
+from gon.degenerate import (EMPTY,
+                            RAW_EMPTY,
+                            Maybe)
 from gon.discrete import Multipoint
 from gon.geometry import Geometry
 from gon.hints import Coordinate
