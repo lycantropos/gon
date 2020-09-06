@@ -92,6 +92,14 @@ rational_non_empty_compounds = (
 rational_non_empty_compounds_with_cosines_sines = strategies.tuples(
         rational_non_empty_compounds, rational_cosines_sines)
 empty_compounds_with_compounds = strategies.tuples(empty_compounds, compounds)
+non_empty_compounds_with_points = (
+    (strategies.builds(call,
+                       non_empty_compounds_factories
+                       .map(lambda factory
+                            : cleave_in_tuples(factory,
+                                               coordinates_to_points)),
+                       coordinates_strategies)
+     .flatmap(identity)))
 compounds_with_points = (
     (strategies.builds(call,
                        compounds_factories
