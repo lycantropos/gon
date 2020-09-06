@@ -56,11 +56,19 @@ non_empty_compounds_factories = (
         strategies.sampled_from([coordinates_to_multipoints,
                                  coordinates_to_segments])
         | indexables_factories)
+non_empty_geometries_factories = (strategies.just(coordinates_to_points)
+                                  | non_empty_compounds_factories)
 compounds_factories = (strategies.just(to_constant(empty_compounds))
                        | non_empty_compounds_factories)
 indexables = (strategies.builds(call, indexables_factories,
                                 coordinates_strategies)
               .flatmap(identity))
+indexables_with_non_empty_geometries = strategies.builds(
+        call,
+        (strategies.tuples(indexables_factories,
+                           non_empty_geometries_factories)
+         .map(pack(cleave_in_tuples))),
+        coordinates_strategies).flatmap(identity)
 non_empty_compounds_strategies = strategies.builds(
         call, non_empty_compounds_factories, coordinates_strategies)
 non_empty_compounds = non_empty_compounds_strategies.flatmap(identity)
