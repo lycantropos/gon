@@ -13,8 +13,7 @@ from gon.compound import (Compound,
                           Location,
                           Relation)
 from gon.core.arithmetic import (non_negative_min,
-                                 robust_divide,
-                                 robust_sqrt)
+                                 robust_divide)
 from gon.core.iterable import unique_ever_seen
 from gon.degenerate import EMPTY
 from gon.geometry import Geometry
@@ -26,7 +25,8 @@ from gon.primitive.point import (point_to_step,
                                  rotate_point_around_origin,
                                  rotate_translate_point,
                                  scale_point)
-from gon.primitive.raw import squared_raw_points_distance
+from gon.primitive.raw import (raw_points_distance,
+                               squared_raw_points_distance)
 from .hints import RawMultipoint
 
 
@@ -535,8 +535,8 @@ class Multipoint(Indexable):
             point.validate()
 
     def _distance_to_raw_point(self, other: RawPoint) -> Coordinate:
-        return robust_sqrt(squared_raw_points_distance(
-                self._points[self._raw_nearest_index(other)], other))
+        return raw_points_distance(
+                self._points[self._raw_nearest_index(other)], other)
 
     def _relate_geometry(self, other: Compound) -> Relation:
         disjoint = is_subset = not_interior = not_boundary = True

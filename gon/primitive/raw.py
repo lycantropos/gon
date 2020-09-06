@@ -1,5 +1,10 @@
+from gon.core.arithmetic import robust_sqrt
 from gon.hints import Coordinate
 from .hints import RawPoint
+
+
+def raw_points_distance(left: RawPoint, right: RawPoint) -> Coordinate:
+    return robust_sqrt(squared_raw_points_distance(left, right))
 
 
 def scale_raw_point(point: RawPoint,
