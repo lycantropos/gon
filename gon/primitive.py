@@ -1,6 +1,6 @@
-import math
 from decimal import Decimal
 from fractions import Fraction
+from math import isfinite
 from typing import (Optional,
                     Tuple)
 
@@ -234,8 +234,8 @@ class Point(Geometry):
 
         >>> Point(0, 0).validate()
         """
-        _validate_coordinate(self._x)
-        _validate_coordinate(self._y)
+        if not (isfinite(self._x) and isfinite(self._y)):
+            raise ValueError('NaN/infinity coordinates are not supported.')
 
 
 def _rotate_point_around_origin(point: Point,
@@ -282,8 +282,3 @@ def _to_decimal(value: Coordinate) -> Decimal:
     return (Decimal(value.numerator) / value.denominator
             if isinstance(value, Fraction)
             else Decimal(value))
-
-
-def _validate_coordinate(value: Coordinate) -> None:
-    if not math.isfinite(value):
-        raise ValueError('NaN/infinity coordinates are not supported.')
