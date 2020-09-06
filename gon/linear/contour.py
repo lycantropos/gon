@@ -37,7 +37,8 @@ from .hints import (RawContour,
                     RawMultisegment,
                     RawSegment,
                     Vertices)
-from .multisegment import Multisegment
+from .multisegment import (Multisegment,
+                           SegmentalSquaredDistanceNode)
 from .segment import (Segment,
                       raw_segment_to_point_distance,
                       raw_segments_distance,
@@ -529,7 +530,8 @@ class Contour(Indexable, Linear):
         raw_contour = self._raw
         graph = multisegment_trapezoidal(to_pairs_sequence(raw_contour))
         self._raw_locate = graph.locate
-        tree = segmental.Tree(to_pairs_sequence(raw_contour))
+        tree = segmental.Tree(to_pairs_sequence(raw_contour),
+                              node_cls=SegmentalSquaredDistanceNode)
         self._raw_point_nearest_index = tree.nearest_to_point_index
         self._raw_segment_nearest_index = tree.nearest_index
 
