@@ -41,7 +41,7 @@ from .hints import (RawContour,
                     Vertices)
 from .multisegment import (Multisegment,
                            SegmentalSquaredDistanceNode)
-from .raw import (raw_segment_to_point_distance,
+from .raw import (raw_segment_point_distance,
                   raw_segments_distance,
                   squared_raw_point_segment_distance,
                   squared_raw_segments_distance)
@@ -761,14 +761,9 @@ class Contour(Indexable, Linear):
         if edges_intersect(self._raw):
             raise ValueError('Contour should not be self-intersecting.')
 
-    def _distance_to_contour(self, other: 'Contour') -> Coordinate:
-        return (self._raw_edge(self._raw_segment_nearest_index(other.raw()))
-                .distance_to(other))
-
     def _distance_to_raw_point(self, other: RawPoint) -> Coordinate:
-        return raw_segment_to_point_distance(
-                self._raw_edge(self._raw_point_nearest_index(other)),
-                other)
+        return raw_segment_point_distance(
+                self._raw_edge(self._raw_point_nearest_index(other)), other)
 
     def _distance_to_raw_segment(self, other: RawSegment) -> Coordinate:
         return raw_segments_distance(

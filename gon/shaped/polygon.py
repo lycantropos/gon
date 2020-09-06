@@ -55,7 +55,7 @@ from gon.linear.contour import (rotate_contour_around_origin,
                                 scale_contour,
                                 scale_contour_degenerate)
 from gon.linear.multisegment import SegmentalSquaredDistanceNode
-from gon.linear.raw import (raw_segment_to_point_distance,
+from gon.linear.raw import (raw_segment_point_distance,
                             raw_segments_distance,
                             squared_raw_point_segment_distance,
                             squared_raw_segments_distance)
@@ -917,7 +917,7 @@ class Polygon(Indexable, Shaped):
                 raise ValueError('Holes should lie inside border.')
 
     def _distance_to_raw_point(self, other: RawPoint) -> Coordinate:
-        return (raw_segment_to_point_distance(
+        return (raw_segment_point_distance(
                 self._path_to_raw_edge(self._raw_point_nearest_path(other)),
                 other)
                 if self._raw_locate(other) is Location.EXTERIOR

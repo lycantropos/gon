@@ -38,7 +38,8 @@ from gon.primitive.point import (point_to_step,
 from gon.primitive.raw import scale_raw_point
 from .hints import (RawMultisegment,
                     RawSegment)
-from .raw import (squared_raw_interval_point_distance,
+from .raw import (raw_segment_point_distance,
+                  squared_raw_interval_point_distance,
                   squared_raw_point_segment_distance,
                   squared_raw_segment_interval_distance,
                   squared_raw_segments_distance)
@@ -692,8 +693,8 @@ class Multisegment(Indexable, Linear):
             raise ValueError('Crossing or overlapping segments found.')
 
     def _distance_to_raw_point(self, other: RawPoint) -> Coordinate:
-        return robust_sqrt(squared_raw_point_segment_distance(
-                other, self._raw[self._raw_point_nearest_index(other)]))
+        return raw_segment_point_distance(
+                self._raw[self._raw_point_nearest_index(other)], other)
 
     def _distance_to_raw_segment(self, other: RawSegment) -> Coordinate:
         return robust_sqrt(squared_raw_segments_distance(

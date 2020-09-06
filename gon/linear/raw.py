@@ -11,8 +11,8 @@ from gon.primitive.raw import squared_raw_points_distance
 from .hints import RawSegment
 
 
-def raw_segment_to_point_distance(raw_segment: RawSegment,
-                                  raw_point: RawPoint) -> Coordinate:
+def raw_segment_point_distance(raw_segment: RawSegment,
+                               raw_point: RawPoint) -> Coordinate:
     return robust_sqrt(squared_raw_point_segment_distance(raw_point,
                                                           raw_segment))
 

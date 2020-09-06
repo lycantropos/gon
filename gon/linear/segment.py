@@ -23,7 +23,7 @@ from gon.primitive.point import (point_to_step,
                                  scale_point)
 from .hints import (RawMultisegment,
                     RawSegment)
-from .raw import (raw_segment_to_point_distance,
+from .raw import (raw_segment_point_distance,
                   raw_segments_distance)
 from .utils import (from_raw_multisegment,
                     relate_multipoint_to_linear_compound)
@@ -419,16 +419,15 @@ class Segment(Compound, Linear):
         >>> segment.distance_to(segment) == 0
         True
         """
-        return (raw_segment_to_point_distance(self._raw, other.raw())
+        return (raw_segment_point_distance(self._raw, other.raw())
                 if isinstance(other, Point)
-                else
-                (non_negative_min(raw_segment_to_point_distance(self._raw,
-                                                                raw_point)
-                                  for raw_point in other._raw)
-                 if isinstance(other, Multipoint)
-                 else (raw_segments_distance(self._raw, other._raw)
-                       if isinstance(other, Segment)
-                       else other.distance_to(self))))
+                else (non_negative_min(raw_segment_point_distance(self._raw,
+                                                                  raw_point)
+                                       for raw_point in other._raw)
+                      if isinstance(other, Multipoint)
+                      else (raw_segments_distance(self._raw, other._raw)
+                            if isinstance(other, Segment)
+                            else other.distance_to(self))))
 
     def locate(self, point: Point) -> Location:
         """
