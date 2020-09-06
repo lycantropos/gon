@@ -24,7 +24,8 @@ from .primitive import (Point,
                         _point_to_step,
                         _rotate_point_around_origin,
                         _rotate_translate_point,
-                        _scale_point)
+                        _scale_point,
+                        _squared_raw_points_distance)
 
 RawMultipoint = List[RawPoint]
 
@@ -577,12 +578,6 @@ def _to_raw_multipoint_nearest_index(raw_multipoint: RawMultipoint,
         if candidate_distance < min_distance:
             result, min_distance = index, candidate_distance
     return result
-
-
-def _squared_raw_points_distance(left: RawPoint,
-                                 right: RawPoint) -> Coordinate:
-    (left_x, left_y), (right_x, right_y) = left, right
-    return (left_x - right_x) ** 2 + (left_y - right_y) ** 2
 
 
 def _rotate_points_around_origin(points: Iterable[Point],

@@ -18,8 +18,7 @@ from gon.core.arithmetic import (non_negative_min,
                                  robust_divide,
                                  robust_sqrt)
 from gon.degenerate import EMPTY
-from gon.discrete import (Multipoint,
-                          _squared_raw_points_distance)
+from gon.discrete import Multipoint
 from gon.geometry import Geometry
 from gon.hints import Coordinate
 from gon.primitive import (Point,
@@ -27,7 +26,8 @@ from gon.primitive import (Point,
                            _point_to_step,
                            _rotate_point_around_origin,
                            _rotate_translate_point,
-                           _scale_point)
+                           _scale_point,
+                           _squared_raw_points_distance)
 from .hints import (RawMultisegment,
                     RawSegment)
 from .utils import (from_raw_multisegment,
