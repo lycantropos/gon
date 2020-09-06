@@ -1,4 +1,5 @@
 from functools import partial
+from math import inf
 from typing import (Iterable,
                     List,
                     Optional)
@@ -10,6 +11,7 @@ from clipping.planar import (complete_intersect_multisegments,
                              symmetric_subtract_multisegments,
                              unite_multisegments)
 from locus import segmental
+from locus.hints import Interval
 from orient.planar import (multisegment_in_multisegment,
                            point_in_multisegment,
                            segment_in_multisegment)
@@ -508,7 +510,8 @@ class Multisegment(Indexable, Linear):
             raw_segments = self._raw
             graph = multisegment_trapezoidal(raw_segments)
             self._raw_locate = graph.locate
-            tree = segmental.Tree(raw_segments)
+            tree = segmental.Tree(raw_segments,
+                                  node_cls=SegmentalSquaredDistanceNode)
             self._raw_point_nearest_index = tree.nearest_to_point_index
             self._raw_segment_nearest_index = tree.nearest_index
 
@@ -787,3 +790,31 @@ def _to_raw_segment_nearest_index(raw_multisegment: RawMultisegment,
         if candidate_squared_distance < min_squared_distance:
             result, min_squared_distance = index, candidate_squared_distance
     return result
+
+
+class SegmentalSquaredDistanceNode(segmental.Node):
+    def distance_to_point(self, point: RawPoint,
+                          *,
+                          _minus_inf: Coordinate = -inf) -> Coordinate:
+        return (squared_raw_point_segment_distance(point, self.segment)
+                or _minus_inf
+                if self.is_leaf
+                else squared_raw_interval_point_distance(self.interval, point))
+
+
+def squared_raw_interval_point_distance(interval: Interval,
+                                        point: RawPoint) -> Coordinate:
+    x, y = point
+    (min_x, max_x), (min_y, max_y) = interval
+    return (_distance_to_linear_interval(x, min_x, max_x) ** 2
+            + _distance_to_linear_interval(y, min_y, max_y) ** 2)
+
+
+def _distance_to_linear_interval(coordinate: Coordinate,
+                                 min_coordinate: Coordinate,
+                                 max_coordinate: Coordinate) -> Coordinate:
+    return (min_coordinate - coordinate
+            if coordinate < min_coordinate
+            else (coordinate - max_coordinate
+                  if coordinate > max_coordinate
+                  else 0))
