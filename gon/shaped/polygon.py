@@ -679,7 +679,7 @@ class Polygon(Indexable, Shaped):
         """
         graph = polygon_trapezoidal(self._raw_border, self._raw_holes)
         self._raw_locate = graph.locate
-        tree = segmental.Tree(list(self._to_raw_edges()),
+        tree = segmental.Tree(list(polygon_to_raw_edges(self)),
                               node_cls=SegmentalSquaredDistanceNode)
         if self._raw_holes:
             contours_offsets = tuple(
@@ -971,11 +971,6 @@ class Polygon(Indexable, Shaped):
                 [(self._raw_border, self._raw_holes)], raw_multipolygon,
                 accurate=False))
 
-    def _to_raw_edges(self) -> Iterator[RawSegment]:
-        return chain(to_pairs_iterable(self._raw_border),
-                     flatten(to_pairs_iterable(raw_hole)
-                             for raw_hole in self._raw_holes))
-
     def _unite_with_multipoint(self, other: Multipoint) -> Compound:
         # importing here to avoid cyclic imports
         from gon.mixed.mix import from_mix_components
@@ -1013,6 +1008,12 @@ def polygon_to_centroid_components(polygon: Polygon
     return x_numerator, y_numerator, double_area
 
 
+def polygon_to_raw_edges(polygon: Polygon) -> Iterator[RawSegment]:
+    return chain(to_pairs_iterable(polygon._raw_border),
+                 flatten(to_pairs_iterable(raw_hole)
+                         for raw_hole in polygon._raw_holes))
+
+
 def raw_locate_point(raw_polygon: RawPolygon, raw_point: RawPoint) -> Location:
     relation = point_in_polygon(raw_point, raw_polygon)
     return (Location.EXTERIOR
@@ -1020,23 +1021,6 @@ def raw_locate_point(raw_polygon: RawPolygon, raw_point: RawPoint) -> Location:
             else (Location.BOUNDARY
                   if relation is Relation.COMPONENT
                   else Location.INTERIOR))
-
-
-def _raw_contour_to_centroid_components(contour: RawContour
-                                        ) -> Tuple[Expansion, Expansion,
-                                                   Expansion]:
-    double_area = x_numerator = y_numerator = (0,)
-    prev_x, prev_y = contour[-1]
-    for x, y in contour:
-        area_component = _to_endpoints_cross_product_z(prev_x, prev_y, x, y)
-        x_numerator, y_numerator, double_area = (
-            sum_expansions(x_numerator,
-                           scale_expansion(area_component, prev_x + x)),
-            sum_expansions(y_numerator,
-                           scale_expansion(area_component, prev_y + y)),
-            sum_expansions(double_area, area_component))
-        prev_x, prev_y = x, y
-    return x_numerator, y_numerator, double_area
 
 
 def scale_polygon(polygon: Polygon,
@@ -1065,6 +1049,23 @@ def rotate_translate_polygon(polygon: Polygon,
                    [rotate_translate_contour(hole, cosine, sine, step_x,
                                              step_y)
                     for hole in polygon._holes])
+
+
+def _raw_contour_to_centroid_components(contour: RawContour
+                                        ) -> Tuple[Expansion, Expansion,
+                                                   Expansion]:
+    double_area = x_numerator = y_numerator = (0,)
+    prev_x, prev_y = contour[-1]
+    for x, y in contour:
+        area_component = _to_endpoints_cross_product_z(prev_x, prev_y, x, y)
+        x_numerator, y_numerator, double_area = (
+            sum_expansions(x_numerator,
+                           scale_expansion(area_component, prev_x + x)),
+            sum_expansions(y_numerator,
+                           scale_expansion(area_component, prev_y + y)),
+            sum_expansions(double_area, area_component))
+        prev_x, prev_y = x, y
+    return x_numerator, y_numerator, double_area
 
 
 def _to_endpoints_cross_product_z(start_x: Coordinate,
