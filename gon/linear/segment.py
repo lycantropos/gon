@@ -14,16 +14,17 @@ from gon.compound import (Compound,
                           Linear,
                           Location,
                           Relation)
+from gon.core.arithmetic import (non_negative_min,
+                                 robust_divide,
+                                 robust_sqrt)
 from gon.degenerate import EMPTY
 from gon.discrete import (Multipoint,
-                          _robust_divide,
                           _squared_raw_points_distance)
 from gon.geometry import Geometry
 from gon.hints import Coordinate
 from gon.primitive import (Point,
                            RawPoint,
                            _point_to_step,
-                           _robust_sqrt,
                            _rotate_point_around_origin,
                            _rotate_translate_point,
                            _scale_point)
@@ -327,8 +328,8 @@ class Segment(Compound, Linear):
         >>> segment.centroid == Point(1, 0)
         True
         """
-        return Point(_robust_divide(self._start.x + self._end.x, 2),
-                     _robust_divide(self._start.y + self._end.y, 2))
+        return Point(robust_divide(self._start.x + self._end.x, 2),
+                     robust_divide(self._start.y + self._end.y, 2))
 
     @property
     def end(self) -> Point:
@@ -425,12 +426,14 @@ class Segment(Compound, Linear):
         """
         return (raw_segment_to_point_distance(self._raw, other.raw())
                 if isinstance(other, Point)
-                else (min(raw_segment_to_point_distance(self._raw, raw_point)
-                          for raw_point in other._raw)
-                      if isinstance(other, Multipoint)
-                      else (raw_segments_distance(self._raw, other._raw)
-                            if isinstance(other, Segment)
-                            else other.distance_to(self))))
+                else
+                (non_negative_min(raw_segment_to_point_distance(self._raw,
+                                                                raw_point)
+                                  for raw_point in other._raw)
+                 if isinstance(other, Multipoint)
+                 else (raw_segments_distance(self._raw, other._raw)
+                       if isinstance(other, Segment)
+                       else other.distance_to(self))))
 
     def locate(self, point: Point) -> Location:
         """
@@ -631,12 +634,12 @@ class Segment(Compound, Linear):
 
 def raw_segment_to_point_distance(raw_segment: RawSegment,
                                   raw_point: RawPoint) -> Coordinate:
-    return _robust_sqrt(squared_raw_point_segment_distance(raw_point,
-                                                           raw_segment))
+    return robust_sqrt(squared_raw_point_segment_distance(raw_point,
+                                                          raw_segment))
 
 
 def raw_segments_distance(left: RawSegment, right: RawSegment) -> Coordinate:
-    return _robust_sqrt(squared_raw_segments_distance(left, right))
+    return robust_sqrt(squared_raw_segments_distance(left, right))
 
 
 def rotate_segment_around_origin(segment: Segment,
@@ -672,7 +675,7 @@ def scale_segment(segment: Segment,
 def squared_raw_point_segment_distance(raw_point: RawPoint,
                                        raw_segment: RawSegment) -> Coordinate:
     raw_start, raw_end = raw_segment
-    factor = max(0, min(1, _robust_divide(projection.signed_length(
+    factor = max(0, min(1, robust_divide(projection.signed_length(
             raw_start, raw_point, raw_start, raw_end),
             _squared_raw_points_distance(raw_end, raw_start))))
     start_x, start_y = raw_start
