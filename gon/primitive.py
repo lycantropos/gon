@@ -237,6 +237,13 @@ class Point(Geometry):
             raise ValueError('NaN/infinity coordinates are not supported.')
 
 
+def _point_to_step(point: Point,
+                   cosine: Coordinate,
+                   sine: Coordinate) -> Tuple[Coordinate, Coordinate]:
+    rotated_point = _rotate_point_around_origin(point, cosine, sine)
+    return point.x - rotated_point.x, point.y - rotated_point.y
+
+
 def _rotate_point_around_origin(point: Point,
                                 cosine: Coordinate,
                                 sine: Coordinate) -> Point:
@@ -253,13 +260,6 @@ def _rotate_translate_point(point: Point,
                  sine * point._x + cosine * point._y + step_y)
 
 
-def _point_to_step(point: Point,
-                   cosine: Coordinate,
-                   sine: Coordinate) -> Tuple[Coordinate, Coordinate]:
-    rotated_point = _rotate_point_around_origin(point, cosine, sine)
-    return point.x - rotated_point.x, point.y - rotated_point.y
-
-
 def _scale_point(point: Point,
                  factor_x: Coordinate,
                  factor_y: Coordinate) -> Point:
@@ -271,3 +271,9 @@ def _scale_raw_point(point: RawPoint,
                      factor_y: Coordinate) -> RawPoint:
     x, y = point
     return x * factor_x, y * factor_y
+
+
+def _squared_raw_points_distance(left: RawPoint,
+                                 right: RawPoint) -> Coordinate:
+    (left_x, left_y), (right_x, right_y) = left, right
+    return (left_x - right_x) ** 2 + (left_y - right_y) ** 2
