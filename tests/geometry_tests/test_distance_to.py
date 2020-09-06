@@ -1,7 +1,9 @@
 from typing import Tuple
 
+import pytest
 from hypothesis import given
 
+from gon.compound import Compound
 from gon.geometry import Geometry
 from gon.hints import Coordinate
 from . import strategies
@@ -32,3 +34,9 @@ def test_non_negativeness(geometries_pair: Tuple[Geometry, Geometry]) -> None:
     result = left_geometry.distance_to(right_geometry)
 
     assert result >= 0
+
+
+@given(strategies.empty_compounds, strategies.geometries)
+def test_empty(compound: Compound, geometry: Geometry) -> None:
+    with pytest.raises(ValueError):
+        compound.distance_to(geometry)
