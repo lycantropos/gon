@@ -37,9 +37,10 @@ from gon.compound import (Compound,
                           Location,
                           Relation,
                           Shaped)
+from gon.core.arithmetic import (non_negative_min,
+                                 robust_divide)
 from gon.degenerate import EMPTY
-from gon.discrete import (Multipoint,
-                          _robust_divide)
+from gon.discrete import Multipoint
 from gon.geometry import Geometry
 from gon.hints import Coordinate
 from gon.linear import (Contour,
@@ -529,8 +530,8 @@ class Polygon(Indexable, Shaped):
         x_numerator, y_numerator, double_area = _polygon_to_centroid_components(
                 self)
         divisor = 3 * double_area[-1]
-        return Point(_robust_divide(x_numerator[-1], divisor),
-                     _robust_divide(y_numerator[-1], divisor))
+        return Point(robust_divide(x_numerator[-1], divisor),
+                     robust_divide(y_numerator[-1], divisor))
 
     @property
     def convex_hull(self) -> 'Polygon':
@@ -635,23 +636,25 @@ class Polygon(Indexable, Shaped):
         return (self._distance_to_raw_point(other.raw())
                 if isinstance(other, Point)
                 else
-                (min(self._distance_to_raw_point(raw_point)
-                     for raw_point in other._raw)
+                (non_negative_min(self._distance_to_raw_point(raw_point)
+                                  for raw_point in other._raw)
                  if isinstance(other, Multipoint)
                  else
                  (self._distance_to_raw_segment(other.raw())
                   if isinstance(other, Segment)
                   else
-                  (min(self._distance_to_raw_segment(raw_segment)
-                       for raw_segment in other._raw)
+                  (non_negative_min(self._distance_to_raw_segment(raw_segment)
+                                    for raw_segment in other._raw)
                    if isinstance(other, Multisegment)
                    else
-                   (min(self._distance_to_raw_segment(raw_segment)
-                        for raw_segment in to_pairs_iterable(other._raw))
+                   (non_negative_min(
+                           self._distance_to_raw_segment(raw_segment)
+                           for raw_segment in to_pairs_iterable(other._raw))
                     if isinstance(other, Contour)
                     else
-                    ((min(self._linear_distance_to_raw_segment(raw_segment)
-                          for raw_segment in other._to_raw_edges())
+                    ((non_negative_min(
+                            self._linear_distance_to_raw_segment(raw_segment)
+                            for raw_segment in other._to_raw_edges())
                       if self.disjoint(other)
                       else 0)
                      if isinstance(other, Polygon)

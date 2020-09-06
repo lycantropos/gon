@@ -1,11 +1,10 @@
-from decimal import Decimal
-from fractions import Fraction
 from math import isfinite
 from typing import (Optional,
                     Tuple)
 
 from reprit.base import generate_repr
 
+from .core.arithmetic import robust_sqrt
 from .geometry import Geometry
 from .hints import Coordinate
 
@@ -149,8 +148,8 @@ class Point(Geometry):
         >>> point.distance_to(point) == 0
         True
         """
-        return (_robust_sqrt((self._x - other._x) ** 2
-                             + (self._y - other._y) ** 2)
+        return (robust_sqrt((self._x - other._x) ** 2
+                            + (self._y - other._y) ** 2)
                 if isinstance(other, Point)
                 else other.distance_to(self))
 
@@ -261,10 +260,6 @@ def _point_to_step(point: Point,
     return point.x - rotated_point.x, point.y - rotated_point.y
 
 
-def _robust_sqrt(value: Coordinate) -> Coordinate:
-    return Fraction.from_decimal(_to_decimal(value).sqrt())
-
-
 def _scale_point(point: Point,
                  factor_x: Coordinate,
                  factor_y: Coordinate) -> Point:
@@ -276,9 +271,3 @@ def _scale_raw_point(point: RawPoint,
                      factor_y: Coordinate) -> RawPoint:
     x, y = point
     return x * factor_x, y * factor_y
-
-
-def _to_decimal(value: Coordinate) -> Decimal:
-    return (Decimal(value.numerator) / value.denominator
-            if isinstance(value, Fraction)
-            else Decimal(value))

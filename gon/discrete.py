@@ -1,5 +1,3 @@
-import sys
-from fractions import Fraction
 from functools import partial
 from typing import (AbstractSet,
                     Iterable,
@@ -14,6 +12,9 @@ from .compound import (Compound,
                        Indexable,
                        Location,
                        Relation)
+from .core.arithmetic import (non_negative_min,
+                              robust_divide)
+from .core.iterable import unique_ever_seen
 from .degenerate import EMPTY
 from .geometry import Geometry
 from .hints import (Coordinate,
@@ -311,8 +312,8 @@ class Multipoint(Indexable):
             accumulated_x += x
             accumulated_y += y
         divisor = len(self._raw)
-        return Point(_robust_divide(accumulated_x, divisor),
-                     _robust_divide(accumulated_y, divisor))
+        return Point(robust_divide(accumulated_x, divisor),
+                     robust_divide(accumulated_y, divisor))
 
     @property
     def points(self) -> List[Point]:
@@ -347,8 +348,8 @@ class Multipoint(Indexable):
         """
         return (self._distance_to_point(other)
                 if isinstance(other, Point)
-                else (min(self._distance_to_point(point)
-                          for point in other._points)
+                else (non_negative_min(self._distance_to_point(point)
+                                       for point in other._points)
                       if isinstance(other, Multipoint)
                       else other.distance_to(self)))
 
@@ -481,10 +482,10 @@ class Multipoint(Indexable):
         return (Multipoint(*[_scale_point(point, factor_x, factor_y)
                              for point in self._points])
                 if factor_x and factor_y
-                else (Multipoint(*_unique_ever_seen(_scale_point(point,
-                                                                 factor_x,
-                                                                 factor_y)
-                                                    for point in self._points))
+                else (Multipoint(*unique_ever_seen(_scale_point(point,
+                                                                factor_x,
+                                                                factor_y)
+                                                   for point in self._points))
                       if factor_x or factor_y
                       else Multipoint(Point(factor_x, factor_y))))
 
@@ -611,20 +612,6 @@ def _relate_sets(left: Set[Domain], right: Set[Domain]) -> Relation:
                    else Relation.OVERLAP))
             if intersection
             else Relation.DISJOINT)
-
-
-def _robust_divide(dividend: Coordinate, divisor: int) -> Coordinate:
-    return (Fraction(dividend, divisor)
-            if isinstance(dividend, int)
-            else dividend / divisor)
-
-
-if sys.version_info < (3, 6):
-    from collections import OrderedDict
-else:
-    OrderedDict = dict
-_unique_ever_seen = OrderedDict.fromkeys
-del OrderedDict, sys
 
 
 class KdTreeSquaredDistanceNode(kd.Node):

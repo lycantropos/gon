@@ -27,9 +27,10 @@ from gon.compound import (Compound,
                           Linear,
                           Relation,
                           Shaped)
+from gon.core.arithmetic import (non_negative_min,
+                                 robust_divide)
 from gon.degenerate import EMPTY
-from gon.discrete import (Multipoint,
-                          _robust_divide)
+from gon.discrete import Multipoint
 from gon.geometry import Geometry
 from gon.hints import Coordinate
 from gon.linear import (Contour,
@@ -514,8 +515,8 @@ class Multipolygon(Indexable, Shaped):
                 sum_expansions(y_numerator, polygon_y_numerator),
                 sum_expansions(double_area, polygon_double_area))
         divisor = 3 * double_area[-1]
-        return Point(_robust_divide(x_numerator[-1], divisor),
-                     _robust_divide(y_numerator[-1], divisor))
+        return Point(robust_divide(x_numerator[-1], divisor),
+                     robust_divide(y_numerator[-1], divisor))
 
     @property
     def perimeter(self) -> Coordinate:
@@ -583,28 +584,33 @@ class Multipolygon(Indexable, Shaped):
         return (self._distance_to_raw_point(other.raw())
                 if isinstance(other, Point)
                 else
-                (min(self._distance_to_raw_point(raw_point)
-                     for raw_point in other._raw)
+                (non_negative_min(self._distance_to_raw_point(raw_point)
+                                  for raw_point in other._raw)
                  if isinstance(other, Multipoint)
                  else
                  (self._distance_to_raw_segment(other.raw())
                   if isinstance(other, Segment)
                   else
-                  (min(self._distance_to_raw_segment(raw_segment)
-                       for raw_segment in other._raw)
+                  (non_negative_min(self._distance_to_raw_segment(raw_segment)
+                                    for raw_segment in other._raw)
                    if isinstance(other, Multisegment)
                    else
-                   (min(self._distance_to_raw_segment(raw_segment)
-                        for raw_segment in to_pairs_iterable(other._raw))
+                   (non_negative_min(
+                           self._distance_to_raw_segment(raw_segment)
+                           for raw_segment in to_pairs_iterable(other._raw))
                     if isinstance(other, Contour)
-                    else (min(self._distance_to_raw_segment(raw_segment)
-                              for raw_segment in other._to_raw_edges())
-                          if isinstance(other, Polygon)
-                          else (min(self._distance_to_raw_segment(raw_segment)
-                                    for polygon in other._polygons
-                                    for raw_segment in polygon._to_raw_edges())
-                                if isinstance(other, Multipolygon)
-                                else other.distance_to(self))))))))
+                    else
+                    (non_negative_min(
+                            self._distance_to_raw_segment(raw_segment)
+                            for raw_segment in other._to_raw_edges())
+                     if isinstance(other, Polygon)
+                     else
+                     (non_negative_min(
+                             self._distance_to_raw_segment(raw_segment)
+                             for polygon in other._polygons
+                             for raw_segment in polygon._to_raw_edges())
+                      if isinstance(other, Multipolygon)
+                      else other.distance_to(self))))))))
 
     def index(self) -> None:
         """
@@ -899,12 +905,12 @@ class Multipolygon(Indexable, Shaped):
                              'in discrete number of points.')
 
     def _distance_to_raw_point(self, other: RawPoint) -> Coordinate:
-        return min(polygon._distance_to_raw_point(other)
-                   for polygon in self._polygons)
+        return non_negative_min(polygon._distance_to_raw_point(other)
+                                for polygon in self._polygons)
 
     def _distance_to_raw_segment(self, other: RawSegment) -> Coordinate:
-        return min(polygon._distance_to_raw_segment(other)
-                   for polygon in self._polygons)
+        return non_negative_min(polygon._distance_to_raw_segment(other)
+                                for polygon in self._polygons)
 
     def _intersect_with_raw_multipolygon(self, other_raw: RawMultipolygon
                                          ) -> Compound:

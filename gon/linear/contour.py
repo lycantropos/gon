@@ -22,9 +22,10 @@ from gon.compound import (Compound,
                           Linear,
                           Location,
                           Relation)
+from gon.core.arithmetic import (non_negative_min,
+                                 robust_divide)
 from gon.degenerate import EMPTY
 from gon.discrete import (Multipoint,
-                          _robust_divide,
                           _rotate_points_around_origin,
                           _rotate_translate_points)
 from gon.geometry import Geometry
@@ -426,8 +427,8 @@ class Contour(Indexable, Linear):
             accumulated_length += length
             start = end
         divisor = 2 * accumulated_length
-        return Point(_robust_divide(accumulated_x, divisor),
-                     _robust_divide(accumulated_y, divisor))
+        return Point(robust_divide(accumulated_x, divisor),
+                     robust_divide(accumulated_y, divisor))
 
     @property
     def length(self) -> Coordinate:
@@ -497,20 +498,22 @@ class Contour(Indexable, Linear):
         return (self._distance_to_raw_point(other.raw())
                 if isinstance(other, Point)
                 else
-                (min(self._distance_to_raw_point(raw_point)
-                     for raw_point in other._raw)
+                (non_negative_min(self._distance_to_raw_point(raw_point)
+                                  for raw_point in other._raw)
                  if isinstance(other, Multipoint)
                  else
                  (self._distance_to_raw_segment(other.raw())
                   if isinstance(other, Segment)
                   else
-                  (min(self._distance_to_raw_segment(raw_segment)
-                       for raw_segment in other._raw)
+                  (non_negative_min(self._distance_to_raw_segment(raw_segment)
+                                    for raw_segment in other._raw)
                    if isinstance(other, Multisegment)
-                   else (min(self._distance_to_raw_segment(raw_segment)
-                             for raw_segment in to_pairs_iterable(other._raw))
-                         if isinstance(other, Contour)
-                         else other.distance_to(self))))))
+                   else
+                   (non_negative_min(
+                           self._distance_to_raw_segment(raw_segment)
+                           for raw_segment in to_pairs_iterable(other._raw))
+                    if isinstance(other, Contour)
+                    else other.distance_to(self))))))
 
     def index(self) -> None:
         """

@@ -23,17 +23,18 @@ from gon.compound import (Compound,
                           Linear,
                           Location,
                           Relation)
+from gon.core.arithmetic import (non_negative_min,
+                                 robust_divide,
+                                 robust_sqrt)
+from gon.core.iterable import unique_ever_seen
 from gon.degenerate import EMPTY
 from gon.discrete import (Multipoint,
-                          _robust_divide,
-                          _unique_ever_seen,
                           from_points)
 from gon.geometry import Geometry
 from gon.hints import Coordinate
 from gon.primitive import (Point,
                            RawPoint,
                            _point_to_step,
-                           _robust_sqrt,
                            _scale_point,
                            _scale_raw_point)
 from .hints import (RawMultisegment,
@@ -424,8 +425,8 @@ class Multisegment(Indexable, Linear):
             accumulated_y += (segment.start.y + segment.end.y) * length
             accumulated_length += length
         divisor = 2 * accumulated_length
-        return Point(_robust_divide(accumulated_x, divisor),
-                     _robust_divide(accumulated_y, divisor))
+        return Point(robust_divide(accumulated_x, divisor),
+                     robust_divide(accumulated_y, divisor))
 
     @property
     def length(self) -> Coordinate:
@@ -480,15 +481,17 @@ class Multisegment(Indexable, Linear):
         return (self._distance_to_raw_point(other.raw())
                 if isinstance(other, Point)
                 else
-                (min(self._distance_to_raw_point(raw_point)
-                     for raw_point in other._raw)
+                (non_negative_min(self._distance_to_raw_point(raw_point)
+                                  for raw_point in other._raw)
                  if isinstance(other, Multipoint)
-                 else (self._distance_to_raw_segment(other._raw)
-                       if isinstance(other, Segment)
-                       else (min(self._distance_to_raw_segment(raw_segment)
-                                 for raw_segment in other._raw)
-                             if isinstance(other, Multisegment)
-                             else other.distance_to(self)))))
+                 else
+                 (self._distance_to_raw_segment(other._raw)
+                  if isinstance(other, Segment)
+                  else
+                  (non_negative_min(self._distance_to_raw_segment(raw_segment)
+                                    for raw_segment in other._raw)
+                   if isinstance(other, Multisegment)
+                   else other.distance_to(self)))))
 
     def index(self) -> None:
         """
@@ -688,11 +691,11 @@ class Multisegment(Indexable, Linear):
             raise ValueError('Crossing or overlapping segments found.')
 
     def _distance_to_raw_point(self, other: RawPoint) -> Coordinate:
-        return _robust_sqrt(squared_raw_point_segment_distance(
+        return robust_sqrt(squared_raw_point_segment_distance(
                 other, self._raw[self._raw_point_nearest_index(other)]))
 
     def _distance_to_raw_segment(self, other: RawSegment) -> Coordinate:
-        return _robust_sqrt(squared_raw_segments_distance(
+        return robust_sqrt(squared_raw_segments_distance(
                 self._raw[self._raw_segment_nearest_index(other)], other))
 
     def _intersect_with_raw_multisegment(self, other_raw: RawMultisegment
@@ -745,7 +748,7 @@ def _scale_segments(segments: Iterable[Segment],
         else:
             scaled_points.append(_scale_point(segment.start, factor_x,
                                               factor_y))
-    return (from_points(_unique_ever_seen(scaled_points))
+    return (from_points(unique_ever_seen(scaled_points))
             | from_raw_segments(scaled_raw_segments))
 
 
