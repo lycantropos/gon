@@ -29,6 +29,11 @@ from gon.primitive.point import (point_to_step,
 from .hints import RawMultipoint
 
 
+class KdTreeSquaredDistanceNode(kd.Node):
+    def distance_to_point(self, point: RawPoint) -> Coordinate:
+        return squared_raw_points_distance(self.point, point)
+
+
 class Multipoint(Indexable):
     __slots__ = '_points', '_points_set', '_raw', '_raw_nearest_index'
 
@@ -565,19 +570,6 @@ def from_points(points: AbstractSet[Point]) -> Compound:
     return Multipoint(*points) if points else EMPTY
 
 
-def _to_raw_multipoint_nearest_index(raw_multipoint: RawMultipoint,
-                                     raw_point: RawPoint) -> int:
-    enumerated_candidates = enumerate(raw_multipoint)
-    result, candidate = next(enumerated_candidates)
-    distance_to_point = partial(squared_raw_points_distance, raw_point)
-    min_distance = distance_to_point(candidate)
-    for index, candidate in enumerated_candidates:
-        candidate_distance = distance_to_point(candidate)
-        if candidate_distance < min_distance:
-            result, min_distance = index, candidate_distance
-    return result
-
-
 def rotate_points_around_origin(points: Iterable[Point],
                                 cosine: Coordinate,
                                 sine: Coordinate) -> List[Point]:
@@ -607,6 +599,14 @@ def _relate_sets(left: Set[Domain], right: Set[Domain]) -> Relation:
             else Relation.DISJOINT)
 
 
-class KdTreeSquaredDistanceNode(kd.Node):
-    def distance_to_point(self, point: RawPoint) -> Coordinate:
-        return squared_raw_points_distance(self.point, point)
+def _to_raw_multipoint_nearest_index(raw_multipoint: RawMultipoint,
+                                     raw_point: RawPoint) -> int:
+    enumerated_candidates = enumerate(raw_multipoint)
+    result, candidate = next(enumerated_candidates)
+    distance_to_point = partial(squared_raw_points_distance, raw_point)
+    min_distance = distance_to_point(candidate)
+    for index, candidate in enumerated_candidates:
+        candidate_distance = distance_to_point(candidate)
+        if candidate_distance < min_distance:
+            result, min_distance = index, candidate_distance
+    return result
