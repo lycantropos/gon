@@ -50,10 +50,10 @@ from gon.linear import (Contour,
                         RawSegment,
                         Segment,
                         vertices)
-from gon.linear.contour import (_rotate_translate_contour,
-                                _scale_contour,
-                                _scale_contour_degenerate,
-                                rotate_contour_around_origin)
+from gon.linear.contour import (rotate_contour_around_origin,
+                                rotate_translate_contour,
+                                scale_contour,
+                                scale_contour_degenerate)
 from gon.linear.multisegment import SegmentalSquaredDistanceNode
 from gon.linear.segment import (raw_segment_to_point_distance,
                                 raw_segments_distance,
@@ -527,7 +527,7 @@ class Polygon(Indexable, Shaped):
         >>> polygon.centroid == Point(3, 3)
         True
         """
-        x_numerator, y_numerator, double_area = _polygon_to_centroid_components(
+        x_numerator, y_numerator, double_area = polygon_to_centroid_components(
                 self)
         divisor = 3 * double_area[-1]
         return Point(robust_divide(x_numerator[-1], divisor),
@@ -805,9 +805,9 @@ class Polygon(Indexable, Shaped):
         """
         return (rotate_polygon_around_origin(self, cosine, sine)
                 if point is None
-                else _rotate_translate_polygon(self, cosine, sine,
-                                               *_point_to_step(point, cosine,
-                                                               sine)))
+                else rotate_translate_polygon(self, cosine, sine,
+                                              *_point_to_step(point, cosine,
+                                                              sine)))
 
     def scale(self,
               factor_x: Coordinate,
@@ -834,10 +834,10 @@ class Polygon(Indexable, Shaped):
         """
         if factor_y is None:
             factor_y = factor_x
-        return (_scale_polygon(self, factor_x, factor_y)
+        return (scale_polygon(self, factor_x, factor_y)
                 if factor_x and factor_y
-                else _scale_contour_degenerate(self._border, factor_x,
-                                               factor_y))
+                else scale_contour_degenerate(self._border, factor_x,
+                                              factor_y))
 
     def translate(self, step_x: Coordinate, step_y: Coordinate) -> 'Polygon':
         """
@@ -997,9 +997,8 @@ class Polygon(Indexable, Shaped):
                                                          accurate=False))
 
 
-def _polygon_to_centroid_components(polygon: Polygon
-                                    ) -> Tuple[Expansion, Expansion,
-                                               Expansion]:
+def polygon_to_centroid_components(polygon: Polygon
+                                   ) -> Tuple[Expansion, Expansion, Expansion]:
     (x_numerator, y_numerator,
      double_area) = _raw_contour_to_centroid_components(
             polygon._border.to_counterclockwise().raw())
@@ -1040,11 +1039,11 @@ def _raw_contour_to_centroid_components(contour: RawContour
     return x_numerator, y_numerator, double_area
 
 
-def _scale_polygon(polygon: Polygon,
-                   factor_x: Coordinate,
-                   factor_y: Coordinate) -> Polygon:
-    return Polygon(_scale_contour(polygon._border, factor_x, factor_y),
-                   [_scale_contour(hole, factor_x, factor_y)
+def scale_polygon(polygon: Polygon,
+                  factor_x: Coordinate,
+                  factor_y: Coordinate) -> Polygon:
+    return Polygon(scale_contour(polygon._border, factor_x, factor_y),
+                   [scale_contour(hole, factor_x, factor_y)
                     for hole in polygon._holes])
 
 
@@ -1056,15 +1055,15 @@ def rotate_polygon_around_origin(polygon: Polygon,
                     for hole in polygon._holes])
 
 
-def _rotate_translate_polygon(polygon: Polygon,
-                              cosine: Coordinate,
-                              sine: Coordinate,
-                              step_x: Coordinate,
-                              step_y: Coordinate) -> Polygon:
-    return Polygon(_rotate_translate_contour(polygon._border, cosine, sine,
-                                             step_x, step_y),
-                   [_rotate_translate_contour(hole, cosine, sine, step_x,
-                                              step_y)
+def rotate_translate_polygon(polygon: Polygon,
+                             cosine: Coordinate,
+                             sine: Coordinate,
+                             step_x: Coordinate,
+                             step_y: Coordinate) -> Polygon:
+    return Polygon(rotate_translate_contour(polygon._border, cosine, sine,
+                                            step_x, step_y),
+                   [rotate_translate_contour(hole, cosine, sine, step_x,
+                                             step_y)
                     for hole in polygon._holes])
 
 

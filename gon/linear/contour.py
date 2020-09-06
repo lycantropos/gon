@@ -638,9 +638,9 @@ class Contour(Indexable, Linear):
         """
         return (rotate_contour_around_origin(self, cosine, sine)
                 if point is None
-                else _rotate_translate_contour(self, cosine, sine,
-                                               *_point_to_step(point, cosine,
-                                                               sine)))
+                else rotate_translate_contour(self, cosine, sine,
+                                              *_point_to_step(point, cosine,
+                                                              sine)))
 
     def scale(self,
               factor_x: Coordinate,
@@ -664,9 +664,9 @@ class Contour(Indexable, Linear):
         """
         if factor_y is None:
             factor_y = factor_x
-        return (_scale_contour(self, factor_x, factor_y)
+        return (scale_contour(self, factor_x, factor_y)
                 if factor_x and factor_y
-                else _scale_contour_degenerate(self, factor_x, factor_y))
+                else scale_contour_degenerate(self, factor_x, factor_y))
 
     def to_clockwise(self) -> 'Contour':
         """
@@ -826,6 +826,27 @@ def rotate_contour_around_origin(contour: Contour,
                                                 sine))
 
 
+def rotate_translate_contour(contour: Contour,
+                             cosine: Coordinate,
+                             sine: Coordinate,
+                             step_x: Coordinate,
+                             step_y: Coordinate) -> Contour:
+    return Contour(_rotate_translate_points(contour._vertices, cosine, sine,
+                                            step_x, step_y))
+
+
+def scale_contour(contour: Contour,
+                  factor_x: Coordinate,
+                  factor_y: Coordinate) -> Contour:
+    return Contour(_vertices.scale(contour._vertices, factor_x, factor_y))
+
+
+def scale_contour_degenerate(contour: Contour,
+                             factor_x: Coordinate,
+                             factor_y: Coordinate) -> Compound:
+    return _vertices.scale_degenerate(contour._vertices, factor_x, factor_y)
+
+
 def _to_raw_point_nearest_index(raw_contour: RawContour,
                                 raw_point: RawPoint) -> int:
     vertex = raw_contour[-1]
@@ -860,24 +881,3 @@ def _to_raw_segment_nearest_index(raw_contour: RawContour,
             result, min_squared_distance = index, candidate_squared_distance
         vertex = next_vertex
     return result
-
-
-def _rotate_translate_contour(contour: Contour,
-                              cosine: Coordinate,
-                              sine: Coordinate,
-                              step_x: Coordinate,
-                              step_y: Coordinate) -> Contour:
-    return Contour(_rotate_translate_points(contour._vertices, cosine, sine,
-                                            step_x, step_y))
-
-
-def _scale_contour(contour: Contour,
-                   factor_x: Coordinate,
-                   factor_y: Coordinate) -> Contour:
-    return Contour(_vertices.scale(contour._vertices, factor_x, factor_y))
-
-
-def _scale_contour_degenerate(contour: Contour,
-                              factor_x: Coordinate,
-                              factor_y: Coordinate) -> Compound:
-    return _vertices.scale_degenerate(contour._vertices, factor_x, factor_y)
