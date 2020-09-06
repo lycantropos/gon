@@ -33,6 +33,7 @@ from gon.hints import Coordinate
 from gon.primitive import (Point,
                            RawPoint)
 from gon.primitive.point import point_to_step
+from gon.primitive.raw import raw_points_distance
 from . import vertices as _vertices
 from .hints import (RawContour,
                     RawMultisegment,
@@ -419,13 +420,14 @@ class Contour(Indexable, Linear):
         True
         """
         accumulated_x = accumulated_y = accumulated_length = 0
-        start = self._vertices[-1]
-        for end in self._vertices:
-            length = end.distance_to(start)
-            accumulated_x += (start.x + end.x) * length
-            accumulated_y += (start.y + end.y) * length
+        start_x, start_y = start = self._raw[-1]
+        for end in self._raw:
+            end_x, end_y = end
+            length = raw_points_distance(start, end)
+            accumulated_x += (start_x + end_x) * length
+            accumulated_y += (start_y + end_y) * length
             accumulated_length += length
-            start = end
+            start, start_x, start_y = end, end_x, end_y
         divisor = 2 * accumulated_length
         return Point(robust_divide(accumulated_x, divisor),
                      robust_divide(accumulated_y, divisor))
