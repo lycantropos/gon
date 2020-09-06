@@ -4,11 +4,10 @@ from typing import (Optional,
 
 from reprit.base import generate_repr
 
-from .core.arithmetic import robust_sqrt
-from .geometry import Geometry
-from .hints import Coordinate
-
-RawPoint = Tuple[Coordinate, Coordinate]
+from gon.core.arithmetic import robust_sqrt
+from gon.geometry import Geometry
+from gon.hints import Coordinate
+from .hints import RawPoint
 
 
 class Point(Geometry):
@@ -185,10 +184,10 @@ class Point(Geometry):
         >>> point.rotate(0, 1, Point(1, 1)) == Point(2, 1)
         True
         """
-        return (_rotate_point_around_origin(self, cosine, sine)
+        return (rotate_point_around_origin(self, cosine, sine)
                 if point is None
-                else _rotate_translate_point(
-                self, cosine, sine, *_point_to_step(point, cosine, sine)))
+                else rotate_translate_point(
+                self, cosine, sine, *point_to_step(point, cosine, sine)))
 
     def scale(self,
               factor_x: Coordinate,
@@ -205,8 +204,8 @@ class Point(Geometry):
         >>> point.scale(1) == point.scale(1, 2) == point
         True
         """
-        return _scale_point(self, factor_x,
-                            factor_x if factor_y is None else factor_y)
+        return scale_point(self, factor_x,
+                           factor_x if factor_y is None else factor_y)
 
     def translate(self, step_x: Coordinate, step_y: Coordinate) -> 'Point':
         """
@@ -237,43 +236,43 @@ class Point(Geometry):
             raise ValueError('NaN/infinity coordinates are not supported.')
 
 
-def _point_to_step(point: Point,
-                   cosine: Coordinate,
-                   sine: Coordinate) -> Tuple[Coordinate, Coordinate]:
-    rotated_point = _rotate_point_around_origin(point, cosine, sine)
+def point_to_step(point: Point,
+                  cosine: Coordinate,
+                  sine: Coordinate) -> Tuple[Coordinate, Coordinate]:
+    rotated_point = rotate_point_around_origin(point, cosine, sine)
     return point.x - rotated_point.x, point.y - rotated_point.y
 
 
-def _rotate_point_around_origin(point: Point,
-                                cosine: Coordinate,
-                                sine: Coordinate) -> Point:
+def rotate_point_around_origin(point: Point,
+                               cosine: Coordinate,
+                               sine: Coordinate) -> Point:
     return Point(cosine * point._x - sine * point._y,
                  sine * point._x + cosine * point._y)
 
 
-def _rotate_translate_point(point: Point,
-                            cosine: Coordinate,
-                            sine: Coordinate,
-                            step_x: Coordinate,
-                            step_y: Coordinate) -> Point:
+def rotate_translate_point(point: Point,
+                           cosine: Coordinate,
+                           sine: Coordinate,
+                           step_x: Coordinate,
+                           step_y: Coordinate) -> Point:
     return Point(cosine * point._x - sine * point._y + step_x,
                  sine * point._x + cosine * point._y + step_y)
 
 
-def _scale_point(point: Point,
-                 factor_x: Coordinate,
-                 factor_y: Coordinate) -> Point:
+def scale_point(point: Point,
+                factor_x: Coordinate,
+                factor_y: Coordinate) -> Point:
     return Point(point._x * factor_x, point._y * factor_y)
 
 
-def _scale_raw_point(point: RawPoint,
-                     factor_x: Coordinate,
-                     factor_y: Coordinate) -> RawPoint:
+def scale_raw_point(point: RawPoint,
+                    factor_x: Coordinate,
+                    factor_y: Coordinate) -> RawPoint:
     x, y = point
     return x * factor_x, y * factor_y
 
 
-def _squared_raw_points_distance(left: RawPoint,
-                                 right: RawPoint) -> Coordinate:
+def squared_raw_points_distance(left: RawPoint,
+                                right: RawPoint) -> Coordinate:
     (left_x, left_y), (right_x, right_y) = left, right
     return (left_x - right_x) ** 2 + (left_y - right_y) ** 2

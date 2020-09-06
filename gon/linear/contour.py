@@ -31,8 +31,8 @@ from gon.discrete import (Multipoint,
 from gon.geometry import Geometry
 from gon.hints import Coordinate
 from gon.primitive import (Point,
-                           RawPoint,
-                           _point_to_step)
+                           RawPoint)
+from gon.primitive.point import point_to_step
 from . import vertices as _vertices
 from .hints import (RawContour,
                     RawMultisegment,
@@ -639,8 +639,8 @@ class Contour(Indexable, Linear):
         return (rotate_contour_around_origin(self, cosine, sine)
                 if point is None
                 else rotate_translate_contour(self, cosine, sine,
-                                              *_point_to_step(point, cosine,
-                                                              sine)))
+                                              *point_to_step(point, cosine,
+                                                             sine)))
 
     def scale(self,
               factor_x: Coordinate,
