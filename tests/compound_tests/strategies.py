@@ -66,9 +66,10 @@ compounds_factories = (strategies.just(to_constant(empty_compounds))
 indexables = (strategies.builds(call, indexables_factories,
                                 coordinates_strategies)
               .flatmap(identity))
-non_empty_compounds = (strategies.builds(call, non_empty_compounds_factories,
-                                         coordinates_strategies)
-                       .flatmap(identity))
+non_empty_compounds_strategies = strategies.builds(
+        call, non_empty_compounds_factories, coordinates_strategies)
+non_empty_compounds = non_empty_compounds_strategies.flatmap(identity)
+non_empty_compounds_pairs = non_empty_compounds_strategies.flatmap(to_pairs)
 compounds = (strategies.builds(call, compounds_factories,
                                coordinates_strategies)
              .flatmap(identity))
