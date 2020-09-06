@@ -20,12 +20,12 @@ from .geometry import Geometry
 from .hints import (Coordinate,
                     Domain)
 from .primitive import (Point,
-                        RawPoint,
-                        _point_to_step,
-                        _rotate_point_around_origin,
-                        _rotate_translate_point,
-                        _scale_point,
-                        _squared_raw_points_distance)
+                        RawPoint)
+from .primitive.point import (point_to_step,
+                              rotate_point_around_origin,
+                              rotate_translate_point,
+                              scale_point,
+                              squared_raw_points_distance)
 
 RawMultipoint = List[RawPoint]
 
@@ -456,7 +456,7 @@ class Multipoint(Indexable):
                 else
                 Multipoint(*_rotate_translate_points(
                         self._points, cosine, sine,
-                        *_point_to_step(point, cosine, sine))))
+                        *point_to_step(point, cosine, sine))))
 
     def scale(self,
               factor_x: Coordinate,
@@ -480,12 +480,11 @@ class Multipoint(Indexable):
         """
         if factor_y is None:
             factor_y = factor_x
-        return (Multipoint(*[_scale_point(point, factor_x, factor_y)
+        return (Multipoint(*[scale_point(point, factor_x, factor_y)
                              for point in self._points])
                 if factor_x and factor_y
-                else (Multipoint(*unique_ever_seen(_scale_point(point,
-                                                                factor_x,
-                                                                factor_y)
+                else (Multipoint(*unique_ever_seen(scale_point(point, factor_x,
+                                                               factor_y)
                                                    for point in self._points))
                       if factor_x or factor_y
                       else Multipoint(Point(factor_x, factor_y))))
@@ -571,7 +570,7 @@ def _to_raw_multipoint_nearest_index(raw_multipoint: RawMultipoint,
                                      raw_point: RawPoint) -> int:
     enumerated_candidates = enumerate(raw_multipoint)
     result, candidate = next(enumerated_candidates)
-    distance_to_point = partial(_squared_raw_points_distance, raw_point)
+    distance_to_point = partial(squared_raw_points_distance, raw_point)
     min_distance = distance_to_point(candidate)
     for index, candidate in enumerated_candidates:
         candidate_distance = distance_to_point(candidate)
@@ -583,7 +582,7 @@ def _to_raw_multipoint_nearest_index(raw_multipoint: RawMultipoint,
 def _rotate_points_around_origin(points: Iterable[Point],
                                  cosine: Coordinate,
                                  sine: Coordinate) -> List[Point]:
-    return [_rotate_point_around_origin(point, cosine, sine)
+    return [rotate_point_around_origin(point, cosine, sine)
             for point in points]
 
 
@@ -592,7 +591,7 @@ def _rotate_translate_points(points: Iterable[Point],
                              sine: Coordinate,
                              step_x: Coordinate,
                              step_y: Coordinate) -> List[Point]:
-    return [_rotate_translate_point(point, cosine, sine, step_x, step_y)
+    return [rotate_translate_point(point, cosine, sine, step_x, step_y)
             for point in points]
 
 
@@ -611,4 +610,4 @@ def _relate_sets(left: Set[Domain], right: Set[Domain]) -> Relation:
 
 class KdTreeSquaredDistanceNode(kd.Node):
     def distance_to_point(self, point: RawPoint) -> Coordinate:
-        return _squared_raw_points_distance(self.point, point)
+        return squared_raw_points_distance(self.point, point)

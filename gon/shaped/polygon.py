@@ -63,8 +63,8 @@ from gon.linear.utils import (from_raw_multisegment,
                               to_pairs_iterable,
                               to_pairs_sequence)
 from gon.primitive import (Point,
-                           RawPoint,
-                           _point_to_step)
+                           RawPoint)
+from gon.primitive.point import point_to_step
 from .hints import (RawMultipolygon,
                     RawPolygon)
 from .utils import (flatten,
@@ -806,8 +806,8 @@ class Polygon(Indexable, Shaped):
         return (rotate_polygon_around_origin(self, cosine, sine)
                 if point is None
                 else rotate_translate_polygon(self, cosine, sine,
-                                              *_point_to_step(point, cosine,
-                                                              sine)))
+                                              *point_to_step(point, cosine,
+                                                             sine)))
 
     def scale(self,
               factor_x: Coordinate,

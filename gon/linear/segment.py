@@ -22,12 +22,12 @@ from gon.discrete import Multipoint
 from gon.geometry import Geometry
 from gon.hints import Coordinate
 from gon.primitive import (Point,
-                           RawPoint,
-                           _point_to_step,
-                           _rotate_point_around_origin,
-                           _rotate_translate_point,
-                           _scale_point,
-                           _squared_raw_points_distance)
+                           RawPoint)
+from gon.primitive.point import (point_to_step,
+                                 rotate_point_around_origin,
+                                 rotate_translate_point,
+                                 scale_point,
+                                 squared_raw_points_distance)
 from .hints import (RawMultisegment,
                     RawSegment)
 from .utils import (from_raw_multisegment,
@@ -507,8 +507,9 @@ class Segment(Compound, Linear):
         """
         return (rotate_segment_around_origin(self, cosine, sine)
                 if point is None
-                else rotate_translate_segment(
-                self, cosine, sine, *_point_to_step(point, cosine, sine)))
+                else rotate_translate_segment(self, cosine, sine,
+                                              *point_to_step(point, cosine,
+                                                             sine)))
 
     def scale(self,
               factor_x: Coordinate,
@@ -645,10 +646,8 @@ def raw_segments_distance(left: RawSegment, right: RawSegment) -> Coordinate:
 def rotate_segment_around_origin(segment: Segment,
                                  cosine: Coordinate,
                                  sine: Coordinate) -> Segment:
-    return Segment(_rotate_point_around_origin(segment._start, cosine,
-                                               sine),
-                   _rotate_point_around_origin(segment._end, cosine,
-                                               sine))
+    return Segment(rotate_point_around_origin(segment._start, cosine, sine),
+                   rotate_point_around_origin(segment._end, cosine, sine))
 
 
 def rotate_translate_segment(segment: Segment,
@@ -656,20 +655,20 @@ def rotate_translate_segment(segment: Segment,
                              sine: Coordinate,
                              step_x: Coordinate,
                              step_y: Coordinate) -> Segment:
-    return Segment(_rotate_translate_point(segment._start, cosine, sine,
-                                           step_x, step_y),
-                   _rotate_translate_point(segment._end, cosine, sine,
-                                           step_x, step_y))
+    return Segment(rotate_translate_point(segment._start, cosine, sine, step_x,
+                                          step_y),
+                   rotate_translate_point(segment._end, cosine, sine, step_x,
+                                          step_y))
 
 
 def scale_segment(segment: Segment,
                   factor_x: Coordinate,
                   factor_y: Coordinate) -> Compound:
-    return (Segment(_scale_point(segment._start, factor_x, factor_y),
-                    _scale_point(segment._end, factor_x, factor_y))
+    return (Segment(scale_point(segment._start, factor_x, factor_y),
+                    scale_point(segment._end, factor_x, factor_y))
             if ((factor_x or not segment.is_horizontal) and factor_y
                 or factor_x and not segment.is_vertical)
-            else Multipoint(_scale_point(segment._start, factor_x, factor_y)))
+            else Multipoint(scale_point(segment._start, factor_x, factor_y)))
 
 
 def squared_raw_point_segment_distance(raw_point: RawPoint,
@@ -677,12 +676,12 @@ def squared_raw_point_segment_distance(raw_point: RawPoint,
     raw_start, raw_end = raw_segment
     factor = max(0, min(1, robust_divide(projection.signed_length(
             raw_start, raw_point, raw_start, raw_end),
-            _squared_raw_points_distance(raw_end, raw_start))))
+            squared_raw_points_distance(raw_end, raw_start))))
     start_x, start_y = raw_start
     end_x, end_y = raw_end
-    return _squared_raw_points_distance((start_x + factor * (end_x - start_x),
-                                         start_y + factor * (end_y - start_y)),
-                                        raw_point)
+    return squared_raw_points_distance((start_x + factor * (end_x - start_x),
+                                        start_y + factor * (end_y - start_y)),
+                                       raw_point)
 
 
 def squared_raw_segments_distance(left: RawSegment,

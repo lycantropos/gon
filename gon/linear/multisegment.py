@@ -33,10 +33,10 @@ from gon.discrete import (Multipoint,
 from gon.geometry import Geometry
 from gon.hints import Coordinate
 from gon.primitive import (Point,
-                           RawPoint,
-                           _point_to_step,
-                           _scale_point,
-                           _scale_raw_point)
+                           RawPoint)
+from gon.primitive.point import (point_to_step,
+                                 scale_point,
+                                 scale_raw_point)
 from .hints import (RawMultisegment,
                     RawSegment)
 from .segment import (Segment,
@@ -610,8 +610,7 @@ class Multisegment(Indexable, Linear):
                 if point is None
                 else Multisegment(
                 *[rotate_translate_segment(segment, cosine, sine,
-                                           *_point_to_step(point, cosine,
-                                                           sine))
+                                           *point_to_step(point, cosine, sine))
                   for segment in self._segments]))
 
     def scale(self,
@@ -741,13 +740,13 @@ def _scale_segments(segments: Iterable[Segment],
     for segment in segments:
         if ((factor_x or not segment.is_horizontal) and factor_y
                 or factor_x and not segment.is_vertical):
-            scaled_raw_segments.append((_scale_raw_point(segment.start.raw(),
-                                                         factor_x, factor_y),
-                                        _scale_raw_point(segment.end.raw(),
-                                                         factor_x, factor_y)))
+            scaled_raw_segments.append((scale_raw_point(segment.start.raw(),
+                                                        factor_x, factor_y),
+                                        scale_raw_point(segment.end.raw(),
+                                                        factor_x, factor_y)))
         else:
-            scaled_points.append(_scale_point(segment.start, factor_x,
-                                              factor_y))
+            scaled_points.append(scale_point(segment.start, factor_x,
+                                             factor_y))
     return (from_points(unique_ever_seen(scaled_points))
             | from_raw_segments(scaled_raw_segments))
 

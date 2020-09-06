@@ -14,8 +14,8 @@ from gon.angular import (Orientation,
 from gon.compound import Compound
 from gon.discrete import Multipoint
 from gon.hints import Coordinate
-from gon.primitive import (Point,
-                           _scale_point)
+from gon.primitive import Point
+from gon.primitive.point import scale_point
 from .hints import Vertices
 from .segment import Segment
 
@@ -92,7 +92,7 @@ def equal(left: Vertices, right: Vertices, same_oriented: bool) -> bool:
 def scale(vertices: Vertices,
           factor_x: Coordinate,
           factor_y: Coordinate) -> Vertices:
-    return [_scale_point(vertex, factor_x, factor_y) for vertex in vertices]
+    return [scale_point(vertex, factor_x, factor_y) for vertex in vertices]
 
 
 def scale_degenerate(vertices: Iterable[Point],
