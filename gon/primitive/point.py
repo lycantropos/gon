@@ -147,8 +147,7 @@ class Point(Geometry):
         >>> point.distance_to(point) == 0
         True
         """
-        return (robust_sqrt((self._x - other._x) ** 2
-                            + (self._y - other._y) ** 2)
+        return (self._distance_to_point(other)
                 if isinstance(other, Point)
                 else other.distance_to(self))
 
@@ -234,6 +233,10 @@ class Point(Geometry):
         """
         if not (isfinite(self._x) and isfinite(self._y)):
             raise ValueError('NaN/infinity coordinates are not supported.')
+
+    def _distance_to_point(self, other: 'Point') -> Coordinate:
+        return robust_sqrt((self._x - other._x) ** 2
+                           + (self._y - other._y) ** 2)
 
 
 def point_to_step(point: Point,

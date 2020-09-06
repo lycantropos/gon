@@ -388,7 +388,7 @@ class Segment(Compound, Linear):
         >>> segment.length == 2
         True
         """
-        return self._end.distance_to(self._start)
+        return self._end._distance_to_point(self._start)
 
     @property
     def start(self) -> Point:
