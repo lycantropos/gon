@@ -7,7 +7,7 @@ from gon.core.arithmetic import (robust_divide,
                                  robust_sqrt)
 from gon.hints import Coordinate
 from gon.primitive import RawPoint
-from gon.primitive.point import squared_raw_points_distance
+from gon.primitive.raw import squared_raw_points_distance
 from .hints import RawSegment
 
 
