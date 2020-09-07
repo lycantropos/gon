@@ -23,7 +23,8 @@ from gon.compound import (Compound,
                           Location,
                           Relation)
 from gon.core.arithmetic import (non_negative_min,
-                                 robust_divide)
+                                 robust_divide,
+                                 robust_sqrt)
 from gon.degenerate import EMPTY
 from gon.discrete import Multipoint
 from gon.discrete.multipoint import (rotate_points_around_origin,
@@ -33,7 +34,6 @@ from gon.hints import Coordinate
 from gon.primitive import (Point,
                            RawPoint)
 from gon.primitive.point import point_to_step
-from gon.primitive.raw import raw_points_distance
 from . import vertices as _vertices
 from .hints import (RawContour,
                     RawMultisegment,
@@ -420,14 +420,14 @@ class Contour(Indexable, Linear):
         True
         """
         accumulated_x = accumulated_y = accumulated_length = 0
-        start_x, start_y = start = self._raw[-1]
-        for end in self._raw:
-            end_x, end_y = end
-            length = raw_points_distance(start, end)
+        start_x, start_y = self._raw[-1]
+        for end_x, end_y in self._raw:
+            length = robust_sqrt((end_x - start_x) ** 2
+                                 + (end_y - start_y) ** 2)
             accumulated_x += (start_x + end_x) * length
             accumulated_y += (start_y + end_y) * length
             accumulated_length += length
-            start, start_x, start_y = end, end_x, end_y
+            start_x, start_y = end_x, end_y
         divisor = 2 * accumulated_length
         return Point(robust_divide(accumulated_x, divisor),
                      robust_divide(accumulated_y, divisor))
