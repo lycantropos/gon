@@ -606,10 +606,12 @@ class Multipolygon(Indexable, Shaped):
                             for raw_segment in polygon_to_raw_edges(other))
                      if isinstance(other, Polygon)
                      else
-                     (non_negative_min(
+                     ((non_negative_min(
                              self._distance_to_raw_segment(raw_segment)
                              for polygon in other._polygons
                              for raw_segment in polygon_to_raw_edges(polygon))
+                       if self.disjoint(other)
+                       else 0)
                       if isinstance(other, Multipolygon)
                       else other.distance_to(self))))))))
 
