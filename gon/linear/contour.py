@@ -758,7 +758,8 @@ class Contour(Indexable, Linear):
                for orientation in _vertices.to_orientations(self._vertices)):
             raise ValueError('Consecutive vertices triplets '
                              'should not be on the same line.')
-        if edges_intersect(self._raw):
+        if edges_intersect(self._raw,
+                           accurate=False):
             raise ValueError('Contour should not be self-intersecting.')
 
     def _distance_to_raw_point(self, other: RawPoint) -> Coordinate:
