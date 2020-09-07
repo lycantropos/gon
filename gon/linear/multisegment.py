@@ -39,6 +39,7 @@ from gon.primitive.raw import scale_raw_point
 from .hints import (RawMultisegment,
                     RawSegment)
 from .raw import (raw_segment_point_distance,
+                  raw_segments_distance,
                   squared_raw_interval_point_distance,
                   squared_raw_point_segment_distance,
                   squared_raw_segment_interval_distance,
@@ -697,8 +698,8 @@ class Multisegment(Indexable, Linear):
                 self._raw[self._raw_point_nearest_index(other)], other)
 
     def _distance_to_raw_segment(self, other: RawSegment) -> Coordinate:
-        return robust_sqrt(squared_raw_segments_distance(
-                self._raw[self._raw_segment_nearest_index(other)], other))
+        return raw_segments_distance(
+                self._raw[self._raw_segment_nearest_index(other)], other)
 
     def _intersect_with_raw_multisegment(self, other_raw: RawMultisegment
                                          ) -> Compound:
