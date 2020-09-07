@@ -897,13 +897,11 @@ class Multipolygon(Indexable, Shaped):
             raise ValueError('Duplicate polygons found.')
         for polygon in self._polygons:
             polygon.validate()
-        polygons_raw_edges = list(flatten(
-                chain(to_pairs_sequence(polygon.border.raw()),
-                      flatten(to_pairs_sequence(hole.raw())
-                              for hole in polygon.holes))
-                for polygon in self._polygons))
+        polygons_raw_edges = list(flatten(polygon_to_raw_edges(polygon)
+                                          for polygon in self._polygons))
         if segments_cross_or_overlap(polygons_raw_edges,
-                                     accurate=False):
+                                     accurate=False,
+                                     validate=False):
             raise ValueError('Polygons should only touch each other '
                              'in discrete number of points.')
 
