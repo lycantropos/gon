@@ -912,9 +912,9 @@ class Polygon(Indexable, Shaped):
             for hole in self._holes:
                 hole.validate()
             relation = region_in_multiregion(self._raw_border, self._raw_holes)
-            if (relation is not Relation.COVER
-                    and relation is not Relation.ENCLOSES):
-                raise ValueError('Holes should lie inside border.')
+            if not (relation is Relation.COVER
+                    or relation is Relation.ENCLOSES):
+                raise ValueError('Holes should lie inside the border.')
 
     def _distance_to_raw_point(self, other: RawPoint) -> Coordinate:
         return (raw_segment_point_distance(
