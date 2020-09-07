@@ -535,8 +535,8 @@ class Multipoint(Indexable):
             point.validate()
 
     def _distance_to_raw_point(self, other: RawPoint) -> Coordinate:
-        return raw_points_distance(
-                self._points[self._raw_nearest_index(other)], other)
+        return raw_points_distance(self._raw[self._raw_nearest_index(other)],
+                                   other)
 
     def _relate_geometry(self, other: Compound) -> Relation:
         disjoint = is_subset = not_interior = not_boundary = True
