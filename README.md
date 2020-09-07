@@ -141,6 +141,10 @@ True
 True
 >>> square.centroid == Point(2, 2)
 True
+>>> square.distance_to(Point(2, 2)) == 0
+True
+>>> square.distance_to(Point(7, 8)) == 5
+True
 >>> (square.rotate(0, 1, Point(4, 4))
 ...  == Polygon.from_raw(([(8, 0), (8, 4), (4, 4), (4, 0)], [])))
 True
