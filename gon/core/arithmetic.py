@@ -12,13 +12,10 @@ def robust_divide(dividend: Coordinate, divisor: int) -> Coordinate:
 
 
 def robust_sqrt(value: Coordinate) -> Coordinate:
-    return Fraction.from_decimal(_to_decimal(value).sqrt())
-
-
-def _to_decimal(value: Coordinate) -> Decimal:
-    return (Decimal(value.numerator) / value.denominator
-            if isinstance(value, Fraction)
-            else Decimal(value))
+    return Fraction.from_decimal((Decimal(value.numerator) / value.denominator
+                                  if isinstance(value, Fraction)
+                                  else Decimal(value))
+                                 .sqrt())
 
 
 def non_negative_min(numbers: Iterable[Coordinate]) -> Coordinate:
