@@ -654,7 +654,7 @@ class Polygon(Indexable, Shaped):
                     else
                     ((non_negative_min(
                             self._linear_distance_to_raw_segment(raw_segment)
-                            for raw_segment in other._to_raw_edges())
+                            for raw_segment in polygon_to_raw_edges(other))
                       if self.disjoint(other)
                       else 0)
                      if isinstance(other, Polygon)
