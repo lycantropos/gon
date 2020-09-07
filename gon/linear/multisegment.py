@@ -690,7 +690,8 @@ class Multisegment(Indexable, Linear):
             raise ValueError('Duplicate segments found.')
         for segment in self._segments:
             segment.validate()
-        if segments_cross_or_overlap(self._raw):
+        if segments_cross_or_overlap(self._raw,
+                                     accurate=False):
             raise ValueError('Crossing or overlapping segments found.')
 
     def _distance_to_raw_point(self, other: RawPoint) -> Coordinate:
