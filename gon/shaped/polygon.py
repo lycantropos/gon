@@ -915,6 +915,11 @@ class Polygon(Indexable, Shaped):
             if not (relation is Relation.COVER
                     or relation is Relation.ENCLOSES):
                 raise ValueError('Holes should lie inside the border.')
+            border_minus_holes = subtract_multipolygons(
+                    [(self._raw_border, [])],
+                    [(raw_hole, []) for raw_hole in self._raw_holes])
+            if len(border_minus_holes) != 1:
+                raise ValueError('Holes should not tear polygon apart.')
 
     def _distance_to_raw_point(self, other: RawPoint) -> Coordinate:
         return (raw_segment_point_distance(
