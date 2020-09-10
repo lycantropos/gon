@@ -20,12 +20,18 @@ from gon.primitive import Point
 from gon.shaped import (Multipolygon,
                         Polygon)
 from tests.utils import (Strategy,
+                         call,
                          pack)
 
 
 def to_non_zero_coordinates(coordinates: Strategy[Coordinate]
                             ) -> Strategy[Coordinate]:
     return coordinates.filter(bool)
+
+
+def to_zero_coordinates(coordinates: Strategy[Coordinate]
+                        ) -> Strategy[Coordinate]:
+    return strategies.builds(call, coordinates.map(type))
 
 
 def coordinates_to_points(coordinates: Strategy[Coordinate]
