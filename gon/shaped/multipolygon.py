@@ -28,7 +28,9 @@ from gon.compound import (Compound,
                           Shaped)
 from gon.core.arithmetic import (non_negative_min,
                                  robust_divide)
-from gon.core.iterable import flatten
+from gon.core.iterable import (flatten,
+                               to_pairs_iterable,
+                               to_pairs_sequence)
 from gon.degenerate import EMPTY
 from gon.discrete import Multipoint
 from gon.geometry import Geometry
@@ -39,9 +41,7 @@ from gon.linear import (Contour,
                         RawSegment,
                         Segment,
                         vertices)
-from gon.linear.utils import (from_raw_multisegment,
-                              to_pairs_iterable,
-                              to_pairs_sequence)
+from gon.linear.utils import from_raw_multisegment
 from gon.primitive import (Point,
                            RawPoint)
 from gon.primitive.point import point_to_step

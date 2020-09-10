@@ -1,14 +1,8 @@
-from typing import (Iterable,
-                    List,
-                    Sequence,
-                    Tuple)
-
 from gon.compound import (Compound,
                           Relation)
 from gon.degenerate import EMPTY
 from gon.discrete import (Multipoint,
                           RawMultipoint)
-from gon.hints import Domain
 from .hints import RawMultisegment
 
 
@@ -26,24 +20,6 @@ def relate_multipoint_to_linear_compound(multipoint: Multipoint,
             else (Relation.COMPONENT
                   if is_subset
                   else Relation.TOUCH))
-
-
-def shift_sequence(sequence: Sequence[Domain], step: int) -> Sequence[Domain]:
-    return (sequence[step:] + sequence[:step]
-            if step
-            else sequence)
-
-
-def to_pairs_iterable(sequence: Sequence[Domain]
-                      ) -> Iterable[Tuple[Domain, Domain]]:
-    return ((sequence[index - 1], sequence[index])
-            for index in range(len(sequence)))
-
-
-def to_pairs_sequence(sequence: Sequence[Domain]
-                      ) -> List[Tuple[Domain, Domain]]:
-    return [(sequence[index - 1], sequence[index])
-            for index in range(len(sequence))]
 
 
 def from_raw_mix_components(raw_multipoint: RawMultipoint,

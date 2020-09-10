@@ -3,10 +3,10 @@ from itertools import chain
 from bentley_ottmann.planar import segments_cross_or_overlap
 from hypothesis import strategies
 
+from gon.core.iterable import to_pairs_sequence
 from gon.degenerate import Empty
 from gon.discrete import Multipoint
 from gon.linear import Multisegment
-from gon.linear.utils import to_pairs_sequence
 from gon.mixed import Mix
 from gon.shaped import Multipolygon
 from tests.strategies import (coordinates_strategies,
