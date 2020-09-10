@@ -11,7 +11,8 @@ from tests.strategies import (coordinates_strategies,
                               coordinates_to_polygons,
                               coordinates_to_segments,
                               rational_coordinates_strategies,
-                              rational_cosines_sines)
+                              rational_cosines_sines,
+                              to_non_zero_coordinates)
 from tests.utils import (call,
                          cleave_in_tuples,
                          identity,
@@ -35,10 +36,13 @@ geometries_factories = (strategies.just(empty_compounds_factory)
 geometries_strategies = strategies.builds(call, geometries_factories,
                                           coordinates_strategies)
 geometries = geometries_strategies.flatmap(identity)
-non_empty_geometries_pairs = (strategies.builds(call,
-                                                non_empty_geometries_factories,
-                                                coordinates_strategies)
-                              .flatmap(to_pairs))
+rational_geometries_with_non_zero_coordinates_pairs = strategies.builds(
+        call,
+        geometries_factories.map(lambda factory
+                                 : cleave_in_tuples(factory,
+                                                    to_non_zero_coordinates,
+                                                    to_non_zero_coordinates)),
+        rational_coordinates_strategies).flatmap(identity)
 empty_compounds_with_coordinates_pairs = (
     coordinates_strategies.flatmap(cleave_in_tuples(empty_compounds_factory,
                                                     identity, identity)))
@@ -62,3 +66,7 @@ rational_geometries_points_with_cosines_sines = strategies.tuples(
 rational_geometries_points_with_cosines_sines_pairs = strategies.tuples(
         rational_geometries_with_points, rational_cosines_sines,
         rational_cosines_sines)
+non_empty_geometries_pairs = (strategies.builds(call,
+                                                non_empty_geometries_factories,
+                                                coordinates_strategies)
+                              .flatmap(to_pairs))

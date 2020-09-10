@@ -127,6 +127,10 @@ def are_compounds_equivalent(left: Compound, right: Compound) -> bool:
     return left == right or left.relate(right) is Relation.EQUAL
 
 
+def robust_invert(value: Coordinate) -> Coordinate:
+    return 1 / Fraction(value)
+
+
 def scale_segment(segment: Segment,
                   *,
                   scale: Coordinate) -> Segment:
