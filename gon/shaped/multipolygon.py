@@ -1,5 +1,4 @@
 from functools import partial
-from itertools import chain
 from typing import (List,
                     Optional,
                     Sequence)
@@ -29,6 +28,7 @@ from gon.compound import (Compound,
                           Shaped)
 from gon.core.arithmetic import (non_negative_min,
                                  robust_divide)
+from gon.core.iterable import flatten
 from gon.degenerate import EMPTY
 from gon.discrete import Multipoint
 from gon.geometry import Geometry
@@ -53,8 +53,7 @@ from .polygon import (Polygon,
                       rotate_polygon_around_origin,
                       rotate_translate_polygon,
                       scale_polygon)
-from .utils import (flatten,
-                    from_raw_holeless_mix_components,
+from .utils import (from_raw_holeless_mix_components,
                     from_raw_mix_components,
                     from_raw_multipolygon)
 

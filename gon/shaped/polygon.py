@@ -39,6 +39,7 @@ from gon.compound import (Compound,
                           Shaped)
 from gon.core.arithmetic import (non_negative_min,
                                  robust_divide)
+from gon.core.iterable import flatten
 from gon.degenerate import EMPTY
 from gon.discrete import Multipoint
 from gon.geometry import Geometry
@@ -67,8 +68,7 @@ from gon.primitive import (Point,
 from gon.primitive.point import point_to_step
 from .hints import (RawMultipolygon,
                     RawPolygon)
-from .utils import (flatten,
-                    from_raw_holeless_mix_components,
+from .utils import (from_raw_holeless_mix_components,
                     from_raw_mix_components,
                     from_raw_multipolygon,
                     to_convex_hull)
