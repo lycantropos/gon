@@ -282,7 +282,7 @@ class Multipoint(Indexable):
                 else NotImplemented)
 
     @classmethod
-    def from_raw(cls, raw: RawMultipoint) -> Domain:
+    def from_raw(cls, raw: RawMultipoint) -> 'Multipoint':
         """
         Constructs multipoint from the combination of Python built-ins.
 
