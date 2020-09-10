@@ -7,13 +7,6 @@ from typing import (Iterable,
 
 from gon.hints import Domain
 
-if sys.version_info < (3, 6):
-    OrderedDict = dict
-else:
-    from collections import OrderedDict
-unique_ever_seen = OrderedDict.fromkeys
-del OrderedDict, sys
-
 flatten = chain.from_iterable
 
 
@@ -33,3 +26,11 @@ def to_pairs_sequence(sequence: Sequence[Domain]
                       ) -> List[Tuple[Domain, Domain]]:
     return [(sequence[index - 1], sequence[index])
             for index in range(len(sequence))]
+
+
+if sys.version_info < (3, 6):
+    OrderedDict = dict
+else:
+    from collections import OrderedDict
+unique_ever_seen = OrderedDict.fromkeys
+del OrderedDict, sys
