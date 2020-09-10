@@ -25,6 +25,9 @@ from gon.compound import (Compound,
 from gon.core.arithmetic import (non_negative_min,
                                  robust_divide,
                                  robust_sqrt)
+from gon.core.iterable import (shift_sequence,
+                               to_pairs_iterable,
+                               to_pairs_sequence)
 from gon.degenerate import EMPTY
 from gon.discrete import Multipoint
 from gon.discrete.multipoint import (rotate_points_around_origin,
@@ -48,10 +51,7 @@ from .raw import (raw_segment_point_distance,
 from .segment import Segment
 from .utils import (from_raw_mix_components,
                     from_raw_multisegment,
-                    relate_multipoint_to_linear_compound,
-                    shift_sequence,
-                    to_pairs_iterable,
-                    to_pairs_sequence)
+                    relate_multipoint_to_linear_compound)
 
 
 class Contour(Indexable, Linear):
