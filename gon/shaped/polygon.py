@@ -555,7 +555,8 @@ class Polygon(Indexable, Shaped):
         """
         return (self
                 if self.is_convex
-                else Polygon(Contour(to_convex_hull(self._border.vertices))))
+                else
+                Polygon(Contour.from_raw(to_convex_hull(self._raw_border))))
 
     @property
     def holes(self) -> List[Contour]:
