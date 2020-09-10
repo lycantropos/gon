@@ -23,6 +23,11 @@ from tests.utils import (Strategy,
                          pack)
 
 
+def to_non_zero_coordinates(coordinates: Strategy[Coordinate]
+                            ) -> Strategy[Coordinate]:
+    return coordinates.filter(bool)
+
+
 def coordinates_to_points(coordinates: Strategy[Coordinate]
                           ) -> Strategy[Point]:
     return strategies.builds(Point, coordinates, coordinates)
