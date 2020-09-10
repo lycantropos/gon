@@ -2,32 +2,33 @@ from typing import (Iterable,
                     List,
                     Sequence)
 
-from gon.angular import (Orientation,
-                         to_orientation)
+from robust.angular import (Orientation,
+                            orientation)
+
 from gon.compound import Compound
 from gon.degenerate import EMPTY
 from gon.discrete import RawMultipoint
 from gon.linear import RawMultisegment
 from gon.linear.utils import (from_raw_multipoint,
                               from_raw_multisegment)
-from gon.primitive import Point
+from gon.primitive import RawPoint
 from .hints import (RawMultipolygon,
                     RawMultiregion)
 
 
-def to_convex_hull(points: Sequence[Point]) -> List[Point]:
+def to_convex_hull(points: Sequence[RawPoint]) -> List[RawPoint]:
     points = sorted(points)
     lower = _to_sub_hull(points)
     upper = _to_sub_hull(reversed(points))
     return lower[:-1] + upper[:-1]
 
 
-def _to_sub_hull(points: Iterable[Point]) -> List[Point]:
+def _to_sub_hull(points: Iterable[RawPoint]) -> List[RawPoint]:
     result = []
     for point in points:
         while len(result) >= 2:
-            if to_orientation(result[-1], result[-2],
-                              point) is not Orientation.COUNTERCLOCKWISE:
+            if orientation(result[-1], result[-2],
+                           point) is not Orientation.COUNTERCLOCKWISE:
                 del result[-1]
             else:
                 break
