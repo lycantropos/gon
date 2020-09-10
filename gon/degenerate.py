@@ -238,7 +238,7 @@ class Empty(Compound):
     __rxor__ = __xor__
 
     @classmethod
-    def from_raw(cls, raw: RawEmpty) -> Domain:
+    def from_raw(cls, raw: RawEmpty) -> 'Empty':
         """
         Constructs empty geometry from the combination of Python built-ins.
 
