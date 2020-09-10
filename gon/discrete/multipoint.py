@@ -2,8 +2,7 @@ from functools import partial
 from typing import (AbstractSet,
                     Iterable,
                     List,
-                    Optional,
-                    Set)
+                    Optional)
 
 from locus import kd
 from reprit.base import generate_repr
@@ -17,8 +16,7 @@ from gon.core.arithmetic import (non_negative_min,
 from gon.core.iterable import unique_ever_seen
 from gon.degenerate import EMPTY
 from gon.geometry import Geometry
-from gon.hints import (Coordinate,
-                       Domain)
+from gon.hints import Coordinate
 from gon.primitive import (Point,
                            RawPoint)
 from gon.primitive.point import (point_to_step,
@@ -587,7 +585,7 @@ def rotate_translate_points(points: Iterable[Point],
             for point in points]
 
 
-def _relate_sets(left: Set[Domain], right: Set[Domain]) -> Relation:
+def _relate_sets(left: AbstractSet, right: AbstractSet) -> Relation:
     if left == right:
         return Relation.EQUAL
     intersection = left & right
