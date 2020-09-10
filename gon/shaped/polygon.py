@@ -920,7 +920,8 @@ class Polygon(Indexable, Shaped):
             border_minus_holes = subtract_multipolygons(
                     [(self._raw_border, [])],
                     [(raw_hole, []) for raw_hole in self._raw_holes])
-            if len(border_minus_holes) != 1:
+            if (len(border_minus_holes) != 1
+                    or Polygon.from_raw(border_minus_holes[0]) != self):
                 raise ValueError('Holes should not tear polygon apart.')
 
     def _distance_to_raw_point(self, other: RawPoint) -> Coordinate:
