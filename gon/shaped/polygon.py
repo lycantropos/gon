@@ -71,7 +71,7 @@ from .hints import (RawMultipolygon,
 from .utils import (from_raw_holeless_mix_components,
                     from_raw_mix_components,
                     from_raw_multipolygon,
-                    to_convex_hull)
+                    to_raw_points_convex_hull)
 
 
 class Polygon(Indexable, Shaped):
@@ -556,7 +556,8 @@ class Polygon(Indexable, Shaped):
         return (self
                 if self.is_convex
                 else
-                Polygon(Contour.from_raw(to_convex_hull(self._raw_border))))
+                Polygon(Contour.from_raw(
+                        to_raw_points_convex_hull(self._raw_border))))
 
     @property
     def holes(self) -> List[Contour]:

@@ -16,14 +16,14 @@ from .hints import (RawMultipolygon,
                     RawMultiregion)
 
 
-def to_convex_hull(points: Sequence[RawPoint]) -> List[RawPoint]:
+def to_raw_points_convex_hull(points: Sequence[RawPoint]) -> List[RawPoint]:
     points = sorted(points)
-    lower = _to_sub_hull(points)
-    upper = _to_sub_hull(reversed(points))
+    lower = _to_raw_points_sub_hull(points)
+    upper = _to_raw_points_sub_hull(reversed(points))
     return lower[:-1] + upper[:-1]
 
 
-def _to_sub_hull(points: Iterable[RawPoint]) -> List[RawPoint]:
+def _to_raw_points_sub_hull(points: Iterable[RawPoint]) -> List[RawPoint]:
     result = []
     for point in points:
         while len(result) >= 2:

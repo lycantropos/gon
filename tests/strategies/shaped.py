@@ -11,7 +11,7 @@ from gon.linear import (Contour,
 from gon.primitive import RawPoint
 from gon.shaped import (Multipolygon,
                         Polygon)
-from gon.shaped.utils import to_convex_hull
+from gon.shaped.utils import to_raw_points_convex_hull
 from tests.utils import (Domain,
                          Strategy,
                          pack,
@@ -27,7 +27,7 @@ polygons = coordinates_strategies.flatmap(coordinates_to_polygons)
 
 def raw_contour_to_invalid_polygon(raw_contour: RawContour) -> Polygon:
     return Polygon(Contour.from_raw(raw_contour),
-                   [Contour.from_raw(to_convex_hull(raw_contour))])
+                   [Contour.from_raw(to_raw_points_convex_hull(raw_contour))])
 
 
 def raw_contour_to_invalid_polygons(raw_convex_contour: RawContour
