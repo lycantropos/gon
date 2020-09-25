@@ -1,8 +1,8 @@
-bentley_ottmann>=0.8.2
-clipping>=0.11.0
+bentley-ottmann>=0.9.0
+clipping>=0.12.0
 locus>=0.7.1
-orient>=0.9.6
+orient>=0.10.0
 reprit>=0.2.2
 robust>=0.2.5
-sect>=0.3.7
+sect>=0.4.0
 typing_extensions>=3.7.4.2; python_version < '3.5.4' or python_version < '3.6.2'
