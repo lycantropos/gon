@@ -1,4 +1,4 @@
 hypothesis>=5.32.0
-hypothesis-geometry>=0.16.0
-pytest>=6.0.2
+hypothesis-geometry>=0.17.0
+pytest>=6.1.1
 pytest-cov>=2.10.1
