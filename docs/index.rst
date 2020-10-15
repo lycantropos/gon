@@ -33,6 +33,8 @@ primitive module
 .. automodule:: gon.primitive
     :members:
     :special-members:
+.. autoclass:: Point
+    :members:
 
 degenerate module
 =================
@@ -47,6 +49,8 @@ discrete module
 .. automodule:: gon.discrete
     :members:
     :special-members:
+.. autoclass:: Multipoint
+    :members:
 
 linear module
 =============
