@@ -1,8 +1,9 @@
 gon
 ===
 
-[![](https://dev.azure.com/lycantropos/gon/_apis/build/status/lycantropos.gon?branchName=master)](https://dev.azure.com/lycantropos/gon/_build/latest?branchName=master "Azure Pipelines")
+[![](https://dev.azure.com/lycantropos/gon/_apis/build/status/lycantropos.gon?branchName=master)](https://dev.azure.com/lycantropos/gon/_build/latest?definitionId=9&branchName=master "Azure Pipelines")
 [![](https://codecov.io/gh/lycantropos/gon/branch/master/graph/badge.svg)](https://codecov.io/gh/lycantropos/gon "Codecov")
+[![](https://readthedocs.org/projects/gon/badge/?version=latest)](https://gon.readthedocs.io/en/latest "Documentation")
 [![](https://img.shields.io/github/license/lycantropos/gon.svg)](https://github.com/lycantropos/gon/blob/master/LICENSE "License")
 [![](https://badge.fury.io/py/gon.svg)](https://badge.fury.io/py/gon "PyPI")
 
