@@ -78,9 +78,7 @@ def equal(left: Vertices, right: Vertices, same_oriented: bool) -> bool:
                         range(index, size)
                         if same_oriented
                         else range(index, -1, right_step)),
-                    zip(range(size - index
-                              if same_oriented
-                              else index + 1,
+                    zip(range(size - index if same_oriented else index + 1,
                               size),
                         range(index)
                         if same_oriented
