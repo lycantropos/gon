@@ -1,5 +1,7 @@
-from numbers import Real
-from typing import TypeVar
+from numbers import Real as _Real
+from typing import TypeVar as _TypeVar
 
-Domain = TypeVar('Domain')
-Coordinate = Real
+from symba.base import Expression as _Expression
+
+Domain = _TypeVar('Domain')
+Coordinate = _TypeVar('Coordinate', _Expression, _Real)
