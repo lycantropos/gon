@@ -1,6 +1,7 @@
-from decimal import Decimal
 from fractions import Fraction
 from typing import Iterable
+
+from symba.base import sqrt
 
 from gon.hints import Coordinate
 
@@ -12,10 +13,7 @@ def robust_divide(dividend: Coordinate, divisor: int) -> Coordinate:
 
 
 def robust_sqrt(value: Coordinate) -> Coordinate:
-    return Fraction.from_decimal((Decimal(value.numerator) / value.denominator
-                                  if isinstance(value, Fraction)
-                                  else Decimal(value))
-                                 .sqrt())
+    return sqrt(value)
 
 
 def non_negative_min(numbers: Iterable[Coordinate]) -> Coordinate:

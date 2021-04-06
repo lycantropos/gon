@@ -12,7 +12,6 @@ from orient.planar import (contour_in_contour,
                            point_in_contour,
                            segment_in_contour)
 from reprit.base import generate_repr
-from robust.hints import Point
 from sect.decomposition import multisegment_trapezoidal
 
 from gon.angular import (Orientation,
@@ -23,7 +22,6 @@ from gon.compound import (Compound,
                           Location,
                           Relation)
 from gon.core.arithmetic import (non_negative_min,
-                                 robust_divide,
                                  robust_sqrt)
 from gon.core.iterable import (shift_sequence,
                                to_pairs_iterable,
@@ -429,8 +427,7 @@ class Contour(Indexable, Linear):
             accumulated_length += length
             start_x, start_y = end_x, end_y
         divisor = 2 * accumulated_length
-        return Point(robust_divide(accumulated_x, divisor),
-                     robust_divide(accumulated_y, divisor))
+        return Point(accumulated_x / divisor, accumulated_y / divisor)
 
     @property
     def length(self) -> Coordinate:
