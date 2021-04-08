@@ -16,6 +16,9 @@ def robust_sqrt(value: Coordinate) -> Coordinate:
     return sqrt(value)
 
 
+ZERO = sqrt(0)
+
+
 def non_negative_min(numbers: Iterable[Coordinate]) -> Coordinate:
     numbers = iter(numbers)
     result = next(numbers)
