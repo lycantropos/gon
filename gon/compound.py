@@ -4,6 +4,7 @@ from typing import (TYPE_CHECKING,
 
 from orient.planar import Relation
 from sect.decomposition import Location
+from symba.base import Expression
 
 from .geometry import Geometry
 from .hints import Coordinate
@@ -104,7 +105,7 @@ class Linear(Geometry):
 
     @property
     @abstractmethod
-    def length(self) -> Coordinate:
+    def length(self) -> Expression:
         """
         Returns length of the geometry.
         """
