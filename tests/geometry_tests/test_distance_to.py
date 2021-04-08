@@ -2,10 +2,10 @@ from typing import Tuple
 
 import pytest
 from hypothesis import given
+from symba.base import Expression
 
 from gon.compound import Compound
 from gon.geometry import Geometry
-from gon.hints import Coordinate
 from . import strategies
 
 
@@ -15,7 +15,7 @@ def test_basic(geometries_pair: Tuple[Geometry, Geometry]) -> None:
 
     result = left_geometry.distance_to(right_geometry)
 
-    assert isinstance(result, Coordinate)
+    assert isinstance(result, Expression)
 
 
 @given(strategies.non_empty_geometries_pairs)
