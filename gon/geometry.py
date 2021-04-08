@@ -5,6 +5,8 @@ from typing import (TYPE_CHECKING,
                     Type,
                     TypeVar)
 
+from symba.base import Expression
+
 from .hints import (Coordinate,
                     Domain)
 
@@ -43,7 +45,7 @@ class Geometry(ABC):
         """
 
     @abstractmethod
-    def distance_to(self, other: 'Geometry') -> Coordinate:
+    def distance_to(self, other: 'Geometry') -> Expression:
         """
         Returns distance between geometric objects.
         """
