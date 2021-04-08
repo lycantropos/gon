@@ -123,7 +123,7 @@ class Shaped(Geometry):
 
     @property
     @abstractmethod
-    def perimeter(self) -> Coordinate:
+    def perimeter(self) -> Expression:
         """
         Returns perimeter of the geometry.
         """
