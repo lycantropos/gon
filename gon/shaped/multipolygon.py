@@ -26,7 +26,8 @@ from gon.compound import (Compound,
                           Linear,
                           Relation,
                           Shaped)
-from gon.core.arithmetic import (non_negative_min,
+from gon.core.arithmetic import (ZERO,
+                                 non_negative_min,
                                  robust_divide)
 from gon.core.iterable import (flatten,
                                to_pairs_iterable,
@@ -610,7 +611,7 @@ class Multipolygon(Indexable, Shaped):
                              for polygon in other._polygons
                              for raw_segment in polygon_to_raw_edges(polygon))
                        if self.disjoint(other)
-                       else 0)
+                       else ZERO)
                       if isinstance(other, Multipolygon)
                       else other.distance_to(self))))))))
 

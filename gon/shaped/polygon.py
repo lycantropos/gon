@@ -30,6 +30,7 @@ from robust.utils import (scale_expansion,
                           two_two_diff)
 from sect.decomposition import polygon_trapezoidal
 from sect.triangulation import constrained_delaunay_triangles
+from symba.base import Expression
 
 from gon.compound import (Compound,
                           Indexable,
@@ -37,7 +38,8 @@ from gon.compound import (Compound,
                           Location,
                           Relation,
                           Shaped)
-from gon.core.arithmetic import (non_negative_min,
+from gon.core.arithmetic import (ZERO,
+                                 non_negative_min,
                                  robust_divide)
 from gon.core.iterable import (flatten,
                                to_pairs_iterable,
@@ -924,19 +926,19 @@ class Polygon(Indexable, Shaped):
                     or Polygon.from_raw(border_minus_holes[0]) != self):
                 raise ValueError('Holes should not tear polygon apart.')
 
-    def _distance_to_raw_point(self, other: RawPoint) -> Coordinate:
+    def _distance_to_raw_point(self, other: RawPoint) -> Expression:
         return (raw_segment_point_distance(
                 self._path_to_raw_edge(self._raw_point_nearest_path(other)),
                 other)
                 if self._raw_locate(other) is Location.EXTERIOR
-                else 0)
+                else ZERO)
 
     def _distance_to_raw_segment(self, other: RawSegment) -> Coordinate:
         other_start, other_end = other
         return (self._linear_distance_to_raw_segment(other)
                 if (self._raw_locate(other_start) is Location.EXTERIOR
                     and self._raw_locate(other_end) is Location.EXTERIOR)
-                else 0)
+                else ZERO)
 
     def _intersect_with_raw_multisegment(self,
                                          raw_multisegment: RawMultisegment
