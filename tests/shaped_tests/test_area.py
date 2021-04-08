@@ -1,15 +1,15 @@
 import math
+from numbers import Real
 
 from hypothesis import given
 
 from gon.compound import Shaped
-from gon.hints import Coordinate
 from . import strategies
 
 
 @given(strategies.shaped_geometries)
 def test_basic(shaped: Shaped) -> None:
-    assert isinstance(shaped.area, Coordinate)
+    assert isinstance(shaped.area, Real)
 
 
 @given(strategies.shaped_geometries)
