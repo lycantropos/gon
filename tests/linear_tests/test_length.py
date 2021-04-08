@@ -1,5 +1,3 @@
-import math
-
 from hypothesis import given
 from symba.base import Expression
 
@@ -16,5 +14,4 @@ def test_basic(linear: Linear) -> None:
 def test_properties(linear: Linear) -> None:
     result = linear.length
 
-    assert math.isfinite(result)
     assert result > 0
