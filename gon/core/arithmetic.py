@@ -20,11 +20,11 @@ ZERO = sqrt(0)
 
 
 def non_negative_min(numbers: Iterable[Coordinate]) -> Coordinate:
-    numbers = iter(numbers)
-    result = next(numbers)
+    iterator = iter(numbers)
+    result = next(iterator)
     if not result:
         return result
-    for number in numbers:
+    for number in iterator:
         if not number:
             return number
         elif number < result:
