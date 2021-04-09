@@ -1,3 +1,5 @@
+import math
+
 from hypothesis import given
 from symba.base import Expression
 
@@ -11,7 +13,7 @@ def test_basic(shaped: Shaped) -> None:
 
 
 @given(strategies.shaped_geometries)
-def test_properties(shaped: Shaped) -> None:
+def test_value(shaped: Shaped) -> None:
     result = shaped.perimeter
 
-    assert result > 0
+    assert 0 < result < math.inf

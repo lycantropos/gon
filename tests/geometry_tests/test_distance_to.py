@@ -1,3 +1,4 @@
+import math
 from typing import Tuple
 
 import pytest
@@ -28,12 +29,12 @@ def test_commutativity(geometries_pair: Tuple[Geometry, Geometry]) -> None:
 
 
 @given(strategies.non_empty_geometries_pairs)
-def test_non_negativeness(geometries_pair: Tuple[Geometry, Geometry]) -> None:
+def test_value(geometries_pair: Tuple[Geometry, Geometry]) -> None:
     left_geometry, right_geometry = geometries_pair
 
     result = left_geometry.distance_to(right_geometry)
 
-    assert result >= 0
+    assert 0 <= result < math.inf
 
 
 @given(strategies.empty_compounds, strategies.geometries)

@@ -1,3 +1,5 @@
+import math
+
 from hypothesis import given
 from symba.base import Expression
 
@@ -11,7 +13,7 @@ def test_basic(linear: Linear) -> None:
 
 
 @given(strategies.linear_geometries)
-def test_properties(linear: Linear) -> None:
+def test_value(linear: Linear) -> None:
     result = linear.length
 
-    assert result > 0
+    assert 0 < result < math.inf
