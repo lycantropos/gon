@@ -660,7 +660,7 @@ class Polygon(Indexable, Shaped):
                             self._linear_distance_to_raw_segment(raw_segment)
                             for raw_segment in polygon_to_raw_edges(other))
                       if self.disjoint(other)
-                      else 0)
+                      else ZERO)
                      if isinstance(other, Polygon)
                      else other.distance_to(self)))))))
 
