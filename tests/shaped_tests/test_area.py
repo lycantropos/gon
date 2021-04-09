@@ -13,8 +13,7 @@ def test_basic(shaped: Shaped) -> None:
 
 
 @given(strategies.shaped_geometries)
-def test_properties(shaped: Shaped) -> None:
+def test_value(shaped: Shaped) -> None:
     result = shaped.area
 
-    assert math.isfinite(result)
-    assert result > 0
+    assert 0 < result < math.inf
