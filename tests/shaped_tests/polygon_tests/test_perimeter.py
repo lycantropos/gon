@@ -1,6 +1,6 @@
 from hypothesis import given
 
-from gon.shaped import Polygon
+from gon.base import Polygon
 from tests.utils import equivalence
 from . import strategies
 

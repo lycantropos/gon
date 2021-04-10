@@ -1,7 +1,7 @@
 import pytest
 from hypothesis import given
 
-from gon.linear import Segment
+from gon.base import Segment
 from . import strategies
 
 

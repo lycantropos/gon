@@ -3,12 +3,12 @@ from itertools import chain
 from bentley_ottmann.planar import segments_cross_or_overlap
 from hypothesis import strategies
 
+from gon.base import (EMPTY,
+                      Mix,
+                      Multipoint,
+                      Multipolygon,
+                      Multisegment)
 from gon.core.iterable import to_pairs_sequence
-from gon.degenerate import Empty
-from gon.discrete import Multipoint
-from gon.linear import Multisegment
-from gon.mixed import Mix
-from gon.shaped import Multipolygon
 from tests.strategies import (coordinates_strategies,
                               coordinates_to_mixes,
                               coordinates_to_multipoints,
@@ -28,7 +28,7 @@ from tests.utils import (Strategy,
 
 raw_mixes = coordinates_strategies.flatmap(coordinates_to_raw_mixes)
 mixes = coordinates_strategies.flatmap(coordinates_to_mixes)
-empty_geometries = strategies.builds(Empty)
+empty_geometries = strategies.just(EMPTY)
 multipoints = coordinates_strategies.flatmap(coordinates_to_multipoints)
 multisegments = coordinates_strategies.flatmap(coordinates_to_multisegments)
 multipolygons = coordinates_strategies.flatmap(coordinates_to_multipolygons)

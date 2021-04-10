@@ -1,7 +1,7 @@
 import pytest
 from hypothesis import given
 
-from gon.primitive import Point
+from gon.base import Point
 from . import strategies
 
 

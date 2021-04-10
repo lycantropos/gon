@@ -1,7 +1,7 @@
 from hypothesis import given
 
-from gon.degenerate import (Empty,
-                            RawEmpty)
+from gon.base import Empty
+from gon.raw import RawEmpty
 from . import strategies
 
 

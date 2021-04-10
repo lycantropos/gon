@@ -1,7 +1,7 @@
 from hypothesis import given
 
-from gon.linear import (Contour,
-                        RawContour)
+from gon.base import Contour
+from gon.raw import RawContour
 from . import strategies
 
 

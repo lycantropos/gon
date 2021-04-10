@@ -19,17 +19,17 @@ import pytest
 from hypothesis import strategies
 from hypothesis.strategies import SearchStrategy
 
-from gon.compound import (Compound,
-                          Relation)
+from gon.base import (Compound,
+                      Contour,
+                      Mix,
+                      Multipoint,
+                      Multipolygon,
+                      Multisegment,
+                      Point,
+                      Relation,
+                      Segment)
 from gon.core.iterable import shift_sequence
-from gon.discrete import Multipoint
 from gon.hints import Coordinate
-from gon.linear import (Contour,
-                        Multisegment,
-                        Segment)
-from gon.mixed import Mix
-from gon.primitive import Point
-from gon.shaped import Multipolygon
 
 Domain = TypeVar('Domain')
 Range = TypeVar('Range')

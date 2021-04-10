@@ -1,6 +1,6 @@
 from hypothesis import strategies
 
-from gon.degenerate import EMPTY
+from gon.base import EMPTY
 from tests.strategies import (coordinates_strategies,
                               coordinates_to_contours,
                               coordinates_to_mixes,

@@ -1,7 +1,7 @@
 from hypothesis import given
 
-from gon.shaped import (Multipolygon,
-                        RawMultipolygon)
+from gon.base import Multipolygon
+from gon.raw import RawMultipolygon
 from . import strategies
 
 

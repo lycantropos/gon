@@ -2,8 +2,8 @@ from typing import Tuple
 
 from hypothesis import given
 
-from gon.compound import Compound
-from gon.geometry import Geometry
+from gon.base import (Compound,
+                      Geometry)
 from gon.hints import Coordinate
 from tests.utils import (equivalence,
                          robust_invert)

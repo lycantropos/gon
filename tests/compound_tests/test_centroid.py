@@ -1,8 +1,8 @@
 import pytest
 from hypothesis import given
 
-from gon.compound import Compound
-from gon.primitive import Point
+from gon.base import (Compound,
+                      Point)
 from . import strategies
 
 

@@ -1,6 +1,6 @@
 from hypothesis import strategies
 
-from gon.discrete import Multipoint
+from gon.base import Multipoint
 from tests.utils import pack
 from .primitive import (invalid_points,
                         repeated_raw_points)

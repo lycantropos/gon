@@ -4,9 +4,9 @@ from operator import or_
 
 from hypothesis import given
 
-from gon.compound import (Relation,
-                          Shaped)
-from gon.shaped import Polygon
+from gon.base import (Polygon,
+                      Relation,
+                      Shaped)
 from . import strategies
 
 

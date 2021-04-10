@@ -1,7 +1,7 @@
 from hypothesis import given
 
-from gon.mixed import (Mix,
-                       RawMix)
+from gon.base import Mix
+from gon.raw import RawMix
 from . import strategies
 
 

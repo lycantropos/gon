@@ -1,6 +1,6 @@
 from hypothesis import given
 
-from gon.degenerate import Empty
+from gon.base import Empty
 from . import strategies
 
 

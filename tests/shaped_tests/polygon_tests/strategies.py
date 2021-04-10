@@ -1,6 +1,6 @@
 from hypothesis_geometry import planar
 
-from gon.shaped import Polygon
+from gon.base import Polygon
 from tests.strategies import (coordinates_strategies,
                               coordinates_to_points,
                               coordinates_to_polygons,

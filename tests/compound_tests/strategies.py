@@ -4,16 +4,16 @@ from typing import (Iterable,
 
 from hypothesis import strategies
 
-from gon.compound import Compound
-from gon.degenerate import EMPTY
-from gon.discrete import Multipoint
-from gon.linear import (Contour,
-                        Multisegment,
-                        Segment)
-from gon.mixed import Mix
-from gon.primitive import Point
-from gon.shaped import (Multipolygon,
-                        Polygon)
+from gon.base import (EMPTY,
+                      Compound,
+                      Contour,
+                      Mix,
+                      Multipoint,
+                      Multipolygon,
+                      Multisegment,
+                      Point,
+                      Polygon,
+                      Segment)
 from tests.strategies import (coordinates_strategies,
                               coordinates_to_contours,
                               coordinates_to_maybe_linear_geometries,

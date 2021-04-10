@@ -2,7 +2,7 @@ from typing import Tuple
 
 from hypothesis import given
 
-from gon.shaped import Multipolygon
+from gon.base import Multipolygon
 from tests.utils import implication
 from . import strategies
 

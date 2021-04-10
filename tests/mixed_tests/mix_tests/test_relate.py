@@ -3,9 +3,9 @@ from typing import Tuple
 
 from hypothesis import given
 
-from gon.compound import Relation
-from gon.degenerate import EMPTY
-from gon.mixed import Mix
+from gon.base import (EMPTY,
+                      Mix,
+                      Relation)
 from tests.utils import (equivalence,
                          implication,
                          mix_to_components)

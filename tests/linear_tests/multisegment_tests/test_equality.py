@@ -2,7 +2,7 @@ from typing import Tuple
 
 from hypothesis import given
 
-from gon.linear import Multisegment
+from gon.base import Multisegment
 from tests.utils import (implication,
                          reverse_multisegment,
                          reverse_multisegment_segments,

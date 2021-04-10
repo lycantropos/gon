@@ -5,8 +5,8 @@ import pytest
 from hypothesis import given
 from symba.base import Expression
 
-from gon.compound import Compound
-from gon.geometry import Geometry
+from gon.base import (Compound,
+                      Geometry)
 from . import strategies
 
 

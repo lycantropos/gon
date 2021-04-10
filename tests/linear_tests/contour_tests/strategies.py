@@ -3,9 +3,9 @@ from typing import Tuple
 from hypothesis import strategies
 from hypothesis_geometry import planar
 
+from gon.base import (Contour,
+                      Point)
 from gon.hints import Coordinate
-from gon.linear import Contour
-from gon.primitive import Point
 from tests.strategies import (coordinates_strategies,
                               coordinates_to_contours,
                               coordinates_to_points,

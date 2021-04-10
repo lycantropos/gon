@@ -2,10 +2,10 @@ from typing import Tuple
 
 from hypothesis import given
 
-from gon.compound import (Compound,
-                          Indexable)
-from gon.geometry import Geometry
-from gon.primitive import Point
+from gon.base import (Compound,
+                      Geometry,
+                      Indexable,
+                      Point)
 from tests.utils import equivalence
 from . import strategies
 

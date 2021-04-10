@@ -1,7 +1,7 @@
 from hypothesis import given
 
-from gon.discrete import (Multipoint,
-                          RawMultipoint)
+from gon.base import Multipoint
+from gon.raw import RawMultipoint
 from . import strategies
 
 
