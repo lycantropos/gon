@@ -2,9 +2,9 @@ from typing import Tuple
 
 from hypothesis import given
 
-from gon.compound import (Compound,
-                          Location)
-from gon.primitive import Point
+from gon.base import (Compound,
+                      Location,
+                      Point)
 from . import strategies
 
 

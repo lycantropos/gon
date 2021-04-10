@@ -2,7 +2,7 @@ from typing import Tuple
 
 from hypothesis import given
 
-from gon.compound import Linear
+from gon.base import Linear
 from gon.hints import Coordinate
 from . import strategies
 

@@ -2,8 +2,8 @@ from typing import Tuple
 
 from hypothesis import given
 
-from gon.compound import Compound
-from gon.degenerate import EMPTY
+from gon.base import (EMPTY,
+                      Compound)
 from tests.utils import (are_compounds_equivalent,
                          implication,
                          not_raises)

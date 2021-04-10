@@ -1,7 +1,7 @@
 from hypothesis import given
 
-from gon.shaped import (Polygon,
-                        RawPolygon)
+from gon.base import Polygon
+from gon.raw import RawPolygon
 from . import strategies
 
 

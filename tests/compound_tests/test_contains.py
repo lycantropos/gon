@@ -1,6 +1,6 @@
 from hypothesis import given
 
-from gon.compound import Compound
+from gon.base import Compound
 from . import strategies
 
 

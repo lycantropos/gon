@@ -1,7 +1,7 @@
 import pytest
 from hypothesis import given
 
-from gon.discrete import Multipoint
+from gon.base import Multipoint
 from . import strategies
 
 

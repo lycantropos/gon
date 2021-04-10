@@ -8,11 +8,11 @@ from typing import (List,
 from hypothesis import strategies
 from hypothesis_geometry import planar
 
+from gon.base import Point
+from gon.raw import RawPoint
 from gon.hints import Coordinate
 from gon.linear import vertices
 from gon.linear.hints import Vertices
-from gon.primitive import (Point,
-                           RawPoint)
 from tests.utils import (Strategy,
                          identity)
 from .base import coordinates_strategies

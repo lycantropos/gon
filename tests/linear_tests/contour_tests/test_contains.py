@@ -2,8 +2,8 @@ from typing import Tuple
 
 from hypothesis import given
 
-from gon.linear import Contour
-from gon.primitive import Point
+from gon.base import (Contour,
+                      Point)
 from tests.utils import equivalence
 from . import strategies
 

@@ -3,7 +3,7 @@ import math
 from hypothesis import given
 from symba.base import Expression
 
-from gon.compound import Linear
+from gon.base import Linear
 from . import strategies
 
 

@@ -1,7 +1,7 @@
 import pytest
 from hypothesis import given
 
-from gon.mixed import Mix
+from gon.base import Mix
 from . import strategies
 
 

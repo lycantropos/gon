@@ -6,11 +6,11 @@ from hypothesis import strategies
 from hypothesis_geometry import planar
 from hypothesis_geometry.utils import to_contour
 
-from gon.linear import (Contour,
-                        RawContour)
-from gon.primitive import RawPoint
-from gon.shaped import (Multipolygon,
-                        Polygon)
+from gon.base import (Contour,
+                      Multipolygon,
+                      Polygon)
+from gon.raw import (RawContour,
+                     RawPoint)
 from gon.shaped.utils import to_raw_points_convex_hull
 from tests.utils import (Domain,
                          Strategy,

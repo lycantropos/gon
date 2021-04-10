@@ -3,7 +3,7 @@ from numbers import Real
 
 from hypothesis import given
 
-from gon.compound import Shaped
+from gon.base import Shaped
 from . import strategies
 
 

@@ -1,6 +1,6 @@
 from hypothesis_geometry import planar
 
-from gon.linear import Segment
+from gon.base import Segment
 from tests.strategies import (coordinates_strategies,
                               coordinates_to_points,
                               coordinates_to_segments,

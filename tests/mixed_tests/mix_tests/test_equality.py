@@ -2,7 +2,7 @@ from typing import Tuple
 
 from hypothesis import given
 
-from gon.mixed import Mix
+from gon.base import Mix
 from tests.utils import implication
 from . import strategies
 

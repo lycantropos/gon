@@ -1,7 +1,7 @@
 from hypothesis import given
 
-from gon.linear import (Multisegment,
-                        RawMultisegment)
+from gon.base import Multisegment
+from gon.raw import RawMultisegment
 from . import strategies
 
 
@@ -11,5 +11,6 @@ def test_multisegment_round_trip(multisegment: Multisegment) -> None:
 
 
 @given(strategies.raw_multisegments)
-def test_raw_multisegment_round_trip(raw_multisegment: RawMultisegment) -> None:
+def test_raw_multisegment_round_trip(raw_multisegment: RawMultisegment
+                                     ) -> None:
     assert Multisegment.from_raw(raw_multisegment).raw() == raw_multisegment

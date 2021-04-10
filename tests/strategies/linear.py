@@ -6,10 +6,10 @@ from typing import (List,
 
 from hypothesis import strategies
 
-from gon.linear import (Contour,
-                        Multisegment,
-                        Segment,
-                        vertices)
+from gon.base import (Contour,
+                      Multisegment,
+                      Segment)
+from gon.linear import vertices
 from tests.utils import (Strategy,
                          pack,
                          segment_to_rotations)

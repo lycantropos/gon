@@ -1,6 +1,6 @@
 from hypothesis import given
 
-from gon.compound import Indexable
+from gon.base import Indexable
 from . import strategies
 
 

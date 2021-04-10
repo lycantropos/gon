@@ -1,7 +1,7 @@
 from hypothesis import given
 
-from gon.linear import (Segment,
-                        RawSegment)
+from gon.base import Segment
+from gon.raw import RawSegment
 from . import strategies
 
 

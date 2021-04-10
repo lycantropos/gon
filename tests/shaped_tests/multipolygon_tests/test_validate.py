@@ -1,7 +1,7 @@
 import pytest
 from hypothesis import given
 
-from gon.shaped import Multipolygon
+from gon.base import Multipolygon
 from . import strategies
 
 

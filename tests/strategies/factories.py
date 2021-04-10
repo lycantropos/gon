@@ -4,21 +4,21 @@ from typing import Optional
 from hypothesis import strategies
 from hypothesis_geometry import planar
 
-from gon.compound import (Linear,
-                          Shaped)
-from gon.degenerate import (EMPTY,
-                            RAW_EMPTY,
-                            Maybe)
-from gon.discrete import Multipoint
-from gon.hints import Coordinate
-from gon.linear import (Contour,
-                        Multisegment,
-                        Segment)
-from gon.mixed import (Mix,
-                       RawMix)
-from gon.primitive import Point
-from gon.shaped import (Multipolygon,
-                        Polygon)
+from gon.base import (EMPTY,
+                      Contour,
+                      Linear,
+                      Mix,
+                      Multipoint,
+                      Multipolygon,
+                      Multisegment,
+                      Point,
+                      Polygon,
+                      Segment,
+                      Shaped)
+from gon.hints import (Coordinate,
+                       Maybe)
+from gon.raw import (RAW_EMPTY,
+                     RawMix)
 from tests.utils import (Strategy,
                          call,
                          pack)

@@ -2,7 +2,7 @@ from typing import Tuple
 
 from hypothesis import given
 
-from gon.linear import Contour
+from gon.base import Contour
 from tests.utils import (implication,
                          shift_contour)
 from . import strategies

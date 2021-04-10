@@ -2,9 +2,9 @@ from typing import Tuple
 
 from hypothesis import given
 
-from gon.degenerate import EMPTY
-from gon.mixed import Mix
-from gon.primitive import Point
+from gon.base import (EMPTY,
+                      Mix,
+                      Point)
 from tests.utils import equivalence
 from . import strategies
 

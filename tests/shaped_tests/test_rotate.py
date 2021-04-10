@@ -2,9 +2,9 @@ from typing import Tuple
 
 from hypothesis import given
 
-from gon.compound import Shaped
+from gon.base import (Point,
+                      Shaped)
 from gon.hints import Coordinate
-from gon.primitive import Point
 from . import strategies
 
 

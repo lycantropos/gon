@@ -1,7 +1,7 @@
 import pytest
 from hypothesis import given
 
-from gon.linear import Contour
+from gon.base import Contour
 from . import strategies
 
 
