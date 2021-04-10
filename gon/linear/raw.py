@@ -2,6 +2,7 @@ from locus.hints import Interval
 from robust import projection
 from robust.linear import (SegmentsRelationship,
                            segments_relationship)
+from symba.base import Expression
 
 from gon.core.arithmetic import (robust_divide,
                                  robust_sqrt)
@@ -12,12 +13,12 @@ from .hints import RawSegment
 
 
 def raw_segment_point_distance(raw_segment: RawSegment,
-                               raw_point: RawPoint) -> Coordinate:
+                               raw_point: RawPoint) -> Expression:
     return robust_sqrt(squared_raw_point_segment_distance(raw_point,
                                                           raw_segment))
 
 
-def raw_segments_distance(left: RawSegment, right: RawSegment) -> Coordinate:
+def raw_segments_distance(left: RawSegment, right: RawSegment) -> Expression:
     return robust_sqrt(squared_raw_segments_distance(left, right))
 
 
