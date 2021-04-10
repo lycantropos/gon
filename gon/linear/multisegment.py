@@ -16,6 +16,7 @@ from orient.planar import (multisegment_in_multisegment,
                            segment_in_multisegment)
 from reprit.base import generate_repr
 from sect.decomposition import multisegment_trapezoidal
+from symba.base import Expression
 
 from gon.compound import (Compound,
                           Indexable,
@@ -433,7 +434,7 @@ class Multisegment(Indexable, Linear):
                      robust_divide(accumulated_y, divisor))
 
     @property
-    def length(self) -> Coordinate:
+    def length(self) -> Expression:
         """
         Returns length of the multisegment.
 
