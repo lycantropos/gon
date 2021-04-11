@@ -8,10 +8,10 @@ from symba.base import Expression
 
 from .geometry import Geometry
 from .hints import Coordinate
-from .primitive import Point
+from .point import Point
 
 if TYPE_CHECKING:
-    from .shaped.polygon import Polygon
+    from gon.core.polygon import Polygon
 
 Relation = Relation
 Location = Location

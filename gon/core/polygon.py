@@ -32,48 +32,48 @@ from sect.decomposition import polygon_trapezoidal
 from sect.triangulation import constrained_delaunay_triangles
 from symba.base import Expression
 
-from gon.compound import (Compound,
-                          Indexable,
-                          Linear,
-                          Location,
-                          Relation,
-                          Shaped)
-from gon.core.arithmetic import (ZERO,
-                                 non_negative_min,
-                                 robust_divide)
-from gon.core.iterable import (flatten,
-                               to_pairs_iterable,
-                               to_pairs_sequence)
-from gon.degenerate import EMPTY
-from gon.discrete import Multipoint
-from gon.geometry import Geometry
-from gon.hints import Coordinate
-from gon.linear import (Contour,
-                        Multisegment,
-                        RawContour,
-                        RawMultisegment,
-                        RawSegment,
-                        Segment,
-                        vertices)
-from gon.linear.contour import (rotate_contour_around_origin,
-                                rotate_translate_contour,
-                                scale_contour,
-                                scale_contour_degenerate)
-from gon.linear.multisegment import SegmentalSquaredDistanceNode
-from gon.linear.raw import (raw_segment_point_distance,
-                            raw_segments_distance,
-                            squared_raw_point_segment_distance,
-                            squared_raw_segments_distance)
-from gon.linear.utils import from_raw_multisegment
-from gon.primitive import (Point,
-                           RawPoint)
-from gon.primitive.point import point_to_step
-from .hints import (RawMultipolygon,
-                    RawPolygon)
-from .utils import (from_raw_holeless_mix_components,
-                    from_raw_mix_components,
-                    from_raw_multipolygon,
-                    to_raw_points_convex_hull)
+from . import vertices
+from .arithmetic import (ZERO,
+                         non_negative_min,
+                         robust_divide)
+from .compound import (Compound,
+                       Indexable,
+                       Linear,
+                       Location,
+                       Relation,
+                       Shaped)
+from .contour import (Contour,
+                      rotate_contour_around_origin,
+                      rotate_translate_contour,
+                      scale_contour,
+                      scale_contour_degenerate)
+from .degenerate import EMPTY
+from .geometry import Geometry
+from .hints import Coordinate
+from .iterable import (flatten,
+                       to_pairs_iterable,
+                       to_pairs_sequence)
+from .linear_utils import (from_raw_multisegment,
+                           raw_segment_point_distance,
+                           raw_segments_distance,
+                           squared_raw_point_segment_distance,
+                           squared_raw_segments_distance)
+from .multipoint import Multipoint
+from .multisegment import (Multisegment,
+                           SegmentalSquaredDistanceNode)
+from .point import (Point,
+                    point_to_step)
+from .raw import (RawContour,
+                  RawMultipolygon,
+                  RawMultisegment,
+                  RawPoint,
+                  RawPolygon,
+                  RawSegment)
+from .segment import Segment
+from .shaped_utils import (from_raw_holeless_mix_components,
+                           from_raw_mix_components,
+                           from_raw_multipolygon,
+                           to_raw_points_convex_hull)
 
 
 class Polygon(Indexable, Shaped):
@@ -983,7 +983,7 @@ class Polygon(Indexable, Shaped):
 
     def _unite_with_multipoint(self, other: Multipoint) -> Compound:
         # importing here to avoid cyclic imports
-        from gon.mixed.mix import from_mix_components
+        from gon.core.mix import from_mix_components
         return from_mix_components(other - self, EMPTY, self)
 
     def _unite_with_raw_multisegment(self, other_raw: RawMultisegment

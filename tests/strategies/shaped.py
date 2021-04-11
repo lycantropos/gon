@@ -9,9 +9,9 @@ from hypothesis_geometry.utils import to_contour
 from gon.base import (Contour,
                       Multipolygon,
                       Polygon)
+from gon.core.shaped_utils import to_raw_points_convex_hull
 from gon.raw import (RawContour,
                      RawPoint)
-from gon.shaped.utils import to_raw_points_convex_hull
 from tests.utils import (Domain,
                          Strategy,
                          pack,

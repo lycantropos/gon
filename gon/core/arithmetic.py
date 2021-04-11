@@ -3,7 +3,7 @@ from typing import Iterable
 
 from symba.base import sqrt
 
-from gon.hints import Coordinate
+from .hints import Coordinate
 
 
 def robust_divide(dividend: Coordinate, divisor: int) -> Coordinate:

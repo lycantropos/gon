@@ -4,10 +4,10 @@ from typing import (Optional,
 
 from reprit.base import generate_repr
 
-from gon.core.arithmetic import robust_sqrt
-from gon.geometry import Geometry
-from gon.hints import Coordinate
-from .hints import RawPoint
+from .arithmetic import robust_sqrt
+from .geometry import Geometry
+from .hints import Coordinate
+from .raw import RawPoint
 
 
 class Point(Geometry):
@@ -59,7 +59,7 @@ class Point(Geometry):
         >>> Point(0, 0) == Point(1, 0)
         False
         """
-        return (self._x == other._x and self._y == other._y
+        return (self.x == other.x and self.y == other.y
                 if isinstance(other, Point)
                 else NotImplemented)
 
@@ -218,7 +218,7 @@ class Point(Geometry):
         >>> Point(1, 0).translate(1, 2) == Point(2, 2)
         True
         """
-        return Point(self._x + step_x, self._y + step_y)
+        return Point(self.x + step_x, self.y + step_y)
 
     def validate(self) -> None:
         """
@@ -231,12 +231,12 @@ class Point(Geometry):
 
         >>> Point(0, 0).validate()
         """
-        if not (isfinite(self._x) and isfinite(self._y)):
+        if not (isfinite(self.x) and isfinite(self.y)):
             raise ValueError('NaN/infinity coordinates are not supported.')
 
     def _distance_to_point(self, other: 'Point') -> Coordinate:
-        return robust_sqrt((self._x - other._x) ** 2
-                           + (self._y - other._y) ** 2)
+        return robust_sqrt((self.x - other.x) ** 2
+                           + (self.y - other.y) ** 2)
 
 
 def point_to_step(point: Point,
@@ -249,8 +249,8 @@ def point_to_step(point: Point,
 def rotate_point_around_origin(point: Point,
                                cosine: Coordinate,
                                sine: Coordinate) -> Point:
-    return Point(cosine * point._x - sine * point._y,
-                 sine * point._x + cosine * point._y)
+    return Point(cosine * point.x - sine * point.y,
+                 sine * point.x + cosine * point.y)
 
 
 def rotate_translate_point(point: Point,
@@ -258,11 +258,11 @@ def rotate_translate_point(point: Point,
                            sine: Coordinate,
                            step_x: Coordinate,
                            step_y: Coordinate) -> Point:
-    return Point(cosine * point._x - sine * point._y + step_x,
-                 sine * point._x + cosine * point._y + step_y)
+    return Point(cosine * point.x - sine * point.y + step_x,
+                 sine * point.x + cosine * point.y + step_y)
 
 
 def scale_point(point: Point,
                 factor_x: Coordinate,
                 factor_y: Coordinate) -> Point:
-    return Point(point._x * factor_x, point._y * factor_y)
+    return Point(point.x * factor_x, point.y * factor_y)

@@ -2,22 +2,24 @@ from fractions import Fraction
 from functools import reduce
 from itertools import chain
 from typing import (Iterable,
-                    Iterator)
+                    Iterator,
+                    Sequence)
 
 from robust.hints import Expansion
 from robust.utils import (sum_expansions,
                           two_product,
                           two_two_diff)
 
-from gon.angular import (Orientation,
-                         to_orientation as to_angle_orientation)
-from gon.compound import Compound
-from gon.discrete import Multipoint
-from gon.hints import Coordinate
-from gon.primitive import Point
-from gon.primitive.point import scale_point
-from .hints import Vertices
+from .angular import (Orientation,
+                      to_orientation as to_angle_orientation)
+from .compound import Compound
+from .hints import Coordinate
+from .multipoint import Multipoint
+from .point import (Point,
+                    scale_point)
 from .segment import Segment
+
+Vertices = Sequence[Point]
 
 MIN_COUNT = 3
 

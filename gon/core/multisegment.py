@@ -18,40 +18,40 @@ from reprit.base import generate_repr
 from sect.decomposition import multisegment_trapezoidal
 from symba.base import Expression
 
-from gon.compound import (Compound,
-                          Indexable,
-                          Linear,
-                          Location,
-                          Relation)
-from gon.core.arithmetic import (non_negative_min,
-                                 robust_divide,
-                                 robust_sqrt)
-from gon.core.iterable import unique_ever_seen
-from gon.degenerate import EMPTY
-from gon.discrete import Multipoint
-from gon.discrete.multipoint import from_points
-from gon.geometry import Geometry
-from gon.hints import Coordinate
-from gon.primitive import (Point,
-                           RawPoint)
-from gon.primitive.point import (point_to_step,
-                                 scale_point)
-from gon.primitive.raw import scale_raw_point
-from .hints import (RawMultisegment,
-                    RawSegment)
-from .raw import (raw_segment_point_distance,
-                  raw_segments_distance,
-                  squared_raw_interval_point_distance,
-                  squared_raw_point_segment_distance,
-                  squared_raw_segment_interval_distance,
-                  squared_raw_segments_distance)
+from .arithmetic import (non_negative_min,
+                         robust_divide,
+                         robust_sqrt)
+from .compound import (Compound,
+                       Indexable,
+                       Linear,
+                       Location,
+                       Relation)
+from .degenerate import EMPTY
+from .geometry import Geometry
+from .hints import Coordinate
+from .iterable import unique_ever_seen
+from .linear_utils import (from_raw_mix_components,
+                           from_raw_multisegment,
+                           raw_segment_point_distance,
+                           raw_segments_distance,
+                           relate_multipoint_to_linear_compound,
+                           squared_raw_interval_point_distance,
+                           squared_raw_point_segment_distance,
+                           squared_raw_segment_interval_distance,
+                           squared_raw_segments_distance)
+from .multipoint import (Multipoint,
+                         from_points)
+from .point import (Point,
+                    point_to_step,
+                    scale_point)
+from .primitive_utils import scale_raw_point
+from .raw import (RawMultisegment,
+                  RawPoint,
+                  RawSegment)
 from .segment import (Segment,
                       rotate_segment_around_origin,
                       rotate_translate_segment,
                       scale_segment)
-from .utils import (from_raw_mix_components,
-                    from_raw_multisegment,
-                    relate_multipoint_to_linear_compound)
 
 
 class Multisegment(Indexable, Linear):
@@ -730,7 +730,7 @@ class Multisegment(Indexable, Linear):
 
     def _unite_with_multipoint(self, other: Multipoint) -> Compound:
         # importing here to avoid cyclic imports
-        from gon.mixed.mix import from_mix_components
+        from gon.core.mix import from_mix_components
         return from_mix_components(other - self, self, EMPTY)
 
     def _unite_with_raw_multisegment(self, other_raw: RawMultisegment

@@ -1,5 +1,4 @@
-from typing import (Optional,
-                    Union)
+from typing import Optional, TypeVar as _TypeVar, Union as _Union
 
 from reprit.base import generate_repr
 
@@ -7,17 +6,15 @@ from .compound import (Compound,
                        Location,
                        Relation)
 from .geometry import Geometry
-from .hints import (Coordinate,
-                    Domain)
-from .primitive import Point
+from .hints import Coordinate
+from .point import Point
+from .raw import (RAW_EMPTY,
+                  RawEmpty)
 
 try:
     from typing import NoReturn
 except ImportError:
     from typing_extensions import NoReturn
-
-RAW_EMPTY = None
-RawEmpty = type(RAW_EMPTY)
 
 
 class Empty(Compound):
@@ -360,5 +357,6 @@ class Empty(Compound):
         # empty geometry considered to be always valid
 
 
-Maybe = Union[Empty, Domain]
 EMPTY = Empty()
+_T = _TypeVar('_T')
+Maybe = _Union[Empty, _T]

@@ -14,42 +14,42 @@ from orient.planar import (contour_in_contour,
 from reprit.base import generate_repr
 from sect.decomposition import multisegment_trapezoidal
 
-from gon.angular import (Orientation,
-                         to_orientation)
-from gon.compound import (Compound,
-                          Indexable,
-                          Linear,
-                          Location,
-                          Relation)
-from gon.core.arithmetic import (non_negative_min,
-                                 robust_sqrt)
-from gon.core.iterable import (shift_sequence,
-                               to_pairs_iterable,
-                               to_pairs_sequence)
-from gon.degenerate import EMPTY
-from gon.discrete import Multipoint
-from gon.discrete.multipoint import (rotate_points_around_origin,
-                                     rotate_translate_points)
-from gon.geometry import Geometry
-from gon.hints import Coordinate
-from gon.primitive import (Point,
-                           RawPoint)
-from gon.primitive.point import point_to_step
 from . import vertices as _vertices
-from .hints import (RawContour,
-                    RawMultisegment,
-                    RawSegment,
-                    Vertices)
+from .angular import (Orientation,
+                      to_orientation)
+from .arithmetic import (non_negative_min,
+                         robust_sqrt)
+from .compound import (Compound,
+                       Indexable,
+                       Linear,
+                       Location,
+                       Relation)
+from .degenerate import EMPTY
+from .geometry import Geometry
+from .hints import (Coordinate)
+from .vertices import Vertices
+from .iterable import (shift_sequence,
+                       to_pairs_iterable,
+                       to_pairs_sequence)
+from .linear_utils import (from_raw_mix_components,
+                           from_raw_multisegment,
+                           raw_segment_point_distance,
+                           raw_segments_distance,
+                           relate_multipoint_to_linear_compound,
+                           squared_raw_point_segment_distance,
+                           squared_raw_segments_distance)
+from .multipoint import (Multipoint,
+                         rotate_points_around_origin,
+                         rotate_translate_points)
 from .multisegment import (Multisegment,
                            SegmentalSquaredDistanceNode)
-from .raw import (raw_segment_point_distance,
-                  raw_segments_distance,
-                  squared_raw_point_segment_distance,
-                  squared_raw_segments_distance)
+from .point import (Point,
+                    point_to_step)
+from .raw import (RawContour,
+                  RawMultisegment,
+                  RawPoint,
+                  RawSegment)
 from .segment import Segment
-from .utils import (from_raw_mix_components,
-                    from_raw_multisegment,
-                    relate_multipoint_to_linear_compound)
 
 
 class Contour(Indexable, Linear):
@@ -798,7 +798,7 @@ class Contour(Indexable, Linear):
 
     def _unite_with_multipoint(self, other: Multipoint) -> Compound:
         # importing here to avoid cyclic imports
-        from gon.mixed.mix import from_mix_components
+        from .mix import from_mix_components
         return from_mix_components(other - self, self, EMPTY)
 
     def _unite_with_raw_multisegment(self, other_raw: RawMultisegment
