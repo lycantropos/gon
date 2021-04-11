@@ -7,13 +7,13 @@ from typing import (TYPE_CHECKING,
 
 from symba.base import Expression
 
-from .hints import (Coordinate,
-                    Domain)
+from gon.core.hints import Coordinate
 
 if TYPE_CHECKING:
     from .primitive import Point
 
 RawGeometry = TypeVar('RawGeometry', None, tuple, list)
+_T = TypeVar('_T')
 
 
 class Geometry(ABC):
@@ -39,7 +39,7 @@ class Geometry(ABC):
 
     @classmethod
     @abstractmethod
-    def from_raw(cls: Type[Domain], raw: RawGeometry) -> Domain:
+    def from_raw(cls: Type[_T], raw: RawGeometry) -> _T:
         """
         Constructs geometric object from combination of Python built-ins.
         """

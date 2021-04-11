@@ -1,15 +1,15 @@
 from locus.hints import Interval
 from robust import projection
-from robust.linear import (SegmentsRelationship,
-                           segments_relationship)
+from robust.linear import SegmentsRelationship, segments_relationship
 from symba.base import Expression
 
-from gon.core.arithmetic import (robust_divide,
-                                 robust_sqrt)
-from gon.hints import Coordinate
-from gon.primitive import RawPoint
-from gon.primitive.raw import squared_raw_points_distance
-from .hints import RawSegment
+from gon.core.compound import Compound, Relation
+from .arithmetic import robust_divide, robust_sqrt
+from .degenerate import EMPTY
+from .hints import Coordinate
+from .multipoint import Multipoint
+from .raw import RawMultipoint, RawMultisegment, RawPoint, RawSegment
+from .primitive_utils import squared_raw_points_distance
 
 
 def raw_segment_point_distance(raw_segment: RawSegment,
@@ -111,3 +111,45 @@ def _squared_raw_segment_non_degenerate_interval_distance(segment: RawSegment,
     return (left_side_distance
             and min(bottom_side_distance, right_side_distance,
                     top_side_distance, left_side_distance))
+
+
+def relate_multipoint_to_linear_compound(multipoint: Multipoint,
+                                         compound: Compound) -> Relation:
+    disjoint = is_subset = True
+    for point in multipoint.points:
+        if point in compound:
+            if disjoint:
+                disjoint = False
+        elif is_subset:
+            is_subset = False
+    return (Relation.DISJOINT
+            if disjoint
+            else (Relation.COMPONENT
+                  if is_subset
+                  else Relation.TOUCH))
+
+
+def from_raw_mix_components(raw_multipoint: RawMultipoint,
+                            raw_multisegment: RawMultisegment) -> Compound:
+    # importing here to avoid cyclic imports
+    from gon.core.mix import from_mix_components
+    return from_mix_components(from_raw_multipoint(raw_multipoint),
+                               from_raw_multisegment(raw_multisegment),
+                               EMPTY)
+
+
+def from_raw_multipoint(raw_multipoint: RawMultipoint) -> Multipoint:
+    return (Multipoint.from_raw(raw_multipoint)
+            if raw_multipoint
+            else EMPTY)
+
+
+def from_raw_multisegment(raw: RawMultisegment) -> Compound:
+    # importing here to avoid cyclic imports
+    from .segment import Segment
+    from .multisegment import Multisegment
+    return ((Segment.from_raw(raw[0])
+             if len(raw) == 1
+             else Multisegment.from_raw(raw))
+            if raw
+            else EMPTY)

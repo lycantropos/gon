@@ -2,24 +2,24 @@ from typing import Optional
 
 from reprit.base import generate_repr
 
-from gon.compound import (Compound,
-                          Indexable,
-                          Linear,
-                          Location,
-                          Relation,
-                          Shaped)
-from gon.degenerate import (EMPTY,
-                            RAW_EMPTY,
-                            Maybe)
-from gon.discrete import Multipoint
-from gon.geometry import Geometry
-from gon.hints import Coordinate
-from gon.linear import (Multisegment,
-                        Segment)
-from gon.mixed import RawMix
-from gon.primitive import Point
-from gon.shaped import (Multipolygon,
-                        Polygon)
+from gon.core.compound import (Compound,
+                               Indexable,
+                               Linear,
+                               Location,
+                               Relation,
+                               Shaped)
+from .degenerate import (EMPTY,
+                         Maybe)
+from .geometry import Geometry
+from .hints import Coordinate
+from .multipoint import Multipoint
+from .multipolygon import Multipolygon
+from .multisegment import Multisegment
+from .point import Point
+from .polygon import Polygon
+from .raw import (RAW_EMPTY,
+                  RawMix)
+from .segment import Segment
 
 MIN_MIX_NON_EMPTY_COMPONENTS = 2
 

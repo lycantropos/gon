@@ -73,9 +73,7 @@ Usage
 -----
 
 ```python
->>> from gon.degenerate import EMPTY
->>> from gon.primitive import Point
->>> from gon.shaped import Polygon
+>>> from gon.base import EMPTY, Point, Polygon
 >>> raw_square = [(0, 0), (4, 0), (4, 4), (0, 4)], []
 >>> square = Polygon.from_raw(raw_square)
 >>> square.raw() == raw_square

@@ -1,21 +1,21 @@
-from gon.angular import Orientation
-from gon.compound import (Compound,
-                          Indexable,
-                          Linear,
-                          Location,
-                          Relation,
-                          Shaped)
-from gon.degenerate import (EMPTY,
-                            Empty)
-from gon.discrete import (Multipoint)
-from gon.geometry import Geometry
-from gon.linear import (Contour,
-                        Multisegment,
-                        Segment)
-from gon.mixed import Mix
-from gon.primitive import Point
-from gon.shaped import (Multipolygon,
-                        Polygon)
+from .core.angular import Orientation
+from .core.compound import (Compound,
+                            Indexable,
+                            Linear,
+                            Location,
+                            Relation,
+                            Shaped)
+from .core.contour import Contour
+from .core.degenerate import (EMPTY,
+                              Empty)
+from .core.geometry import Geometry
+from .core.mix import Mix
+from .core.multipoint import Multipoint
+from .core.multipolygon import Multipolygon
+from .core.multisegment import Multisegment
+from .core.point import Point
+from .core.polygon import Polygon
+from .core.segment import Segment
 
 EMPTY = EMPTY
 Compound = Compound

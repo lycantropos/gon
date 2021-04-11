@@ -7,27 +7,27 @@ from robust.linear import (segments_intersection,
                            segments_intersections)
 from symba.base import Expression
 
-from gon.compound import (Compound,
-                          Linear,
-                          Location,
-                          Relation)
-from gon.core.arithmetic import (non_negative_min,
-                                 robust_divide)
-from gon.degenerate import EMPTY
-from gon.discrete import Multipoint
-from gon.geometry import Geometry
-from gon.hints import Coordinate
-from gon.primitive import Point
-from gon.primitive.point import (point_to_step,
-                                 rotate_point_around_origin,
-                                 rotate_translate_point,
-                                 scale_point)
-from .hints import (RawMultisegment,
-                    RawSegment)
-from .raw import (raw_segment_point_distance,
-                  raw_segments_distance)
-from .utils import (from_raw_multisegment,
-                    relate_multipoint_to_linear_compound)
+from .arithmetic import (non_negative_min,
+                         robust_divide)
+from .compound import (Compound,
+                       Linear,
+                       Location,
+                       Relation)
+from .degenerate import EMPTY
+from .geometry import Geometry
+from .hints import Coordinate
+from .linear_utils import (from_raw_multisegment,
+                           raw_segment_point_distance,
+                           raw_segments_distance,
+                           relate_multipoint_to_linear_compound)
+from .multipoint import Multipoint
+from .point import (Point,
+                    point_to_step,
+                    rotate_point_around_origin,
+                    rotate_translate_point,
+                    scale_point)
+from .raw import (RawMultisegment,
+                  RawSegment)
 
 
 class Segment(Compound, Linear):
@@ -607,7 +607,7 @@ class Segment(Compound, Linear):
 
     def _unite_with_multipoint(self, other: Multipoint) -> Compound:
         # importing here to avoid cyclic imports
-        from gon.mixed.mix import from_mix_components
+        from gon.core.mix import from_mix_components
         return from_mix_components(other - self, self, EMPTY)
 
     def _unite_with_segment(self, other: 'Segment') -> Compound:

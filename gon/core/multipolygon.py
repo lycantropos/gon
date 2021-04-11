@@ -21,42 +21,42 @@ from reprit.base import generate_repr
 from robust.utils import sum_expansions
 from sect.decomposition import Location
 
-from gon.compound import (Compound,
-                          Indexable,
-                          Linear,
-                          Relation,
-                          Shaped)
-from gon.core.arithmetic import (ZERO,
-                                 non_negative_min,
-                                 robust_divide)
-from gon.core.iterable import (flatten,
-                               to_pairs_iterable,
-                               to_pairs_sequence)
-from gon.degenerate import EMPTY
-from gon.discrete import Multipoint
-from gon.geometry import Geometry
-from gon.hints import Coordinate
-from gon.linear import (Contour,
-                        Multisegment,
-                        RawMultisegment,
-                        RawSegment,
-                        Segment,
-                        vertices)
-from gon.linear.utils import from_raw_multisegment
-from gon.primitive import (Point,
-                           RawPoint)
-from gon.primitive.point import point_to_step
-from .hints import (RawMultipolygon,
-                    RawMultiregion)
+from . import vertices
+from .arithmetic import (ZERO,
+                         non_negative_min,
+                         robust_divide)
+from .compound import (Compound,
+                       Indexable,
+                       Linear,
+                       Relation,
+                       Shaped)
+from .contour import (Contour,
+                      Multisegment,
+                      Segment)
+from .degenerate import EMPTY
+from .geometry import Geometry
+from .hints import Coordinate
+from .iterable import (flatten,
+                       to_pairs_iterable,
+                       to_pairs_sequence)
+from .linear_utils import from_raw_multisegment
+from .multipoint import Multipoint
+from .point import (Point,
+                    point_to_step)
 from .polygon import (Polygon,
                       polygon_to_centroid_components,
                       polygon_to_raw_edges,
                       rotate_polygon_around_origin,
                       rotate_translate_polygon,
                       scale_polygon)
-from .utils import (from_raw_holeless_mix_components,
-                    from_raw_mix_components,
-                    from_raw_multipolygon)
+from .raw import (RawMultipolygon,
+                  RawMultiregion,
+                  RawMultisegment,
+                  RawPoint,
+                  RawSegment)
+from .shaped_utils import (from_raw_holeless_mix_components,
+                           from_raw_mix_components,
+                           from_raw_multipolygon)
 
 
 class Multipolygon(Indexable, Shaped):
@@ -961,7 +961,7 @@ class Multipolygon(Indexable, Shaped):
 
     def _unite_with_multipoint(self, other: Multipoint) -> Compound:
         # importing here to avoid cyclic imports
-        from gon.mixed.mix import from_mix_components
+        from gon.core.mix import from_mix_components
         return from_mix_components(other - self, EMPTY, self)
 
     def _unite_with_raw_multisegment(self, other_raw: RawMultisegment

@@ -1,6 +1,6 @@
-from gon.core.arithmetic import robust_sqrt
-from gon.hints import Coordinate
-from .hints import RawPoint
+from .arithmetic import robust_sqrt
+from .hints import Coordinate
+from .raw import RawPoint
 
 
 def raw_points_distance(left: RawPoint, right: RawPoint) -> Coordinate:

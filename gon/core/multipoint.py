@@ -7,25 +7,25 @@ from typing import (AbstractSet,
 from locus import kd
 from reprit.base import generate_repr
 
-from gon.compound import (Compound,
-                          Indexable,
-                          Location,
-                          Relation)
-from gon.core.arithmetic import (non_negative_min,
-                                 robust_divide)
-from gon.core.iterable import unique_ever_seen
-from gon.degenerate import EMPTY
-from gon.geometry import Geometry
-from gon.hints import Coordinate
-from gon.primitive import (Point,
-                           RawPoint)
-from gon.primitive.point import (point_to_step,
-                                 rotate_point_around_origin,
-                                 rotate_translate_point,
-                                 scale_point)
-from gon.primitive.raw import (raw_points_distance,
-                               squared_raw_points_distance)
-from .hints import RawMultipoint
+from gon.core.compound import (Compound,
+                               Indexable,
+                               Location,
+                               Relation)
+from gon.core.geometry import Geometry
+from .arithmetic import (non_negative_min,
+                         robust_divide)
+from .degenerate import EMPTY
+from .hints import Coordinate
+from .iterable import unique_ever_seen
+from .point import (Point,
+                    point_to_step,
+                    rotate_point_around_origin,
+                    rotate_translate_point,
+                    scale_point)
+from .raw import (RawMultipoint,
+                  RawPoint)
+from .primitive_utils import (raw_points_distance,
+                              squared_raw_points_distance)
 
 
 class KdTreeSquaredDistanceNode(kd.Node):

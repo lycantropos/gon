@@ -9,10 +9,10 @@ from hypothesis import strategies
 from hypothesis_geometry import planar
 
 from gon.base import Point
-from gon.raw import RawPoint
+from gon.core import vertices
+from gon.core.vertices import Vertices
 from gon.hints import Coordinate
-from gon.linear import vertices
-from gon.linear.hints import Vertices
+from gon.raw import RawPoint
 from tests.utils import (Strategy,
                          identity)
 from .base import coordinates_strategies

@@ -9,7 +9,7 @@ from hypothesis import strategies
 from gon.base import (Contour,
                       Multisegment,
                       Segment)
-from gon.linear import vertices
+from gon.core import vertices
 from tests.utils import (Strategy,
                          pack,
                          segment_to_rotations)

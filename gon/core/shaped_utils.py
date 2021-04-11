@@ -5,15 +5,15 @@ from typing import (Iterable,
 from robust.angular import (Orientation,
                             orientation)
 
-from gon.compound import Compound
-from gon.degenerate import EMPTY
-from gon.discrete import RawMultipoint
-from gon.linear import RawMultisegment
-from gon.linear.utils import (from_raw_multipoint,
-                              from_raw_multisegment)
-from gon.primitive import RawPoint
-from .hints import (RawMultipolygon,
-                    RawMultiregion)
+from .compound import Compound
+from .degenerate import EMPTY
+from .linear_utils import (from_raw_multipoint,
+                           from_raw_multisegment)
+from .raw import (RawMultipoint,
+                  RawMultipolygon,
+                  RawMultiregion,
+                  RawMultisegment,
+                  RawPoint)
 
 
 def to_raw_points_convex_hull(points: Sequence[RawPoint]) -> List[RawPoint]:
@@ -40,7 +40,7 @@ def from_raw_mix_components(raw_multipoint: RawMultipoint,
                             raw_multisegment: RawMultisegment,
                             raw_multipolygon: RawMultipolygon) -> Compound:
     # importing here to avoid cyclic imports
-    from gon.mixed.mix import from_mix_components
+    from .mix import from_mix_components
     return from_mix_components(from_raw_multipoint(raw_multipoint),
                                from_raw_multisegment(raw_multisegment),
                                from_raw_multipolygon(raw_multipolygon))
@@ -51,7 +51,7 @@ def from_raw_holeless_mix_components(raw_multipoint: RawMultipoint,
                                      raw_multiregion: RawMultiregion
                                      ) -> Compound:
     # importing here to avoid cyclic imports
-    from gon.mixed.mix import from_mix_components
+    from .mix import from_mix_components
     return from_mix_components(from_raw_multipoint(raw_multipoint),
                                from_raw_multisegment(raw_multisegment),
                                from_raw_multiregion(raw_multiregion))
