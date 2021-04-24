@@ -1,9 +1,10 @@
 bentley-ottmann>=0.9.0,<1.0
 clipping>=0.12.0,<1.0
+ground>=3.5.0,<4.0
 locus>=0.7.1,<1.0
 orient>=0.10.0,<1.0
 reprit>=0.3.1,<1.0
 robust>=0.2.7,<1.0
 sect>=0.5.0,<1.0
-symba>=0.3.1,<1.0
+symba>=0.4.2,<1.0
 typing_extensions>=3.7.4.3,<4.0; python_version < '3.5.4' or python_version < '3.6.2'

@@ -11,6 +11,7 @@ from clipping.planar import (complete_intersect_multipolygons,
                              subtract_multipolygons,
                              symmetric_subtract_multipolygons,
                              unite_multipolygons)
+from ground.base import get_context
 from locus import r
 from orient.planar import (contour_in_multipolygon,
                            multipolygon_in_multipolygon,
@@ -18,13 +19,11 @@ from orient.planar import (contour_in_multipolygon,
                            polygon_in_multipolygon,
                            segment_in_multipolygon)
 from reprit.base import generate_repr
-from robust.utils import sum_expansions
 from sect.decomposition import Location
 
 from . import vertices
 from .arithmetic import (ZERO,
-                         non_negative_min,
-                         robust_divide)
+                         non_negative_min)
 from .compound import (Compound,
                        Indexable,
                        Linear,
@@ -44,7 +43,6 @@ from .multipoint import Multipoint
 from .point import (Point,
                     point_to_step)
 from .polygon import (Polygon,
-                      polygon_to_centroid_components,
                       polygon_to_raw_edges,
                       rotate_polygon_around_origin,
                       rotate_translate_polygon,
@@ -505,19 +503,7 @@ class Multipolygon(Indexable, Shaped):
         >>> multipolygon.centroid == Point(3, 3)
         True
         """
-        polygons = iter(self._polygons)
-        (x_numerator, y_numerator,
-         double_area) = polygon_to_centroid_components(next(polygons))
-        for polygon in polygons:
-            (polygon_x_numerator, polygon_y_numerator,
-             polygon_double_area) = polygon_to_centroid_components(polygon)
-            x_numerator, y_numerator, double_area = (
-                sum_expansions(x_numerator, polygon_x_numerator),
-                sum_expansions(y_numerator, polygon_y_numerator),
-                sum_expansions(double_area, polygon_double_area))
-        divisor = 3 * double_area[-1]
-        return Point(robust_divide(x_numerator[-1], divisor),
-                     robust_divide(y_numerator[-1], divisor))
+        return get_context().multipolygon_centroid(self._polygons)
 
     @property
     def perimeter(self) -> Coordinate:

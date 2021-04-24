@@ -1,10 +1,3 @@
-from typing import (Iterable,
-                    List,
-                    Sequence)
-
-from robust.angular import (Orientation,
-                            orientation)
-
 from .compound import Compound
 from .degenerate import EMPTY
 from .linear_utils import (from_raw_multipoint,
@@ -12,28 +5,7 @@ from .linear_utils import (from_raw_multipoint,
 from .raw import (RawMultipoint,
                   RawMultipolygon,
                   RawMultiregion,
-                  RawMultisegment,
-                  RawPoint)
-
-
-def to_raw_points_convex_hull(points: Sequence[RawPoint]) -> List[RawPoint]:
-    points = sorted(points)
-    lower = _to_raw_points_sub_hull(points)
-    upper = _to_raw_points_sub_hull(reversed(points))
-    return lower[:-1] + upper[:-1]
-
-
-def _to_raw_points_sub_hull(points: Iterable[RawPoint]) -> List[RawPoint]:
-    result = []
-    for point in points:
-        while len(result) >= 2:
-            if orientation(result[-1], result[-2],
-                           point) is not Orientation.COUNTERCLOCKWISE:
-                del result[-1]
-            else:
-                break
-        result.append(point)
-    return result
+                  RawMultisegment)
 
 
 def from_raw_mix_components(raw_multipoint: RawMultipoint,

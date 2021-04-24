@@ -1,25 +1,31 @@
 from locus.hints import Interval
 from robust import projection
-from robust.linear import SegmentsRelationship, segments_relationship
+from robust.linear import (SegmentsRelationship,
+                           segments_relationship)
 from symba.base import Expression
 
-from gon.core.compound import Compound, Relation
-from .arithmetic import robust_divide, robust_sqrt
+from gon.core.compound import (Compound,
+                               Relation)
+from .arithmetic import (robust_divide,
+                         sqrt)
 from .degenerate import EMPTY
 from .hints import Coordinate
 from .multipoint import Multipoint
-from .raw import RawMultipoint, RawMultisegment, RawPoint, RawSegment
 from .primitive_utils import squared_raw_points_distance
+from .raw import (RawMultipoint,
+                  RawMultisegment,
+                  RawPoint,
+                  RawSegment)
 
 
 def raw_segment_point_distance(raw_segment: RawSegment,
                                raw_point: RawPoint) -> Expression:
-    return robust_sqrt(squared_raw_point_segment_distance(raw_point,
-                                                          raw_segment))
+    return sqrt(squared_raw_point_segment_distance(raw_point,
+                                                   raw_segment))
 
 
 def raw_segments_distance(left: RawSegment, right: RawSegment) -> Expression:
-    return robust_sqrt(squared_raw_segments_distance(left, right))
+    return sqrt(squared_raw_segments_distance(left, right))
 
 
 def squared_raw_interval_point_distance(interval: Interval,

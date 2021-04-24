@@ -10,6 +10,7 @@ from clipping.planar import (complete_intersect_multisegments,
                              subtract_multisegments,
                              symmetric_subtract_multisegments,
                              unite_multisegments)
+from ground.base import get_context
 from locus import segmental
 from orient.planar import (multisegment_in_multisegment,
                            point_in_multisegment,
@@ -20,7 +21,7 @@ from symba.base import Expression
 
 from .arithmetic import (non_negative_min,
                          robust_divide,
-                         robust_sqrt)
+                         sqrt)
 from .compound import (Compound,
                        Indexable,
                        Linear,
@@ -422,16 +423,7 @@ class Multisegment(Indexable, Linear):
         >>> multisegment.centroid == Point(1, 1)
         True
         """
-        accumulated_x = accumulated_y = accumulated_length = 0
-        for (start_x, start_y), (end_x, end_y) in self._raw:
-            length = robust_sqrt((end_x - start_x) ** 2
-                                 + (end_y - start_y) ** 2)
-            accumulated_x += (start_x + end_x) * length
-            accumulated_y += (start_y + end_y) * length
-            accumulated_length += length
-        divisor = 2 * accumulated_length
-        return Point(robust_divide(accumulated_x, divisor),
-                     robust_divide(accumulated_y, divisor))
+        return get_context().multisegment_centroid(self.segments)
 
     @property
     def length(self) -> Expression:

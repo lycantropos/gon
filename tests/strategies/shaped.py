@@ -1,15 +1,17 @@
 from itertools import repeat
-from typing import (List,
+from typing import (Iterable,
+                    List,
                     Sequence)
 
 from hypothesis import strategies
 from hypothesis_geometry import planar
 from hypothesis_geometry.utils import to_contour
+from robust.angular import (Orientation,
+                            orientation)
 
 from gon.base import (Contour,
                       Multipolygon,
                       Polygon)
-from gon.core.shaped_utils import to_raw_points_convex_hull
 from gon.raw import (RawContour,
                      RawPoint)
 from tests.utils import (Domain,
@@ -65,3 +67,23 @@ repeated_polygons = (strategies.builds(repeat, polygons,
 invalid_multipolygons = (strategies.builds(pack(Multipolygon),
                                            strategies.lists(invalid_polygons)
                                            | repeated_polygons))
+
+
+def to_raw_points_convex_hull(points: Sequence[RawPoint]) -> List[RawPoint]:
+    points = sorted(points)
+    lower = _to_raw_points_sub_hull(points)
+    upper = _to_raw_points_sub_hull(reversed(points))
+    return lower[:-1] + upper[:-1]
+
+
+def _to_raw_points_sub_hull(points: Iterable[RawPoint]) -> List[RawPoint]:
+    result = []
+    for point in points:
+        while len(result) >= 2:
+            if orientation(result[-1], result[-2],
+                           point) is not Orientation.COUNTERCLOCKWISE:
+                del result[-1]
+            else:
+                break
+        result.append(point)
+    return result

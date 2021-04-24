@@ -15,6 +15,7 @@ from clipping.planar import (complete_intersect_multipolygons,
                              subtract_multipolygons,
                              symmetric_subtract_multipolygons,
                              unite_multipolygons)
+from ground.base import get_context
 from locus import segmental
 from orient.planar import (contour_in_polygon,
                            multisegment_in_polygon,
@@ -23,19 +24,13 @@ from orient.planar import (contour_in_polygon,
                            region_in_multiregion,
                            segment_in_polygon)
 from reprit.base import generate_repr
-from robust.hints import Expansion
-from robust.utils import (scale_expansion,
-                          sum_expansions,
-                          two_product,
-                          two_two_diff)
 from sect.decomposition import polygon_trapezoidal
 from sect.triangulation import constrained_delaunay_triangles
 from symba.base import Expression
 
 from . import vertices
 from .arithmetic import (ZERO,
-                         non_negative_min,
-                         robust_divide)
+                         non_negative_min)
 from .compound import (Compound,
                        Indexable,
                        Linear,
@@ -72,8 +67,7 @@ from .raw import (RawContour,
 from .segment import Segment
 from .shaped_utils import (from_raw_holeless_mix_components,
                            from_raw_mix_components,
-                           from_raw_multipolygon,
-                           to_raw_points_convex_hull)
+                           from_raw_multipolygon)
 
 
 class Polygon(Indexable, Shaped):
@@ -529,11 +523,7 @@ class Polygon(Indexable, Shaped):
         >>> polygon.centroid == Point(3, 3)
         True
         """
-        x_numerator, y_numerator, double_area = polygon_to_centroid_components(
-                self)
-        divisor = 3 * double_area[-1]
-        return Point(robust_divide(x_numerator[-1], divisor),
-                     robust_divide(y_numerator[-1], divisor))
+        return get_context().polygon_centroid(self.border, self.holes)
 
     @property
     def convex_hull(self) -> 'Polygon':
@@ -558,8 +548,8 @@ class Polygon(Indexable, Shaped):
         return (self
                 if self.is_convex
                 else
-                Polygon(Contour.from_raw(
-                        to_raw_points_convex_hull(self._raw_border))))
+                Polygon(Contour(get_context().points_convex_hull(
+                        self.border.vertices))))
 
     @property
     def holes(self) -> List[Contour]:
@@ -1002,22 +992,6 @@ class Polygon(Indexable, Shaped):
                                                          accurate=False))
 
 
-def polygon_to_centroid_components(polygon: Polygon
-                                   ) -> Tuple[Expansion, Expansion, Expansion]:
-    (x_numerator, y_numerator,
-     double_area) = _raw_contour_to_centroid_components(
-            polygon._border.to_counterclockwise().raw())
-    for hole in polygon._holes:
-        (hole_x_numerator, hole_y_numerator,
-         hole_double_area) = _raw_contour_to_centroid_components(
-                hole.to_clockwise().raw())
-        x_numerator, y_numerator, double_area = (
-            sum_expansions(x_numerator, hole_x_numerator),
-            sum_expansions(y_numerator, hole_y_numerator),
-            sum_expansions(double_area, hole_double_area))
-    return x_numerator, y_numerator, double_area
-
-
 def polygon_to_raw_edges(polygon: Polygon) -> Iterator[RawSegment]:
     return chain(to_pairs_iterable(polygon._raw_border),
                  flatten(to_pairs_iterable(raw_hole)
@@ -1059,34 +1033,6 @@ def rotate_translate_polygon(polygon: Polygon,
                    [rotate_translate_contour(hole, cosine, sine, step_x,
                                              step_y)
                     for hole in polygon._holes])
-
-
-def _raw_contour_to_centroid_components(contour: RawContour
-                                        ) -> Tuple[Expansion, Expansion,
-                                                   Expansion]:
-    double_area = x_numerator = y_numerator = (0,)
-    prev_x, prev_y = contour[-1]
-    for x, y in contour:
-        area_component = _to_endpoints_cross_product_z(prev_x, prev_y, x, y)
-        x_numerator, y_numerator, double_area = (
-            sum_expansions(x_numerator,
-                           scale_expansion(area_component, prev_x + x)),
-            sum_expansions(y_numerator,
-                           scale_expansion(area_component, prev_y + y)),
-            sum_expansions(double_area, area_component))
-        prev_x, prev_y = x, y
-    return x_numerator, y_numerator, double_area
-
-
-def _to_endpoints_cross_product_z(start_x: Coordinate,
-                                  start_y: Coordinate,
-                                  end_x: Coordinate,
-                                  end_y: Coordinate) -> Expansion:
-    minuend, minuend_tail = two_product(start_x, end_y)
-    subtrahend, subtrahend_tail = two_product(start_y, end_x)
-    return (two_two_diff(minuend, minuend_tail, subtrahend, subtrahend_tail)
-            if minuend_tail or subtrahend_tail
-            else (minuend - subtrahend,))
 
 
 def _to_raw_point_nearest_path(raw_border: RawContour,

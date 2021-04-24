@@ -1,12 +1,13 @@
-from math import isfinite
 from typing import (Optional,
                     Tuple)
 
+from ground.base import get_context
 from reprit.base import generate_repr
 
-from .arithmetic import robust_sqrt
+from .arithmetic import sqrt
 from .geometry import Geometry
 from .hints import Coordinate
+from .primitive_utils import is_finite
 from .raw import RawPoint
 
 
@@ -231,12 +232,11 @@ class Point(Geometry):
 
         >>> Point(0, 0).validate()
         """
-        if not (isfinite(self.x) and isfinite(self.y)):
+        if not (is_finite(self.x) and is_finite(self.y)):
             raise ValueError('NaN/infinity coordinates are not supported.')
 
     def _distance_to_point(self, other: 'Point') -> Coordinate:
-        return robust_sqrt((self.x - other.x) ** 2
-                           + (self.y - other.y) ** 2)
+        return sqrt(get_context().points_squared_distance(self, other))
 
 
 def point_to_step(point: Point,
