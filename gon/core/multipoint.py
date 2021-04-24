@@ -2,7 +2,8 @@ from functools import partial
 from typing import (AbstractSet,
                     Iterable,
                     List,
-                    Optional)
+                    Optional,
+                    Sequence)
 
 from ground.base import get_context
 from locus import kd
@@ -37,7 +38,7 @@ class KdTreeSquaredDistanceNode(kd.Node):
 class Multipoint(Indexable):
     __slots__ = '_points', '_points_set', '_raw', '_raw_nearest_index'
 
-    def __init__(self, *points: Point) -> None:
+    def __init__(self, points: Sequence[Point]) -> None:
         """
         Initializes multipoint.
 
@@ -234,7 +235,7 @@ class Multipoint(Indexable):
         >>> multipoint | multipoint == multipoint
         True
         """
-        return (Multipoint(*(self._points_set | other._points_set))
+        return (Multipoint(list(self._points_set | other._points_set))
                 if isinstance(other, Multipoint)
                 else NotImplemented)
 
@@ -294,7 +295,7 @@ class Multipoint(Indexable):
         >>> multipoint == Multipoint(Point(0, 0), Point(1, 0), Point(0, 1))
         True
         """
-        return cls(*map(Point.from_raw, raw))
+        return cls([Point.from_raw(raw_point) for raw_point in raw])
 
     @property
     def centroid(self) -> Point:
@@ -561,7 +562,7 @@ class Multipoint(Indexable):
 
 
 def from_points(points: AbstractSet[Point]) -> Compound:
-    return Multipoint(*points) if points else EMPTY
+    return Multipoint(list(points)) if points else EMPTY
 
 
 def rotate_points_around_origin(points: Iterable[Point],
