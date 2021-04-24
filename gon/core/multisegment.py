@@ -2,7 +2,8 @@ from functools import partial
 from math import inf
 from typing import (Iterable,
                     List,
-                    Optional)
+                    Optional,
+                    Sequence)
 
 from bentley_ottmann.planar import segments_cross_or_overlap
 from clipping.planar import (complete_intersect_multisegments,
@@ -19,9 +20,7 @@ from reprit.base import generate_repr
 from sect.decomposition import multisegment_trapezoidal
 from symba.base import Expression
 
-from .arithmetic import (non_negative_min,
-                         robust_divide,
-                         sqrt)
+from .arithmetic import non_negative_min
 from .compound import (Compound,
                        Indexable,
                        Linear,
@@ -59,7 +58,7 @@ class Multisegment(Indexable, Linear):
     __slots__ = ('_segments', '_segments_set', '_raw', '_raw_locate',
                  '_raw_point_nearest_index', '_raw_segment_nearest_index')
 
-    def __init__(self, *segments: Segment) -> None:
+    def __init__(self, segments: Sequence[Segment]) -> None:
         """
         Initializes multisegment.
 
@@ -406,7 +405,8 @@ class Multisegment(Indexable, Linear):
         ...                              Segment(Point(0, 1), Point(1, 1)))
         True
         """
-        return Multisegment(*map(Segment.from_raw, raw))
+        return Multisegment([Segment.from_raw(raw_segment)
+                             for raw_segment in raw])
 
     @property
     def centroid(self) -> Point:
