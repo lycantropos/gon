@@ -1,5 +1,6 @@
 from typing import Optional
 
+from ground.base import get_context
 from orient.planar import (point_in_segment,
                            segment_in_segment)
 from reprit.base import generate_repr
@@ -8,7 +9,8 @@ from robust.linear import (segments_intersection,
 from symba.base import Expression
 
 from .arithmetic import (non_negative_min,
-                         robust_divide)
+                         robust_divide,
+                         sqrt)
 from .compound import (Compound,
                        Linear,
                        Location,
@@ -103,8 +105,8 @@ class Segment(Compound, Linear):
         False
         """
         return (self is other
-                or (self._start == other._start and self._end == other._end
-                    or self._start == other._end and self._end == other._start
+                or (self.start == other.start and self.end == other.end
+                    or self.start == other.end and self.end == other.start
                     if isinstance(other, Segment)
                     else NotImplemented))
 
@@ -389,7 +391,8 @@ class Segment(Compound, Linear):
         >>> segment.length == 2
         True
         """
-        return self._end._distance_to_point(self._start)
+        return sqrt(get_context().points_squared_distance(self.start,
+                                                          self.end))
 
     @property
     def start(self) -> Point:

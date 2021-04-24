@@ -12,10 +12,7 @@ def robust_divide(dividend: Coordinate, divisor: int) -> Coordinate:
             else dividend / divisor)
 
 
-def robust_sqrt(value: Coordinate) -> Coordinate:
-    return sqrt(value)
-
-
+sqrt = sqrt
 ZERO = sqrt(0)
 
 

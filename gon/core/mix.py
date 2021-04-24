@@ -612,7 +612,7 @@ class Mix(Indexable):
         ...                     [((0, 6), (0, 8)), ((6, 6), (6, 8))],
         ...                     [([(0, 0), (6, 0), (6, 6), (0, 6)],
         ...                       [[(2, 2), (2, 4), (4, 4), (4, 2)]])]))
-        >>> from gon.linear import Contour
+        >>> from gon.base import Contour
         >>> (mix
         ...  == Mix(Multipoint(Point(3, 3), Point(7, 7)),
         ...         Multisegment(Segment(Point(0, 6), Point(0, 8)),
@@ -699,7 +699,7 @@ class Mix(Indexable):
         ...                     [((0, 6), (0, 8)), ((6, 6), (6, 8))],
         ...                     [([(0, 0), (6, 0), (6, 6), (0, 6)],
         ...                       [[(2, 2), (2, 4), (4, 4), (4, 2)]])]))
-        >>> from gon.linear import Contour
+        >>> from gon.base import Contour
         >>> (mix.multipolygon
         ...  == Multipolygon(Polygon(Contour([Point(0, 0), Point(6, 0),
         ...                                   Point(6, 6), Point(0, 6)]),

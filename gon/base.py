@@ -1,3 +1,6 @@
+from ground.base import (Context as _Context,
+                         set_context as _set_context)
+
 from .core.angular import Orientation
 from .core.compound import (Compound,
                             Indexable,
@@ -35,3 +38,10 @@ Polygon = Polygon
 Relation = Relation
 Segment = Segment
 Shaped = Shaped
+_set_context(_Context(contour_cls=Contour,
+                      multipoint_cls=Multipoint,
+                      multipolygon_cls=Multipolygon,
+                      multisegment_cls=Multisegment,
+                      point_cls=Point,
+                      polygon_cls=Polygon,
+                      segment_cls=Segment))

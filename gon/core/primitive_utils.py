@@ -1,10 +1,21 @@
-from .arithmetic import robust_sqrt
+import math
+from numbers import Real
+
+from symba.base import Expression
+
+from .arithmetic import sqrt
 from .hints import Coordinate
 from .raw import RawPoint
 
 
+def is_finite(value: Coordinate) -> bool:
+    return (math.isfinite(value)
+            if isinstance(value, Real)
+            else isinstance(value, Expression) and value.is_finite)
+
+
 def raw_points_distance(left: RawPoint, right: RawPoint) -> Coordinate:
-    return robust_sqrt(squared_raw_points_distance(left, right))
+    return sqrt(squared_raw_points_distance(left, right))
 
 
 def scale_raw_point(point: RawPoint,

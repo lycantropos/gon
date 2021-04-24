@@ -4,6 +4,7 @@ from typing import (AbstractSet,
                     List,
                     Optional)
 
+from ground.base import get_context
 from locus import kd
 from reprit.base import generate_repr
 
@@ -311,13 +312,7 @@ class Multipoint(Indexable):
         >>> multipoint.centroid == Point(1, 1)
         True
         """
-        accumulated_x = accumulated_y = 0
-        for x, y in self._raw:
-            accumulated_x += x
-            accumulated_y += y
-        divisor = len(self._raw)
-        return Point(robust_divide(accumulated_x, divisor),
-                     robust_divide(accumulated_y, divisor))
+        return get_context().multipoint_centroid(self.points)
 
     @property
     def points(self) -> List[Point]:

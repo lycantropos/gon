@@ -1,6 +1,3 @@
-from numbers import Real
-from typing import TypeVar
+from ground.hints import Coordinate
 
-from symba.base import Expression
-
-Coordinate = TypeVar('Coordinate', Expression, Real)
+Coordinate = Coordinate
