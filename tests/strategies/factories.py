@@ -23,6 +23,8 @@ from tests.utils import (Strategy,
                          call,
                          pack)
 
+MAX_LINEAR_SIZE = 5
+
 
 def to_non_zero_coordinates(coordinates: Strategy[Coordinate]
                             ) -> Strategy[Coordinate]:
@@ -85,14 +87,16 @@ def coordinates_to_segments(coordinates: Strategy[Coordinate]
 
 def coordinates_to_multisegments(coordinates: Strategy[Coordinate]
                                  ) -> Strategy[Multisegment]:
-    return planar.multisegments(coordinates,
-                                min_size=1).map(Multisegment.from_raw)
+    return (planar.multisegments(coordinates,
+                                 min_size=1,
+                                 max_size=MAX_LINEAR_SIZE)
+            .map(Multisegment.from_raw))
 
 
 def coordinates_to_contours(coordinates: Strategy[Coordinate],
                             *,
                             min_size: int = planar.TRIANGULAR_CONTOUR_SIZE,
-                            max_size: Optional[int] = None
+                            max_size: int = MAX_LINEAR_SIZE
                             ) -> Strategy[Contour]:
     return (planar.contours(coordinates,
                             min_size=min_size,
