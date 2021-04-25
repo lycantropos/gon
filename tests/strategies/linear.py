@@ -88,6 +88,7 @@ small_contours = (
                       coordinates_strategies
                       .map(coordinates_to_points)
                       .flatmap(partial(strategies.lists,
+                                       min_size=1,
                                        max_size=vertices.MIN_COUNT - 1))))
 invalid_vertices_contours = strategies.builds(
         Contour,
