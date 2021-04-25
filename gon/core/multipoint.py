@@ -504,8 +504,8 @@ class Multipoint(Indexable):
                 if factor_x and factor_y
                 else
                 (Multipoint(list(unique_ever_seen(scale_point(point, factor_x,
-                                                              factor_y))
-                                 for point in self._points))
+                                                              factor_y)
+                                                  for point in self._points)))
                  if factor_x or factor_y
                  else Multipoint([Point(factor_x, factor_y)])))
 
