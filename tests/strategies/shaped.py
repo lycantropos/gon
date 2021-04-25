@@ -17,7 +17,8 @@ from gon.raw import (RawContour,
 from tests.utils import (Domain,
                          Strategy,
                          sub_lists)
-from .base import coordinates_strategies
+from .base import (coordinates_strategies,
+                   empty_sequences)
 from .factories import (coordinates_to_contours,
                         coordinates_to_polygons)
 from .linear import (contours_with_repeated_points,
@@ -63,9 +64,10 @@ invalid_polygons = (
 repeated_polygons = (strategies.builds(repeat, polygons,
                                        strategies.integers(2, 100))
                      .map(list))
-invalid_multipolygons = (strategies.builds(Multipolygon,
-                                           strategies.lists(invalid_polygons)
-                                           | repeated_polygons))
+invalid_multipolygons = strategies.builds(Multipolygon,
+                                          empty_sequences
+                                          | strategies.lists(invalid_polygons)
+                                          | repeated_polygons)
 
 
 def to_raw_points_convex_hull(points: Sequence[RawPoint]) -> List[RawPoint]:
