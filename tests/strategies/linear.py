@@ -11,7 +11,6 @@ from gon.base import (Contour,
                       Segment)
 from gon.core import vertices
 from tests.utils import (Strategy,
-                         pack,
                          segment_to_rotations)
 from .base import (coordinates_strategies,
                    rational_coordinates_strategies)
@@ -82,7 +81,7 @@ invalid_multisegments = ((strategies.builds(list)
                                              min_size=1)
                           | to_segments_rotations(rational_segments)
                           | to_repeated_segments(segments))
-                         .map(pack(Multisegment)))
+                         .map(Multisegment))
 small_contours = (
     strategies.builds(Contour,
                       coordinates_strategies

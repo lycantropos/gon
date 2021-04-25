@@ -401,8 +401,8 @@ class Multisegment(Indexable, Linear):
 
         >>> multisegment = Multisegment.from_raw([((0, 0), (1, 0)),
         ...                                       ((0, 1), (1, 1))])
-        >>> multisegment == Multisegment(Segment(Point(0, 0), Point(1, 0)),
-        ...                              Segment(Point(0, 1), Point(1, 1)))
+        >>> multisegment == Multisegment([Segment(Point(0, 0), Point(1, 0)),
+        ...                               Segment(Point(0, 1), Point(1, 1))])
         True
         """
         return Multisegment([Segment.from_raw(raw_segment)
@@ -601,14 +601,14 @@ class Multisegment(Indexable, Linear):
         ...  == Multisegment.from_raw([((2, 0), (2, 1)), ((1, 0), (1, 1))]))
         True
         """
-        return (Multisegment(*[rotate_segment_around_origin(segment, cosine,
-                                                            sine)
-                               for segment in self._segments])
+        return (Multisegment([rotate_segment_around_origin(segment, cosine,
+                                                           sine)
+                              for segment in self._segments])
                 if point is None
                 else Multisegment(
-                *[rotate_translate_segment(segment, cosine, sine,
-                                           *point_to_step(point, cosine, sine))
-                  for segment in self._segments]))
+                [rotate_translate_segment(segment, cosine, sine,
+                                          *point_to_step(point, cosine, sine))
+                 for segment in self._segments]))
 
     def scale(self,
               factor_x: Coordinate,
@@ -633,12 +633,12 @@ class Multisegment(Indexable, Linear):
         """
         if factor_y is None:
             factor_y = factor_x
-        return (Multisegment(*[scale_segment(segment, factor_x, factor_y)
-                               for segment in self._segments])
+        return (Multisegment([scale_segment(segment, factor_x, factor_y)
+                              for segment in self._segments])
                 if factor_x and factor_y
                 else (_scale_segments(self._segments, factor_x, factor_y)
                       if factor_x or factor_y
-                      else Multipoint(Point(factor_x, factor_y))))
+                      else Multipoint([Point(factor_x, factor_y)])))
 
     def translate(self,
                   step_x: Coordinate,
@@ -659,8 +659,8 @@ class Multisegment(Indexable, Linear):
         ...  == Multisegment.from_raw([((1, 2), (2, 2)), ((1, 3), (2, 3))]))
         True
         """
-        return Multisegment(*[segment.translate(step_x, step_y)
-                              for segment in self._segments])
+        return Multisegment([segment.translate(step_x, step_y)
+                             for segment in self._segments])
 
     def validate(self) -> None:
         """

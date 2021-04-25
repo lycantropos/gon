@@ -112,8 +112,8 @@ empty_compounds_with_compounds = strategies.tuples(empty_compounds, compounds)
 
 def compound_to_compound_with_multipoint(compound: Compound
                                          ) -> Tuple[Compound, Multipoint]:
-    return (compound,
-            Multipoint(*to_unique_ever_seen(compound_to_points(compound))))
+    return (compound, Multipoint(list(to_unique_ever_seen(compound_to_points(
+            compound)))))
 
 
 def compound_to_points(compound: Compound) -> Iterable[Point]:

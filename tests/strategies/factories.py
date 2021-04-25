@@ -20,8 +20,7 @@ from gon.hints import (Coordinate,
 from gon.raw import (RAW_EMPTY,
                      RawMix)
 from tests.utils import (Strategy,
-                         call,
-                         pack)
+                         call)
 
 MAX_LINEAR_SIZE = 5
 
@@ -61,10 +60,9 @@ def coordinates_to_maybe_shaped_geometries(coordinates: Strategy[Coordinate]
 def coordinates_to_multipoints(coordinates: Strategy[Coordinate]
                                ) -> Strategy[Multipoint]:
     points = coordinates_to_points(coordinates)
-    return strategies.builds(pack(Multipoint),
-                             strategies.lists(points,
-                                              min_size=1,
-                                              unique=True))
+    return strategies.builds(Multipoint, strategies.lists(points,
+                                                          min_size=1,
+                                                          unique=True))
 
 
 def coordinates_to_linear_geometries(coordinates: Strategy[Coordinate]

@@ -566,7 +566,7 @@ class Segment(Compound, Linear):
         intersections = [Point.from_raw(raw_point)
                          for raw_point in segments_intersections(self._raw,
                                                                  other._raw)]
-        return ((Multipoint(*intersections)
+        return ((Multipoint(intersections)
                  if len(intersections) == 1
                  else Segment(*intersections))
                 if intersections
@@ -593,7 +593,7 @@ class Segment(Compound, Linear):
         return (EMPTY
                 if relation is Relation.EQUAL
                 else
-                (Multisegment(self, other)
+                (Multisegment([self, other])
                  if relation is Relation.DISJOINT or relation is Relation.TOUCH
                  else (Multisegment.from_raw(_raw_unite_cross(self._raw,
                                                               other._raw))
@@ -627,7 +627,7 @@ class Segment(Compound, Linear):
                        else (Multisegment.from_raw(
                               _raw_unite_cross(self._raw, other._raw))
                              if relation is Relation.CROSS
-                             else Multisegment(self, other)))))
+                             else Multisegment([self, other])))))
 
 
 def rotate_segment_around_origin(segment: Segment,

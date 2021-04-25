@@ -292,7 +292,7 @@ class Multipoint(Indexable):
             ``O(len(raw))``
 
         >>> multipoint = Multipoint.from_raw([(0, 0), (1, 0), (0, 1)])
-        >>> multipoint == Multipoint(Point(0, 0), Point(1, 0), Point(0, 1))
+        >>> multipoint == Multipoint([Point(0, 0), Point(1, 0), Point(0, 1)])
         True
         """
         return cls([Point.from_raw(raw_point) for raw_point in raw])
@@ -449,11 +449,11 @@ class Multipoint(Indexable):
         ...  == Multipoint.from_raw([(2, 0), (2, 1), (1, 0)]))
         True
         """
-        return (Multipoint(*rotate_points_around_origin(self._points, cosine,
-                                                        sine))
+        return (Multipoint(rotate_points_around_origin(self._points, cosine,
+                                                       sine))
                 if point is None
                 else
-                Multipoint(*rotate_translate_points(
+                Multipoint(rotate_translate_points(
                         self._points, cosine, sine,
                         *point_to_step(point, cosine, sine))))
 
@@ -479,14 +479,15 @@ class Multipoint(Indexable):
         """
         if factor_y is None:
             factor_y = factor_x
-        return (Multipoint(*[scale_point(point, factor_x, factor_y)
-                             for point in self._points])
+        return (Multipoint([scale_point(point, factor_x, factor_y)
+                            for point in self._points])
                 if factor_x and factor_y
-                else (Multipoint(*unique_ever_seen(scale_point(point, factor_x,
-                                                               factor_y)
-                                                   for point in self._points))
-                      if factor_x or factor_y
-                      else Multipoint(Point(factor_x, factor_y))))
+                else
+                (Multipoint(list(unique_ever_seen(scale_point(point, factor_x,
+                                                              factor_y))
+                                 for point in self._points))
+                 if factor_x or factor_y
+                 else Multipoint([Point(factor_x, factor_y)])))
 
     def translate(self,
                   step_x: Coordinate,
@@ -506,8 +507,8 @@ class Multipoint(Indexable):
         ...  == Multipoint.from_raw([(1, 2), (2, 2), (1, 3)]))
         True
         """
-        return Multipoint(*[point.translate(step_x, step_y)
-                            for point in self._points])
+        return Multipoint([point.translate(step_x, step_y)
+                           for point in self._points])
 
     def validate(self) -> None:
         """
