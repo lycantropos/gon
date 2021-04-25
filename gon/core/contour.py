@@ -223,7 +223,7 @@ class Contour(Indexable, Linear):
         """
         vertices = shift_sequence(self._vertices, self._min_index)
         return hash(vertices
-                    if (to_orientation(vertices[0], vertices[- 1], vertices[1])
+                    if (to_orientation(vertices[-1], vertices[0], vertices[1])
                         is Orientation.COUNTERCLOCKWISE)
                     else _vertices.rotate_positions(vertices))
 
@@ -450,7 +450,7 @@ class Contour(Indexable, Linear):
         True
         """
         vertices, min_index = self._vertices, self._min_index
-        return to_orientation(vertices[min_index], vertices[min_index - 1],
+        return to_orientation(vertices[min_index - 1], vertices[min_index],
                               vertices[(min_index + 1) % len(vertices)])
 
     @property
