@@ -5,18 +5,18 @@ from typing import (AbstractSet,
                     Optional,
                     Sequence)
 
-from ground.base import get_context
+from ground.base import (Context,
+                         get_context)
 from locus import kd
 from reprit.base import generate_repr
 
-from gon.core.compound import (Compound,
-                               Indexable,
-                               Location,
-                               Relation)
-from gon.core.geometry import Geometry
-from .arithmetic import (non_negative_min,
-                         robust_divide)
+from .arithmetic import non_negative_min
+from .compound import (Compound,
+                       Indexable,
+                       Location,
+                       Relation)
 from .degenerate import EMPTY
+from .geometry import Geometry
 from .hints import Coordinate
 from .iterable import unique_ever_seen
 from .point import (Point,
@@ -24,10 +24,10 @@ from .point import (Point,
                     rotate_point_around_origin,
                     rotate_translate_point,
                     scale_point)
-from .raw import (RawMultipoint,
-                  RawPoint)
 from .primitive_utils import (raw_points_distance,
                               squared_raw_points_distance)
+from .raw import (RawMultipoint,
+                  RawPoint)
 
 
 class KdTreeSquaredDistanceNode(kd.Node):
@@ -36,9 +36,12 @@ class KdTreeSquaredDistanceNode(kd.Node):
 
 
 class Multipoint(Indexable):
-    __slots__ = '_points', '_points_set', '_raw', '_raw_nearest_index'
+    __slots__ = ('_context', '_points', '_points_set', '_raw',
+                 '_raw_nearest_index')
 
-    def __init__(self, points: Sequence[Point]) -> None:
+    def __init__(self, points: Sequence[Point],
+                 *,
+                 context: Optional[Context] = None) -> None:
         """
         Initializes multipoint.
 
@@ -49,6 +52,7 @@ class Multipoint(Indexable):
 
         where ``points_count = len(points)``.
         """
+        self._context = get_context() if context is None else context
         self._points = points
         self._points_set = frozenset(points)
         self._raw = tuple(point.raw() for point in points)
@@ -313,7 +317,23 @@ class Multipoint(Indexable):
         >>> multipoint.centroid == Point(1, 1)
         True
         """
-        return get_context().multipoint_centroid(self.points)
+        return self.context.multipoint_centroid(self.points)
+
+    @property
+    def context(self) -> Context:
+        """
+        Returns context of the multipoint.
+
+        Time complexity:
+            ``O(1)``
+        Memory complexity:
+            ``O(1)``
+
+        >>> multipoint = Multipoint.from_raw([(0, 0), (3, 0), (0, 3)])
+        >>> isinstance(multipoint.context, Context)
+        True
+        """
+        return self._context
 
     @property
     def points(self) -> List[Point]:
