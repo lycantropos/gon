@@ -13,6 +13,7 @@ from gon.core import vertices
 from tests.utils import (Strategy,
                          segment_to_rotations)
 from .base import (coordinates_strategies,
+                   empty_sequences,
                    rational_coordinates_strategies)
 from .factories import (coordinates_to_points,
                         coordinates_to_segments)
@@ -76,7 +77,7 @@ def to_repeated_segments(segments: Strategy[Segment]
             .map(list))
 
 
-invalid_multisegments = ((strategies.builds(list)
+invalid_multisegments = ((empty_sequences
                           | strategies.lists(invalid_segments,
                                              min_size=1)
                           | to_segments_rotations(rational_segments)
@@ -87,7 +88,6 @@ small_contours = (
                       coordinates_strategies
                       .map(coordinates_to_points)
                       .flatmap(partial(strategies.lists,
-                                       min_size=1,
                                        max_size=vertices.MIN_COUNT - 1))))
 invalid_vertices_contours = strategies.builds(
         Contour,

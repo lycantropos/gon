@@ -102,3 +102,4 @@ def pythagorean_triplet_to_rational_cosine_sine(
 
 rational_cosines_sines = (to_pythagorean_triplets(max_value=MAX_COORDINATE)
                           .map(pythagorean_triplet_to_rational_cosine_sine))
+empty_sequences = strategies.builds(list) | strategies.builds(tuple)

@@ -9,8 +9,8 @@ from hypothesis import strategies
 from hypothesis_geometry import planar
 
 from gon.base import Point
-from gon.core import vertices
-from gon.core.vertices import Vertices
+from gon.core.vertices import (MIN_COUNT,
+                               Vertices)
 from gon.hints import Coordinate
 from gon.raw import RawPoint
 from tests.utils import (Strategy,
@@ -29,7 +29,7 @@ invalid_points = (strategies.builds(Point, valid_coordinates,
 
 
 def to_repeated_raw_points(coordinates: Strategy[Coordinate],
-                           min_size: int = vertices.MIN_COUNT,
+                           min_size: int = MIN_COUNT,
                            max_size: Optional[int] = None
                            ) -> Strategy[List[RawPoint]]:
     return (strategies.lists(planar.points(coordinates),
