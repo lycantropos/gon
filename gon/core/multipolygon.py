@@ -60,7 +60,7 @@ from .shaped_utils import (from_raw_holeless_mix_components,
 class Multipolygon(Indexable, Shaped):
     __slots__ = '_polygons', '_polygons_set', '_raw', '_locate'
 
-    def __init__(self, *polygons: Polygon) -> None:
+    def __init__(self, polygons: Sequence[Polygon]) -> None:
         """
         Initializes multipolygon.
 
@@ -453,13 +453,13 @@ class Multipolygon(Indexable, Shaped):
         ...         [([(0, 0), (6, 0), (6, 6), (0, 6)],
         ...           [[(2, 2), (2, 4), (4, 4), (4, 2)]])])
         >>> (multipolygon
-        ...  == Multipolygon(Polygon(Contour([Point(0, 0), Point(6, 0),
+        ...  == Multipolygon([Polygon(Contour([Point(0, 0), Point(6, 0),
         ...                                   Point(6, 6), Point(0, 6)]),
         ...                          [Contour([Point(2, 2), Point(2, 4),
-        ...                                    Point(4, 4), Point(4, 2)])])))
+        ...                                    Point(4, 4), Point(4, 2)])])]))
         True
         """
-        return cls(*map(Polygon.from_raw, raw))
+        return cls([Polygon.from_raw(raw_polygon) for raw_polygon in raw])
 
     @property
     def area(self) -> Coordinate:
@@ -795,8 +795,8 @@ class Multipolygon(Indexable, Shaped):
         """
         if factor_y is None:
             factor_y = factor_x
-        return (Multipolygon(*[scale_polygon(polygon, factor_x, factor_y)
-                               for polygon in self._polygons])
+        return (Multipolygon([scale_polygon(polygon, factor_x, factor_y)
+                              for polygon in self._polygons])
                 if factor_x and factor_y
                 else vertices.scale_degenerate(
                 flatten(polygon._border._vertices
@@ -826,8 +826,8 @@ class Multipolygon(Indexable, Shaped):
         ...                             [[(3, 4), (3, 6), (5, 6), (5, 4)]])]))
         True
         """
-        return Multipolygon(*[polygon.translate(step_x, step_y)
-                              for polygon in self._polygons])
+        return Multipolygon([polygon.translate(step_x, step_y)
+                             for polygon in self._polygons])
 
     def triangulate(self) -> List[Polygon]:
         """
@@ -995,8 +995,8 @@ def _locate_point_in_indexed_polygons(tree: r.Tree,
 def _rotate_multipolygon_around_origin(multipolygon: Multipolygon,
                                        cosine: Coordinate,
                                        sine: Coordinate) -> Multipolygon:
-    return Multipolygon(*[rotate_polygon_around_origin(polygon, cosine, sine)
-                          for polygon in multipolygon._polygons])
+    return Multipolygon([rotate_polygon_around_origin(polygon, cosine, sine)
+                         for polygon in multipolygon._polygons])
 
 
 def _rotate_translate_multipolygon(multipolygon: Multipolygon,
@@ -1004,6 +1004,6 @@ def _rotate_translate_multipolygon(multipolygon: Multipolygon,
                                    sine: Coordinate,
                                    step_x: Coordinate,
                                    step_y: Coordinate) -> Multipolygon:
-    return Multipolygon(*[rotate_translate_polygon(polygon, cosine, sine,
-                                                   step_x, step_y)
-                          for polygon in multipolygon._polygons])
+    return Multipolygon([rotate_translate_polygon(polygon, cosine, sine,
+                                                  step_x, step_y)
+                         for polygon in multipolygon._polygons])

@@ -151,15 +151,16 @@ def reverse_segment(segment: Segment) -> Segment:
 
 
 def reverse_multipoint(multipoint: Multipoint) -> Multipoint:
-    return Multipoint(*multipoint.points[::-1])
+    return Multipoint(multipoint.points[::-1])
 
 
 def reverse_multisegment(multisegment: Multisegment) -> Multisegment:
-    return Multisegment(*multisegment.segments[::-1])
+    return Multisegment(multisegment.segments[::-1])
 
 
 def reverse_multisegment_segments(multisegment: Multisegment) -> Multisegment:
-    return Multisegment(*map(reverse_segment, multisegment.segments))
+    return Multisegment([reverse_segment(segment)
+                         for segment in multisegment.segments])
 
 
 def shift_contour(contour: Contour, step: int) -> Contour:
@@ -167,12 +168,11 @@ def shift_contour(contour: Contour, step: int) -> Contour:
 
 
 def shift_multipoint(multipoint: Multipoint, step: int) -> Multipoint:
-    return Multipoint(*shift_sequence(multipoint.points, step))
+    return Multipoint(shift_sequence(multipoint.points, step))
 
 
-def shift_multisegment(multisegment: Multisegment,
-                       step: int) -> Multisegment:
-    return Multisegment(*shift_sequence(multisegment.segments, step))
+def shift_multisegment(multisegment: Multisegment, step: int) -> Multisegment:
+    return Multisegment(shift_sequence(multisegment.segments, step))
 
 
 def divide_by_int(dividend: Coordinate, divisor: int) -> Coordinate:

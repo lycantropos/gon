@@ -614,13 +614,13 @@ class Mix(Indexable):
         ...                       [[(2, 2), (2, 4), (4, 4), (4, 2)]])]))
         >>> from gon.base import Contour
         >>> (mix
-        ...  == Mix(Multipoint(Point(3, 3), Point(7, 7)),
-        ...         Multisegment(Segment(Point(0, 6), Point(0, 8)),
-        ...                      Segment(Point(6, 6), Point(6, 8))),
-        ...         Multipolygon(Polygon(Contour([Point(0, 0), Point(6, 0),
+        ...  == Mix(Multipoint([Point(3, 3), Point(7, 7)]),
+        ...         Multisegment([Segment(Point(0, 6), Point(0, 8)),
+        ...                       Segment(Point(6, 6), Point(6, 8))]),
+        ...         Multipolygon([Polygon(Contour([Point(0, 0), Point(6, 0),
         ...                                       Point(6, 6), Point(0, 6)]),
-        ...                      [Contour([Point(2, 2), Point(2, 4),
-        ...                                Point(4, 4), Point(4, 2)])]))))
+        ...                       [Contour([Point(2, 2), Point(2, 4),
+        ...                                 Point(4, 4), Point(4, 2)])])])))
         True
         """
         raw_multipoint, raw_multisegment, raw_multipolygon = raw
@@ -680,7 +680,7 @@ class Mix(Indexable):
         ...                     [((0, 6), (0, 8)), ((6, 6), (6, 8))],
         ...                     [([(0, 0), (6, 0), (6, 6), (0, 6)],
         ...                       [[(2, 2), (2, 4), (4, 4), (4, 2)]])]))
-        >>> mix.multipoint == Multipoint(Point(3, 3), Point(7, 7))
+        >>> mix.multipoint == Multipoint([Point(3, 3), Point(7, 7)])
         True
         """
         return self._multipoint
@@ -701,10 +701,10 @@ class Mix(Indexable):
         ...                       [[(2, 2), (2, 4), (4, 4), (4, 2)]])]))
         >>> from gon.base import Contour
         >>> (mix.multipolygon
-        ...  == Multipolygon(Polygon(Contour([Point(0, 0), Point(6, 0),
+        ...  == Multipolygon([Polygon(Contour([Point(0, 0), Point(6, 0),
         ...                                   Point(6, 6), Point(0, 6)]),
         ...                  [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
-        ...                            Point(4, 2)])])))
+        ...                            Point(4, 2)])])]))
         True
         """
         return self._multipolygon
@@ -723,8 +723,9 @@ class Mix(Indexable):
         ...                     [((0, 6), (0, 8)), ((6, 6), (6, 8))],
         ...                     [([(0, 0), (6, 0), (6, 6), (0, 6)],
         ...                       [[(2, 2), (2, 4), (4, 4), (4, 2)]])]))
-        >>> mix.multisegment == Multisegment(Segment(Point(0, 6), Point(0, 8)),
-        ...                                  Segment(Point(6, 6), Point(6, 8)))
+        >>> (mix.multisegment
+        ...  == Multisegment([Segment(Point(0, 6), Point(0, 8)),
+        ...                   Segment(Point(6, 6), Point(6, 8))]))
         True
         """
         return self._multisegment
@@ -1017,7 +1018,7 @@ class Mix(Indexable):
                        | self._multisegment.scale(factor_x, factor_y)
                        | self._multipolygon.scale(factor_x, factor_y))
                       if factor_x or factor_y
-                      else Multipoint(Point(factor_x, factor_y))))
+                      else Multipoint([Point(factor_x, factor_y)])))
 
     def translate(self, step_x: Coordinate, step_y: Coordinate) -> 'Mix':
         """
@@ -1833,10 +1834,10 @@ def from_mix_components(multipoint: Maybe[Multipoint],
                         linear: Maybe[Linear],
                         shaped: Maybe[Shaped]) -> Compound:
     return (Mix(multipoint,
-                Multisegment(linear)
+                Multisegment([linear])
                 if isinstance(linear, Segment)
                 else linear,
-                Multipolygon(shaped)
+                Multipolygon([shaped])
                 if isinstance(shaped, Polygon)
                 else shaped)
             if (((multipoint is not EMPTY)

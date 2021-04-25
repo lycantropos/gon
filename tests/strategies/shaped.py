@@ -16,7 +16,6 @@ from gon.raw import (RawContour,
                      RawPoint)
 from tests.utils import (Domain,
                          Strategy,
-                         pack,
                          sub_lists)
 from .base import coordinates_strategies
 from .factories import (coordinates_to_contours,
@@ -64,7 +63,7 @@ invalid_polygons = (
 repeated_polygons = (strategies.builds(repeat, polygons,
                                        strategies.integers(2, 100))
                      .map(list))
-invalid_multipolygons = (strategies.builds(pack(Multipolygon),
+invalid_multipolygons = (strategies.builds(Multipolygon,
                                            strategies.lists(invalid_polygons)
                                            | repeated_polygons))
 
