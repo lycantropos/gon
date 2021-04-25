@@ -655,7 +655,7 @@ def scale_segment(segment: Segment,
                     scale_point(segment._end, factor_x, factor_y))
             if ((factor_x or not segment.is_horizontal) and factor_y
                 or factor_x and not segment.is_vertical)
-            else Multipoint(scale_point(segment._start, factor_x, factor_y)))
+            else Multipoint([scale_point(segment._start, factor_x, factor_y)]))
 
 
 def _raw_subtract_overlap(minuend: RawSegment,
