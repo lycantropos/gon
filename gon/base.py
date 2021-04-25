@@ -1,4 +1,5 @@
 from ground.base import (Context as _Context,
+                         get_context as _get_context,
                          set_context as _set_context)
 
 from .core.angular import Orientation
@@ -38,10 +39,14 @@ Polygon = Polygon
 Relation = Relation
 Segment = Segment
 Shaped = Shaped
-_set_context(_Context(contour_cls=Contour,
+_initial_context = _get_context()
+_set_context(_Context(box_cls=_initial_context.box_cls,
+                      contour_cls=Contour,
                       multipoint_cls=Multipoint,
                       multipolygon_cls=Multipolygon,
                       multisegment_cls=Multisegment,
                       point_cls=Point,
                       polygon_cls=Polygon,
-                      segment_cls=Segment))
+                      segment_cls=Segment,
+                      mode=_initial_context.mode,
+                      sqrt=_initial_context.sqrt))
