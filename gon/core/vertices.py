@@ -102,7 +102,7 @@ def scale_degenerate(vertices: Iterable[Point],
             if factor_x
             else (scale_projecting_on_oy(vertices, factor_x, factor_y)
                   if factor_y
-                  else Multipoint(Point(factor_x, factor_y))))
+                  else Multipoint([Point(factor_x, factor_y)])))
 
 
 def scale_projecting_on_ox(vertices: Iterable[Point],
