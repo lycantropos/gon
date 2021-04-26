@@ -664,7 +664,8 @@ class Multipolygon(Indexable, Shaped):
         tree = r.Tree([polygon_to_interval(polygon) for polygon in polygons],
                       context=context)
         self._locate = partial(_locate_point_in_indexed_polygons, tree,
-                               polygons)
+                               polygons,
+                               context=context)
 
     def locate(self, point: Point) -> Location:
         """
@@ -985,9 +986,10 @@ def _locate_point_in_polygons(polygons: Sequence[Polygon],
 
 def _locate_point_in_indexed_polygons(tree: r.Tree,
                                       polygons: Sequence[Polygon],
-                                      point: Point) -> Location:
-    candidates_indices = tree.find_supersets_indices(((point.x, point.x),
-                                                      (point.y, point.y)))
+                                      point: Point,
+                                      context: Context) -> Location:
+    candidates_indices = tree.find_supersets_indices(
+            context.box_cls(point.x, point.x, point.y, point.y))
     for candidate_index in candidates_indices:
         location = polygons[candidate_index].locate(point)
         if location is not Location.EXTERIOR:

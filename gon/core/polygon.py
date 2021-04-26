@@ -993,11 +993,12 @@ class Polygon(Indexable, Shaped):
     def _unite_with_multisegment(self, other: Multisegment) -> Compound:
         from gon.core.mix import from_mix_components
         multipolygon = self._as_multipolygon()
-        return from_mix_components(EMPTY,
-                                   subtract_multipolygon_from_multisegment(
-                                           other, multipolygon,
-                                           context=self.context),
-                                   multipolygon)
+        return from_mix_components(
+                EMPTY,
+                unfold_multisegment(subtract_multipolygon_from_multisegment(
+                        other, multipolygon,
+                        context=self.context)),
+                multipolygon)
 
     def _unite_with_multipolygon(self, multipolygon: Multipolygon) -> Compound:
         return unfold_multipolygon(unite_multipolygons(self._as_multipolygon(),
