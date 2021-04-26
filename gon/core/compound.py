@@ -2,7 +2,7 @@ from abc import abstractmethod
 from typing import (TYPE_CHECKING,
                     List)
 
-from orient.planar import Relation
+from ground.base import Relation
 from sect.decomposition import Location
 from symba.base import Expression
 

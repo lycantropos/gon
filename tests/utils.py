@@ -16,6 +16,7 @@ from typing import (Any,
                     TypeVar)
 
 import pytest
+from ground.base import get_context
 from hypothesis import strategies
 from hypothesis.strategies import SearchStrategy
 
@@ -38,6 +39,7 @@ Strategy = SearchStrategy
 MAX_COORDINATE_EXPONENT = 15
 MAX_COORDINATE = 10 ** MAX_COORDINATE_EXPONENT
 MIN_COORDINATE = -MAX_COORDINATE
+context = get_context()
 
 
 @contextmanager
@@ -212,3 +214,6 @@ def rotate_segment(segment: Segment,
                          center_y + divide_by_int(area_sine * end_dx
                                                   + area_cosine * end_dy,
                                                   area)))
+
+
+to_points_convex_hull = context.points_convex_hull

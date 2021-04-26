@@ -1,5 +1,4 @@
-from functools import partial
-from typing import Optional
+from typing import Optional, Tuple
 
 from hypothesis import strategies
 from hypothesis_geometry import planar
@@ -17,8 +16,6 @@ from gon.base import (EMPTY,
                       Shaped)
 from gon.hints import (Coordinate,
                        Maybe)
-from gon.raw import (RAW_EMPTY,
-                     RawMix)
 from tests.utils import (Strategy,
                          call)
 
@@ -59,10 +56,8 @@ def coordinates_to_maybe_shaped_geometries(coordinates: Strategy[Coordinate]
 
 def coordinates_to_multipoints(coordinates: Strategy[Coordinate]
                                ) -> Strategy[Multipoint]:
-    points = coordinates_to_points(coordinates)
-    return strategies.builds(Multipoint, strategies.lists(points,
-                                                          min_size=1,
-                                                          unique=True))
+    return planar.multipoints(coordinates,
+                              min_size=1)
 
 
 def coordinates_to_linear_geometries(coordinates: Strategy[Coordinate]
@@ -80,95 +75,84 @@ def coordinates_to_shaped_geometries(coordinates: Strategy[Coordinate]
 
 def coordinates_to_segments(coordinates: Strategy[Coordinate]
                             ) -> Strategy[Segment]:
-    return planar.segments(coordinates).map(Segment.from_raw)
+    return planar.segments(coordinates)
 
 
 def coordinates_to_multisegments(coordinates: Strategy[Coordinate]
                                  ) -> Strategy[Multisegment]:
-    return (planar.multisegments(coordinates,
-                                 min_size=1,
-                                 max_size=MAX_LINEAR_SIZE)
-            .map(Multisegment.from_raw))
+    return planar.multisegments(coordinates,
+                                min_size=1,
+                                max_size=MAX_LINEAR_SIZE)
 
 
 def coordinates_to_contours(coordinates: Strategy[Coordinate],
                             *,
-                            min_size: int = planar.TRIANGULAR_CONTOUR_SIZE,
+                            min_size: int = 3,
                             max_size: int = MAX_LINEAR_SIZE
                             ) -> Strategy[Contour]:
-    return (planar.contours(coordinates,
-                            min_size=min_size,
-                            max_size=max_size)
-            .map(Contour.from_raw))
+    return planar.contours(coordinates,
+                           min_size=min_size,
+                           max_size=max_size)
 
 
 def coordinates_to_mixes(coordinates: Strategy[Coordinate]) -> Strategy[Mix]:
-    return coordinates_to_raw_mixes(coordinates).map(Mix.from_raw)
-
-
-def coordinates_to_raw_mixes(coordinates: Strategy[Coordinate]
-                             ) -> Strategy[RawMix]:
-    def coordinate_to_raw_empty(index: int, raw_mix: RawMix) -> RawMix:
-        return (raw_mix
-                if raw_mix[index]
-                else raw_mix[:index] + (RAW_EMPTY,) + raw_mix[index + 1:])
+    def from_components(components
+                        : Tuple[Multipoint, Multisegment, Multipolygon]
+                        ) -> Mix:
+        multipoint, multisegment, multipolygon = components
+        return Mix(multipoint if multipoint.points else EMPTY,
+                   multisegment if multisegment.segments else EMPTY,
+                   multipolygon if multipolygon.polygons else EMPTY)
 
     return ((planar.mixes(coordinates,
                           min_multipoint_size=1,
                           min_multisegment_size=1)
-             .map(partial(coordinate_to_raw_empty, 2)))
+             .map(from_components))
             | (planar.mixes(coordinates,
                             min_multipoint_size=1,
                             min_multipolygon_size=1)
-               .map(partial(coordinate_to_raw_empty, 1)))
+               .map(from_components))
             | (planar.mixes(coordinates,
                             min_multisegment_size=1,
                             min_multipolygon_size=1)
-               .map(partial(coordinate_to_raw_empty, 0))))
+               .map(from_components)))
 
 
 def coordinates_to_polygons(coordinates: Strategy[Coordinate],
                             *,
-                            min_size: int = planar.TRIANGULAR_CONTOUR_SIZE,
+                            min_size: int = 3,
                             max_size: Optional[int] = None,
-                            min_holes_size: int
-                            = planar.EMPTY_MULTICONTOUR_SIZE,
+                            min_holes_size: int = 0,
                             max_holes_size: Optional[int] = None,
-                            min_hole_size: int
-                            = planar.TRIANGULAR_CONTOUR_SIZE,
+                            min_hole_size: int = 3,
                             max_hole_size: Optional[int] = None
                             ) -> Strategy[Polygon]:
-    return (planar.polygons(coordinates,
-                            min_size=min_size,
-                            max_size=max_size,
-                            min_holes_size=min_holes_size,
-                            max_holes_size=max_holes_size,
-                            min_hole_size=min_hole_size,
-                            max_hole_size=max_hole_size)
-            .map(Polygon.from_raw))
+    return planar.polygons(coordinates,
+                           min_size=min_size,
+                           max_size=max_size,
+                           min_holes_size=min_holes_size,
+                           max_holes_size=max_holes_size,
+                           min_hole_size=min_hole_size,
+                           max_hole_size=max_hole_size)
 
 
 def coordinates_to_multipolygons(coordinates: Strategy[Coordinate],
                                  *,
                                  min_size: int = 1,
                                  max_size: Optional[int] = None,
-                                 min_border_size: int
-                                 = planar.TRIANGULAR_CONTOUR_SIZE,
+                                 min_border_size: int = 3,
                                  max_border_size: Optional[int] = None,
-                                 min_holes_size: int
-                                 = planar.EMPTY_MULTICONTOUR_SIZE,
+                                 min_holes_size: int = 0,
                                  max_holes_size: Optional[int] = None,
-                                 min_hole_size: int
-                                 = planar.TRIANGULAR_CONTOUR_SIZE,
+                                 min_hole_size: int = 3,
                                  max_hole_size: Optional[int] = None
                                  ) -> Strategy[Multipolygon]:
-    return (planar.multipolygons(coordinates,
-                                 min_size=min_size,
-                                 max_size=max_size,
-                                 min_border_size=min_border_size,
-                                 max_border_size=max_border_size,
-                                 min_holes_size=min_holes_size,
-                                 max_holes_size=max_holes_size,
-                                 min_hole_size=min_hole_size,
-                                 max_hole_size=max_hole_size)
-            .map(Multipolygon.from_raw))
+    return planar.multipolygons(coordinates,
+                                min_size=min_size,
+                                max_size=max_size,
+                                min_border_size=min_border_size,
+                                max_border_size=max_border_size,
+                                min_holes_size=min_holes_size,
+                                max_holes_size=max_holes_size,
+                                min_hole_size=min_hole_size,
+                                max_hole_size=max_hole_size)

@@ -1,5 +1,3 @@
-from itertools import chain
-
 from bentley_ottmann.planar import segments_cross_or_overlap
 from hypothesis import strategies
 
@@ -7,26 +5,23 @@ from gon.base import (EMPTY,
                       Mix,
                       Multipoint,
                       Multipolygon,
-                      Multisegment)
-from gon.core.iterable import to_pairs_sequence
+                      Multisegment,
+                      Segment)
 from tests.strategies import (coordinates_strategies,
                               coordinates_to_mixes,
                               coordinates_to_multipoints,
                               coordinates_to_multipolygons,
                               coordinates_to_multisegments,
                               coordinates_to_points,
-                              coordinates_to_raw_mixes,
                               invalid_multipoints,
                               invalid_multipolygons,
                               invalid_multisegments)
 from tests.utils import (Strategy,
                          cleave_in_tuples,
-                         flatten,
                          sub_lists,
                          to_pairs,
                          to_triplets)
 
-raw_mixes = coordinates_strategies.flatmap(coordinates_to_raw_mixes)
 mixes = coordinates_strategies.flatmap(coordinates_to_mixes)
 empty_geometries = strategies.just(EMPTY)
 multipoints = coordinates_strategies.flatmap(coordinates_to_multipoints)
@@ -35,18 +30,17 @@ multipolygons = coordinates_strategies.flatmap(coordinates_to_multipolygons)
 
 
 def multipolygon_to_invalid_mix(multipolygon: Multipolygon) -> Strategy[Mix]:
-    raw_contours = list(flatten(chain((polygon.border.raw(),),
-                                      (hole.raw() for hole in polygon.holes))
-                                for polygon in multipolygon.polygons))
-    raw_vertices = list(flatten(raw_contours))
-    raw_edges = list(flatten(map(to_pairs_sequence, raw_contours)))
-    raw_segments = raw_edges + to_pairs_sequence(raw_vertices)
+    vertices = sum([sum((hole.vertices for hole in polygon.holes),
+                        polygon.border.vertices)
+                    for polygon in multipolygon.polygons], [])
+    edges = sum([polygon.edges for polygon in multipolygon.polygons], [])
+    segments = edges + [Segment(vertices[index - 1], vertices[index])
+                        for index in range(len(vertices))]
     return strategies.builds(
             Mix,
-            empty_geometries | (sub_lists(raw_vertices)
-                                .map(Multipoint.from_raw)),
-            sub_lists(raw_segments)
-            .filter(lambda candidates: segments_cross_or_overlap(raw_edges
+            empty_geometries | (sub_lists(vertices).map(Multipoint)),
+            sub_lists(segments)
+            .filter(lambda candidates: segments_cross_or_overlap(edges
                                                                  + candidates))
             .map(Multisegment.from_raw),
             strategies.just(multipolygon))

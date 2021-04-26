@@ -8,6 +8,7 @@ from gon.core.compound import (Compound,
                                Location,
                                Relation,
                                Shaped)
+from .arithmetic import non_negative_min
 from .degenerate import (EMPTY,
                          Maybe)
 from .geometry import Geometry
@@ -757,18 +758,9 @@ class Mix(Indexable):
         >>> mix.distance_to(mix) == 0
         True
         """
-        candidates = (component.distance_to(other)
-                      for component in self._components
-                      if component is not EMPTY)
-        result = next(candidates)
-        if not result:
-            return result
-        for candidate in candidates:
-            if not candidate:
-                return candidate
-            elif candidate < result:
-                result = candidate
-        return result
+        return non_negative_min(component.distance_to(other)
+                                for component in self._components
+                                if component is not EMPTY)
 
     def index(self) -> None:
         """

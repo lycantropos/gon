@@ -24,24 +24,14 @@ from .point import (Point,
                     rotate_point_around_origin,
                     rotate_translate_point,
                     scale_point)
-from .primitive_utils import (raw_points_distance,
-                              squared_raw_points_distance)
-from .raw import (RawMultipoint,
-                  RawPoint)
-
-
-class KdTreeSquaredDistanceNode(kd.Node):
-    def distance_to_point(self, point: RawPoint) -> Coordinate:
-        return squared_raw_points_distance(self.point, point)
+from .raw import RawMultipoint
 
 
 class Multipoint(Indexable):
     __slots__ = ('_context', '_points', '_points_set', '_raw',
-                 '_raw_nearest_index')
+                 '_nearest_point')
 
-    def __init__(self, points: Sequence[Point],
-                 *,
-                 context: Optional[Context] = None) -> None:
+    def __init__(self, points: Sequence[Point]) -> None:
         """
         Initializes multipoint.
 
@@ -52,12 +42,12 @@ class Multipoint(Indexable):
 
         where ``points_count = len(points)``.
         """
-        self._context = get_context() if context is None else context
+        context = get_context()
+        self._context = context
         self._points = points
         self._points_set = frozenset(points)
         self._raw = tuple(point.raw() for point in points)
-        self._raw_nearest_index = partial(_to_raw_multipoint_nearest_index,
-                                          self._raw)
+        self._nearest_point = partial(_to_nearest_point, context, points)
 
     __repr__ = generate_repr(__init__)
 
@@ -366,10 +356,10 @@ class Multipoint(Indexable):
         >>> multipoint.distance_to(multipoint) == 0
         True
         """
-        return (self._distance_to_raw_point(other.raw())
+        return (self._distance_to_point(other)
                 if isinstance(other, Point)
-                else (non_negative_min(self._distance_to_raw_point(raw_point)
-                                       for raw_point in other._raw)
+                else (non_negative_min(self._distance_to_point(point)
+                                       for point in other.points)
                       if isinstance(other, Multipoint)
                       else other.distance_to(self)))
 
@@ -387,9 +377,7 @@ class Multipoint(Indexable):
         >>> multipoint = Multipoint.from_raw([(0, 0), (1, 0), (0, 1)])
         >>> multipoint.index()
         """
-        tree = kd.Tree(self._raw,
-                       node_cls=KdTreeSquaredDistanceNode)
-        self._raw_nearest_index = tree.nearest_index
+        self._nearest_point = kd.Tree(self._points).nearest_point
 
     def locate(self, point: Point) -> Location:
         """
@@ -549,9 +537,9 @@ class Multipoint(Indexable):
         for point in self._points:
             point.validate()
 
-    def _distance_to_raw_point(self, other: RawPoint) -> Coordinate:
-        return raw_points_distance(self._raw[self._raw_nearest_index(other)],
-                                   other)
+    def _distance_to_point(self, other: Point) -> Coordinate:
+        return self.context.sqrt(self.context.points_squared_distance(
+                self._nearest_point(other), other))
 
     def _relate_geometry(self, other: Compound) -> Relation:
         disjoint = is_subset = not_interior = not_boundary = True
@@ -615,14 +603,8 @@ def _relate_sets(left: AbstractSet, right: AbstractSet) -> Relation:
             else Relation.DISJOINT)
 
 
-def _to_raw_multipoint_nearest_index(raw_multipoint: RawMultipoint,
-                                     raw_point: RawPoint) -> int:
-    enumerated_candidates = enumerate(raw_multipoint)
-    result, candidate = next(enumerated_candidates)
-    squared_distance_to_point = partial(squared_raw_points_distance, raw_point)
-    min_squared_distance = squared_distance_to_point(candidate)
-    for index, candidate in enumerated_candidates:
-        candidate_squared_distance = squared_distance_to_point(candidate)
-        if candidate_squared_distance < min_squared_distance:
-            result, min_squared_distance = index, candidate_squared_distance
-    return result
+def _to_nearest_point(context: Context,
+                      points: Sequence[Point],
+                      point: Point) -> Point:
+    return min(points,
+               key=partial(context.points_squared_distance, point))
