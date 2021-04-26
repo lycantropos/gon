@@ -12,7 +12,6 @@ from gon.base import Point
 from gon.core.vertices import (MIN_COUNT,
                                Vertices)
 from gon.hints import Coordinate
-from gon.raw import RawPoint
 from tests.utils import (Strategy,
                          identity)
 from .base import coordinates_strategies
@@ -31,7 +30,7 @@ invalid_points = (strategies.builds(Point, valid_coordinates,
 def to_repeated_raw_points(coordinates: Strategy[Coordinate],
                            min_size: int = MIN_COUNT,
                            max_size: Optional[int] = None
-                           ) -> Strategy[List[RawPoint]]:
+                           ) -> Strategy[List[Point]]:
     return (strategies.lists(planar.points(coordinates),
                              min_size=min_size,
                              max_size=max_size)

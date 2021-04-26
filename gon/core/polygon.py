@@ -1,10 +1,6 @@
 from bisect import bisect
 from functools import partial
-from itertools import (accumulate,
-                       chain)
-from typing import (Iterator,
-                    List,
-                    Optional,
+from typing import (Optional,
                     Sequence,
                     Tuple)
 
@@ -15,7 +11,9 @@ from clipping.planar import (complete_intersect_multipolygons,
                              subtract_multipolygons,
                              symmetric_subtract_multipolygons,
                              unite_multipolygons)
-from ground.base import get_context
+from ground.base import (Context,
+                         get_context)
+from ground.hints import Multipolygon
 from locus import segmental
 from orient.planar import (contour_in_polygon,
                            multisegment_in_polygon,
@@ -24,9 +22,8 @@ from orient.planar import (contour_in_polygon,
                            region_in_multiregion,
                            segment_in_polygon)
 from reprit.base import generate_repr
-from sect.decomposition import polygon_trapezoidal
-from sect.triangulation import constrained_delaunay_triangles
-from symba.base import Expression
+from sect.decomposition import Graph
+from sect.triangulation import Triangulation
 
 from . import vertices
 from .arithmetic import (ZERO,
@@ -45,37 +42,30 @@ from .contour import (Contour,
 from .degenerate import EMPTY
 from .geometry import Geometry
 from .hints import Coordinate
-from .iterable import (flatten,
-                       to_pairs_iterable,
-                       to_pairs_sequence)
-from .linear_utils import (from_raw_multisegment,
-                           raw_segment_point_distance,
-                           raw_segments_distance,
-                           squared_raw_point_segment_distance,
-                           squared_raw_segments_distance)
+from .linear_utils import (from_mix_components,
+                           to_point_nearest_segment,
+                           to_segment_nearest_segment,
+                           unfold_multisegment)
 from .multipoint import Multipoint
-from .multisegment import (Multisegment,
-                           SegmentalSquaredDistanceNode)
+from .multisegment import Multisegment
 from .point import (Point,
                     point_to_step)
-from .raw import (RawContour,
-                  RawMultipolygon,
-                  RawMultisegment,
-                  RawPoint,
+from .raw import (RawPoint,
                   RawPolygon,
                   RawSegment)
 from .segment import Segment
-from .shaped_utils import (from_raw_holeless_mix_components,
-                           from_raw_mix_components,
-                           from_raw_multipolygon)
+from .shaped_utils import (from_holeless_mix_components,
+                           mix_from_unfolded_components,
+                           unfold_multipolygon)
 
 
 class Polygon(Indexable, Shaped):
-    __slots__ = ('_border', '_holes', '_holes_set', '_raw_border',
-                 '_raw_holes', '_raw_locate', '_raw_point_nearest_path',
-                 '_raw_segment_nearest_path')
+    __slots__ = ('_border', '_context', '_holes', '_holes_set', '_raw_border',
+                 '_raw_holes', '_locate', '_point_nearest_edge',
+                 '_segment_nearest_edge')
 
-    def __init__(self, border: Contour,
+    def __init__(self,
+                 border: Contour,
                  holes: Optional[Sequence[Contour]] = None) -> None:
         """
         Initializes polygon.
@@ -88,19 +78,19 @@ class Polygon(Indexable, Shaped):
         where ``vertices_count = len(border.vertices)\
  + sum(len(hole.vertices) for hole in holes)``.
         """
+        context = get_context()
+        self._context = context
         holes = tuple(holes or ())
         self._border, self._holes, self._holes_set = (border, holes,
                                                       frozenset(holes))
         self._raw_border, self._raw_holes = border.raw(), [hole.raw()
                                                            for hole in holes]
-        self._raw_locate = partial(raw_locate_point,
-                                   (self._raw_border, self._raw_holes))
-        self._raw_segment_nearest_path = partial(_to_raw_segment_nearest_path,
-                                                 self._raw_border,
-                                                 self._raw_holes)
-        self._raw_point_nearest_path = partial(_to_raw_point_nearest_path,
-                                               self._raw_border,
-                                               self._raw_holes)
+        self._locate = partial(locate_point, self)
+        edges = self.edges
+        self._segment_nearest_edge = partial(to_segment_nearest_segment, edges,
+                                             context=context)
+        self._point_nearest_edge = partial(to_point_nearest_segment, edges,
+                                           context=context)
 
     __repr__ = generate_repr(__init__)
 
@@ -116,30 +106,30 @@ class Polygon(Indexable, Shaped):
         where ``vertices_count = len(self.border.vertices)\
  + sum(len(hole.vertices) for hole in self.holes)``.
 
+        >>> from gon.base import Multipolygon
         >>> polygon = Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
         ...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]]))
-        >>> polygon & polygon == polygon
+        >>> polygon & polygon == Multipolygon([polygon])
         True
         """
-        return (self._intersect_with_raw_multisegment([other.raw()])
+        return (self._intersect_with_multisegment(
+                self.context.multisegment_cls([other]))
                 if isinstance(other, Segment)
-                else (self._intersect_with_raw_multisegment(other.raw())
+                else (self._intersect_with_multisegment(other)
                       if isinstance(other, Multisegment)
                       else
-                      (self._intersect_with_raw_multisegment(
-                              to_pairs_sequence(other.raw()))
+                      (self._intersect_with_multisegment(
+                              self.context.multisegment_cls(other.edges))
                        if isinstance(other, Contour)
                        else
-                       ((from_raw_mix_components(
+                       ((mix_from_unfolded_components(
                                *complete_intersect_multipolygons(
-                                       [(self._raw_border, self._raw_holes)],
-                                       [(other._raw_border, other._raw_holes)],
-                                       accurate=False))
+                                       self._as_multipolygon(),
+                                       other._as_multipolygon()))
                          if self._holes or other._holes
-                         else from_raw_holeless_mix_components(
+                         else from_holeless_mix_components(
                                *complete_intersect_multiregions(
-                                       [self._raw_border], [other._raw_border],
-                                       accurate=False)))
+                                       [self.border], [other.border])))
                         if isinstance(other, Polygon)
                         else NotImplemented))))
 
@@ -177,7 +167,7 @@ class Polygon(Indexable, Shaped):
         >>> Point(7, 0) in polygon
         False
         """
-        return isinstance(other, Point) and bool(self._raw_locate(other.raw()))
+        return isinstance(other, Point) and bool(self._locate(other))
 
     def __eq__(self, other: 'Polygon') -> bool:
         """
@@ -334,24 +324,27 @@ class Polygon(Indexable, Shaped):
         where ``vertices_count = len(self.border.vertices)\
  + sum(len(hole.vertices) for hole in self.holes)``.
 
+        >>> from gon.base import Multipolygon
         >>> polygon = Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
         ...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]]))
-        >>> polygon | polygon == polygon
+        >>> polygon | polygon == Multipolygon([polygon])
         True
         """
         return (self._unite_with_multipoint(other)
                 if isinstance(other, Multipoint)
                 else
-                (self._unite_with_raw_multisegment([other.raw()])
+                (self._unite_with_multisegment(
+                        self.context.multisegment_cls([other]))
                  if isinstance(other, Segment)
                  else
-                 (self._unite_with_raw_multisegment(other.raw())
+                 (self._unite_with_multisegment(other)
                   if isinstance(other, Multisegment)
                   else
-                  (self._unite_with_raw_multisegment(
-                          to_pairs_sequence(other.raw()))
+                  (self._unite_with_multisegment(
+                          self.context.multisegment_cls(other.edges))
                    if isinstance(other, Contour)
-                   else (self._unite_with_raw_multipolygon([other.raw()])
+                   else (self._unite_with_multipolygon(
+                          self.context.multipolygon_cls([other]))
                          if isinstance(other, Polygon)
                          else NotImplemented)))))
 
@@ -369,13 +362,14 @@ class Polygon(Indexable, Shaped):
         where ``vertices_count = len(self.border.vertices)\
  + sum(len(hole.vertices) for hole in self.holes)``.
         """
-        return (self._subtract_from_raw_multisegment([other.raw()])
+        return (self._subtract_from_multisegment(
+                self.context.multisegment_cls([other]))
                 if isinstance(other, Segment)
-                else (self._subtract_from_raw_multisegment(other.raw())
+                else (self._subtract_from_multisegment(other)
                       if isinstance(other, Multisegment)
                       else
-                      (self._subtract_from_raw_multisegment(
-                              to_pairs_sequence(other.raw()))
+                      (self._subtract_from_multisegment(
+                              self.context.multisegment_cls(other.edges))
                        if isinstance(other, Contour)
                        else NotImplemented)))
 
@@ -398,8 +392,7 @@ class Polygon(Indexable, Shaped):
         """
         return (self
                 if isinstance(other, (Linear, Multipoint))
-                else (self._subtract_raw_multipolygon([(other._raw_border,
-                                                        other._raw_holes)])
+                else (self._subtract_multipolygon(other._as_multipolygon())
                       if isinstance(other, Polygon)
                       else NotImplemented))
 
@@ -423,17 +416,19 @@ class Polygon(Indexable, Shaped):
         return (self._unite_with_multipoint(other)
                 if isinstance(other, Multipoint)
                 else
-                (self._unite_with_raw_multisegment([other.raw()])
+                (self._unite_with_multisegment(
+                        self.context.multisegment_cls([other]))
                  if isinstance(other, Segment)
                  else
-                 (self._unite_with_raw_multisegment(other.raw())
+                 (self._unite_with_multisegment(other)
                   if isinstance(other, Multisegment)
                   else
-                  (self._unite_with_raw_multisegment(
-                          to_pairs_sequence(other.raw()))
+                  (self._unite_with_multisegment(
+                          self.context.multisegment_cls(other.edges))
                    if isinstance(other, Contour)
                    else
-                   (self._symmetric_subtract_raw_multipolygon([other.raw()])
+                   (self._symmetric_subtract_multipolygon(
+                           other._as_multipolygon())
                     if isinstance(other, Polygon)
                     else NotImplemented)))))
 
@@ -500,8 +495,9 @@ class Polygon(Indexable, Shaped):
 
         >>> polygon = Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
         ...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]]))
-        >>> polygon.border
-        Contour([Point(0, 0), Point(6, 0), Point(6, 6), Point(0, 6)])
+        >>> polygon.border == Contour([Point(0, 0), Point(6, 0), Point(6, 6),
+        ...                            Point(0, 6)])
+        True
         """
         return self._border
 
@@ -523,7 +519,24 @@ class Polygon(Indexable, Shaped):
         >>> polygon.centroid == Point(3, 3)
         True
         """
-        return get_context().polygon_centroid(self.border, self.holes)
+        return self.context.polygon_centroid(self.border, self.holes)
+
+    @property
+    def context(self) -> Context:
+        """
+        Returns context of the polygon.
+
+        Time complexity:
+            ``O(1)``
+        Memory complexity:
+            ``O(1)``
+
+        >>> polygon = Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
+        ...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]]))
+        >>> isinstance(polygon.context, Context)
+        True
+        """
+        return self._context
 
     @property
     def convex_hull(self) -> 'Polygon':
@@ -548,11 +561,31 @@ class Polygon(Indexable, Shaped):
         return (self
                 if self.is_convex
                 else
-                Polygon(Contour(get_context().points_convex_hull(
-                        self.border.vertices))))
+                Polygon(Contour(self.context.points_convex_hull(self.border
+                                                                .vertices))))
 
     @property
-    def holes(self) -> List[Contour]:
+    def edges(self) -> Sequence[Segment]:
+        """
+        Returns edges of the polygon.
+
+        Time complexity:
+            ``O(vertices_count)``
+        Memory complexity:
+            ``O(vertices_count)``
+
+        where ``vertices_count = len(self.border.vertices)\
+ + sum(len(hole.vertices) for hole in self.holes)``.
+
+        >>> polygon = Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
+        ...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]]))
+        >>> polygon.centroid == Point(3, 3)
+        True
+        """
+        return sum([hole.edges for hole in self.holes], self.border.edges)
+
+    @property
+    def holes(self) -> Sequence[Contour]:
         """
         Returns holes of the polygon.
 
@@ -565,8 +598,9 @@ class Polygon(Indexable, Shaped):
 
         >>> polygon = Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
         ...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]]))
-        >>> polygon.holes
-        [Contour([Point(2, 2), Point(2, 4), Point(4, 4), Point(4, 2)])]
+        >>> polygon.holes == [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
+        ...                            Point(4, 2)])]
+        True
         """
         return list(self._holes)
 
@@ -627,28 +661,26 @@ class Polygon(Indexable, Shaped):
         >>> polygon.distance_to(polygon) == 0
         True
         """
-        return (self._distance_to_raw_point(other.raw())
+        return (self._distance_to_point(other)
                 if isinstance(other, Point)
                 else
-                (non_negative_min(self._distance_to_raw_point(raw_point)
-                                  for raw_point in other._raw)
+                (non_negative_min(self._distance_to_point(point)
+                                  for point in other.points)
                  if isinstance(other, Multipoint)
                  else
-                 (self._distance_to_raw_segment(other.raw())
+                 (self._distance_to_segment(other)
                   if isinstance(other, Segment)
                   else
-                  (non_negative_min(self._distance_to_raw_segment(raw_segment)
-                                    for raw_segment in other._raw)
+                  (non_negative_min(self._distance_to_segment(segment)
+                                    for segment in other.segments)
                    if isinstance(other, Multisegment)
                    else
-                   (non_negative_min(
-                           self._distance_to_raw_segment(raw_segment)
-                           for raw_segment in to_pairs_iterable(other._raw))
+                   (non_negative_min(self._distance_to_segment(edge)
+                                     for edge in other.edges)
                     if isinstance(other, Contour)
                     else
-                    ((non_negative_min(
-                            self._linear_distance_to_raw_segment(raw_segment)
-                            for raw_segment in polygon_to_raw_edges(other))
+                    ((non_negative_min(self._linear_distance_to_segment(edge)
+                                       for edge in other.edges)
                       if self.disjoint(other)
                       else ZERO)
                      if isinstance(other, Polygon)
@@ -671,23 +703,11 @@ class Polygon(Indexable, Shaped):
         ...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]]))
         >>> polygon.index()
         """
-        graph = polygon_trapezoidal(self._raw_border, self._raw_holes)
-        self._raw_locate = graph.locate
-        tree = segmental.Tree(list(polygon_to_raw_edges(self)),
-                              node_cls=SegmentalSquaredDistanceNode)
-        if self._raw_holes:
-            contours_offsets = tuple(
-                    accumulate(chain((0, len(self._raw_border)),
-                                     map(len, self._raw_holes))))
-            self._raw_point_nearest_path, self._raw_segment_nearest_path = (
-                partial(_tree_to_raw_point_nearest_path, tree,
-                        contours_offsets),
-                partial(_tree_to_raw_segment_nearest_path, tree,
-                        contours_offsets))
-        else:
-            self._raw_point_nearest_path, self._raw_segment_nearest_path = (
-                partial(_tree_to_holeless_raw_point_nearest_path, tree),
-                partial(_tree_to_holeless_raw_segment_nearest_path, tree))
+        self._locate = Graph.from_polygon(self,
+                                          context=self.context).locate
+        tree = segmental.Tree(self.edges)
+        self._point_nearest_edge, self._segment_nearest_edge = (
+            tree.nearest_to_point_segment, tree.nearest_segment)
 
     def locate(self, point: Point) -> Location:
         """
@@ -721,7 +741,7 @@ class Polygon(Indexable, Shaped):
         >>> polygon.locate(Point(7, 0)) is Location.EXTERIOR
         True
         """
-        return self._raw_locate(point.raw())
+        return self._locate(point)
 
     def raw(self) -> RawPolygon:
         """
@@ -760,16 +780,13 @@ class Polygon(Indexable, Shaped):
         >>> polygon.relate(polygon) is Relation.EQUAL
         True
         """
-        raw = self._raw_border, self._raw_holes
-        return (segment_in_polygon(other.raw(), raw)
+        return (segment_in_polygon(other, self)
                 if isinstance(other, Segment)
-                else (multisegment_in_polygon(other.raw(), raw)
+                else (multisegment_in_polygon(other, self)
                       if isinstance(other, Multisegment)
-                      else (contour_in_polygon(other.raw(), raw)
+                      else (contour_in_polygon(other, self)
                             if isinstance(other, Contour)
-                            else (polygon_in_polygon((other._raw_border,
-                                                      other._raw_holes),
-                                                     raw)
+                            else (polygon_in_polygon(other, self)
                                   if isinstance(other, Polygon)
                                   else other.relate(self).complement))))
 
@@ -856,7 +873,7 @@ class Polygon(Indexable, Shaped):
                        [hole.translate(step_x, step_y)
                         for hole in self._holes])
 
-    def triangulate(self) -> List['Polygon']:
+    def triangulate(self) -> Sequence[Contour]:
         """
         Returns triangulation of the polygon.
 
@@ -871,19 +888,19 @@ class Polygon(Indexable, Shaped):
         >>> polygon = Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
         ...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]]))
         >>> (polygon.triangulate()
-        ...  == [Polygon.from_raw(([(4, 4), (6, 0), (6, 6)], [])),
-        ...      Polygon.from_raw(([(4, 2), (6, 0), (4, 4)], [])),
-        ...      Polygon.from_raw(([(0, 6), (4, 4), (6, 6)], [])),
-        ...      Polygon.from_raw(([(0, 0), (2, 2), (0, 6)], [])),
-        ...      Polygon.from_raw(([(0, 0), (6, 0), (4, 2)], [])),
-        ...      Polygon.from_raw(([(0, 6), (2, 4), (4, 4)], [])),
-        ...      Polygon.from_raw(([(0, 6), (2, 2), (2, 4)], [])),
-        ...      Polygon.from_raw(([(0, 0), (4, 2), (2, 2)], []))])
+        ...  == [Contour.from_raw([(4, 4), (6, 0), (6, 6)]),
+        ...      Contour.from_raw([(4, 2), (6, 0), (4, 4)]),
+        ...      Contour.from_raw([(0, 6), (4, 4), (6, 6)]),
+        ...      Contour.from_raw([(0, 0), (2, 2), (0, 6)]),
+        ...      Contour.from_raw([(0, 0), (6, 0), (4, 2)]),
+        ...      Contour.from_raw([(0, 6), (2, 4), (4, 4)]),
+        ...      Contour.from_raw([(0, 6), (2, 2), (2, 4)]),
+        ...      Contour.from_raw([(0, 0), (4, 2), (2, 2)])])
         True
         """
-        return [Polygon(Contour.from_raw(raw_contour))
-                for raw_contour in constrained_delaunay_triangles(
-                    self._raw_border, self._raw_holes)]
+        return (Triangulation.constrained_delaunay(self,
+                                                   context=self.context)
+                .triangles())
 
     def validate(self) -> None:
         """
@@ -905,101 +922,91 @@ class Polygon(Indexable, Shaped):
         if self._holes:
             for hole in self._holes:
                 hole.validate()
-            relation = region_in_multiregion(self._raw_border, self._raw_holes)
+            relation = region_in_multiregion(self._border, self._holes)
             if not (relation is Relation.COVER
                     or relation is Relation.ENCLOSES):
                 raise ValueError('Holes should lie inside the border.')
+            context = self.context
             border_minus_holes = subtract_multipolygons(
-                    [(self._raw_border, [])],
-                    [(raw_hole, []) for raw_hole in self._raw_holes])
-            if (len(border_minus_holes) != 1
-                    or Polygon.from_raw(border_minus_holes[0]) != self):
+                    context.multipolygon_cls(
+                            [context.polygon_cls(self._border, [])]),
+                    context.multipolygon_cls(
+                            [context.polygon_cls(hole, [])
+                             for hole in self._holes]))
+            if (len(border_minus_holes.polygons) != 1
+                    or border_minus_holes.polygons[0] != self):
                 raise ValueError('Holes should not tear polygon apart.')
 
-    def _distance_to_raw_point(self, other: RawPoint) -> Expression:
-        return (raw_segment_point_distance(
-                self._path_to_raw_edge(self._raw_point_nearest_path(other)),
-                other)
-                if self._raw_locate(other) is Location.EXTERIOR
+    def _as_multipolygon(self) -> Multipolygon:
+        return self.context.multipolygon_cls([self])
+
+    def _distance_to_point(self, other: Point) -> Coordinate:
+        return self.context.sqrt(
+                self._squared_distance_to_exterior_point(other)
+                if self._locate(other) is Location.EXTERIOR
+                else 0)
+
+    def _distance_to_segment(self, other: Segment) -> Coordinate:
+        return (self._linear_distance_to_segment(other)
+                if (self._locate(other.start) is Location.EXTERIOR
+                    and self._locate(other.end) is Location.EXTERIOR)
                 else ZERO)
 
-    def _distance_to_raw_segment(self, other: RawSegment) -> Coordinate:
-        other_start, other_end = other
-        return (self._linear_distance_to_raw_segment(other)
-                if (self._raw_locate(other_start) is Location.EXTERIOR
-                    and self._raw_locate(other_end) is Location.EXTERIOR)
-                else ZERO)
-
-    def _intersect_with_raw_multisegment(self,
-                                         raw_multisegment: RawMultisegment
-                                         ) -> Compound:
-        return from_raw_mix_components(
+    def _intersect_with_multisegment(self, multisegment: Multisegment
+                                     ) -> Compound:
+        return from_mix_components(
                 *complete_intersect_multisegment_with_multipolygon(
-                        raw_multisegment,
-                        [(self._raw_border, self._raw_holes)],
-                        accurate=False))
+                        multisegment, self._as_multipolygon()))
 
-    def _linear_distance_to_raw_segment(self, other: RawSegment
-                                        ) -> Coordinate:
-        return raw_segments_distance(
-                self._path_to_raw_edge(self._raw_segment_nearest_path(other)),
-                other)
+    def _linear_distance_to_segment(self, other: Segment) -> Coordinate:
+        nearest_edge = self._segment_nearest_edge(other)
+        return self.context.segments_squared_distance(
+                nearest_edge.start, nearest_edge.end, other.start, other.end)
 
-    def _path_to_raw_edge(self, path: Tuple[int, int]) -> RawSegment:
-        contour_id, edge_index = path
-        raw_contour = (self._holes[contour_id - 1]
-                       if contour_id
-                       else self._border)._raw
-        return raw_contour[edge_index - 1], raw_contour[edge_index]
+    def _squared_distance_to_exterior_point(self, other: Point) -> Coordinate:
+        nearest_edge = self._point_nearest_edge(other)
+        return self.context.segment_point_squared_distance(
+                nearest_edge.start, nearest_edge.end, other)
 
-    def _subtract_from_raw_multisegment(self, other_raw: RawMultisegment
-                                        ) -> Compound:
-        return from_raw_multisegment(subtract_multipolygon_from_multisegment(
-                other_raw, [(self._raw_border, self._raw_holes)],
-                accurate=False))
+    def _subtract_from_multisegment(self, other: Multisegment) -> Compound:
+        return unfold_multisegment(subtract_multipolygon_from_multisegment(
+                other, self._as_multipolygon(),
+                context=self.context))
 
-    def _subtract_raw_multipolygon(self, raw_multipolygon: RawMultipolygon
-                                   ) -> Compound:
-        return from_raw_multipolygon(subtract_multipolygons(
-                [(self._raw_border, self._raw_holes)], raw_multipolygon,
-                accurate=False))
+    def _subtract_multipolygon(self, multipolygon: Multipolygon
+                               ) -> Compound:
+        return unfold_multipolygon(subtract_multipolygons(
+                self._as_multipolygon(), multipolygon,
+                context=self.context))
 
-    def _symmetric_subtract_raw_multipolygon(self,
-                                             raw_multipolygon: RawMultipolygon
-                                             ) -> Compound:
-        return from_raw_multipolygon(symmetric_subtract_multipolygons(
-                [(self._raw_border, self._raw_holes)], raw_multipolygon,
-                accurate=False))
+    def _symmetric_subtract_multipolygon(self, multipolygon: Multipolygon
+                                         ) -> Compound:
+        return unfold_multipolygon(symmetric_subtract_multipolygons(
+                self._as_multipolygon(), multipolygon,
+                context=self.context))
 
     def _unite_with_multipoint(self, other: Multipoint) -> Compound:
         # importing here to avoid cyclic imports
         from gon.core.mix import from_mix_components
         return from_mix_components(other - self, EMPTY, self)
 
-    def _unite_with_raw_multisegment(self, other_raw: RawMultisegment
-                                     ) -> Compound:
-        raw_multipolygon = [(self._raw_border, self._raw_holes)]
-        raw_multisegment = subtract_multipolygon_from_multisegment(
-                other_raw, raw_multipolygon,
-                accurate=False)
-        return from_raw_mix_components([], raw_multisegment, raw_multipolygon)
+    def _unite_with_multisegment(self, other: Multisegment) -> Compound:
+        from gon.core.mix import from_mix_components
+        multipolygon = self._as_multipolygon()
+        return from_mix_components(EMPTY,
+                                   subtract_multipolygon_from_multisegment(
+                                           other, multipolygon,
+                                           context=self.context),
+                                   multipolygon)
 
-    def _unite_with_raw_multipolygon(self, raw_multipolygon: RawMultipolygon
-                                     ) -> Compound:
-        return from_raw_multipolygon(unite_multipolygons([(self._raw_border,
-                                                           self._raw_holes)],
-                                                         raw_multipolygon,
-                                                         accurate=False))
-
-
-def polygon_to_raw_edges(polygon: Polygon) -> Iterator[RawSegment]:
-    return chain(to_pairs_iterable(polygon._raw_border),
-                 flatten(to_pairs_iterable(raw_hole)
-                         for raw_hole in polygon._raw_holes))
+    def _unite_with_multipolygon(self, multipolygon: Multipolygon) -> Compound:
+        return unfold_multipolygon(unite_multipolygons(self._as_multipolygon(),
+                                                       multipolygon,
+                                                       context=self.context))
 
 
-def raw_locate_point(raw_polygon: RawPolygon, raw_point: RawPoint) -> Location:
-    relation = point_in_polygon(raw_point, raw_polygon)
+def locate_point(polygon: Polygon, point: Point) -> Location:
+    relation = point_in_polygon(point, polygon)
     return (Location.EXTERIOR
             if relation is Relation.DISJOINT
             else (Location.BOUNDARY
@@ -1033,68 +1040,6 @@ def rotate_translate_polygon(polygon: Polygon,
                    [rotate_translate_contour(hole, cosine, sine, step_x,
                                              step_y)
                     for hole in polygon._holes])
-
-
-def _to_raw_point_nearest_path(raw_border: RawContour,
-                               raw_holes: List[RawContour],
-                               raw_point: RawPoint) -> Tuple[int, int]:
-    vertex = raw_border[-1]
-    enumerated_vertices = enumerate(raw_border)
-    min_contour_index = 0
-    min_edge_index, next_vertex = next(enumerated_vertices)
-    squared_distance_to_point = partial(squared_raw_point_segment_distance,
-                                        raw_point)
-    min_squared_distance = squared_distance_to_point((vertex, next_vertex))
-    vertex = next_vertex
-    for edge_index, next_vertex in enumerated_vertices:
-        candidate_squared_distance = squared_distance_to_point((vertex,
-                                                                next_vertex))
-        if candidate_squared_distance < min_squared_distance:
-            min_edge_index, min_squared_distance = (edge_index,
-                                                    candidate_squared_distance)
-        vertex = next_vertex
-    for contour_index, raw_hole in enumerate(raw_holes,
-                                             start=1):
-        vertex = raw_hole[-1]
-        for edge_index, next_vertex in enumerate(raw_hole):
-            candidate_squared_distance = squared_distance_to_point(
-                    (vertex, next_vertex))
-            if candidate_squared_distance < min_squared_distance:
-                (min_contour_index, min_edge_index, min_squared_distance) = (
-                    contour_index, edge_index, candidate_squared_distance)
-            vertex = next_vertex
-    return min_contour_index, min_edge_index
-
-
-def _to_raw_segment_nearest_path(raw_border: RawContour,
-                                 raw_holes: List[RawContour],
-                                 raw_segment: RawSegment) -> Tuple[int, int]:
-    vertex = raw_border[-1]
-    enumerated_vertices = enumerate(raw_border)
-    min_contour_index = 0
-    min_edge_index, next_vertex = next(enumerated_vertices)
-    squared_distance_to_segment = partial(squared_raw_segments_distance,
-                                          raw_segment)
-    min_squared_distance = squared_distance_to_segment((vertex, next_vertex))
-    vertex = next_vertex
-    for index, next_vertex in enumerated_vertices:
-        candidate_squared_distance = squared_distance_to_segment((vertex,
-                                                                  next_vertex))
-        if candidate_squared_distance < min_squared_distance:
-            min_edge_index, min_squared_distance = (index,
-                                                    candidate_squared_distance)
-        vertex = next_vertex
-    for contour_index, raw_hole in enumerate(raw_holes,
-                                             start=1):
-        vertex = raw_hole[-1]
-        for edge_index, next_vertex in enumerate(raw_hole):
-            candidate_squared_distance = squared_distance_to_segment(
-                    (vertex, next_vertex))
-            if candidate_squared_distance < min_squared_distance:
-                (min_contour_index, min_edge_index, min_squared_distance) = (
-                    contour_index, edge_index, candidate_squared_distance)
-            vertex = next_vertex
-    return min_contour_index, min_edge_index
 
 
 def _tree_to_holeless_raw_point_nearest_path(tree: segmental.Tree,

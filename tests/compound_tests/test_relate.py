@@ -1,7 +1,7 @@
 from typing import Tuple
 
+from ground.base import Relation
 from hypothesis import given
-from orient.planar import Relation
 
 from gon.base import Compound
 from . import strategies
