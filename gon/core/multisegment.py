@@ -6,7 +6,6 @@ from typing import (Iterable,
 
 from bentley_ottmann.planar import segments_cross_or_overlap
 from clipping.planar import (complete_intersect_multisegments,
-                             segments_to_multisegment,
                              subtract_multisegments,
                              symmetric_subtract_multisegments,
                              unite_multisegments)
@@ -33,14 +32,14 @@ from .iterable import unique_ever_seen
 from .linear_utils import (from_mix_components,
                            relate_multipoint_to_linear_compound,
                            to_point_nearest_segment,
-                           to_segment_nearest_segment, unfold_multisegment)
+                           to_segment_nearest_segment,
+                           unfold_multisegment)
 from .multipoint import (Multipoint,
                          from_points)
 from .point import (Point,
                     point_to_step,
                     scale_point)
-from .raw import (RawMultisegment,
-                  RawSegment)
+from .raw import RawMultisegment
 from .segment import (Segment,
                       rotate_segment_around_origin,
                       rotate_translate_segment,
@@ -740,12 +739,6 @@ class Multisegment(Indexable, Linear):
 
     def _unite_with_multisegment(self, other: 'Multisegment') -> Compound:
         return unite_multisegments(self, other)
-
-
-def from_raw_segments(raw_segments: List[RawSegment]) -> Compound:
-    return (Multisegment.from_raw(segments_to_multisegment(raw_segments))
-            if raw_segments
-            else EMPTY)
 
 
 def locate_point(multisegment: Multisegment, point: Point) -> Location:
