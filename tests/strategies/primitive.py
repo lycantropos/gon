@@ -27,10 +27,11 @@ invalid_points = (strategies.builds(Point, valid_coordinates,
                                       valid_coordinates))
 
 
-def to_repeated_raw_points(coordinates: Strategy[Coordinate],
-                           min_size: int = MIN_COUNT,
-                           max_size: Optional[int] = None
-                           ) -> Strategy[List[Point]]:
+def to_repeated_points(coordinates: Strategy[Coordinate],
+                       *,
+                       min_size: int = MIN_COUNT,
+                       max_size: Optional[int] = None
+                       ) -> Strategy[List[Point]]:
     return (strategies.lists(planar.points(coordinates),
                              min_size=min_size,
                              max_size=max_size)
@@ -51,4 +52,4 @@ def not_all_unique(vertices: Vertices) -> bool:
     return False
 
 
-repeated_raw_points = coordinates_strategies.flatmap(to_repeated_raw_points)
+repeated_points = coordinates_strategies.flatmap(to_repeated_points)

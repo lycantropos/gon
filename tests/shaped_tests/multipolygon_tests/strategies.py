@@ -1,7 +1,3 @@
-from functools import partial
-
-from hypothesis_geometry import planar
-
 from tests.strategies import (coordinates_strategies,
                               coordinates_to_multipolygons,
                               coordinates_to_points,
@@ -11,9 +7,6 @@ from tests.utils import (cleave_in_tuples,
                          to_pairs,
                          to_triplets)
 
-raw_multipolygons = (coordinates_strategies
-                     .flatmap(partial(planar.multipolygons,
-                                      min_size=1)))
 multipolygons = coordinates_strategies.flatmap(coordinates_to_multipolygons)
 polygons = coordinates_strategies.flatmap(coordinates_to_polygons)
 invalid_multipolygons = invalid_multipolygons

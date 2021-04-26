@@ -19,7 +19,7 @@ from .factories import (coordinates_to_points,
                         coordinates_to_segments)
 from .primitive import (invalid_points,
                         points,
-                        repeated_raw_points)
+                        repeated_points)
 
 segments = coordinates_strategies.flatmap(coordinates_to_segments)
 rational_segments = (rational_coordinates_strategies
@@ -94,7 +94,7 @@ invalid_vertices_contours = strategies.builds(
         Contour,
         strategies.lists(invalid_points,
                          min_size=vertices.MIN_COUNT))
-contours_with_repeated_points = repeated_raw_points.map(Contour.from_raw)
+contours_with_repeated_points = repeated_points.map(Contour)
 invalid_contours = (small_contours
                     | invalid_vertices_contours
                     | contours_with_repeated_points)

@@ -1,7 +1,6 @@
 from typing import Tuple
 
 from hypothesis import strategies
-from hypothesis_geometry import planar
 
 from gon.base import (Contour,
                       Point)
@@ -17,7 +16,6 @@ from tests.utils import (Strategy,
                          to_pairs,
                          to_triplets)
 
-raw_contours = coordinates_strategies.flatmap(planar.contours)
 contours = coordinates_strategies.flatmap(coordinates_to_contours)
 
 
