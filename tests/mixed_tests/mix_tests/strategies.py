@@ -42,7 +42,7 @@ def multipolygon_to_invalid_mix(multipolygon: Multipolygon) -> Strategy[Mix]:
             sub_lists(segments)
             .filter(lambda candidates: segments_cross_or_overlap(edges
                                                                  + candidates))
-            .map(Multisegment.from_raw),
+            .map(Multisegment),
             strategies.just(multipolygon))
 
 
