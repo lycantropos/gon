@@ -1,7 +1,3 @@
-from functools import partial
-
-from hypothesis_geometry import planar
-
 from tests.strategies import (coordinates_strategies,
                               coordinates_to_multisegments,
                               coordinates_to_points,
@@ -11,9 +7,6 @@ from tests.utils import (cleave_in_tuples,
                          to_pairs,
                          to_triplets)
 
-raw_multisegments = (coordinates_strategies
-                     .flatmap(partial(planar.multisegments,
-                                      min_size=1)))
 multisegments = coordinates_strategies.flatmap(coordinates_to_multisegments)
 segments = coordinates_strategies.flatmap(coordinates_to_segments)
 invalid_multisegments = invalid_multisegments
