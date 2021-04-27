@@ -14,7 +14,7 @@ from .raw import RawPoint
 
 
 class Point(Geometry):
-    __slots__ = '_context', '_x', '_y', '_raw'
+    __slots__ = '_context', '_coordinates', '_x', '_y'
 
     def __init__(self, x: Coordinate, y: Coordinate) -> None:
         """
@@ -26,8 +26,7 @@ class Point(Geometry):
             ``O(1)``
         """
         self._context = get_context()
-        self._x, self._y = x, y
-        self._raw = x, y
+        self._coordinates = self._x, self._y = x, y
 
     __repr__ = generate_repr(__init__)
 
@@ -43,7 +42,7 @@ class Point(Geometry):
         >>> hash(Point(0, 0)) == hash(Point(0, 0))
         True
         """
-        return hash(self._raw)
+        return hash(self._coordinates)
 
     def __eq__(self, other: 'Point') -> bool:
         """
@@ -88,7 +87,7 @@ class Point(Geometry):
         >>> Point(0, 0) <= Point(1, 0)
         True
         """
-        return (self._raw <= other._raw
+        return (self._coordinates <= other._coordinates
                 if isinstance(other, Point)
                 else NotImplemented)
 
@@ -113,7 +112,7 @@ class Point(Geometry):
         >>> Point(0, 0) < Point(1, 0)
         True
         """
-        return (self._raw < other._raw
+        return (self._coordinates < other._coordinates
                 if isinstance(other, Point)
                 else NotImplemented)
 
@@ -152,7 +151,7 @@ class Point(Geometry):
     @property
     def x(self) -> Coordinate:
         """
-        Returns ``x`` coordinate of the point.
+        Returns abscissa of the point.
 
         Time complexity:
             ``O(1)``
@@ -167,7 +166,7 @@ class Point(Geometry):
     @property
     def y(self) -> Coordinate:
         """
-        Returns ``y`` coordinate of the point.
+        Returns ordinate of the point.
 
         Time complexity:
             ``O(1)``
@@ -208,7 +207,7 @@ class Point(Geometry):
         >>> Point(1, 0).raw()
         (1, 0)
         """
-        return self._raw
+        return self._coordinates
 
     def rotate(self,
                cosine: Coordinate,
