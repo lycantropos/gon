@@ -73,11 +73,9 @@ Usage
 -----
 
 ```python
->>> from gon.base import EMPTY, Point, Polygon
->>> raw_square = [(0, 0), (4, 0), (4, 4), (0, 4)], []
->>> square = Polygon.from_raw(raw_square)
->>> square.raw() == raw_square
-True
+>>> from gon.base import EMPTY, Contour, Point, Polygon
+>>> square = Polygon(Contour([Point(0, 0), Point(4, 0), Point(4, 4),
+...                           Point(0, 4)]))
 >>> square == square
 True
 >>> square >= square
@@ -120,17 +118,17 @@ True
 >>> square.distance_to(Point(7, 8)) == 5
 True
 >>> (square.rotate(0, 1, Point(4, 4))
-...  == Polygon.from_raw(([(8, 0), (8, 4), (4, 4), (4, 0)], [])))
+...  == Polygon(Contour([Point(8, 0), Point(8, 4), Point(4, 4), Point(4, 0)])))
 True
 >>> (square.scale(1, 2)
-...  == Polygon.from_raw(([(0, 0), (4, 0), (4, 8), (0, 8)], [])))
+...  == Polygon(Contour([Point(0, 0), Point(4, 0), Point(4, 8), Point(0, 8)])))
 True
 >>> (square.translate(1, 2)
-...  == Polygon.from_raw(([(1, 2), (5, 2), (5, 6), (1, 6)], [])))
+...  == Polygon(Contour([Point(1, 2), Point(5, 2), Point(5, 6), Point(1, 6)])))
 True
 >>> (square.triangulate()
-...  == [Polygon.from_raw(([(0, 4), (4, 0), (4, 4)], [])), 
-...      Polygon.from_raw(([(0, 0), (4, 0), (0, 4)], []))])
+...  == [Contour([Point(0, 4), Point(4, 0), Point(4, 4)]),
+...      Contour([Point(0, 0), Point(4, 0), Point(0, 4)])])
 True
 
 ```
