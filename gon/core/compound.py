@@ -1,6 +1,4 @@
 from abc import abstractmethod
-from typing import (TYPE_CHECKING,
-                    List)
 
 from ground.base import Relation
 from sect.decomposition import Location
@@ -9,9 +7,6 @@ from symba.base import Expression
 from .geometry import Geometry
 from .hints import Coordinate
 from .point import Point
-
-if TYPE_CHECKING:
-    from gon.core.polygon import Polygon
 
 Relation = Relation
 Location = Location
@@ -126,12 +121,6 @@ class Shaped(Geometry):
     def perimeter(self) -> Expression:
         """
         Returns perimeter of the geometry.
-        """
-
-    @abstractmethod
-    def triangulate(self) -> List['Polygon']:
-        """
-        Returns triangulation of the geometry.
         """
 
 
