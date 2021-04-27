@@ -126,7 +126,7 @@ True
 >>> (square.translate(1, 2)
 ...  == Polygon(Contour([Point(1, 2), Point(5, 2), Point(5, 6), Point(1, 6)])))
 True
->>> (square.triangulate()
+>>> (square.triangulate().triangles()
 ...  == [Contour([Point(0, 4), Point(4, 0), Point(4, 4)]),
 ...      Contour([Point(0, 0), Point(4, 0), Point(0, 4)])])
 True
