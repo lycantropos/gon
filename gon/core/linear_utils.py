@@ -31,7 +31,7 @@ def relate_multipoint_to_linear_compound(multipoint: Multipoint,
 def from_mix_components(multipoint: Multipoint,
                         multisegment: Multisegment) -> Compound:
     # importing here to avoid cyclic imports
-    from gon.core.mix import from_mix_components
+    from .mix import from_mix_components
     return from_mix_components(unfold_multipoint(multipoint),
                                unfold_multisegment(multisegment), EMPTY)
 
