@@ -15,8 +15,7 @@ from .base import (coordinates_strategies,
                    empty_sequences)
 from .factories import (coordinates_to_contours,
                         coordinates_to_polygons)
-from .linear import (contours_with_repeated_points,
-                     invalid_vertices_contours)
+from .linear import contours_with_repeated_points
 
 polygons = coordinates_strategies.flatmap(coordinates_to_polygons)
 
@@ -37,13 +36,12 @@ def contour_to_invalid_polygons(convex_contour: Contour) -> Strategy[Polygon]:
                              .map(lift))
 
 
-invalid_contours = invalid_vertices_contours | contours_with_repeated_points
 invalid_polygons = (
-        strategies.builds(Polygon, invalid_contours)
+        strategies.builds(Polygon, contours_with_repeated_points)
         | strategies.builds(Polygon,
                             coordinates_strategies
                             .flatmap(coordinates_to_contours),
-                            strategies.lists(invalid_contours,
+                            strategies.lists(contours_with_repeated_points,
                                              min_size=1))
         | (coordinates_strategies.flatmap(planar.convex_contours)
            .flatmap(contour_to_invalid_polygons))
