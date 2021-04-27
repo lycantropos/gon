@@ -25,8 +25,7 @@ from reprit.base import generate_repr
 from sect.decomposition import Location
 
 from . import vertices
-from .arithmetic import (ZERO,
-                         non_negative_min)
+from .arithmetic import non_negative_min
 from .compound import (Compound,
                        Indexable,
                        Linear,
@@ -713,7 +712,7 @@ class Multipolygon(Indexable, Shaped):
                                              for polygon in other._polygons
                                              for edge in polygon.edges)
                             if self.disjoint(other)
-                            else ZERO)
+                            else 0)
                            if isinstance(other, Multipolygon)
                            else other.distance_to(self))))))))
 
@@ -1012,50 +1011,6 @@ class Multipolygon(Indexable, Shaped):
         """
         return Multipolygon([polygon.translate(step_x, step_y)
                              for polygon in self._polygons])
-
-    def triangulate(self) -> List[Polygon]:
-        """
-        Returns triangulation of the multipolygon.
-
-        Time complexity:
-            ``O(vertices_count ** 2)``
-        Memory complexity:
-            ``O(vertices_count)``
-
-        where ``vertices_count = sum(len(polygon.border.vertices)\
- + sum(len(hole.vertices) for hole in polygon.holes)\
- for polygon in self.polygons)``.
-
-        >>> multipolygon = Multipolygon(
-        ...         [Polygon(Contour([Point(0, 0), Point(14, 0), Point(14, 14),
-        ...                           Point(0, 14)]),
-        ...                  [Contour([Point(2, 2), Point(2, 12),
-        ...                            Point(12, 12), Point(12, 2)])]),
-        ...          Polygon(Contour([Point(4, 4), Point(10, 4), Point(10, 10),
-        ...                           Point(4, 10)]),
-        ...                  [Contour([Point(6, 6), Point(6, 8), Point(8, 8),
-        ...                            Point(8, 6)])])])
-        >>> (multipolygon.triangulate()
-        ...  == [Contour([Point(12, 12), Point(14, 0), Point(14, 14)]),
-        ...      Contour([Point(12, 2), Point(14, 0), Point(12, 12)]),
-        ...      Contour([Point(0, 14), Point(12, 12), Point(14, 14)]),
-        ...      Contour([Point(0, 0), Point(2, 2), Point(0, 14)]),
-        ...      Contour([Point(0, 0), Point(14, 0), Point(12, 2)]),
-        ...      Contour([Point(0, 14), Point(2, 12), Point(12, 12)]),
-        ...      Contour([Point(0, 14), Point(2, 2), Point(2, 12)]),
-        ...      Contour([Point(0, 0), Point(12, 2), Point(2, 2)]),
-        ...      Contour([Point(8, 8), Point(10, 4), Point(10, 10)]),
-        ...      Contour([Point(8, 6), Point(10, 4), Point(8, 8)]),
-        ...      Contour([Point(4, 10), Point(8, 8), Point(10, 10)]),
-        ...      Contour([Point(4, 4), Point(6, 6), Point(4, 10)]),
-        ...      Contour([Point(4, 4), Point(10, 4), Point(8, 6)]),
-        ...      Contour([Point(4, 10), Point(6, 8), Point(8, 8)]),
-        ...      Contour([Point(4, 10), Point(6, 6), Point(6, 8)]),
-        ...      Contour([Point(4, 4), Point(8, 6), Point(6, 6)])])
-        True
-        """
-        return list(flatten(polygon.triangulate()
-                            for polygon in self._polygons))
 
     def validate(self) -> None:
         """

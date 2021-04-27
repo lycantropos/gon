@@ -23,8 +23,7 @@ from reprit.base import generate_repr
 from sect.decomposition import Graph
 from sect.triangulation import Triangulation
 
-from .arithmetic import (ZERO,
-                         non_negative_min)
+from .arithmetic import non_negative_min
 from .compound import (Compound,
                        Indexable,
                        Linear,
@@ -52,6 +51,8 @@ from .segment import Segment
 from .shaped_utils import (from_holeless_mix_components,
                            mix_from_unfolded_components,
                            unfold_multipolygon)
+
+Triangulation = Triangulation
 
 
 class Polygon(Indexable, Shaped):
@@ -869,7 +870,7 @@ class Polygon(Indexable, Shaped):
                        [hole.translate(step_x, step_y)
                         for hole in self._holes])
 
-    def triangulate(self) -> Sequence[Contour]:
+    def triangulate(self) -> Triangulation:
         """
         Returns triangulation of the polygon.
 
@@ -883,7 +884,8 @@ class Polygon(Indexable, Shaped):
 
         >>> polygon = Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
         ...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]]))
-        >>> (polygon.triangulate()
+        >>> triangulation = polygon.triangulate()
+        >>> (triangulation.trianges()
         ...  == [Contour.from_raw([(4, 4), (6, 0), (6, 6)]),
         ...      Contour.from_raw([(4, 2), (6, 0), (4, 4)]),
         ...      Contour.from_raw([(0, 6), (4, 4), (6, 6)]),
@@ -894,9 +896,8 @@ class Polygon(Indexable, Shaped):
         ...      Contour.from_raw([(0, 0), (4, 2), (2, 2)])])
         True
         """
-        return (Triangulation.constrained_delaunay(self,
-                                                   context=self.context)
-                .triangles())
+        return Triangulation.constrained_delaunay(self,
+                                                  context=self.context)
 
     def validate(self) -> None:
         """
@@ -946,7 +947,7 @@ class Polygon(Indexable, Shaped):
         return (self._linear_distance_to_segment(other)
                 if (self._locate(other.start) is Location.EXTERIOR
                     and self._locate(other.end) is Location.EXTERIOR)
-                else ZERO)
+                else 0)
 
     def _intersect_with_multisegment(self, multisegment: Multisegment
                                      ) -> Compound:
