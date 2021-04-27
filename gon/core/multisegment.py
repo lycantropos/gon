@@ -88,8 +88,8 @@ class Multisegment(Indexable, Linear):
 
         where ``segments_count = len(self.segments)``.
 
-        >>> multisegment = Multisegment.from_raw([((0, 0), (1, 0)),
-        ...                                       ((0, 1), (1, 1))])
+        >>> multisegment = Multisegment([Segment(Point(0, 0), Point(1, 0)),
+        ...                              Segment(Point(0, 1), Point(1, 1))])
         >>> multisegment & multisegment == multisegment
         True
         """
@@ -114,8 +114,8 @@ class Multisegment(Indexable, Linear):
 
         where ``segments_count = len(self.segments)``.
 
-        >>> multisegment = Multisegment.from_raw([((0, 0), (1, 0)),
-        ...                                       ((0, 1), (1, 1))])
+        >>> multisegment = Multisegment([Segment(Point(0, 0), Point(1, 0)),
+        ...                              Segment(Point(0, 1), Point(1, 1))])
         >>> all(segment.start in multisegment and segment.end in multisegment
         ...     for segment in multisegment.segments)
         True
@@ -131,16 +131,16 @@ class Multisegment(Indexable, Linear):
         Memory complexity:
             ``O(1)``
 
-        >>> multisegment = Multisegment.from_raw([((0, 0), (1, 0)),
-        ...                                       ((0, 1), (1, 1))])
+        >>> multisegment = Multisegment([Segment(Point(0, 0), Point(1, 0)),
+        ...                              Segment(Point(0, 1), Point(1, 1))])
         >>> multisegment == multisegment
         True
-        >>> multisegment == Multisegment.from_raw([((0, 0), (1, 0)),
-        ...                                        ((0, 1), (1, 1)),
-        ...                                        ((0, 0), (1, 1))])
+        >>> multisegment == Multisegment([Segment(Point(0, 0), Point(1, 0)),
+        ...                               Segment(Point(0, 1), Point(1, 1)),
+        ...                               Segment(Point(0, 0), Point(1, 1))])
         False
-        >>> multisegment == Multisegment.from_raw([((0, 1), (1, 1)),
-        ...                                        ((0, 0), (1, 0))])
+        >>> multisegment == Multisegment([Segment(Point(0, 1), Point(1, 1)),
+        ...                               Segment(Point(0, 0), Point(1, 0))])
         True
         """
         return (self is other
@@ -161,16 +161,16 @@ class Multisegment(Indexable, Linear):
 
         where ``segments_count = len(self.segments)``.
 
-        >>> multisegment = Multisegment.from_raw([((0, 0), (1, 0)),
-        ...                                       ((0, 1), (1, 1))])
+        >>> multisegment = Multisegment([Segment(Point(0, 0), Point(1, 0)),
+        ...                              Segment(Point(0, 1), Point(1, 1))])
         >>> multisegment >= multisegment
         True
-        >>> multisegment >= Multisegment.from_raw([((0, 0), (1, 0)),
-        ...                                        ((0, 1), (1, 1)),
-        ...                                        ((0, 0), (1, 1))])
+        >>> multisegment >= Multisegment([Segment(Point(0, 0), Point(1, 0)),
+        ...                               Segment(Point(0, 1), Point(1, 1)),
+        ...                               Segment(Point(0, 0), Point(1, 1))])
         False
-        >>> multisegment >= Multisegment.from_raw([((0, 1), (1, 1)),
-        ...                                        ((0, 0), (1, 0))])
+        >>> multisegment >= Multisegment([Segment(Point(0, 1), Point(1, 1)),
+        ...                               Segment(Point(0, 0), Point(1, 0))])
         True
         """
         return (other is EMPTY
@@ -195,16 +195,16 @@ class Multisegment(Indexable, Linear):
 
         where ``segments_count = len(self.segments)``.
 
-        >>> multisegment = Multisegment.from_raw([((0, 0), (1, 0)),
-        ...                                       ((0, 1), (1, 1))])
+        >>> multisegment = Multisegment([Segment(Point(0, 0), Point(1, 0)),
+        ...                              Segment(Point(0, 1), Point(1, 1))])
         >>> multisegment > multisegment
         False
-        >>> multisegment > Multisegment.from_raw([((0, 0), (1, 0)),
-        ...                                       ((0, 1), (1, 1)),
-        ...                                       ((0, 0), (1, 1))])
+        >>> multisegment > Multisegment([Segment(Point(0, 0), Point(1, 0)),
+        ...                              Segment(Point(0, 1), Point(1, 1)),
+        ...                              Segment(Point(0, 0), Point(1, 1))])
         False
-        >>> multisegment > Multisegment.from_raw([((0, 1), (1, 1)),
-        ...                                       ((0, 0), (1, 0))])
+        >>> multisegment > Multisegment([Segment(Point(0, 1), Point(1, 1)),
+        ...                              Segment(Point(0, 0), Point(1, 0))])
         False
         """
         return (other is EMPTY
@@ -227,8 +227,8 @@ class Multisegment(Indexable, Linear):
         Memory complexity:
             ``O(1)``
 
-        >>> multisegment = Multisegment.from_raw([((0, 0), (1, 0)),
-        ...                                       ((0, 1), (1, 1))])
+        >>> multisegment = Multisegment([Segment(Point(0, 0), Point(1, 0)),
+        ...                              Segment(Point(0, 1), Point(1, 1))])
         >>> hash(multisegment) == hash(multisegment)
         True
         """
@@ -245,16 +245,16 @@ class Multisegment(Indexable, Linear):
 
         where ``segments_count = len(self.segments)``.
 
-        >>> multisegment = Multisegment.from_raw([((0, 0), (1, 0)),
-        ...                                       ((0, 1), (1, 1))])
+        >>> multisegment = Multisegment([Segment(Point(0, 0), Point(1, 0)),
+        ...                              Segment(Point(0, 1), Point(1, 1))])
         >>> multisegment <= multisegment
         True
-        >>> multisegment <= Multisegment.from_raw([((0, 0), (1, 0)),
-        ...                                        ((0, 1), (1, 1)),
-        ...                                        ((0, 0), (1, 1))])
+        >>> multisegment <= Multisegment([Segment(Point(0, 0), Point(1, 0)),
+        ...                               Segment(Point(0, 1), Point(1, 1)),
+        ...                               Segment(Point(0, 0), Point(1, 1))])
         True
-        >>> multisegment <= Multisegment.from_raw([((0, 1), (1, 1)),
-        ...                                        ((0, 0), (1, 0))])
+        >>> multisegment <= Multisegment([Segment(Point(0, 1), Point(1, 1)),
+        ...                               Segment(Point(0, 0), Point(1, 0))])
         True
         """
         return (self == other
@@ -274,16 +274,16 @@ class Multisegment(Indexable, Linear):
 
         where ``segments_count = len(self.segments)``.
 
-        >>> multisegment = Multisegment.from_raw([((0, 0), (1, 0)),
-        ...                                       ((0, 1), (1, 1))])
+        >>> multisegment = Multisegment([Segment(Point(0, 0), Point(1, 0)),
+        ...                              Segment(Point(0, 1), Point(1, 1))])
         >>> multisegment < multisegment
         False
-        >>> multisegment < Multisegment.from_raw([((0, 0), (1, 0)),
-        ...                                       ((0, 1), (1, 1)),
-        ...                                       ((0, 0), (1, 1))])
+        >>> multisegment < Multisegment([Segment(Point(0, 0), Point(1, 0)),
+        ...                              Segment(Point(0, 1), Point(1, 1)),
+        ...                              Segment(Point(0, 0), Point(1, 1))])
         True
-        >>> multisegment < Multisegment.from_raw([((0, 1), (1, 1)),
-        ...                                       ((0, 0), (1, 0))])
+        >>> multisegment < Multisegment([Segment(Point(0, 1), Point(1, 1)),
+        ...                              Segment(Point(0, 0), Point(1, 0))])
         False
         """
         return (self != other
@@ -303,8 +303,8 @@ class Multisegment(Indexable, Linear):
 
         where ``segments_count = len(self.segments)``.
 
-        >>> multisegment = Multisegment.from_raw([((0, 0), (1, 0)),
-        ...                                       ((0, 1), (1, 1))])
+        >>> multisegment = Multisegment([Segment(Point(0, 0), Point(1, 0)),
+        ...                              Segment(Point(0, 1), Point(1, 1))])
         >>> multisegment | multisegment == multisegment
         True
         """
@@ -347,8 +347,8 @@ class Multisegment(Indexable, Linear):
 
         where ``segments_count = len(self.segments)``.
 
-        >>> multisegment = Multisegment.from_raw([((0, 0), (1, 0)),
-        ...                                       ((0, 1), (1, 1))])
+        >>> multisegment = Multisegment([Segment(Point(0, 0), Point(1, 0)),
+        ...                              Segment(Point(0, 1), Point(1, 1))])
         >>> multisegment - multisegment is EMPTY
         True
         """
@@ -374,8 +374,8 @@ class Multisegment(Indexable, Linear):
 
         where ``segments_count = len(self.segments)``.
 
-        >>> multisegment = Multisegment.from_raw([((0, 0), (1, 0)),
-        ...                                       ((0, 1), (1, 1))])
+        >>> multisegment = Multisegment([Segment(Point(0, 0), Point(1, 0)),
+        ...                              Segment(Point(0, 1), Point(1, 1))])
         >>> multisegment ^ multisegment is EMPTY
         True
         """
@@ -422,8 +422,8 @@ class Multisegment(Indexable, Linear):
         Memory complexity:
             ``O(1)``
 
-        >>> multisegment = Multisegment.from_raw([((0, 0), (2, 0)),
-        ...                                       ((0, 2), (2, 2))])
+        >>> multisegment = Multisegment([Segment(Point(0, 0), Point(2, 0)),
+        ...                              Segment(Point(0, 2), Point(2, 2))])
         >>> multisegment.centroid == Point(1, 1)
         True
         """
@@ -439,8 +439,8 @@ class Multisegment(Indexable, Linear):
         Memory complexity:
             ``O(1)``
 
-        >>> multisegment = Multisegment.from_raw([((0, 0), (2, 0)),
-        ...                                       ((0, 2), (2, 2))])
+        >>> multisegment = Multisegment([Segment(Point(0, 0), Point(2, 0)),
+        ...                              Segment(Point(0, 2), Point(2, 2))])
         >>> isinstance(multisegment.context, Context)
         True
         """
@@ -456,8 +456,8 @@ class Multisegment(Indexable, Linear):
         Memory complexity:
             ``O(1)``
 
-        >>> multisegment = Multisegment.from_raw([((0, 0), (1, 0)),
-        ...                                       ((0, 1), (1, 1))])
+        >>> multisegment = Multisegment([Segment(Point(0, 0), Point(1, 0)),
+        ...                              Segment(Point(0, 1), Point(1, 1))])
         >>> multisegment.length == 2
         True
         """
@@ -475,8 +475,8 @@ class Multisegment(Indexable, Linear):
 
         where ``segments_count = len(self.segments)``.
 
-        >>> multisegment = Multisegment.from_raw([((0, 0), (1, 0)),
-        ...                                       ((0, 1), (1, 1))])
+        >>> multisegment = Multisegment([Segment(Point(0, 0), Point(1, 0)),
+        ...                              Segment(Point(0, 1), Point(1, 1))])
         >>> multisegment.segments
         [Segment(Point(0, 0), Point(1, 0)), Segment(Point(0, 1), Point(1, 1))]
         """
@@ -491,15 +491,15 @@ class Multisegment(Indexable, Linear):
         Memory complexity:
             ``O(1)``
 
-        >>> multisegment = Multisegment.from_raw([((0, 0), (1, 0)),
-        ...                                       ((0, 1), (1, 1))])
+        >>> multisegment = Multisegment([Segment(Point(0, 0), Point(1, 0)),
+        ...                              Segment(Point(0, 1), Point(1, 1))])
         >>> multisegment.distance_to(multisegment) == 0
         True
         """
         return (self._distance_to_point(other)
                 if isinstance(other, Point)
                 else
-                (non_negative_min(self._distance_to_point(point)
+                (non_negative_min(self._distance_to_pointSegment(Point)
                                   for point in other.points)
                  if isinstance(other, Multipoint)
                  else
@@ -522,8 +522,8 @@ class Multisegment(Indexable, Linear):
 
         where ``segments_count = len(self.segments)``.
 
-        >>> multisegment = Multisegment.from_raw([((0, 0), (1, 0)),
-        ...                                       ((0, 1), (1, 1))])
+        >>> multisegment = Multisegment([Segment(Point(0, 0), Point(1, 0)),
+        ...                              Segment(Point(0, 1), Point(1, 1))])
         >>> multisegment.index()
         """
         if len(self._segments) > 1:
@@ -545,8 +545,8 @@ class Multisegment(Indexable, Linear):
 
         where ``segments_count = len(self.segments)``.
 
-        >>> multisegment = Multisegment.from_raw([((0, 0), (1, 0)),
-        ...                                       ((0, 1), (1, 1))])
+        >>> multisegment = Multisegment([Segment(Point(0, 0), Point(1, 0)),
+        ...                              Segment(Point(0, 1), Point(1, 1))])
         >>> all(multisegment.locate(segment.start)
         ...     is multisegment.locate(segment.end)
         ...     is Location.BOUNDARY
@@ -566,10 +566,10 @@ class Multisegment(Indexable, Linear):
 
         where ``segments_count = len(self.segments)``.
 
-        >>> multisegment = Multisegment.from_raw([((0, 0), (1, 0)),
-        ...                                       ((0, 1), (1, 1))])
+        >>> multisegment = Multisegment([Segment(Point(0, 0), Point(1, 0)),
+        ...                              Segment(Point(0, 1), Point(1, 1))])
         >>> multisegment.raw()
-        [((0, 0), (1, 0)), ((0, 1), (1, 1))]
+        [Segment(Point(0, 0), Point(1, 0)), Segment(Point(0, 1), Point(1, 1))]
         """
         return self._raw[:]
 
@@ -584,8 +584,8 @@ class Multisegment(Indexable, Linear):
 
         where ``segments_count = len(self.segments)``.
 
-        >>> multisegment = Multisegment.from_raw([((0, 0), (1, 0)),
-        ...                                       ((0, 1), (1, 1))])
+        >>> multisegment = Multisegment([Segment(Point(0, 0), Point(1, 0)),
+        ...                              Segment(Point(0, 1), Point(1, 1))])
         >>> multisegment.relate(multisegment) is Relation.EQUAL
         True
         """
@@ -611,12 +611,13 @@ class Multisegment(Indexable, Linear):
 
         where ``segments_count = len(self.segments)``.
 
-        >>> multisegment = Multisegment.from_raw([((0, 0), (1, 0)),
-        ...                                       ((0, 1), (1, 1))])
+        >>> multisegment = Multisegment([Segment(Point(0, 0), Point(1, 0)),
+        ...                              Segment(Point(0, 1), Point(1, 1))])
         >>> multisegment.rotate(1, 0) == multisegment
         True
         >>> (multisegment.rotate(0, 1, Point(1, 1))
-        ...  == Multisegment.from_raw([((2, 0), (2, 1)), ((1, 0), (1, 1))]))
+        ...  == Multisegment([Segment(Point(2, 0), Point(2, 1)),
+        ...                   Segment(Point(1, 0), Point(1, 1))]))
         True
         """
         return (Multisegment([rotate_segment_around_origin(segment, cosine,
@@ -641,12 +642,13 @@ class Multisegment(Indexable, Linear):
 
         where ``segments_count = len(self.segments)``.
 
-        >>> multisegment = Multisegment.from_raw([((0, 0), (1, 0)),
-        ...                                       ((0, 1), (1, 1))])
+        >>> multisegment = Multisegment([Segment(Point(0, 0), Point(1, 0)),
+        ...                              Segment(Point(0, 1), Point(1, 1))])
         >>> multisegment.scale(1) == multisegment
         True
         >>> (multisegment.scale(1, 2)
-        ...  == Multisegment.from_raw([((0, 0), (1, 0)), ((0, 2), (1, 2))]))
+        ...  == Multisegment([Segment(Point(0, 0), Point(1, 0)),
+        ...                   Segment(Point(0, 2), Point(1, 2))]))
         True
         """
         if factor_y is None:
@@ -671,10 +673,11 @@ class Multisegment(Indexable, Linear):
 
         where ``segments_count = len(self.segments)``.
 
-        >>> multisegment = Multisegment.from_raw([((0, 0), (1, 0)),
-        ...                                       ((0, 1), (1, 1))])
+        >>> multisegment = Multisegment([Segment(Point(0, 0), Point(1, 0)),
+        ...                              Segment(Point(0, 1), Point(1, 1))])
         >>> (multisegment.translate(1, 2)
-        ...  == Multisegment.from_raw([((1, 2), (2, 2)), ((1, 3), (2, 3))]))
+        ...  == Multisegment([Segment(Point(1, 2), Point(2, 2)),
+        ...                   Segment(Point(1, 3), Point(2, 3))]))
         True
         """
         return Multisegment([segment.translate(step_x, step_y)
@@ -691,8 +694,8 @@ class Multisegment(Indexable, Linear):
 
         where ``segments_count = len(self.segments)``.
 
-        >>> multisegment = Multisegment.from_raw([((0, 0), (1, 0)),
-        ...                                       ((0, 1), (1, 1))])
+        >>> multisegment = Multisegment([Segment(Point(0, 0), Point(1, 0)),
+        ...                              Segment(Point(0, 1), Point(1, 1))])
         >>> multisegment.validate()
         """
         if not self._segments:
