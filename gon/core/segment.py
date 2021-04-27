@@ -611,7 +611,8 @@ class Segment(Compound, Linear):
 
     def _symmetric_subtract_segment(self, other: 'Segment') -> Compound:
         # importing here to avoid cyclic imports
-        relation = segment_in_segment(self, other)
+        relation = segment_in_segment(self, other,
+                                      context=self.context)
         return (EMPTY
                 if relation is Relation.EQUAL
                 else
@@ -634,7 +635,8 @@ class Segment(Compound, Linear):
 
     def _unite_with_segment(self, other: 'Segment') -> Compound:
         from .multisegment import Multisegment
-        relation = segment_in_segment(self, other)
+        relation = segment_in_segment(self, other,
+                                      context=self.context)
         return (self
                 if relation is Relation.EQUAL or relation is Relation.COMPOSITE
                 else (other
