@@ -1,15 +1,14 @@
 from typing import Optional
 
-from ground.base import Context, get_context
+from ground.base import (Context,
+                         get_context)
 from ground.hints import Multisegment
 from orient.planar import (point_in_segment,
                            segment_in_segment)
 from reprit.base import generate_repr
 from symba.base import Expression
 
-from .arithmetic import (non_negative_min,
-                         robust_divide,
-                         sqrt)
+from .arithmetic import non_negative_min
 from .compound import (Compound,
                        Linear,
                        Location,
@@ -25,8 +24,7 @@ from .point import (Point,
                     rotate_point_around_origin,
                     rotate_translate_point,
                     scale_point)
-from .raw import (RawMultisegment,
-                  RawSegment)
+from .raw import RawSegment
 
 
 class Segment(Compound, Linear):
@@ -325,8 +323,7 @@ class Segment(Compound, Linear):
         >>> segment.centroid == Point(1, 0)
         True
         """
-        return Point(robust_divide(self._start.x + self._end.x, 2),
-                     robust_divide(self._start.y + self._end.y, 2))
+        return self.context.segment_centroid(self)
 
     @property
     def context(self) -> Context:
@@ -406,8 +403,8 @@ class Segment(Compound, Linear):
         >>> segment.length == 2
         True
         """
-        return sqrt(get_context().points_squared_distance(self.start,
-                                                          self.end))
+        return self.context.sqrt(
+                self.context.points_squared_distance(self.start, self.end))
 
     @property
     def start(self) -> Point:
