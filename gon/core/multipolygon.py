@@ -429,9 +429,15 @@ class Multipolygon(Indexable, Shaped):
  + sum(len(hole.vertices) for hole in polygon.holes)\
  for polygon in self.polygons)``.
 
-        >>> multipolygon = Multipolygon.from_raw(
-        ...         [([(0, 0), (6, 0), (6, 6), (0, 6)],
-        ...           [[(2, 2), (2, 4), (4, 4), (4, 2)]])])
+        >>> multipolygon = Multipolygon(
+        ...         [Polygon(Contour([Point(0, 0), Point(14, 0), Point(14, 14),
+        ...                           Point(0, 14)]),
+        ...                  [Contour([Point(2, 2), Point(2, 12),
+        ...                            Point(12, 12), Point(12, 2)])]),
+        ...          Polygon(Contour([Point(4, 4), Point(10, 4), Point(10, 10),
+        ...                           Point(4, 10)]),
+        ...                  [Contour([Point(6, 6), Point(6, 8), Point(8, 8),
+        ...                            Point(8, 6)])])])
         >>> multipolygon - multipolygon is EMPTY
         True
         """
@@ -459,9 +465,15 @@ class Multipolygon(Indexable, Shaped):
  + sum(len(hole.vertices) for hole in polygon.holes)\
  for polygon in self.polygons)``.
 
-        >>> multipolygon = Multipolygon.from_raw(
-        ...         [([(0, 0), (6, 0), (6, 6), (0, 6)],
-        ...           [[(2, 2), (2, 4), (4, 4), (4, 2)]])])
+        >>> multipolygon = Multipolygon(
+        ...         [Polygon(Contour([Point(0, 0), Point(14, 0), Point(14, 14),
+        ...                           Point(0, 14)]),
+        ...                  [Contour([Point(2, 2), Point(2, 12),
+        ...                            Point(12, 12), Point(12, 2)])]),
+        ...          Polygon(Contour([Point(4, 4), Point(10, 4), Point(10, 10),
+        ...                           Point(4, 10)]),
+        ...                  [Contour([Point(6, 6), Point(6, 8), Point(8, 8),
+        ...                            Point(8, 6)])])])
         >>> multipolygon ^ multipolygon is EMPTY
         True
         """
