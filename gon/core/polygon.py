@@ -1,8 +1,6 @@
-from bisect import bisect
 from functools import partial
 from typing import (Optional,
-                    Sequence,
-                    Tuple)
+                    Sequence)
 
 from clipping.planar import (complete_intersect_multipolygons,
                              complete_intersect_multiregions,
@@ -49,9 +47,7 @@ from .multipoint import Multipoint
 from .multisegment import Multisegment
 from .point import (Point,
                     point_to_step)
-from .raw import (RawPoint,
-                  RawPolygon,
-                  RawSegment)
+from .raw import RawPolygon
 from .segment import Segment
 from .shaped_utils import (from_holeless_mix_components,
                            mix_from_unfolded_components,
@@ -1041,32 +1037,3 @@ def rotate_translate_polygon(polygon: Polygon,
                    [rotate_translate_contour(hole, cosine, sine, step_x,
                                              step_y)
                     for hole in polygon._holes])
-
-
-def _tree_to_holeless_raw_point_nearest_path(tree: segmental.Tree,
-                                             raw_point: RawPoint
-                                             ) -> Tuple[int, int]:
-    return 0, tree.nearest_to_point_index(raw_point)
-
-
-def _tree_to_holeless_raw_segment_nearest_path(tree: segmental.Tree,
-                                               raw_segment: RawSegment
-                                               ) -> Tuple[int, int]:
-    return 0, tree.nearest_index(raw_segment)
-
-
-def _tree_to_raw_point_nearest_path(tree: segmental.Tree,
-                                    contours_offsets: Tuple[int, ...],
-                                    raw_point: RawPoint) -> Tuple[int, int]:
-    index = tree.nearest_to_point_index(raw_point)
-    contour_index = bisect(contours_offsets, index) - 1
-    return contour_index, index - contours_offsets[contour_index]
-
-
-def _tree_to_raw_segment_nearest_path(tree: segmental.Tree,
-                                      contours_offsets: Tuple[int, ...],
-                                      raw_segment: RawSegment
-                                      ) -> Tuple[int, int]:
-    index = tree.nearest_index(raw_segment)
-    contour_index = bisect(contours_offsets, index) - 1
-    return contour_index, index - contours_offsets[contour_index]
