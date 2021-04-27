@@ -25,7 +25,6 @@ from reprit.base import generate_repr
 from sect.decomposition import Graph
 from sect.triangulation import Triangulation
 
-from . import vertices
 from .arithmetic import (ZERO,
                          non_negative_min)
 from .compound import (Compound,
@@ -479,8 +478,9 @@ class Polygon(Indexable, Shaped):
         >>> polygon.area == 32
         True
         """
-        return (abs(vertices.region_signed_area(self._border._vertices))
-                - sum(abs(vertices.region_signed_area(hole._vertices))
+        region_signed_measure = self.context.region_signed_area
+        return (abs(region_signed_measure(self.border.vertices))
+                - sum(abs(region_signed_measure(hole.vertices))
                       for hole in self._holes))
 
     @property
@@ -622,7 +622,7 @@ class Polygon(Indexable, Shaped):
         True
         """
         return (not self._holes
-                and vertices.form_convex_polygon(self._border._vertices))
+                and self.context.is_region_convex(self.border.vertices))
 
     @property
     def perimeter(self) -> Coordinate:

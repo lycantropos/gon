@@ -18,8 +18,7 @@ from reprit.base import generate_repr
 from sect.decomposition import Graph
 
 from . import vertices as _vertices
-from .angular import (Orientation,
-                      to_orientation)
+from .angular import Orientation
 from .arithmetic import non_negative_min
 from .compound import (Compound,
                        Indexable,
@@ -29,12 +28,12 @@ from .compound import (Compound,
 from .degenerate import EMPTY
 from .geometry import Geometry
 from .hints import Coordinate
-from .iterable import (shift_sequence)
+from .iterable import shift_sequence
 from .linear_utils import (from_mix_components,
-                           unfold_multisegment,
                            relate_multipoint_to_linear_compound,
                            to_point_nearest_segment,
-                           to_segment_nearest_segment)
+                           to_segment_nearest_segment,
+                           unfold_multisegment)
 from .multipoint import (Multipoint,
                          rotate_points_around_origin,
                          rotate_translate_points)
@@ -222,7 +221,9 @@ class Contour(Indexable, Linear):
         """
         vertices = shift_sequence(self._vertices, self._min_index)
         return hash(vertices
-                    if (to_orientation(vertices[-1], vertices[0], vertices[1])
+                    if (self.context.angle_orientation(vertices[-1],
+                                                       vertices[0],
+                                                       vertices[1])
                         is Orientation.COUNTERCLOCKWISE)
                     else _vertices.rotate_positions(vertices))
 
@@ -491,8 +492,9 @@ class Contour(Indexable, Linear):
         True
         """
         vertices, min_index = self._vertices, self._min_index
-        return to_orientation(vertices[min_index - 1], vertices[min_index],
-                              vertices[(min_index + 1) % len(vertices)])
+        return self.context.angle_orientation(
+                vertices[min_index - 1], vertices[min_index],
+                vertices[(min_index + 1) % len(vertices)])
 
     @property
     def vertices(self) -> Vertices:
@@ -770,16 +772,21 @@ class Contour(Indexable, Linear):
         >>> contour = Contour.from_raw([(0, 0), (1, 0), (0, 1)])
         >>> contour.validate()
         """
-        for vertex in self._vertices:
+        vertices = self._vertices
+        for vertex in vertices:
             vertex.validate()
-        if len(self._vertices) < _vertices.MIN_COUNT:
+        vertices_count = len(vertices)
+        if vertices_count < _vertices.MIN_COUNT:
             raise ValueError('Contour should have '
                              'at least {expected} vertices, '
                              'but found {actual}.'
                              .format(expected=_vertices.MIN_COUNT,
-                                     actual=len(self._vertices)))
-        if any(orientation is Orientation.COLLINEAR
-               for orientation in _vertices.to_orientations(self._vertices)):
+                                     actual=vertices_count))
+        orienteer = self.context.angle_orientation
+        if any(orienteer(vertices[index - 1], vertices[index],
+                         vertices[(index + 1) % vertices_count])
+               is Orientation.COLLINEAR
+               for index in range(vertices_count)):
             raise ValueError('Consecutive vertices triplets '
                              'should not be on the same line.')
         if edges_intersect(self):
