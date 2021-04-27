@@ -28,8 +28,7 @@ from .raw import RawMultipoint
 
 
 class Multipoint(Indexable):
-    __slots__ = ('_context', '_points', '_points_set', '_raw',
-                 '_nearest_point')
+    __slots__ = '_context', '_points', '_points_set', '_raw', '_nearest_point'
 
     def __init__(self, points: Sequence[Point]) -> None:
         """
@@ -62,7 +61,7 @@ class Multipoint(Indexable):
 
         where ``points_count = len(self.points)``.
 
-        >>> multipoint = Multipoint.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> multipoint = Multipoint([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> multipoint & multipoint == multipoint
         True
         """
@@ -86,7 +85,7 @@ class Multipoint(Indexable):
         Memory complexity:
             ``O(1)``
 
-        >>> multipoint = Multipoint.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> multipoint = Multipoint([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> all(point in multipoint for point in multipoint.points)
         True
         """
@@ -101,12 +100,13 @@ class Multipoint(Indexable):
         Memory complexity:
             ``O(1)``
 
-        >>> multipoint = Multipoint.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> multipoint = Multipoint([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> multipoint == multipoint
         True
-        >>> multipoint == Multipoint.from_raw([(0, 0), (1, 0), (1, 1), (0, 1)])
+        >>> multipoint == Multipoint([Point(0, 0), Point(1, 0), Point(1, 1),
+        ...                           Point(0, 1)])
         False
-        >>> multipoint == Multipoint.from_raw([(1, 0), (0, 0), (0, 1)])
+        >>> multipoint == Multipoint([Point(1, 0), Point(0, 0), Point(0, 1)])
         True
         """
         return self is other or (self._points_set == other._points_set
@@ -124,12 +124,13 @@ class Multipoint(Indexable):
         Memory complexity:
             ``O(1)``
 
-        >>> multipoint = Multipoint.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> multipoint = Multipoint([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> multipoint >= multipoint
         True
-        >>> multipoint >= Multipoint.from_raw([(0, 0), (1, 0), (1, 1), (0, 1)])
+        >>> multipoint >= Multipoint([Point(0, 0), Point(1, 0), Point(1, 1),
+        ...                           Point(0, 1)])
         False
-        >>> multipoint >= Multipoint.from_raw([(1, 0), (0, 0), (0, 1)])
+        >>> multipoint >= Multipoint([Point(1, 0), Point(0, 0), Point(0, 1)])
         True
         """
         return (self._points_set >= other._points_set
@@ -145,12 +146,13 @@ class Multipoint(Indexable):
         Memory complexity:
             ``O(1)``
 
-        >>> multipoint = Multipoint.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> multipoint = Multipoint([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> multipoint > multipoint
         False
-        >>> multipoint > Multipoint.from_raw([(0, 0), (1, 0), (1, 1), (0, 1)])
+        >>> multipoint > Multipoint([Point(0, 0), Point(1, 0), Point(1, 1),
+        ...                          Point(0, 1)])
         False
-        >>> multipoint > Multipoint.from_raw([(1, 0), (0, 0), (0, 1)])
+        >>> multipoint > Multipoint([Point(1, 0), Point(0, 0), Point(0, 1)])
         False
         """
         return (self._points_set > other._points_set
@@ -166,7 +168,7 @@ class Multipoint(Indexable):
         Memory complexity:
             ``O(1)``
 
-        >>> multipoint = Multipoint.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> multipoint = Multipoint([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> hash(multipoint) == hash(multipoint)
         True
         """
@@ -181,12 +183,13 @@ class Multipoint(Indexable):
         Memory complexity:
             ``O(1)``
 
-        >>> multipoint = Multipoint.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> multipoint = Multipoint([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> multipoint <= multipoint
         True
-        >>> multipoint <= Multipoint.from_raw([(0, 0), (1, 0), (1, 1), (0, 1)])
+        >>> multipoint <= Multipoint([Point(0, 0), Point(1, 0), Point(1, 1),
+        ...                           Point(0, 1)])
         True
-        >>> multipoint <= Multipoint.from_raw([(1, 0), (0, 0), (0, 1)])
+        >>> multipoint <= Multipoint([Point(1, 0), Point(0, 0), Point(0, 1)])
         True
         """
         return (self._points_set <= other._points_set
@@ -202,12 +205,13 @@ class Multipoint(Indexable):
         Memory complexity:
             ``O(1)``
 
-        >>> multipoint = Multipoint.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> multipoint = Multipoint([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> multipoint < multipoint
         False
-        >>> multipoint < Multipoint.from_raw([(0, 0), (1, 0), (1, 1), (0, 1)])
+        >>> multipoint < Multipoint([Point(0, 0), Point(1, 0), Point(1, 1),
+        ...                          Point(0, 1)])
         True
-        >>> multipoint < Multipoint.from_raw([(1, 0), (0, 0), (0, 1)])
+        >>> multipoint < Multipoint([Point(1, 0), Point(0, 0), Point(0, 1)])
         False
         """
         return (self._points_set < other._points_set
@@ -225,7 +229,7 @@ class Multipoint(Indexable):
 
         where ``points_count = len(self.points)``.
 
-        >>> multipoint = Multipoint.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> multipoint = Multipoint([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> multipoint | multipoint == multipoint
         True
         """
@@ -244,7 +248,7 @@ class Multipoint(Indexable):
 
         where ``points_count = len(self.points)``.
 
-        >>> multipoint = Multipoint.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> multipoint = Multipoint([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> multipoint - multipoint is EMPTY
         True
         """
@@ -267,7 +271,7 @@ class Multipoint(Indexable):
 
         where ``points_count = len(self.points)``.
 
-        >>> multipoint = Multipoint.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> multipoint = Multipoint([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> multipoint ^ multipoint is EMPTY
         True
         """
@@ -303,7 +307,7 @@ class Multipoint(Indexable):
 
         where ``points_count = len(self.points)``.
 
-        >>> multipoint = Multipoint.from_raw([(0, 0), (3, 0), (0, 3)])
+        >>> multipoint = Multipoint([Point(0, 0), Point(3, 0), Point(0, 3)])
         >>> multipoint.centroid == Point(1, 1)
         True
         """
@@ -319,7 +323,7 @@ class Multipoint(Indexable):
         Memory complexity:
             ``O(1)``
 
-        >>> multipoint = Multipoint.from_raw([(0, 0), (3, 0), (0, 3)])
+        >>> multipoint = Multipoint([Point(0, 0), Point(3, 0), Point(0, 3)])
         >>> isinstance(multipoint.context, Context)
         True
         """
@@ -337,7 +341,7 @@ class Multipoint(Indexable):
 
         where ``points_count = len(self.points)``.
 
-        >>> multipoint = Multipoint.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> multipoint = Multipoint([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> multipoint.points
         [Point(0, 0), Point(1, 0), Point(0, 1)]
         """
@@ -352,7 +356,7 @@ class Multipoint(Indexable):
         Memory complexity:
             ``O(1)``
 
-        >>> multipoint = Multipoint.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> multipoint = Multipoint([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> multipoint.distance_to(multipoint) == 0
         True
         """
@@ -374,7 +378,7 @@ class Multipoint(Indexable):
 
         where ``points_count = len(self.points)``.
 
-        >>> multipoint = Multipoint.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> multipoint = Multipoint([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> multipoint.index()
         """
         self._nearest_point = kd.Tree(self._points).nearest_point
@@ -389,7 +393,7 @@ class Multipoint(Indexable):
         Memory complexity:
             ``O(1)``
 
-        >>> multipoint = Multipoint.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> multipoint = Multipoint([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> all(multipoint.locate(point) is Location.BOUNDARY
         ...     for point in multipoint.points)
         True
@@ -409,7 +413,7 @@ class Multipoint(Indexable):
 
         where ``points_count = len(self.points)``.
 
-        >>> multipoint = Multipoint.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> multipoint = Multipoint([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> multipoint.raw()
         [(0, 0), (1, 0), (0, 1)]
         """
@@ -426,7 +430,7 @@ class Multipoint(Indexable):
 
         where ``points_count = len(self.points)``.
 
-        >>> multipoint = Multipoint.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> multipoint = Multipoint([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> multipoint.relate(multipoint) is Relation.EQUAL
         True
         """
@@ -450,11 +454,11 @@ class Multipoint(Indexable):
 
         where ``points_count = len(self.points)``.
 
-        >>> multipoint = Multipoint.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> multipoint = Multipoint([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> multipoint.rotate(1, 0) == multipoint
         True
         >>> (multipoint.rotate(0, 1, Point(1, 1))
-        ...  == Multipoint.from_raw([(2, 0), (2, 1), (1, 0)]))
+        ...  == Multipoint([Point(2, 0), Point(2, 1), Point(1, 0)]))
         True
         """
         return (Multipoint(rotate_points_around_origin(self._points, cosine,
@@ -478,11 +482,11 @@ class Multipoint(Indexable):
 
         where ``points_count = len(self.points)``.
 
-        >>> multipoint = Multipoint.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> multipoint = Multipoint([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> multipoint.scale(1) == multipoint
         True
         >>> (multipoint.scale(1, 2)
-        ...  == Multipoint.from_raw([(0, 0), (1, 0), (0, 2)]))
+        ...  == Multipoint([Point(0, 0), Point(1, 0), Point(0, 2)]))
         True
         """
         if factor_y is None:
@@ -510,9 +514,9 @@ class Multipoint(Indexable):
 
         where ``points_count = len(self.points)``.
 
-        >>> multipoint = Multipoint.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> multipoint = Multipoint([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> (multipoint.translate(1, 2)
-        ...  == Multipoint.from_raw([(1, 2), (2, 2), (1, 3)]))
+        ...  == Multipoint([Point(1, 2), Point(2, 2), Point(1, 3)]))
         True
         """
         return Multipoint([point.translate(step_x, step_y)
@@ -527,7 +531,7 @@ class Multipoint(Indexable):
         Memory complexity:
             ``O(1)``
 
-        >>> multipoint = Multipoint.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> multipoint = Multipoint([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> multipoint.validate()
         """
         if not self._points:
