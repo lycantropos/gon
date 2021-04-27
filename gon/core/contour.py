@@ -385,13 +385,13 @@ class Contour(Indexable, Linear):
         return (self._unite_with_multipoint(other)
                 if isinstance(other, Multipoint)
                 else
-                (self._symmetric_subtract_raw_multisegment(
+                (self._symmetric_subtract_multisegment(
                         self.context.multisegment_cls([other]))
                  if isinstance(other, Segment)
                  else
-                 (self._symmetric_subtract_raw_multisegment(other)
+                 (self._symmetric_subtract_multisegment(other)
                   if isinstance(other, Multisegment)
-                  else (self._symmetric_subtract_raw_multisegment(
+                  else (self._symmetric_subtract_multisegment(
                          self.context.multisegment_cls(other._edges))
                         if isinstance(other, Contour)
                         else NotImplemented))))
@@ -832,10 +832,11 @@ class Contour(Indexable, Linear):
                 subtract_multisegments(other, self._as_multisegment(),
                                        context=self.context))
 
-    def _symmetric_subtract_raw_multisegment(self, other: Multisegment
-                                             ) -> Compound:
+    def _symmetric_subtract_multisegment(self, other: Multisegment
+                                         ) -> Compound:
         return unfold_multisegment(symmetric_subtract_multisegments(
-                self._as_multisegment(), other))
+                self._as_multisegment(), other,
+                context=self.context))
 
     def _unite_with_multipoint(self, other: Multipoint) -> Compound:
         # importing here to avoid cyclic imports
