@@ -37,11 +37,7 @@ def from_mix_components(multipoint: Multipoint,
 
 
 def unfold_multipoint(multipoint: Multipoint) -> Compound:
-    return ((multipoint
-             if len(multipoint.points) > 1
-             else multipoint.points[0])
-            if multipoint.points
-            else EMPTY)
+    return multipoint if multipoint.points else EMPTY
 
 
 def unfold_multisegment(multisegment: Multisegment) -> Compound:
