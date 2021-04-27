@@ -87,10 +87,11 @@ class Contour(Indexable, Linear):
 
         where ``vertices_count = len(self.vertices)``.
 
-        >>> contour = Contour.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> contour = Contour([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> (contour & contour
-        ...  == Multisegment.from_raw([((0, 0), (1, 0)), ((1, 0), (0, 1)),
-        ...                            ((0, 1), (0, 0))]))
+        ...  == Multisegment([Segment(Point(0, 0), Point(1, 0)),
+        ...                   Segment(Point(1, 0), Point(0, 1)),
+        ...                   Segment(Point(0, 1), Point(0, 0))]))
         True
         """
         return (self._intersect_with_multisegment(
@@ -118,7 +119,7 @@ class Contour(Indexable, Linear):
 
         where ``vertices_count = len(self.vertices)``.
 
-        >>> contour = Contour.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> contour = Contour([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> all(vertex in contour for vertex in contour.vertices)
         True
         """
@@ -133,12 +134,13 @@ class Contour(Indexable, Linear):
         Memory complexity:
             ``O(1)``
 
-        >>> contour = Contour.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> contour = Contour([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> contour == contour
         True
-        >>> contour == Contour.from_raw([(0, 0), (1, 0), (1, 1), (0, 1)])
+        >>> contour == Contour([Point(0, 0), Point(1, 0), Point(1, 1),
+        ...                     Point(0, 1)])
         False
-        >>> contour == Contour.from_raw([(1, 0), (0, 0), (0, 1)])
+        >>> contour == Contour([Point(1, 0), Point(0, 0), Point(0, 1)])
         True
         """
         return (self is other
@@ -161,12 +163,13 @@ class Contour(Indexable, Linear):
 
         where ``vertices_count = len(self.vertices)``.
 
-        >>> contour = Contour.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> contour = Contour([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> contour >= contour
         True
-        >>> contour >= Contour.from_raw([(0, 0), (1, 0), (1, 1), (0, 1)])
+        >>> contour >= Contour([Point(0, 0), Point(1, 0), Point(1, 1),
+        ...                     Point(0, 1)])
         False
-        >>> contour >= Contour.from_raw([(1, 0), (0, 0), (0, 1)])
+        >>> contour >= Contour([Point(1, 0), Point(0, 0), Point(0, 1)])
         True
         """
         return (self == other
@@ -187,12 +190,13 @@ class Contour(Indexable, Linear):
 
         where ``vertices_count = len(self.vertices)``.
 
-        >>> contour = Contour.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> contour = Contour([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> contour > contour
         False
-        >>> contour > Contour.from_raw([(0, 0), (1, 0), (1, 1), (0, 1)])
+        >>> contour > Contour([Point(0, 0), Point(1, 0), Point(1, 1),
+        ...                    Point(0, 1)])
         False
-        >>> contour > Contour.from_raw([(1, 0), (0, 0), (0, 1)])
+        >>> contour > Contour([Point(1, 0), Point(0, 0), Point(0, 1)])
         False
         """
         return (self != other
@@ -215,7 +219,7 @@ class Contour(Indexable, Linear):
 
         where ``vertices_count = len(self.vertices)``.
 
-        >>> contour = Contour.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> contour = Contour([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> hash(contour) == hash(contour)
         True
         """
@@ -238,12 +242,13 @@ class Contour(Indexable, Linear):
 
         where ``vertices_count = len(self.vertices)``.
 
-        >>> contour = Contour.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> contour = Contour([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> contour <= contour
         True
-        >>> contour <= Contour.from_raw([(0, 0), (1, 0), (1, 1), (0, 1)])
+        >>> contour <= Contour([Point(0, 0), Point(1, 0), Point(1, 1),
+        ...                     Point(0, 1)])
         False
-        >>> contour <= Contour.from_raw([(1, 0), (0, 0), (0, 1)])
+        >>> contour <= Contour([Point(1, 0), Point(0, 0), Point(0, 1)])
         True
         """
         return (self == other
@@ -265,12 +270,13 @@ class Contour(Indexable, Linear):
 
         where ``vertices_count = len(self.vertices)``.
 
-        >>> contour = Contour.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> contour = Contour([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> contour < contour
         False
-        >>> contour < Contour.from_raw([(0, 0), (1, 0), (1, 1), (0, 1)])
+        >>> contour < Contour([Point(0, 0), Point(1, 0), Point(1, 1),
+        ...                    Point(0, 1)])
         False
-        >>> contour < Contour.from_raw([(1, 0), (0, 0), (0, 1)])
+        >>> contour < Contour([Point(1, 0), Point(0, 0), Point(0, 1)])
         False
         """
         return (self != other
@@ -291,10 +297,11 @@ class Contour(Indexable, Linear):
 
         where ``vertices_count = len(self.vertices)``.
 
-        >>> contour = Contour.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> contour = Contour([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> (contour | contour
-        ...  == Multisegment.from_raw([((0, 0), (1, 0)), ((1, 0), (0, 1)),
-        ...                            ((0, 1), (0, 0))]))
+        ...  == Multisegment([Segment(Point(0, 0), Point(1, 0)),
+        ...                   Segment(Point(1, 0), Point(0, 1)),
+        ...                   Segment(Point(0, 1), Point(0, 0))]))
         True
         """
         return (self._unite_with_multipoint(other)
@@ -342,7 +349,7 @@ class Contour(Indexable, Linear):
 
         where ``vertices_count = len(self.vertices)``.
 
-        >>> contour = Contour.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> contour = Contour([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> contour - contour is EMPTY
         True
         """
@@ -371,7 +378,7 @@ class Contour(Indexable, Linear):
 
         where ``vertices_count = len(self.vertices)``.
 
-        >>> contour = Contour.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> contour = Contour([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> contour ^ contour is EMPTY
         True
         """
@@ -419,7 +426,8 @@ class Contour(Indexable, Linear):
         Memory complexity:
             ``O(1)``
 
-        >>> contour = Contour.from_raw([(0, 0), (2, 0), (2, 2), (0, 2)])
+        >>> contour = Contour([Point(0, 0), Point(2, 0), Point(2, 2),
+        ...                    Point(0, 2)])
         >>> contour.centroid == Point(1, 1)
         True
         """
@@ -435,7 +443,8 @@ class Contour(Indexable, Linear):
         Memory complexity:
             ``O(1)``
 
-        >>> contour = Contour.from_raw([(0, 0), (2, 0), (2, 2), (0, 2)])
+        >>> contour = Contour([Point(0, 0), Point(2, 0), Point(2, 2),
+        ...                    Point(0, 2)])
         >>> isinstance(contour.context, Context)
         True
         """
@@ -453,7 +462,7 @@ class Contour(Indexable, Linear):
 
         where ``vertices_count = len(self.vertices)``.
 
-        >>> contour = Contour.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> contour = Contour([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> contour.edges == [Segment(Point(0, 1), Point(0, 0)),
         ...                   Segment(Point(0, 0), Point(1, 0)),
         ...                   Segment(Point(1, 0), Point(0, 1))]
@@ -471,7 +480,8 @@ class Contour(Indexable, Linear):
         Memory complexity:
             ``O(1)``
 
-        >>> contour = Contour.from_raw([(0, 0), (1, 0), (1, 1), (0, 1)])
+        >>> contour = Contour([Point(0, 0), Point(1, 0), Point(1, 1),
+        ...                    Point(0, 1)])
         >>> contour.length == 4
         True
         """
@@ -487,7 +497,7 @@ class Contour(Indexable, Linear):
         Memory complexity:
             ``O(1)``
 
-        >>> contour = Contour.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> contour = Contour([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> contour.orientation is Orientation.COUNTERCLOCKWISE
         True
         """
@@ -508,7 +518,7 @@ class Contour(Indexable, Linear):
 
         where ``vertices_count = len(self.vertices)``.
 
-        >>> contour = Contour.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> contour = Contour([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> contour.vertices
         [Point(0, 0), Point(1, 0), Point(0, 1)]
         """
@@ -523,7 +533,7 @@ class Contour(Indexable, Linear):
         Memory complexity:
             ``O(1)``
 
-        >>> contour = Contour.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> contour = Contour([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> contour.distance_to(contour) == 0
         True
         """
@@ -556,7 +566,7 @@ class Contour(Indexable, Linear):
 
         where ``vertices_count = len(self.vertices)``.
 
-        >>> contour = Contour.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> contour = Contour([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> contour.index()
         """
         graph = Graph.from_multisegment(self._as_multisegment(),
@@ -578,7 +588,7 @@ class Contour(Indexable, Linear):
 
         where ``vertices_count = len(self.vertices)``.
 
-        >>> contour = Contour.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> contour = Contour([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> all(vertex in contour for vertex in contour.vertices)
         True
         """
@@ -595,7 +605,7 @@ class Contour(Indexable, Linear):
 
         where ``vertices_count = len(self.vertices)``.
 
-        >>> contour = Contour.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> contour = Contour([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> contour.raw()
         [(0, 0), (1, 0), (0, 1)]
         """
@@ -612,7 +622,7 @@ class Contour(Indexable, Linear):
 
         where ``vertices_count = len(self.vertices)``.
 
-        >>> contour = Contour.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> contour = Contour([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> contour.relate(contour) is Relation.EQUAL
         True
         """
@@ -637,7 +647,7 @@ class Contour(Indexable, Linear):
 
         where ``vertices_count = len(self.vertices)``.
 
-        >>> contour = Contour.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> contour = Contour([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> contour.reverse().reverse() == contour
         True
         """
@@ -657,11 +667,11 @@ class Contour(Indexable, Linear):
 
         where ``vertices_count = len(self.vertices)``.
 
-        >>> contour = Contour.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> contour = Contour([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> contour.rotate(1, 0) == contour
         True
         >>> (contour.rotate(0, 1, Point(1, 1))
-        ...  == Contour.from_raw([(2, 0), (2, 1), (1, 0)]))
+        ...  == Contour([Point(2, 0), Point(2, 1), Point(1, 0)]))
         True
         """
         return (rotate_contour_around_origin(self, cosine, sine)
@@ -683,11 +693,11 @@ class Contour(Indexable, Linear):
 
         where ``vertices_count = len(self.vertices)``.
 
-        >>> contour = Contour.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> contour = Contour([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> contour.scale(1) == contour
         True
         >>> (contour.scale(1, 2)
-        ...  == Contour.from_raw([(0, 0), (1, 0), (0, 2)]))
+        ...  == Contour([Point(0, 0), Point(1, 0), Point(0, 2)]))
         True
         """
         if factor_y is None:
@@ -709,7 +719,7 @@ class Contour(Indexable, Linear):
 
         where ``vertices_count = len(self.vertices)``.
 
-        >>> contour = Contour.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> contour = Contour([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> contour.to_clockwise().orientation is Orientation.CLOCKWISE
         True
         """
@@ -730,7 +740,7 @@ class Contour(Indexable, Linear):
 
         where ``vertices_count = len(self.vertices)``.
 
-        >>> contour = Contour.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> contour = Contour([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> (contour.to_counterclockwise().orientation
         ...  is Orientation.COUNTERCLOCKWISE)
         True
@@ -750,9 +760,9 @@ class Contour(Indexable, Linear):
 
         where ``vertices_count = len(self.vertices)``.
 
-        >>> contour = Contour.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> contour = Contour([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> (contour.translate(1, 2)
-        ...  == Contour.from_raw([(1, 2), (2, 2), (1, 3)]))
+        ...  == Contour([Point(1, 2), Point(2, 2), Point(1, 3)]))
         True
         """
         return Contour([vertex.translate(step_x, step_y)
@@ -769,7 +779,7 @@ class Contour(Indexable, Linear):
 
         where ``vertices_count = len(self.vertices)``.
 
-        >>> contour = Contour.from_raw([(0, 0), (1, 0), (0, 1)])
+        >>> contour = Contour([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> contour.validate()
         """
         vertices = self._vertices
