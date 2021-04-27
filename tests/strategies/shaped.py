@@ -1,5 +1,5 @@
 from itertools import repeat
-from typing import (List)
+from typing import List
 
 from hypothesis import strategies
 from hypothesis_geometry import planar
