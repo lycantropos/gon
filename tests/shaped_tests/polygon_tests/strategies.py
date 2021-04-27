@@ -1,4 +1,3 @@
-from gon.base import Polygon
 from tests.strategies import (coordinates_strategies,
                               coordinates_to_points,
                               coordinates_to_polygons,
@@ -8,9 +7,8 @@ from tests.utils import (cleave_in_tuples,
                          to_pairs,
                          to_triplets)
 
-rational_raw_polygons = (rational_coordinates_strategies
-                         .flatmap(coordinates_to_polygons))
-rational_polygons = rational_raw_polygons.map(Polygon.from_raw)
+rational_polygons = (rational_coordinates_strategies
+                     .flatmap(coordinates_to_polygons))
 polygons = coordinates_strategies.flatmap(coordinates_to_polygons)
 invalid_polygons = invalid_polygons
 polygons_strategies = coordinates_strategies.map(coordinates_to_polygons)
