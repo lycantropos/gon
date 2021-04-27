@@ -1,15 +1,15 @@
 import math
 
 from hypothesis import given
-from symba.base import Expression
 
 from gon.base import Linear
+from tests.utils import is_scalar
 from . import strategies
 
 
 @given(strategies.linear_geometries)
 def test_basic(linear: Linear) -> None:
-    assert isinstance(linear.length, Expression)
+    assert is_scalar(linear.length)
 
 
 @given(strategies.linear_geometries)

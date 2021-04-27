@@ -3,10 +3,10 @@ from typing import Tuple
 
 import pytest
 from hypothesis import given
-from symba.base import Expression
 
 from gon.base import (Compound,
                       Geometry)
+from tests.utils import is_scalar
 from . import strategies
 
 
@@ -16,7 +16,7 @@ def test_basic(geometries_pair: Tuple[Geometry, Geometry]) -> None:
 
     result = left_geometry.distance_to(right_geometry)
 
-    assert isinstance(result, Expression)
+    assert is_scalar(result)
 
 
 @given(strategies.non_empty_geometries_pairs)

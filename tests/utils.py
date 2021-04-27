@@ -4,6 +4,7 @@ from fractions import Fraction
 from functools import partial
 from itertools import (chain,
                        repeat)
+from numbers import Real
 from operator import getitem
 from typing import (Any,
                     Callable,
@@ -19,6 +20,7 @@ import pytest
 from ground.base import get_context
 from hypothesis import strategies
 from hypothesis.strategies import SearchStrategy
+from symba.base import Expression
 
 from gon.base import (Compound,
                       Contour,
@@ -127,6 +129,10 @@ def call(function: Callable[..., Range],
 
 def are_compounds_equivalent(left: Compound, right: Compound) -> bool:
     return left == right or left.relate(right) is Relation.EQUAL
+
+
+def is_scalar(value: Any) -> bool:
+    return isinstance(value, (Real, Expression))
 
 
 def robust_invert(value: Coordinate) -> Coordinate:
