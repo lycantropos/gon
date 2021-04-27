@@ -679,7 +679,7 @@ class Polygon(Indexable, Shaped):
                     ((non_negative_min(self._linear_distance_to_segment(edge)
                                        for edge in other.edges)
                       if self.disjoint(other)
-                      else ZERO)
+                      else 0)
                      if isinstance(other, Polygon)
                      else other.distance_to(self)))))))
 
@@ -885,7 +885,7 @@ class Polygon(Indexable, Shaped):
         >>> polygon = Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
         ...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]]))
         >>> triangulation = polygon.triangulate()
-        >>> (triangulation.trianges()
+        >>> (triangulation.triangles()
         ...  == [Contour.from_raw([(4, 4), (6, 0), (6, 6)]),
         ...      Contour.from_raw([(4, 2), (6, 0), (4, 4)]),
         ...      Contour.from_raw([(0, 6), (4, 4), (6, 6)]),
