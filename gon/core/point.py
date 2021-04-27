@@ -1,10 +1,10 @@
 from typing import (Optional,
                     Tuple)
 
-from ground.base import get_context
+from ground.base import (Context,
+                         get_context)
 from reprit.base import generate_repr
 
-from .arithmetic import sqrt
 from .geometry import Geometry
 from .hints import Coordinate
 from .primitive_utils import is_finite
@@ -12,7 +12,7 @@ from .raw import RawPoint
 
 
 class Point(Geometry):
-    __slots__ = '_x', '_y', '_raw',
+    __slots__ = '_context', '_x', '_y', '_raw'
 
     def __init__(self, x: Coordinate, y: Coordinate) -> None:
         """
@@ -23,6 +23,7 @@ class Point(Geometry):
         Memory complexity:
             ``O(1)``
         """
+        self._context = get_context()
         self._x, self._y = x, y
         self._raw = x, y
 
@@ -129,6 +130,22 @@ class Point(Geometry):
         """
         x, y = raw
         return cls(x, y)
+
+    @property
+    def context(self) -> Context:
+        """
+        Returns context of the point.
+
+        Time complexity:
+            ``O(1)``
+        Memory complexity:
+            ``O(1)``
+
+        >>> point = Point(1, 0)
+        >>> isinstance(point.context, Context)
+        True
+        """
+        return self._context
 
     @property
     def x(self) -> Coordinate:
@@ -261,7 +278,8 @@ class Point(Geometry):
             raise ValueError('NaN/infinity coordinates are not supported.')
 
     def _distance_to_point(self, other: 'Point') -> Coordinate:
-        return sqrt(get_context().points_squared_distance(self, other))
+        return self.context.sqrt(self.context.points_squared_distance(self,
+                                                                      other))
 
 
 def point_to_step(point: Point,
