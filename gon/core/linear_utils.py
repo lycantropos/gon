@@ -37,11 +37,19 @@ def from_mix_components(multipoint: Multipoint,
 
 
 def unfold_multipoint(multipoint: Multipoint) -> Compound:
-    return multipoint if multipoint.points else EMPTY
+    return ((multipoint
+             if len(multipoint.points) > 1
+             else multipoint.points[0])
+            if multipoint.points
+            else EMPTY)
 
 
 def unfold_multisegment(multisegment: Multisegment) -> Compound:
-    return multisegment if multisegment.segments else EMPTY
+    return ((multisegment
+             if len(multisegment.segments) > 1
+             else multisegment.segments[0])
+            if multisegment.segments
+            else EMPTY)
 
 
 def to_point_nearest_segment(segments: Sequence[Segment],
