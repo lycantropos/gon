@@ -9,8 +9,8 @@ from gon.core.compound import (Compound,
                                Relation,
                                Shaped)
 from .arithmetic import non_negative_min
-from .degenerate import (EMPTY,
-                         Maybe)
+from .empty import (EMPTY,
+                    Maybe)
 from .geometry import Geometry
 from .hints import Coordinate
 from .multipoint import Multipoint

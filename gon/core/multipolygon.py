@@ -34,7 +34,7 @@ from .compound import (Compound,
 from .contour import (Contour,
                       Multisegment,
                       Segment)
-from .degenerate import EMPTY
+from .empty import EMPTY
 from .geometry import Geometry
 from .hints import Coordinate
 from .iterable import flatten

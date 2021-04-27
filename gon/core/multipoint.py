@@ -15,7 +15,7 @@ from .compound import (Compound,
                        Indexable,
                        Location,
                        Relation)
-from .degenerate import EMPTY
+from .empty import EMPTY
 from .geometry import Geometry
 from .hints import Coordinate
 from .iterable import unique_ever_seen

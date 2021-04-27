@@ -35,7 +35,7 @@ from .contour import (Contour,
                       rotate_translate_contour,
                       scale_contour,
                       scale_contour_degenerate)
-from .degenerate import EMPTY
+from .empty import EMPTY
 from .geometry import Geometry
 from .hints import Coordinate
 from .linear_utils import (from_mix_components,

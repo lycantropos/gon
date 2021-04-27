@@ -1,4 +1,4 @@
-from .core.degenerate import Maybe
+from .core.empty import Maybe
 from .core.hints import Coordinate
 
 Coordinate = Coordinate

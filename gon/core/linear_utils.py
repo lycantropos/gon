@@ -9,7 +9,7 @@ from ground.hints import (Coordinate,
 
 from .compound import (Compound,
                        Relation)
-from .degenerate import EMPTY
+from .empty import EMPTY
 
 
 def relate_multipoint_to_linear_compound(multipoint: Multipoint,
