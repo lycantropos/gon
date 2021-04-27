@@ -569,7 +569,7 @@ class Multisegment(Indexable, Linear):
         >>> multisegment = Multisegment([Segment(Point(0, 0), Point(1, 0)),
         ...                              Segment(Point(0, 1), Point(1, 1))])
         >>> multisegment.raw()
-        [Segment(Point(0, 0), Point(1, 0)), Segment(Point(0, 1), Point(1, 1))]
+        [((0, 0), (1, 0)), ((0, 1), (1, 1))]
         """
         return self._raw[:]
 
