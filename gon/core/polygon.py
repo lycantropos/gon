@@ -109,7 +109,7 @@ class Polygon(Indexable, Shaped):
         >>> from gon.base import Multipolygon
         >>> polygon = Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
         ...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]]))
-        >>> polygon & polygon == Multipolygon([polygon])
+        >>> polygon & polygon == polygon
         True
         """
         return (self._intersect_with_multisegment(
@@ -327,7 +327,7 @@ class Polygon(Indexable, Shaped):
         >>> from gon.base import Multipolygon
         >>> polygon = Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
         ...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]]))
-        >>> polygon | polygon == Multipolygon([polygon])
+        >>> polygon | polygon == polygon
         True
         """
         return (self._unite_with_multipoint(other)

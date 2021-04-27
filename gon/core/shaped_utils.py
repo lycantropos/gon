@@ -26,16 +26,23 @@ def from_holeless_mix_components(multipoint: Multipoint,
     from .mix import from_mix_components
     return from_mix_components(unfold_multipoint(multipoint),
                                unfold_multisegment(multisegment),
-                               from_raw_multiregion(multiregion))
+                               unfold_multiregion(multiregion))
 
 
 def unfold_multipolygon(multipolygon: Multipolygon) -> Compound:
-    return multipolygon if multipolygon.polygons else EMPTY
+    return ((multipolygon
+             if len(multipolygon.polygons) > 1
+             else multipolygon.polygons[0])
+            if multipolygon.polygons
+            else EMPTY)
 
 
-def from_raw_multiregion(multiregion: Multiregion) -> Compound:
+def unfold_multiregion(multiregion: Multiregion) -> Compound:
     # importing here to avoid cyclic imports
     from .polygon import Polygon
     from .multipolygon import Multipolygon
-    return (Multipolygon([Polygon(region, []) for region in multiregion])
-            if multiregion else EMPTY)
+    return ((Multipolygon([Polygon(region) for region in multiregion])
+             if len(multiregion) > 1
+             else Polygon(multiregion[0]))
+            if multiregion
+            else EMPTY)
