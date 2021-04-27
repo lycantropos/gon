@@ -10,8 +10,8 @@ from .core.compound import (Compound,
                             Relation,
                             Shaped)
 from .core.contour import Contour
-from .core.degenerate import (EMPTY,
-                              Empty)
+from .core.empty import (EMPTY,
+                         Empty)
 from .core.geometry import Geometry
 from .core.mix import Mix
 from .core.multipoint import Multipoint

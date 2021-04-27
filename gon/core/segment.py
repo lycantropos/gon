@@ -13,7 +13,7 @@ from .compound import (Compound,
                        Linear,
                        Location,
                        Relation)
-from .degenerate import EMPTY
+from .empty import EMPTY
 from .geometry import Geometry
 from .hints import Coordinate
 from .linear_utils import (relate_multipoint_to_linear_compound,

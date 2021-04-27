@@ -4,7 +4,7 @@ from ground.hints import (Multipoint,
                           Multisegment)
 
 from .compound import Compound
-from .degenerate import EMPTY
+from .empty import EMPTY
 from .linear_utils import (unfold_multipoint,
                            unfold_multisegment)
 
