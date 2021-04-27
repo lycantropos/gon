@@ -1,4 +1,6 @@
-from typing import Optional, TypeVar as _TypeVar, Union as _Union
+from typing import (Optional,
+                    TypeVar,
+                    Union)
 
 from reprit.base import generate_repr
 
@@ -358,5 +360,5 @@ class Empty(Compound):
 
 
 EMPTY = Empty()
-_T = _TypeVar('_T')
-Maybe = _Union[Empty, _T]
+_T = TypeVar('_T')
+Maybe = Union[Empty, _T]
