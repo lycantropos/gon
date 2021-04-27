@@ -40,7 +40,7 @@ from .multipoint import (Multipoint,
 from .multisegment import Multisegment
 from .point import (Point,
                     point_to_step)
-from .raw import (RawContour)
+from .raw import RawContour
 from .segment import Segment
 from .vertices import Vertices
 
