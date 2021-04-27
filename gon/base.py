@@ -18,7 +18,8 @@ from .core.multipoint import Multipoint
 from .core.multipolygon import Multipolygon
 from .core.multisegment import Multisegment
 from .core.point import Point
-from .core.polygon import Polygon
+from .core.polygon import (Polygon,
+                           Triangulation)
 from .core.segment import Segment
 
 EMPTY = EMPTY
@@ -39,6 +40,7 @@ Polygon = Polygon
 Relation = Relation
 Segment = Segment
 Shaped = Shaped
+Triangulation = Triangulation
 _initial_context = _get_context()
 _set_context(_Context(box_cls=_initial_context.box_cls,
                       contour_cls=Contour,
