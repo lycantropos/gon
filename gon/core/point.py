@@ -1,13 +1,15 @@
+import math
+from numbers import Real
 from typing import (Optional,
                     Tuple)
 
 from ground.base import (Context,
                          get_context)
 from reprit.base import generate_repr
+from symba.base import Expression
 
 from .geometry import Geometry
 from .hints import Coordinate
-from .primitive_utils import is_finite
 from .raw import RawPoint
 
 
@@ -309,3 +311,9 @@ def scale_point(point: Point,
                 factor_x: Coordinate,
                 factor_y: Coordinate) -> Point:
     return Point(point.x * factor_x, point.y * factor_y)
+
+
+def is_finite(value: Coordinate) -> bool:
+    return (math.isfinite(value)
+            if isinstance(value, Real)
+            else isinstance(value, Expression) and value.is_finite)
