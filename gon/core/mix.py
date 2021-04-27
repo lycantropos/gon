@@ -2,13 +2,13 @@ from typing import Optional
 
 from reprit.base import generate_repr
 
-from gon.core.compound import (Compound,
-                               Indexable,
-                               Linear,
-                               Location,
-                               Relation,
-                               Shaped)
 from .arithmetic import non_negative_min
+from .compound import (Compound,
+                       Indexable,
+                       Linear,
+                       Location,
+                       Relation,
+                       Shaped)
 from .empty import (EMPTY,
                     Maybe)
 from .geometry import Geometry
