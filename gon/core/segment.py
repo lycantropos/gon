@@ -55,7 +55,7 @@ class Segment(Compound, Linear):
         Memory complexity:
             ``O(1)``
 
-        >>> segment = Segment.from_raw(((0, 0), (2, 0)))
+        >>> segment = Segment(Point(0, 0), Point(2, 0))
         >>> segment & segment == segment
         True
         """
@@ -74,7 +74,7 @@ class Segment(Compound, Linear):
         Memory complexity:
             ``O(1)``
 
-        >>> segment = Segment.from_raw(((0, 0), (2, 0)))
+        >>> segment = Segment(Point(0, 0), Point(2, 0))
         >>> segment.start in segment
         True
         >>> segment.end in segment
@@ -91,14 +91,14 @@ class Segment(Compound, Linear):
         Memory complexity:
             ``O(1)``
 
-        >>> segment = Segment.from_raw(((0, 0), (2, 0)))
+        >>> segment = Segment(Point(0, 0), Point(2, 0))
         >>> segment == segment
         True
-        >>> segment == Segment.from_raw(((2, 0), (0, 0)))
+        >>> segment == Segment(Point(2, 0), Point(0, 0))
         True
-        >>> segment == Segment.from_raw(((0, 0), (1, 0)))
+        >>> segment == Segment(Point(0, 0), Point(1, 0))
         False
-        >>> segment == Segment.from_raw(((0, 0), (0, 2)))
+        >>> segment == Segment(Point(0, 0), Point(0, 2))
         False
         """
         return (self is other
@@ -116,14 +116,14 @@ class Segment(Compound, Linear):
         Memory complexity:
             ``O(1)``
 
-        >>> segment = Segment.from_raw(((0, 0), (2, 0)))
+        >>> segment = Segment(Point(0, 0), Point(2, 0))
         >>> segment >= segment
         True
-        >>> segment >= Segment.from_raw(((2, 0), (0, 0)))
+        >>> segment >= Segment(Point(2, 0), Point(0, 0))
         True
-        >>> segment >= Segment.from_raw(((0, 0), (1, 0)))
+        >>> segment >= Segment(Point(0, 0), Point(1, 0))
         True
-        >>> segment >= Segment.from_raw(((0, 0), (0, 2)))
+        >>> segment >= Segment(Point(0, 0), Point(0, 2))
         False
         """
         return (other is EMPTY
@@ -144,14 +144,14 @@ class Segment(Compound, Linear):
         Memory complexity:
             ``O(1)``
 
-        >>> segment = Segment.from_raw(((0, 0), (2, 0)))
+        >>> segment = Segment(Point(0, 0), Point(2, 0))
         >>> segment > segment
         False
-        >>> segment > Segment.from_raw(((2, 0), (0, 0)))
+        >>> segment > Segment(Point(2, 0), Point(0, 0))
         False
-        >>> segment > Segment.from_raw(((0, 0), (1, 0)))
+        >>> segment > Segment(Point(0, 0), Point(1, 0))
         True
-        >>> segment > Segment.from_raw(((0, 0), (0, 2)))
+        >>> segment > Segment(Point(0, 0), Point(0, 2))
         False
         """
         return (other is EMPTY
@@ -172,10 +172,10 @@ class Segment(Compound, Linear):
         Memory complexity:
             ``O(1)``
 
-        >>> segment = Segment.from_raw(((0, 0), (2, 0)))
+        >>> segment = Segment(Point(0, 0), Point(2, 0))
         >>> hash(segment) == hash(segment)
         True
-        >>> hash(segment) == hash(Segment.from_raw(((2, 0), (0, 0))))
+        >>> hash(segment) == hash(Segment(Point(2, 0), Point(0, 0)))
         True
         """
         return hash(frozenset(self._raw))
@@ -189,14 +189,14 @@ class Segment(Compound, Linear):
         Memory complexity:
             ``O(1)``
 
-        >>> segment = Segment.from_raw(((0, 0), (2, 0)))
+        >>> segment = Segment(Point(0, 0), Point(2, 0))
         >>> segment <= segment
         True
-        >>> segment <= Segment.from_raw(((2, 0), (0, 0)))
+        >>> segment <= Segment(Point(2, 0), Point(0, 0))
         True
-        >>> segment <= Segment.from_raw(((0, 0), (1, 0)))
+        >>> segment <= Segment(Point(0, 0), Point(1, 0))
         False
-        >>> segment <= Segment.from_raw(((0, 0), (0, 2)))
+        >>> segment <= Segment(Point(0, 0), Point(0, 2))
         False
         """
         return (self == other
@@ -214,14 +214,14 @@ class Segment(Compound, Linear):
         Memory complexity:
             ``O(1)``
 
-        >>> segment = Segment.from_raw(((0, 0), (2, 0)))
+        >>> segment = Segment(Point(0, 0), Point(2, 0))
         >>> segment < segment
         False
-        >>> segment < Segment.from_raw(((2, 0), (0, 0)))
+        >>> segment < Segment(Point(2, 0), Point(0, 0))
         False
-        >>> segment < Segment.from_raw(((0, 0), (1, 0)))
+        >>> segment < Segment(Point(0, 0), Point(1, 0))
         False
-        >>> segment < Segment.from_raw(((0, 0), (0, 2)))
+        >>> segment < Segment(Point(0, 0), Point(0, 2))
         False
         """
         return (self != other
@@ -239,7 +239,7 @@ class Segment(Compound, Linear):
         Memory complexity:
             ``O(1)``
 
-        >>> segment = Segment.from_raw(((0, 0), (2, 0)))
+        >>> segment = Segment(Point(0, 0), Point(2, 0))
         >>> segment | segment == segment
         True
         """
@@ -260,7 +260,7 @@ class Segment(Compound, Linear):
         Memory complexity:
             ``O(1)``
 
-        >>> segment = Segment.from_raw(((0, 0), (2, 0)))
+        >>> segment = Segment(Point(0, 0), Point(2, 0))
         >>> segment - segment is EMPTY
         True
         """
@@ -279,7 +279,7 @@ class Segment(Compound, Linear):
         Memory complexity:
             ``O(1)``
 
-        >>> segment = Segment.from_raw(((0, 0), (2, 0)))
+        >>> segment = Segment(Point(0, 0), Point(2, 0))
         >>> segment ^ segment is EMPTY
         True
         """
@@ -319,7 +319,7 @@ class Segment(Compound, Linear):
         Memory complexity:
             ``O(1)``
 
-        >>> segment = Segment.from_raw(((0, 0), (2, 0)))
+        >>> segment = Segment(Point(0, 0), Point(2, 0))
         >>> segment.centroid == Point(1, 0)
         True
         """
@@ -335,7 +335,7 @@ class Segment(Compound, Linear):
         Memory complexity:
             ``O(1)``
 
-        >>> segment = Segment.from_raw(((0, 0), (2, 0)))
+        >>> segment = Segment(Point(0, 0), Point(2, 0))
         >>> isinstance(segment.context, Context)
         True
         """
@@ -351,7 +351,7 @@ class Segment(Compound, Linear):
         Memory complexity:
             ``O(1)``
 
-        >>> segment = Segment.from_raw(((0, 0), (2, 0)))
+        >>> segment = Segment(Point(0, 0), Point(2, 0))
         >>> segment.end == Point(2, 0)
         True
         """
@@ -367,7 +367,7 @@ class Segment(Compound, Linear):
         Memory complexity:
             ``O(1)``
 
-        >>> segment = Segment.from_raw(((0, 0), (2, 0)))
+        >>> segment = Segment(Point(0, 0), Point(2, 0))
         >>> segment.is_horizontal
         True
         """
@@ -383,7 +383,7 @@ class Segment(Compound, Linear):
         Memory complexity:
             ``O(1)``
 
-        >>> segment = Segment.from_raw(((0, 0), (2, 0)))
+        >>> segment = Segment(Point(0, 0), Point(2, 0))
         >>> segment.is_vertical
         False
         """
@@ -399,7 +399,7 @@ class Segment(Compound, Linear):
         Memory complexity:
             ``O(1)``
 
-        >>> segment = Segment.from_raw(((0, 0), (2, 0)))
+        >>> segment = Segment(Point(0, 0), Point(2, 0))
         >>> segment.length == 2
         True
         """
@@ -416,7 +416,7 @@ class Segment(Compound, Linear):
         Memory complexity:
             ``O(1)``
 
-        >>> segment = Segment.from_raw(((0, 0), (2, 0)))
+        >>> segment = Segment(Point(0, 0), Point(2, 0))
         >>> segment.start == Point(0, 0)
         True
         """
@@ -431,7 +431,7 @@ class Segment(Compound, Linear):
         Memory complexity:
             ``O(1)``
 
-        >>> segment = Segment.from_raw(((0, 0), (2, 0)))
+        >>> segment = Segment(Point(0, 0), Point(2, 0))
         >>> segment.distance_to(segment) == 0
         True
         """
@@ -461,7 +461,7 @@ class Segment(Compound, Linear):
         Memory complexity:
             ``O(1)``
 
-        >>> segment = Segment.from_raw(((0, 0), (2, 0)))
+        >>> segment = Segment(Point(0, 0), Point(2, 0))
         >>> segment.locate(segment.start) is Location.BOUNDARY
         True
         >>> segment.locate(segment.end) is Location.BOUNDARY
@@ -480,7 +480,7 @@ class Segment(Compound, Linear):
         Memory complexity:
             ``O(1)``
 
-        >>> segment = Segment.from_raw(((0, 0), (2, 0)))
+        >>> segment = Segment(Point(0, 0), Point(2, 0))
         >>> segment.raw()
         ((0, 0), (2, 0))
         """
@@ -495,7 +495,7 @@ class Segment(Compound, Linear):
         Memory complexity:
             ``O(1)``
 
-        >>> segment = Segment.from_raw(((0, 0), (2, 0)))
+        >>> segment = Segment(Point(0, 0), Point(2, 0))
         >>> segment.relate(segment) is Relation.EQUAL
         True
         """
@@ -517,11 +517,11 @@ class Segment(Compound, Linear):
         Memory complexity:
             ``O(1)``
 
-        >>> segment = Segment.from_raw(((0, 0), (2, 0)))
+        >>> segment = Segment(Point(0, 0), Point(2, 0))
         >>> segment.rotate(1, 0) == segment
         True
         >>> (segment.rotate(0, 1, Point(1, 1))
-        ...  == Segment.from_raw(((2, 0), (2, 2))))
+        ...  == Segment(Point(2, 0), Point(2, 2)))
         True
         """
         return (rotate_segment_around_origin(self, cosine, sine)
@@ -541,7 +541,7 @@ class Segment(Compound, Linear):
         Memory complexity:
             ``O(1)``
 
-        >>> segment = Segment.from_raw(((0, 0), (2, 0)))
+        >>> segment = Segment(Point(0, 0), Point(2, 0))
         >>> segment.scale(1) == segment.scale(1, 2) == segment
         True
         """
@@ -557,8 +557,8 @@ class Segment(Compound, Linear):
         Memory complexity:
             ``O(1)``
 
-        >>> segment = Segment.from_raw(((0, 0), (2, 0)))
-        >>> segment.translate(1, 2) == Segment.from_raw(((1, 2), (3, 2)))
+        >>> segment = Segment(Point(0, 0), Point(2, 0))
+        >>> segment.translate(1, 2) == Segment(Point(1, 2), Point(3, 2))
         True
         """
         return Segment(self._start.translate(step_x, step_y),
@@ -573,7 +573,7 @@ class Segment(Compound, Linear):
         Memory complexity:
             ``O(1)``
 
-        >>> segment = Segment.from_raw(((0, 0), (2, 0)))
+        >>> segment = Segment(Point(0, 0), Point(2, 0))
         >>> segment.validate()
         """
         self._start.validate()
