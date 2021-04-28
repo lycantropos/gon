@@ -11,6 +11,7 @@ from gon.base import (Contour,
                       Segment)
 from gon.core import vertices
 from tests.utils import (Strategy,
+                         lift,
                          segment_to_rotations)
 from .base import (coordinates_strategies,
                    empty_sequences,
@@ -78,6 +79,7 @@ def to_repeated_segments(segments: Strategy[Segment]
 
 
 invalid_multisegments = ((empty_sequences
+                          | segments.map(lift)
                           | strategies.lists(invalid_segments,
                                              min_size=1)
                           | to_segments_rotations(rational_segments)
