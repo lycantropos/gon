@@ -140,13 +140,11 @@ class Contour(Indexable, Linear):
         True
         """
         return (self is other
-                or (_vertices.equal(self._vertices,
-                                    other._vertices,
-                                    self.orientation is other.orientation)
-                    if isinstance(other, Contour)
-                    else (False
-                          if isinstance(other, Geometry)
-                          else NotImplemented)))
+                or (isinstance(other, Contour)
+                    and _vertices.equal(self._vertices, other._vertices,
+                                        self.orientation is other.orientation)
+                    if isinstance(other, Geometry)
+                    else NotImplemented))
 
     def __ge__(self, other: Compound) -> bool:
         """
@@ -776,8 +774,7 @@ class Contour(Indexable, Linear):
         return self.context.sqrt(self.context.segments_squared_distance(
                 nearest_edge.start, nearest_edge.end, other.start, other.end))
 
-    def _intersect_with_multisegment(self, other: Multisegment
-                                     ) -> Compound:
+    def _intersect_with_multisegment(self, other: Multisegment) -> Compound:
         multipoint, multisegment = complete_intersect_multisegments(
                 self._as_multisegment(), other,
                 context=self.context)
@@ -818,7 +815,7 @@ def locate_point(contour: Contour, point: Point) -> Location:
 def rotate_contour_around_origin(contour: Contour,
                                  cosine: Coordinate,
                                  sine: Coordinate) -> Contour:
-    return Contour(rotate_points_around_origin(contour._vertices, cosine,
+    return Contour(rotate_points_around_origin(contour.vertices, cosine,
                                                sine))
 
 
@@ -827,17 +824,17 @@ def rotate_translate_contour(contour: Contour,
                              sine: Coordinate,
                              step_x: Coordinate,
                              step_y: Coordinate) -> Contour:
-    return Contour(rotate_translate_points(contour._vertices, cosine, sine,
+    return Contour(rotate_translate_points(contour.vertices, cosine, sine,
                                            step_x, step_y))
 
 
 def scale_contour(contour: Contour,
                   factor_x: Coordinate,
                   factor_y: Coordinate) -> Contour:
-    return Contour(_vertices.scale(contour._vertices, factor_x, factor_y))
+    return Contour(_vertices.scale(contour.vertices, factor_x, factor_y))
 
 
 def scale_contour_degenerate(contour: Contour,
                              factor_x: Coordinate,
                              factor_y: Coordinate) -> Compound:
-    return _vertices.scale_degenerate(contour._vertices, factor_x, factor_y)
+    return _vertices.scale_degenerate(contour.vertices, factor_x, factor_y)
