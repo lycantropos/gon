@@ -5,7 +5,7 @@ from typing import (TYPE_CHECKING,
 
 from symba.base import Expression
 
-from gon.core.hints import Coordinate
+from .hints import Coordinate
 
 if TYPE_CHECKING:
     from .primitive import Point
