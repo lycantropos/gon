@@ -74,9 +74,8 @@ class Polygon(Indexable, Shaped):
         """
         context = get_context()
         self._context = context
-        holes = tuple(holes or ())
-        self._border, self._holes, self._holes_set = (border, holes,
-                                                      frozenset(holes))
+        self._holes = holes = tuple(holes or ())
+        self._border, self._holes_set = border, frozenset(holes)
         self._locate = partial(locate_point, self)
         edges = self.edges
         self._point_nearest_edge, self._segment_nearest_edge = (
