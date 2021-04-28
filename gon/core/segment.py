@@ -17,7 +17,7 @@ from .geometry import Geometry
 from .hints import Coordinate
 from .iterable import non_negative_min
 from .linear_utils import (relate_multipoint_to_linear_compound,
-                           unfold_multisegment)
+                           unpack_multisegment)
 from .multipoint import Multipoint
 from .point import (Point,
                     point_to_step,
@@ -571,7 +571,7 @@ class Segment(Compound, Linear):
                                  Relation.CROSS)
                  else (_subtract_overlap(self, other)
                        if relation is Relation.OVERLAP
-                       else unfold_multisegment(_subtract_composite(
+                       else unpack_multisegment(_subtract_composite(
                         self, other)))))
 
     def _symmetric_subtract_segment(self, other: 'Segment') -> Compound:
@@ -588,7 +588,7 @@ class Segment(Compound, Linear):
                        else
                        (_symmetric_subtract_overlap(self, other)
                         if relation is Relation.OVERLAP
-                        else unfold_multisegment(
+                        else unpack_multisegment(
                                _subtract_composite(self, other)
                                if relation is Relation.COMPOSITE
                                else _subtract_composite(other, self))))))

@@ -33,7 +33,7 @@ from .linear_utils import (from_mix_components,
                            relate_multipoint_to_linear_compound,
                            to_point_nearest_segment,
                            to_segment_nearest_segment,
-                           unfold_multisegment)
+                           unpack_multisegment)
 from .multipoint import (Multipoint,
                          pack_points)
 from .point import (Point,
@@ -676,14 +676,14 @@ class Multisegment(Indexable, Linear):
         return from_mix_components(multipoint, multisegment)
 
     def _subtract_multisegment(self, other: 'Multisegment') -> Compound:
-        return unfold_multisegment(subtract_multisegments(self, other))
+        return unpack_multisegment(subtract_multisegments(self, other))
 
     def _subtract_from_multisegment(self, other: 'Multisegment') -> Compound:
-        return unfold_multisegment(subtract_multisegments(other, self))
+        return unpack_multisegment(subtract_multisegments(other, self))
 
     def _symmetric_subtract_multisegment(self, other: 'Multisegment'
                                          ) -> Compound:
-        return unfold_multisegment(symmetric_subtract_multisegments(
+        return unpack_multisegment(symmetric_subtract_multisegments(
                 self, other,
                 context=self.context))
 

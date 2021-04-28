@@ -5,18 +5,18 @@ from ground.hints import (Multipoint,
 
 from .compound import Compound
 from .empty import EMPTY
-from .linear_utils import (unfold_multipoint,
-                           unfold_multisegment)
+from .linear_utils import (unpack_multipoint,
+                           unpack_multisegment)
 
 
-def mix_from_unfolded_components(multipoint: Multipoint,
-                                 multisegment: Multisegment,
-                                 multipolygon: Multipolygon) -> Compound:
+def mix_from_packed_components(multipoint: Multipoint,
+                               multisegment: Multisegment,
+                               multipolygon: Multipolygon) -> Compound:
     # importing here to avoid cyclic imports
     from .mix import from_mix_components
-    return from_mix_components(unfold_multipoint(multipoint),
-                               unfold_multisegment(multisegment),
-                               unfold_multipolygon(multipolygon))
+    return from_mix_components(unpack_multipoint(multipoint),
+                               unpack_multisegment(multisegment),
+                               unpack_multipolygon(multipolygon))
 
 
 def from_holeless_mix_components(multipoint: Multipoint,
@@ -24,12 +24,12 @@ def from_holeless_mix_components(multipoint: Multipoint,
                                  multiregion: Multiregion) -> Compound:
     # importing here to avoid cyclic imports
     from .mix import from_mix_components
-    return from_mix_components(unfold_multipoint(multipoint),
-                               unfold_multisegment(multisegment),
-                               unfold_multiregion(multiregion))
+    return from_mix_components(unpack_multipoint(multipoint),
+                               unpack_multisegment(multisegment),
+                               unpack_multiregion(multiregion))
 
 
-def unfold_multipolygon(multipolygon: Multipolygon) -> Compound:
+def unpack_multipolygon(multipolygon: Multipolygon) -> Compound:
     return ((multipolygon
              if len(multipolygon.polygons) > 1
              else multipolygon.polygons[0])
@@ -37,7 +37,7 @@ def unfold_multipolygon(multipolygon: Multipolygon) -> Compound:
             else EMPTY)
 
 
-def unfold_multiregion(multiregion: Multiregion) -> Compound:
+def unpack_multiregion(multiregion: Multiregion) -> Compound:
     # importing here to avoid cyclic imports
     from .polygon import Polygon
     from .multipolygon import Multipolygon

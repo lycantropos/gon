@@ -32,15 +32,15 @@ def from_mix_components(multipoint: Multipoint,
                         multisegment: Multisegment) -> Compound:
     # importing here to avoid cyclic imports
     from .mix import from_mix_components
-    return from_mix_components(unfold_multipoint(multipoint),
-                               unfold_multisegment(multisegment), EMPTY)
+    return from_mix_components(unpack_multipoint(multipoint),
+                               unpack_multisegment(multisegment), EMPTY)
 
 
-def unfold_multipoint(multipoint: Multipoint) -> Compound:
+def unpack_multipoint(multipoint: Multipoint) -> Compound:
     return multipoint if multipoint.points else EMPTY
 
 
-def unfold_multisegment(multisegment: Multisegment) -> Compound:
+def unpack_multisegment(multisegment: Multisegment) -> Compound:
     return ((multisegment
              if len(multisegment.segments) > 1
              else multisegment.segments[0])
