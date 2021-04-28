@@ -61,10 +61,8 @@ class Mix(Indexable):
  for polygon in polygons)``,
         ``points = [] if self.multipoint is EMPTY\
  else self.multipoint.points``,
-        ``segments = [] if self.linear is EMPTY\
- else self.linear.segments``,
-        ``polygons = [] if self.shaped is EMPTY\
- else self.shaped.polygons``.
+        ``segments = [] if self.linear is EMPTY else self.linear.segments``,
+        ``polygons = [] if self.shaped is EMPTY else self.shaped.polygons``.
 
         >>> mix = Mix.from_raw(([(3, 3), (7, 7)],
         ...                     [((0, 6), (0, 8)), ((6, 6), (6, 8))],
@@ -92,8 +90,7 @@ class Mix(Indexable):
             linear_part |= shaped_part
             shaped_part = EMPTY
         elif isinstance(shaped_part, Mix):
-            linear_part = (linear_part
-                           | shaped_part.linear
+            linear_part = (linear_part | shaped_part.linear
                            | shaped_part.multipoint)
             shaped_part = shaped_part.shaped
         if isinstance(linear_part, Multipoint):
@@ -125,10 +122,8 @@ class Mix(Indexable):
  for polygon in polygons)``,
         ``points = [] if self.multipoint is EMPTY\
  else self.multipoint.points``,
-        ``segments = [] if self.linear is EMPTY\
- else self.linear.segments``,
-        ``polygons = [] if self.shaped is EMPTY\
- else self.shaped.polygons``.
+        ``segments = [] if self.linear is EMPTY else self.linear.segments``,
+        ``polygons = [] if self.shaped is EMPTY else self.shaped.polygons``.
 
         >>> mix = Mix.from_raw(([(3, 3), (7, 7)],
         ...                     [((0, 6), (0, 8)), ((6, 6), (6, 8))],
@@ -171,10 +166,8 @@ class Mix(Indexable):
  for polygon in polygons)``,
         ``points = [] if self.multipoint is EMPTY\
  else self.multipoint.points``,
-        ``segments = [] if self.linear is EMPTY\
- else self.linear.segments``,
-        ``polygons = [] if self.shaped is EMPTY\
- else self.shaped.polygons``.
+        ``segments = [] if self.linear is EMPTY else self.linear.segments``,
+        ``polygons = [] if self.shaped is EMPTY else self.shaped.polygons``.
 
         >>> mix = Mix.from_raw(([(3, 3), (7, 7)],
         ...                     [((0, 6), (0, 8)), ((6, 6), (6, 8))],
@@ -207,10 +200,8 @@ class Mix(Indexable):
  for polygon in polygons)``,
         ``points = [] if self.multipoint is EMPTY\
  else self.multipoint.points``,
-        ``segments = [] if self.linear is EMPTY\
- else self.linear.segments``,
-        ``polygons = [] if self.shaped is EMPTY\
- else self.shaped.polygons``.
+        ``segments = [] if self.linear is EMPTY else self.linear.segments``,
+        ``polygons = [] if self.shaped is EMPTY else self.shaped.polygons``.
 
         >>> mix = Mix.from_raw(([(3, 3), (7, 7)],
         ...                     [((0, 6), (0, 8)), ((6, 6), (6, 8))],
@@ -250,10 +241,8 @@ class Mix(Indexable):
  for polygon in polygons)``,
         ``points = [] if self.multipoint is EMPTY\
  else self.multipoint.points``,
-        ``segments = [] if self.linear is EMPTY\
- else self.linear.segments``,
-        ``polygons = [] if self.shaped is EMPTY\
- else self.shaped.polygons``.
+        ``segments = [] if self.linear is EMPTY else self.linear.segments``,
+        ``polygons = [] if self.shaped is EMPTY else self.shaped.polygons``.
 
         >>> mix = Mix.from_raw(([(3, 3), (7, 7)],
         ...                     [((0, 6), (0, 8)), ((6, 6), (6, 8))],
@@ -290,10 +279,8 @@ class Mix(Indexable):
         ``multipolygon_size = len(polygons)``,
         ``points = [] if self.multipoint is EMPTY\
  else self.multipoint.points``,
-        ``segments = [] if self.linear is EMPTY\
- else self.linear.segments``,
-        ``polygons = [] if self.shaped is EMPTY\
- else self.shaped.polygons``.
+        ``segments = [] if self.linear is EMPTY else self.linear.segments``,
+        ``polygons = [] if self.shaped is EMPTY else self.shaped.polygons``.
 
         >>> mix = Mix.from_raw(([(3, 3), (7, 7)],
         ...                     [((0, 6), (0, 8)), ((6, 6), (6, 8))],
@@ -322,10 +309,8 @@ class Mix(Indexable):
  for polygon in polygons)``,
         ``points = [] if self.multipoint is EMPTY\
  else self.multipoint.points``,
-        ``segments = [] if self.linear is EMPTY\
- else self.linear.segments``,
-        ``polygons = [] if self.shaped is EMPTY\
- else self.shaped.polygons``.
+        ``segments = [] if self.linear is EMPTY else self.linear.segments``,
+        ``polygons = [] if self.shaped is EMPTY else self.shaped.polygons``.
 
         >>> mix = Mix.from_raw(([(3, 3), (7, 7)],
         ...                     [((0, 6), (0, 8)), ((6, 6), (6, 8))],
@@ -365,10 +350,8 @@ class Mix(Indexable):
  for polygon in polygons)``,
         ``points = [] if self.multipoint is EMPTY\
  else self.multipoint.points``,
-        ``segments = [] if self.linear is EMPTY\
- else self.linear.segments``,
-        ``polygons = [] if self.shaped is EMPTY\
- else self.shaped.polygons``.
+        ``segments = [] if self.linear is EMPTY else self.linear.segments``,
+        ``polygons = [] if self.shaped is EMPTY else self.shaped.polygons``.
 
         >>> mix = Mix.from_raw(([(3, 3), (7, 7)],
         ...                     [((0, 6), (0, 8)), ((6, 6), (6, 8))],
@@ -407,10 +390,8 @@ class Mix(Indexable):
  for polygon in polygons)``,
         ``points = [] if self.multipoint is EMPTY\
  else self.multipoint.points``,
-        ``segments = [] if self.linear is EMPTY\
- else self.linear.segments``,
-        ``polygons = [] if self.shaped is EMPTY\
- else self.shaped.polygons``.
+        ``segments = [] if self.linear is EMPTY else self.linear.segments``,
+        ``polygons = [] if self.shaped is EMPTY else self.shaped.polygons``.
 
         >>> mix = Mix.from_raw(([(3, 3), (7, 7)],
         ...                     [((0, 6), (0, 8)), ((6, 6), (6, 8))],
@@ -468,10 +449,8 @@ class Mix(Indexable):
  for polygon in polygons)``,
         ``points = [] if self.multipoint is EMPTY\
  else self.multipoint.points``,
-        ``segments = [] if self.linear is EMPTY\
- else self.linear.segments``,
-        ``polygons = [] if self.shaped is EMPTY\
- else self.shaped.polygons``.
+        ``segments = [] if self.linear is EMPTY else self.linear.segments``,
+        ``polygons = [] if self.shaped is EMPTY else self.shaped.polygons``.
         """
         return ((other - self.multipoint) & (other - self.linear)
                 & other - self.shaped)
@@ -494,10 +473,8 @@ class Mix(Indexable):
  for polygon in polygons)``,
         ``points = [] if self.multipoint is EMPTY\
  else self.multipoint.points``,
-        ``segments = [] if self.linear is EMPTY\
- else self.linear.segments``,
-        ``polygons = [] if self.shaped is EMPTY\
- else self.shaped.polygons``.
+        ``segments = [] if self.linear is EMPTY else self.linear.segments``,
+        ``polygons = [] if self.shaped is EMPTY else self.shaped.polygons``.
 
         >>> mix = Mix.from_raw(([(3, 3), (7, 7)],
         ...                     [((0, 6), (0, 8)), ((6, 6), (6, 8))],
@@ -527,10 +504,8 @@ class Mix(Indexable):
  for polygon in polygons)``,
         ``points = [] if self.multipoint is EMPTY\
  else self.multipoint.points``,
-        ``segments = [] if self.linear is EMPTY\
- else self.linear.segments``,
-        ``polygons = [] if self.shaped is EMPTY\
- else self.shaped.polygons``.
+        ``segments = [] if self.linear is EMPTY else self.linear.segments``,
+        ``polygons = [] if self.shaped is EMPTY else self.shaped.polygons``.
 
         >>> mix = Mix.from_raw(([(3, 3), (7, 7)],
         ...                     [((0, 6), (0, 8)), ((6, 6), (6, 8))],
@@ -632,10 +607,8 @@ class Mix(Indexable):
         ``multipolygon_vertices_count = sum(len(polygon.border.vertices)\
  + sum(len(hole.vertices) for hole in polygon.holes)\
  for polygon in polygons)``,
-        ``segments = [] if self.linear is EMPTY\
- else self.linear.segments``,
-        ``polygons = [] if self.shaped is EMPTY\
- else self.shaped.polygons``.
+        ``segments = [] if self.linear is EMPTY else self.linear.segments``,
+        ``polygons = [] if self.shaped is EMPTY else self.shaped.polygons``.
 
         >>> mix = Mix.from_raw(([(3, 3), (7, 7)],
         ...                     [((0, 6), (0, 8)), ((6, 6), (6, 8))],
@@ -644,9 +617,7 @@ class Mix(Indexable):
         >>> mix.centroid == Point(3, 3)
         True
         """
-        return (self.linear
-                if self.shaped is EMPTY
-                else self.shaped).centroid
+        return (self.linear if self.shaped is EMPTY else self.shaped).centroid
 
     @property
     def multipoint(self) -> Maybe[Multipoint]:
@@ -757,10 +728,8 @@ class Mix(Indexable):
         ``multipolygon_vertices_count = sum(len(polygon.border.vertices)\
  + sum(len(hole.vertices) for hole in polygon.holes)\
  for polygon in polygons)``,
-        ``segments = [] if self.linear is EMPTY\
- else self.linear.segments``,
-        ``polygons = [] if self.shaped is EMPTY\
- else self.shaped.polygons``.
+        ``segments = [] if self.linear is EMPTY else self.linear.segments``,
+        ``polygons = [] if self.shaped is EMPTY else self.shaped.polygons``.
 
         >>> mix = Mix.from_raw(([(3, 3), (7, 7)],
         ...                     [((0, 6), (0, 8)), ((6, 6), (6, 8))],
@@ -792,10 +761,8 @@ class Mix(Indexable):
  for polygon in polygons)``,
         ``points = [] if self.multipoint is EMPTY\
  else self.multipoint.points``,
-        ``segments = [] if self.linear is EMPTY\
- else self.linear.segments``,
-        ``polygons = [] if self.shaped is EMPTY\
- else self.shaped.polygons``.
+        ``segments = [] if self.linear is EMPTY else self.linear.segments``,
+        ``polygons = [] if self.shaped is EMPTY else self.shaped.polygons``.
 
         >>> mix = Mix.from_raw(([(3, 3), (7, 7)],
         ...                     [((0, 6), (0, 8)), ((6, 6), (6, 8))],
@@ -842,10 +809,8 @@ class Mix(Indexable):
  for polygon in polygons)``,
         ``points = [] if self.multipoint is EMPTY\
  else self.multipoint.points``,
-        ``segments = [] if self.linear is EMPTY\
- else self.linear.segments``,
-        ``polygons = [] if self.shaped is EMPTY\
- else self.shaped.polygons``.
+        ``segments = [] if self.linear is EMPTY else self.linear.segments``,
+        ``polygons = [] if self.shaped is EMPTY else self.shaped.polygons``.
 
         >>> mix = Mix.from_raw(([(3, 3), (7, 7)],
         ...                     [((0, 6), (0, 8)), ((6, 6), (6, 8))],
@@ -855,8 +820,7 @@ class Mix(Indexable):
         ([(3, 3), (7, 7)], [((0, 6), (0, 8)), ((6, 6), (6, 8))],\
  [([(0, 0), (6, 0), (6, 6), (0, 6)], [[(2, 2), (2, 4), (4, 4), (4, 2)]])])
         """
-        return (self.multipoint.raw(), self.linear.raw(),
-                self.shaped.raw())
+        return self.multipoint.raw(), self.linear.raw(), self.shaped.raw()
 
     def relate(self, other: Compound) -> Relation:
         """
@@ -876,10 +840,8 @@ class Mix(Indexable):
  for polygon in polygons)``,
         ``points = [] if self.multipoint is EMPTY\
  else self.multipoint.points``,
-        ``segments = [] if self.linear is EMPTY\
- else self.linear.segments``,
-        ``polygons = [] if self.shaped is EMPTY\
- else self.shaped.polygons``.
+        ``segments = [] if self.linear is EMPTY else self.linear.segments``,
+        ``polygons = [] if self.shaped is EMPTY else self.shaped.polygons``.
 
         >>> mix = Mix.from_raw(([(3, 3), (7, 7)],
         ...                     [((0, 6), (0, 8)), ((6, 6), (6, 8))],
@@ -919,10 +881,8 @@ class Mix(Indexable):
  for polygon in polygons)``,
         ``points = [] if self.multipoint is EMPTY\
  else self.multipoint.points``,
-        ``segments = [] if self.linear is EMPTY\
- else self.linear.segments``,
-        ``polygons = [] if self.shaped is EMPTY\
- else self.shaped.polygons``.
+        ``segments = [] if self.linear is EMPTY else self.linear.segments``,
+        ``polygons = [] if self.shaped is EMPTY else self.shaped.polygons``.
 
         >>> mix = Mix.from_raw(([(3, 3), (7, 7)],
         ...                     [((0, 6), (0, 8)), ((6, 6), (6, 8))],
@@ -961,10 +921,8 @@ class Mix(Indexable):
  for polygon in polygons)``,
         ``points = [] if self.multipoint is EMPTY\
  else self.multipoint.points``,
-        ``segments = [] if self.linear is EMPTY\
- else self.linear.segments``,
-        ``polygons = [] if self.shaped is EMPTY\
- else self.shaped.polygons``.
+        ``segments = [] if self.linear is EMPTY else self.linear.segments``,
+        ``polygons = [] if self.shaped is EMPTY else self.shaped.polygons``.
 
         >>> mix = Mix.from_raw(([(3, 3), (7, 7)],
         ...                     [((0, 6), (0, 8)), ((6, 6), (6, 8))],
@@ -1009,10 +967,8 @@ class Mix(Indexable):
  for polygon in polygons)``,
         ``points = [] if self.multipoint is EMPTY\
  else self.multipoint.points``,
-        ``segments = [] if self.linear is EMPTY\
- else self.linear.segments``,
-        ``polygons = [] if self.shaped is EMPTY\
- else self.shaped.polygons``.
+        ``segments = [] if self.linear is EMPTY else self.linear.segments``,
+        ``polygons = [] if self.shaped is EMPTY else self.shaped.polygons``.
 
         >>> mix = Mix.from_raw(([(3, 3), (7, 7)],
         ...                     [((0, 6), (0, 8)), ((6, 6), (6, 8))],
@@ -1047,10 +1003,8 @@ class Mix(Indexable):
  for polygon in polygons)``,
         ``points = [] if self.multipoint is EMPTY\
  else self.multipoint.points``,
-        ``segments = [] if self.linear is EMPTY\
- else self.linear.segments``,
-        ``polygons = [] if self.shaped is EMPTY\
- else self.shaped.polygons``.
+        ``segments = [] if self.linear is EMPTY else self.linear.segments``,
+        ``polygons = [] if self.shaped is EMPTY else self.shaped.polygons``.
 
         >>> mix = Mix.from_raw(([(3, 3), (7, 7)],
         ...                     [((0, 6), (0, 8)), ((6, 6), (6, 8))],
