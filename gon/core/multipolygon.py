@@ -51,6 +51,8 @@ from .shaped_utils import (from_holeless_mix_components,
                            mix_from_packed_components,
                            unpack_multipolygon)
 
+MIN_MULTIPOLYGON_POLYGONS_COUNT = 2
+
 
 class Multipolygon(Indexable, Shaped):
     __slots__ = '_context', '_locate', '_polygons', '_polygons_set'
@@ -981,8 +983,12 @@ class Multipolygon(Indexable, Shaped):
         ...                            Point(8, 6)])])])
         >>> multipolygon.validate()
         """
-        if not self._polygons:
-            raise ValueError('Multipolygon is empty.')
+        if len(self._polygons) < MIN_MULTIPOLYGON_POLYGONS_COUNT:
+            raise ValueError('Multipolygon should have '
+                             'at least {min_size} polygons, '
+                             'but found {size}.'
+                             .format(min_size=MIN_MULTIPOLYGON_POLYGONS_COUNT,
+                                     size=len(self._polygons)))
         elif len(self._polygons) > len(self._polygons_set):
             raise ValueError('Duplicate polygons found.')
         for polygon in self._polygons:
