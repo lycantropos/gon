@@ -10,8 +10,6 @@ from .compound import (Compound,
 from .geometry import Geometry
 from .hints import Coordinate
 from .point import Point
-from .raw import (RAW_EMPTY,
-                  RawEmpty)
 
 try:
     from typing import NoReturn
@@ -236,22 +234,6 @@ class Empty(Compound):
 
     __rxor__ = __xor__
 
-    @classmethod
-    def from_raw(cls, raw: RawEmpty) -> 'Empty':
-        """
-        Constructs empty geometry from the combination of Python built-ins.
-
-        Time complexity:
-            ``O(1)``
-        Memory complexity:
-            ``O(1)``
-
-        >>> Empty.from_raw(RAW_EMPTY) is EMPTY
-        True
-        """
-        assert raw is RAW_EMPTY
-        return cls()
-
     @property
     def centroid(self) -> NoReturn:
         raise ValueError('Empty geometry has no points.')
@@ -272,19 +254,6 @@ class Empty(Compound):
         True
         """
         return Location.EXTERIOR
-
-    def raw(self) -> RawEmpty:
-        """
-        Returns the empty geometry as combination of Python built-ins.
-
-        Time complexity:
-            ``O(1)``
-        Memory complexity:
-            ``O(1)``
-
-        >>> EMPTY.raw()
-        """
-        return RAW_EMPTY
 
     def relate(self, other: Compound) -> Relation:
         """
