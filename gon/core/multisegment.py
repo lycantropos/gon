@@ -44,6 +44,8 @@ from .segment import (Segment,
                       rotate_translate_segment,
                       scale_segment)
 
+MIN_MULTISEGMENT_SEGMENTS_COUNT = 2
+
 
 class Multisegment(Indexable, Linear):
     __slots__ = ('_context', '_locate', '_point_nearest_segment',
@@ -649,8 +651,12 @@ class Multisegment(Indexable, Linear):
         ...                              Segment(Point(0, 1), Point(1, 1))])
         >>> multisegment.validate()
         """
-        if not self._segments:
-            raise ValueError('Multisegment is empty.')
+        if len(self._segments) < MIN_MULTISEGMENT_SEGMENTS_COUNT:
+            raise ValueError('Multisegment should have '
+                             'at least {min_size} segments, '
+                             'but found {size}.'
+                             .format(min_size=MIN_MULTISEGMENT_SEGMENTS_COUNT,
+                                     size=len(self._segments)))
         elif len(self.segments) > len(self._segments_set):
             raise ValueError('Duplicate segments found.')
         for segment in self._segments:
