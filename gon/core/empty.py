@@ -85,9 +85,7 @@ class Empty(Compound):
         >>> EMPTY == EMPTY
         True
         """
-        return (self is other
-                if isinstance(other, Geometry)
-                else NotImplemented)
+        return self is other or NotImplemented
 
     def __ge__(self, other: Compound) -> bool:
         """
