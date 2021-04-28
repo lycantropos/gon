@@ -1,5 +1,4 @@
-from typing import (Optional,
-                    Tuple)
+from typing import Optional
 
 from hypothesis import strategies
 from hypothesis_geometry import planar
@@ -15,10 +14,12 @@ from gon.base import (EMPTY,
                       Polygon,
                       Segment,
                       Shaped)
+from gon.core.shaped_utils import mix_from_packed_components
 from gon.hints import (Coordinate,
                        Maybe)
 from tests.utils import (Strategy,
-                         call)
+                         call,
+                         pack)
 
 MAX_LINEAR_SIZE = 5
 
@@ -97,26 +98,16 @@ def coordinates_to_contours(coordinates: Strategy[Coordinate],
 
 
 def coordinates_to_mixes(coordinates: Strategy[Coordinate]) -> Strategy[Mix]:
-    def from_components(components
-                        : Tuple[Multipoint, Multisegment, Multipolygon]
-                        ) -> Mix:
-        multipoint, multisegment, multipolygon = components
-        return Mix(multipoint if multipoint.points else EMPTY,
-                   multisegment if multisegment.segments else EMPTY,
-                   multipolygon if multipolygon.polygons else EMPTY)
-
     return ((planar.mixes(coordinates,
                           min_multipoint_size=1,
-                          min_multisegment_size=2)
-             .map(from_components))
-            | (planar.mixes(coordinates,
+                          min_multisegment_size=1)
+             | planar.mixes(coordinates,
                             min_multipoint_size=1,
-                            min_multipolygon_size=2)
-               .map(from_components))
-            | (planar.mixes(coordinates,
+                            min_multipolygon_size=1)
+             | planar.mixes(coordinates,
                             min_multisegment_size=1,
-                            min_multipolygon_size=2)
-               .map(from_components)))
+                            min_multipolygon_size=1))
+            .map(pack(mix_from_packed_components)))
 
 
 def coordinates_to_polygons(coordinates: Strategy[Coordinate],
