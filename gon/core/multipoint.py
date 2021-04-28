@@ -24,11 +24,10 @@ from .point import (Point,
                     rotate_point_around_origin,
                     rotate_translate_point,
                     scale_point)
-from .raw import RawMultipoint
 
 
 class Multipoint(Indexable):
-    __slots__ = '_context', '_points', '_points_set', '_raw', '_nearest_point'
+    __slots__ = '_context', '_points', '_points_set', '_nearest_point'
 
     def __init__(self, points: Sequence[Point]) -> None:
         """
@@ -43,9 +42,7 @@ class Multipoint(Indexable):
         """
         context = get_context()
         self._context = context
-        self._points = points
-        self._points_set = frozenset(points)
-        self._raw = tuple(point.raw() for point in points)
+        self._points, self._points_set = points, frozenset(points)
         self._nearest_point = partial(_to_nearest_point, context, points)
 
     __repr__ = generate_repr(__init__)
@@ -279,22 +276,6 @@ class Multipoint(Indexable):
                 if isinstance(other, Multipoint)
                 else NotImplemented)
 
-    @classmethod
-    def from_raw(cls, raw: RawMultipoint) -> 'Multipoint':
-        """
-        Constructs multipoint from the combination of Python built-ins.
-
-        Time complexity:
-            ``O(len(raw))``
-        Memory complexity:
-            ``O(len(raw))``
-
-        >>> multipoint = Multipoint.from_raw([(0, 0), (1, 0), (0, 1)])
-        >>> multipoint == Multipoint([Point(0, 0), Point(1, 0), Point(0, 1)])
-        True
-        """
-        return cls([Point.from_raw(raw_point) for raw_point in raw])
-
     @property
     def centroid(self) -> Point:
         """
@@ -401,23 +382,6 @@ class Multipoint(Indexable):
         return (Location.BOUNDARY
                 if point in self._points_set
                 else Location.EXTERIOR)
-
-    def raw(self) -> RawMultipoint:
-        """
-        Returns the multipoint as combination of Python built-ins.
-
-        Time complexity:
-            ``O(points_count)``
-        Memory complexity:
-            ``O(points_count)``
-
-        where ``points_count = len(self.points)``.
-
-        >>> multipoint = Multipoint([Point(0, 0), Point(1, 0), Point(0, 1)])
-        >>> multipoint.raw()
-        [(0, 0), (1, 0), (0, 1)]
-        """
-        return list(self._raw)
 
     def relate(self, other: Compound) -> Relation:
         """
