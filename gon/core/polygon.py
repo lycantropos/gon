@@ -23,7 +23,6 @@ from reprit.base import generate_repr
 from sect.decomposition import Graph
 from sect.triangulation import Triangulation
 
-from .arithmetic import non_negative_min
 from .compound import (Compound,
                        Indexable,
                        Linear,
@@ -38,6 +37,7 @@ from .contour import (Contour,
 from .empty import EMPTY
 from .geometry import Geometry
 from .hints import Coordinate
+from .iterable import non_negative_min
 from .linear_utils import (from_mix_components,
                            to_point_nearest_segment,
                            to_segment_nearest_segment,

@@ -19,7 +19,6 @@ from sect.decomposition import Graph
 
 from . import vertices as _vertices
 from .angular import Orientation
-from .arithmetic import non_negative_min
 from .compound import (Compound,
                        Indexable,
                        Linear,
@@ -28,7 +27,8 @@ from .compound import (Compound,
 from .empty import EMPTY
 from .geometry import Geometry
 from .hints import Coordinate
-from .iterable import shift_sequence
+from .iterable import (non_negative_min,
+                       shift_sequence)
 from .linear_utils import (from_mix_components,
                            relate_multipoint_to_linear_compound,
                            to_point_nearest_segment,
