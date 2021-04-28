@@ -191,7 +191,7 @@ def divide_by_int(dividend: Coordinate, divisor: int) -> Coordinate:
 
 def mix_to_components(mix: Mix
                       ) -> Tuple[Multipoint, Multisegment, Multipolygon]:
-    return mix.multipoint, mix.multisegment, mix.multipolygon
+    return mix.multipoint, mix.linear, mix.shaped
 
 
 def segment_to_rotations(segment: Segment,

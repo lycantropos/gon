@@ -26,11 +26,12 @@ MIN_MIX_NON_EMPTY_COMPONENTS = 2
 
 
 class Mix(Indexable):
-    __slots__ = '_multipoint', '_multisegment', '_multipolygon', '_components'
+    __slots__ = '_components', '_linear', '_multipoint', '_shaped'
 
-    def __init__(self, multipoint: Maybe[Multipoint],
-                 multisegment: Maybe[Multisegment],
-                 multipolygon: Maybe[Multipolygon]) -> None:
+    def __init__(self,
+                 multipoint: Maybe[Multipoint],
+                 linear: Maybe[Linear],
+                 shaped: Maybe[Shaped]) -> None:
         """
         Initializes mix.
 
@@ -39,11 +40,8 @@ class Mix(Indexable):
         Memory complexity:
             ``O(1)``
         """
-        self._multipoint = multipoint
-        self._multisegment = multisegment
-        self._multipolygon = multipolygon
-        self._components = (self._multipoint, self._multisegment,
-                            self._multipolygon)
+        self._components = self._multipoint, self._linear, self._shaped = (
+            multipoint, linear, shaped)
 
     __repr__ = generate_repr(__init__)
 
@@ -65,10 +63,10 @@ class Mix(Indexable):
  for polygon in polygons)``,
         ``points = [] if self.multipoint is EMPTY\
  else self.multipoint.points``,
-        ``segments = [] if self.multisegment is EMPTY\
- else self.multisegment.segments``,
-        ``polygons = [] if self.multipolygon is EMPTY\
- else self.multipolygon.polygons``.
+        ``segments = [] if self.linear is EMPTY\
+ else self.linear.segments``,
+        ``polygons = [] if self.shaped is EMPTY\
+ else self.shaped.polygons``.
 
         >>> mix = Mix.from_raw(([(3, 3), (7, 7)],
         ...                     [((0, 6), (0, 8)), ((6, 6), (6, 8))],
@@ -77,37 +75,36 @@ class Mix(Indexable):
         >>> mix & mix == mix
         True
         """
-        multipoint_part = self._multipoint & other
-        multisegment_part = self._multisegment & other
-        multipolygon_part = self._multipolygon & other
-        if isinstance(multisegment_part, Multipoint):
-            multipolygon_part |= multisegment_part
-            multisegment_part = EMPTY
-        elif isinstance(multisegment_part, Mix):
-            multipolygon_part |= multisegment_part._multipoint
-            multisegment_part = multisegment_part._multisegment
-        if isinstance(multipolygon_part, Multipoint):
-            multisegment_part |= multipolygon_part
-            if isinstance(multisegment_part, Mix):
-                multipoint_part |= multisegment_part._multipoint
-                multisegment_part = multisegment_part._multisegment
-            multipolygon_part = EMPTY
-        elif isinstance(multipolygon_part, Linear):
-            multisegment_part |= multipolygon_part
-            multipolygon_part = EMPTY
-        elif isinstance(multipolygon_part, Mix):
-            multisegment_part = (multisegment_part
-                                 | multipolygon_part._multisegment
-                                 | multipolygon_part._multipoint)
-            multipolygon_part = multipolygon_part._multipolygon
-        if isinstance(multisegment_part, Multipoint):
-            multipoint_part |= multisegment_part
-            multisegment_part = EMPTY
-        elif isinstance(multisegment_part, Mix):
-            multipoint_part |= multisegment_part._multipoint
-            multisegment_part = multisegment_part._multisegment
-        return from_mix_components(multipoint_part, multisegment_part,
-                                   multipolygon_part)
+        multipoint_part = self.multipoint & other
+        linear_part = self.linear & other
+        shaped_part = self.shaped & other
+        if isinstance(linear_part, Multipoint):
+            shaped_part |= linear_part
+            linear_part = EMPTY
+        elif isinstance(linear_part, Mix):
+            shaped_part |= linear_part.multipoint
+            linear_part = linear_part.linear
+        if isinstance(shaped_part, Multipoint):
+            linear_part |= shaped_part
+            if isinstance(linear_part, Mix):
+                multipoint_part |= linear_part.multipoint
+                linear_part = linear_part.linear
+            shaped_part = EMPTY
+        elif isinstance(shaped_part, Linear):
+            linear_part |= shaped_part
+            shaped_part = EMPTY
+        elif isinstance(shaped_part, Mix):
+            linear_part = (linear_part
+                           | shaped_part.linear
+                           | shaped_part.multipoint)
+            shaped_part = shaped_part.shaped
+        if isinstance(linear_part, Multipoint):
+            multipoint_part |= linear_part
+            linear_part = EMPTY
+        elif isinstance(linear_part, Mix):
+            multipoint_part |= linear_part.multipoint
+            linear_part = linear_part.linear
+        return from_mix_components(multipoint_part, linear_part, shaped_part)
 
     __rand__ = __and__
 
@@ -130,10 +127,10 @@ class Mix(Indexable):
  for polygon in polygons)``,
         ``points = [] if self.multipoint is EMPTY\
  else self.multipoint.points``,
-        ``segments = [] if self.multisegment is EMPTY\
- else self.multisegment.segments``,
-        ``polygons = [] if self.multipolygon is EMPTY\
- else self.multipolygon.polygons``.
+        ``segments = [] if self.linear is EMPTY\
+ else self.linear.segments``,
+        ``polygons = [] if self.shaped is EMPTY\
+ else self.shaped.polygons``.
 
         >>> mix = Mix.from_raw(([(3, 3), (7, 7)],
         ...                     [((0, 6), (0, 8)), ((6, 6), (6, 8))],
@@ -176,10 +173,10 @@ class Mix(Indexable):
  for polygon in polygons)``,
         ``points = [] if self.multipoint is EMPTY\
  else self.multipoint.points``,
-        ``segments = [] if self.multisegment is EMPTY\
- else self.multisegment.segments``,
-        ``polygons = [] if self.multipolygon is EMPTY\
- else self.multipolygon.polygons``.
+        ``segments = [] if self.linear is EMPTY\
+ else self.linear.segments``,
+        ``polygons = [] if self.shaped is EMPTY\
+ else self.shaped.polygons``.
 
         >>> mix = Mix.from_raw(([(3, 3), (7, 7)],
         ...                     [((0, 6), (0, 8)), ((6, 6), (6, 8))],
@@ -212,10 +209,10 @@ class Mix(Indexable):
  for polygon in polygons)``,
         ``points = [] if self.multipoint is EMPTY\
  else self.multipoint.points``,
-        ``segments = [] if self.multisegment is EMPTY\
- else self.multisegment.segments``,
-        ``polygons = [] if self.multipolygon is EMPTY\
- else self.multipolygon.polygons``.
+        ``segments = [] if self.linear is EMPTY\
+ else self.linear.segments``,
+        ``polygons = [] if self.shaped is EMPTY\
+ else self.shaped.polygons``.
 
         >>> mix = Mix.from_raw(([(3, 3), (7, 7)],
         ...                     [((0, 6), (0, 8)), ((6, 6), (6, 8))],
@@ -226,10 +223,10 @@ class Mix(Indexable):
         """
         return (other is EMPTY
                 or self == other
-                or ((self._multipolygon is not EMPTY
+                or ((self.shaped is not EMPTY
                      or not isinstance(other, Shaped)
                      and (not isinstance(other, Mix)
-                          or other._multipolygon is EMPTY))
+                          or other.shaped is EMPTY))
                     and self.relate(other) in (Relation.EQUAL,
                                                Relation.COMPONENT,
                                                Relation.ENCLOSED,
@@ -255,10 +252,10 @@ class Mix(Indexable):
  for polygon in polygons)``,
         ``points = [] if self.multipoint is EMPTY\
  else self.multipoint.points``,
-        ``segments = [] if self.multisegment is EMPTY\
- else self.multisegment.segments``,
-        ``polygons = [] if self.multipolygon is EMPTY\
- else self.multipolygon.polygons``.
+        ``segments = [] if self.linear is EMPTY\
+ else self.linear.segments``,
+        ``polygons = [] if self.shaped is EMPTY\
+ else self.shaped.polygons``.
 
         >>> mix = Mix.from_raw(([(3, 3), (7, 7)],
         ...                     [((0, 6), (0, 8)), ((6, 6), (6, 8))],
@@ -269,10 +266,10 @@ class Mix(Indexable):
         """
         return (other is EMPTY
                 or self != other
-                and ((self._multipolygon is not EMPTY
+                and ((self.shaped is not EMPTY
                       or not isinstance(other, Shaped)
                       and (not isinstance(other, Mix)
-                           or other._multipolygon is EMPTY))
+                           or other.shaped is EMPTY))
                      and self.relate(other) in (Relation.COMPONENT,
                                                 Relation.ENCLOSED,
                                                 Relation.WITHIN)
@@ -295,10 +292,10 @@ class Mix(Indexable):
         ``multipolygon_size = len(polygons)``,
         ``points = [] if self.multipoint is EMPTY\
  else self.multipoint.points``,
-        ``segments = [] if self.multisegment is EMPTY\
- else self.multisegment.segments``,
-        ``polygons = [] if self.multipolygon is EMPTY\
- else self.multipolygon.polygons``.
+        ``segments = [] if self.linear is EMPTY\
+ else self.linear.segments``,
+        ``polygons = [] if self.shaped is EMPTY\
+ else self.shaped.polygons``.
 
         >>> mix = Mix.from_raw(([(3, 3), (7, 7)],
         ...                     [((0, 6), (0, 8)), ((6, 6), (6, 8))],
@@ -327,10 +324,10 @@ class Mix(Indexable):
  for polygon in polygons)``,
         ``points = [] if self.multipoint is EMPTY\
  else self.multipoint.points``,
-        ``segments = [] if self.multisegment is EMPTY\
- else self.multisegment.segments``,
-        ``polygons = [] if self.multipolygon is EMPTY\
- else self.multipolygon.polygons``.
+        ``segments = [] if self.linear is EMPTY\
+ else self.linear.segments``,
+        ``polygons = [] if self.shaped is EMPTY\
+ else self.shaped.polygons``.
 
         >>> mix = Mix.from_raw(([(3, 3), (7, 7)],
         ...                     [((0, 6), (0, 8)), ((6, 6), (6, 8))],
@@ -341,10 +338,10 @@ class Mix(Indexable):
         """
         return (self == other
                 or (not isinstance(other, Multipoint)
-                    and (self._multipolygon is EMPTY
+                    and (self.shaped is EMPTY
                          or not isinstance(other, Linear)
                          and (not isinstance(other, Mix)
-                              or other._multipolygon is not EMPTY))
+                              or other.shaped is not EMPTY))
                     and self.relate(other) in (Relation.COVER,
                                                Relation.ENCLOSES,
                                                Relation.COMPOSITE,
@@ -370,10 +367,10 @@ class Mix(Indexable):
  for polygon in polygons)``,
         ``points = [] if self.multipoint is EMPTY\
  else self.multipoint.points``,
-        ``segments = [] if self.multisegment is EMPTY\
- else self.multisegment.segments``,
-        ``polygons = [] if self.multipolygon is EMPTY\
- else self.multipolygon.polygons``.
+        ``segments = [] if self.linear is EMPTY\
+ else self.linear.segments``,
+        ``polygons = [] if self.shaped is EMPTY\
+ else self.shaped.polygons``.
 
         >>> mix = Mix.from_raw(([(3, 3), (7, 7)],
         ...                     [((0, 6), (0, 8)), ((6, 6), (6, 8))],
@@ -384,10 +381,10 @@ class Mix(Indexable):
         """
         return (self != other
                 and (not isinstance(other, Multipoint)
-                     and (self._multipolygon is EMPTY
+                     and (self.shaped is EMPTY
                           or not isinstance(other, Linear)
                           and (not isinstance(other, Mix)
-                               or other._multipolygon is not EMPTY))
+                               or other.shaped is not EMPTY))
                      and self.relate(other) in (Relation.COVER,
                                                 Relation.ENCLOSES,
                                                 Relation.COMPOSITE)
@@ -412,10 +409,10 @@ class Mix(Indexable):
  for polygon in polygons)``,
         ``points = [] if self.multipoint is EMPTY\
  else self.multipoint.points``,
-        ``segments = [] if self.multisegment is EMPTY\
- else self.multisegment.segments``,
-        ``polygons = [] if self.multipolygon is EMPTY\
- else self.multipolygon.polygons``.
+        ``segments = [] if self.linear is EMPTY\
+ else self.linear.segments``,
+        ``polygons = [] if self.shaped is EMPTY\
+ else self.shaped.polygons``.
 
         >>> mix = Mix.from_raw(([(3, 3), (7, 7)],
         ...                     [((0, 6), (0, 8)), ((6, 6), (6, 8))],
@@ -425,38 +422,31 @@ class Mix(Indexable):
         True
         """
         if isinstance(other, Multipoint):
-            return Mix(self._multipoint
-                       | (other - self._multipolygon - self._multisegment),
-                       self._multisegment,
-                       self._multipolygon)
+            return Mix(self.multipoint | (other - self.shaped - self.linear),
+                       self.linear, self.shaped)
         elif isinstance(other, Linear):
-            multipoint_part, multisegment_part = (self._multipoint,
-                                                  self._multisegment)
-            multipolygon_part = self._multipolygon | other
-            if isinstance(multipolygon_part, Linear):
-                multisegment_part = (multisegment_part | multipolygon_part
-                                     | multipoint_part)
-                multipolygon_part = EMPTY
-            elif isinstance(multipolygon_part, Mix):
-                multisegment_part = (multisegment_part
-                                     | multipolygon_part._multisegment
-                                     | multipoint_part)
-                multipolygon_part = multipolygon_part._multipolygon
+            multipoint_part, linear_part = self.multipoint, self.linear
+            shaped_part = self.shaped | other
+            if isinstance(shaped_part, Linear):
+                linear_part = linear_part | shaped_part | multipoint_part
+                shaped_part = EMPTY
+            elif isinstance(shaped_part, Mix):
+                linear_part = (linear_part | shaped_part.linear
+                               | multipoint_part)
+                shaped_part = shaped_part.shaped
             else:
-                # other is subset of the multipolygon
-                return from_mix_components(multipoint_part, multisegment_part,
-                                           multipolygon_part)
-            if isinstance(multisegment_part, Mix):
-                multipoint_part, multisegment_part = (
-                    multisegment_part._multipoint,
-                    multisegment_part._multisegment)
+                # other is subset of the shaped component
+                return from_mix_components(multipoint_part, linear_part,
+                                           shaped_part)
+            if isinstance(linear_part, Mix):
+                multipoint_part, linear_part = (linear_part.multipoint,
+                                                linear_part.linear)
             else:
                 multipoint_part = EMPTY
-            return from_mix_components(multipoint_part, multisegment_part,
-                                       multipolygon_part)
+            return from_mix_components(multipoint_part, linear_part,
+                                       shaped_part)
         elif isinstance(other, (Shaped, Mix)):
-            return (self._multipolygon | other
-                    | self._multisegment | self._multipoint)
+            return self.shaped | other | self.linear | self.multipoint
         else:
             return NotImplemented
 
@@ -480,13 +470,13 @@ class Mix(Indexable):
  for polygon in polygons)``,
         ``points = [] if self.multipoint is EMPTY\
  else self.multipoint.points``,
-        ``segments = [] if self.multisegment is EMPTY\
- else self.multisegment.segments``,
-        ``polygons = [] if self.multipolygon is EMPTY\
- else self.multipolygon.polygons``.
+        ``segments = [] if self.linear is EMPTY\
+ else self.linear.segments``,
+        ``polygons = [] if self.shaped is EMPTY\
+ else self.shaped.polygons``.
         """
-        return ((other - self._multipoint) & (other - self._multisegment)
-                & other - self._multipolygon)
+        return ((other - self.multipoint) & (other - self.linear)
+                & other - self.shaped)
 
     def __sub__(self, other: Compound) -> Compound:
         """
@@ -506,10 +496,10 @@ class Mix(Indexable):
  for polygon in polygons)``,
         ``points = [] if self.multipoint is EMPTY\
  else self.multipoint.points``,
-        ``segments = [] if self.multisegment is EMPTY\
- else self.multisegment.segments``,
-        ``polygons = [] if self.multipolygon is EMPTY\
- else self.multipolygon.polygons``.
+        ``segments = [] if self.linear is EMPTY\
+ else self.linear.segments``,
+        ``polygons = [] if self.shaped is EMPTY\
+ else self.shaped.polygons``.
 
         >>> mix = Mix.from_raw(([(3, 3), (7, 7)],
         ...                     [((0, 6), (0, 8)), ((6, 6), (6, 8))],
@@ -518,9 +508,8 @@ class Mix(Indexable):
         >>> mix - mix is EMPTY
         True
         """
-        return from_mix_components(self._multipoint - other,
-                                   self._multisegment - other,
-                                   self._multipolygon - other)
+        return from_mix_components(self.multipoint - other,
+                                   self.linear - other, self.shaped - other)
 
     def __xor__(self, other: Compound) -> Compound:
         """
@@ -540,10 +529,10 @@ class Mix(Indexable):
  for polygon in polygons)``,
         ``points = [] if self.multipoint is EMPTY\
  else self.multipoint.points``,
-        ``segments = [] if self.multisegment is EMPTY\
- else self.multisegment.segments``,
-        ``polygons = [] if self.multipolygon is EMPTY\
- else self.multipolygon.polygons``.
+        ``segments = [] if self.linear is EMPTY\
+ else self.linear.segments``,
+        ``polygons = [] if self.shaped is EMPTY\
+ else self.shaped.polygons``.
 
         >>> mix = Mix.from_raw(([(3, 3), (7, 7)],
         ...                     [((0, 6), (0, 8)), ((6, 6), (6, 8))],
@@ -553,38 +542,32 @@ class Mix(Indexable):
         True
         """
         if isinstance(other, Multipoint):
-            rest_other = other - self._multipolygon - self._multisegment
-            return from_mix_components(self._multipoint ^ rest_other,
-                                       self._multisegment,
-                                       self._multipolygon)
+            rest_other = other - self.shaped - self.linear
+            return from_mix_components(self.multipoint ^ rest_other,
+                                       self.linear, self.shaped)
         elif isinstance(other, Linear):
-            multipoint_part, multisegment_part = (self._multipoint,
-                                                  self._multisegment)
-            multipolygon_part = self._multipolygon ^ other
-            if isinstance(multipolygon_part, Linear):
-                multisegment_part = (multisegment_part ^ multipolygon_part
-                                     ^ multipoint_part)
-                multipolygon_part = EMPTY
-            elif isinstance(multipolygon_part, Mix):
-                multisegment_part = (multisegment_part
-                                     ^ multipolygon_part._multisegment
-                                     ^ multipoint_part)
-                multipolygon_part = multipolygon_part._multipolygon
+            multipoint_part, linear_part = self.multipoint, self.linear
+            shaped_part = self.shaped ^ other
+            if isinstance(shaped_part, Linear):
+                linear_part = linear_part ^ shaped_part ^ multipoint_part
+                shaped_part = EMPTY
+            elif isinstance(shaped_part, Mix):
+                linear_part = (linear_part ^ shaped_part.linear
+                               ^ multipoint_part)
+                shaped_part = shaped_part.shaped
             else:
-                # other is subset of the multipolygon
-                return from_mix_components(multipoint_part, multisegment_part,
-                                           multipolygon_part)
-            if isinstance(multisegment_part, Mix):
-                multipoint_part, multisegment_part = (
-                    multisegment_part._multipoint,
-                    multisegment_part._multisegment)
+                # other is subset of the shaped component
+                return from_mix_components(multipoint_part, linear_part,
+                                           shaped_part)
+            if isinstance(linear_part, Mix):
+                multipoint_part, linear_part = (linear_part.multipoint,
+                                                linear_part.linear)
             else:
                 multipoint_part = EMPTY
-            return from_mix_components(multipoint_part, multisegment_part,
-                                       multipolygon_part)
+            return from_mix_components(multipoint_part, linear_part,
+                                       shaped_part)
         elif isinstance(other, (Shaped, Mix)):
-            return (self._multipolygon ^ other
-                    ^ self._multisegment ^ self._multipoint)
+            return self.shaped ^ other ^ self.linear ^ self.multipoint
         else:
             return NotImplemented
 
@@ -646,15 +629,15 @@ class Mix(Indexable):
             ``O(1)``
 
         where ``elements_count = multisegment_size\
- if self.multipolygon is EMPTY else multipolygon_vertices_count``,
+ if self.shaped is EMPTY else multipolygon_vertices_count``,
         ``multisegment_size = len(segments)``,
         ``multipolygon_vertices_count = sum(len(polygon.border.vertices)\
  + sum(len(hole.vertices) for hole in polygon.holes)\
  for polygon in polygons)``,
-        ``segments = [] if self.multisegment is EMPTY\
- else self.multisegment.segments``,
-        ``polygons = [] if self.multipolygon is EMPTY\
- else self.multipolygon.polygons``.
+        ``segments = [] if self.linear is EMPTY\
+ else self.linear.segments``,
+        ``polygons = [] if self.shaped is EMPTY\
+ else self.shaped.polygons``.
 
         >>> mix = Mix.from_raw(([(3, 3), (7, 7)],
         ...                     [((0, 6), (0, 8)), ((6, 6), (6, 8))],
@@ -663,9 +646,9 @@ class Mix(Indexable):
         >>> mix.centroid == Point(3, 3)
         True
         """
-        return (self._multisegment
-                if self._multipolygon is EMPTY
-                else self._multipolygon).centroid
+        return (self.linear
+                if self.shaped is EMPTY
+                else self.shaped).centroid
 
     @property
     def multipoint(self) -> Maybe[Multipoint]:
@@ -687,9 +670,9 @@ class Mix(Indexable):
         return self._multipoint
 
     @property
-    def multipolygon(self) -> Maybe[Multipolygon]:
+    def shaped(self) -> Maybe[Shaped]:
         """
-        Returns multipolygon of the mix.
+        Returns shaped component of the mix.
 
         Time complexity:
             ``O(1)``
@@ -701,19 +684,19 @@ class Mix(Indexable):
         ...                     [([(0, 0), (6, 0), (6, 6), (0, 6)],
         ...                       [[(2, 2), (2, 4), (4, 4), (4, 2)]])]))
         >>> from gon.base import Contour
-        >>> (mix.multipolygon
+        >>> (mix.shaped
         ...  == Multipolygon([Polygon(Contour([Point(0, 0), Point(6, 0),
         ...                                   Point(6, 6), Point(0, 6)]),
         ...                  [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
         ...                            Point(4, 2)])])]))
         True
         """
-        return self._multipolygon
+        return self._shaped
 
     @property
-    def multisegment(self) -> Maybe[Multisegment]:
+    def linear(self) -> Maybe[Linear]:
         """
-        Returns multisegment of the mix.
+        Returns linear component of the mix.
 
         Time complexity:
             ``O(1)``
@@ -724,12 +707,12 @@ class Mix(Indexable):
         ...                     [((0, 6), (0, 8)), ((6, 6), (6, 8))],
         ...                     [([(0, 0), (6, 0), (6, 6), (0, 6)],
         ...                       [[(2, 2), (2, 4), (4, 4), (4, 2)]])]))
-        >>> (mix.multisegment
+        >>> (mix.linear
         ...  == Multisegment([Segment(Point(0, 6), Point(0, 8)),
         ...                   Segment(Point(6, 6), Point(6, 8))]))
         True
         """
-        return self._multisegment
+        return self._linear
 
     def distance_to(self, other: Geometry) -> Coordinate:
         """
@@ -746,10 +729,8 @@ class Mix(Indexable):
         ``multipolygon_vertices_count = sum(len(polygon.border.vertices)\
  + sum(len(hole.vertices) for hole in polygon.holes)\
  for polygon in polygons)``,
-        ``segments = [] if self.multisegment is EMPTY\
- else self.multisegment.segments``,
-        ``polygons = [] if self.multipolygon is EMPTY\
- else self.multipolygon.polygons``.
+        ``segments = [] if self.linear is EMPTY else self.linear.segments``,
+        ``polygons = [] if self.shaped is EMPTY else self.shaped.polygons``.
 
         >>> mix = Mix.from_raw(([(3, 3), (7, 7)],
         ...                     [((0, 6), (0, 8)), ((6, 6), (6, 8))],
@@ -778,10 +759,10 @@ class Mix(Indexable):
         ``multipolygon_vertices_count = sum(len(polygon.border.vertices)\
  + sum(len(hole.vertices) for hole in polygon.holes)\
  for polygon in polygons)``,
-        ``segments = [] if self.multisegment is EMPTY\
- else self.multisegment.segments``,
-        ``polygons = [] if self.multipolygon is EMPTY\
- else self.multipolygon.polygons``.
+        ``segments = [] if self.linear is EMPTY\
+ else self.linear.segments``,
+        ``polygons = [] if self.shaped is EMPTY\
+ else self.shaped.polygons``.
 
         >>> mix = Mix.from_raw(([(3, 3), (7, 7)],
         ...                     [((0, 6), (0, 8)), ((6, 6), (6, 8))],
@@ -789,10 +770,10 @@ class Mix(Indexable):
         ...                       [[(2, 2), (2, 4), (4, 4), (4, 2)]])]))
         >>> mix.index()
         """
-        if self._multisegment is not EMPTY:
-            self._multisegment.index()
-        if self._multipolygon is not EMPTY:
-            self._multipolygon.index()
+        if self.linear is not EMPTY:
+            self.linear.index()
+        if self.shaped is not EMPTY:
+            self.shaped.index()
 
     def locate(self, point: Point) -> Location:
         """
@@ -813,10 +794,10 @@ class Mix(Indexable):
  for polygon in polygons)``,
         ``points = [] if self.multipoint is EMPTY\
  else self.multipoint.points``,
-        ``segments = [] if self.multisegment is EMPTY\
- else self.multisegment.segments``,
-        ``polygons = [] if self.multipolygon is EMPTY\
- else self.multipolygon.polygons``.
+        ``segments = [] if self.linear is EMPTY\
+ else self.linear.segments``,
+        ``polygons = [] if self.shaped is EMPTY\
+ else self.shaped.polygons``.
 
         >>> mix = Mix.from_raw(([(3, 3), (7, 7)],
         ...                     [((0, 6), (0, 8)), ((6, 6), (6, 8))],
@@ -863,10 +844,10 @@ class Mix(Indexable):
  for polygon in polygons)``,
         ``points = [] if self.multipoint is EMPTY\
  else self.multipoint.points``,
-        ``segments = [] if self.multisegment is EMPTY\
- else self.multisegment.segments``,
-        ``polygons = [] if self.multipolygon is EMPTY\
- else self.multipolygon.polygons``.
+        ``segments = [] if self.linear is EMPTY\
+ else self.linear.segments``,
+        ``polygons = [] if self.shaped is EMPTY\
+ else self.shaped.polygons``.
 
         >>> mix = Mix.from_raw(([(3, 3), (7, 7)],
         ...                     [((0, 6), (0, 8)), ((6, 6), (6, 8))],
@@ -876,8 +857,8 @@ class Mix(Indexable):
         ([(3, 3), (7, 7)], [((0, 6), (0, 8)), ((6, 6), (6, 8))],\
  [([(0, 0), (6, 0), (6, 6), (0, 6)], [[(2, 2), (2, 4), (4, 4), (4, 2)]])])
         """
-        return (self._multipoint.raw(), self._multisegment.raw(),
-                self._multipolygon.raw())
+        return (self.multipoint.raw(), self.linear.raw(),
+                self.shaped.raw())
 
     def relate(self, other: Compound) -> Relation:
         """
@@ -897,10 +878,10 @@ class Mix(Indexable):
  for polygon in polygons)``,
         ``points = [] if self.multipoint is EMPTY\
  else self.multipoint.points``,
-        ``segments = [] if self.multisegment is EMPTY\
- else self.multisegment.segments``,
-        ``polygons = [] if self.multipolygon is EMPTY\
- else self.multipolygon.polygons``.
+        ``segments = [] if self.linear is EMPTY\
+ else self.linear.segments``,
+        ``polygons = [] if self.shaped is EMPTY\
+ else self.shaped.polygons``.
 
         >>> mix = Mix.from_raw(([(3, 3), (7, 7)],
         ...                     [((0, 6), (0, 8)), ((6, 6), (6, 8))],
@@ -940,10 +921,10 @@ class Mix(Indexable):
  for polygon in polygons)``,
         ``points = [] if self.multipoint is EMPTY\
  else self.multipoint.points``,
-        ``segments = [] if self.multisegment is EMPTY\
- else self.multisegment.segments``,
-        ``polygons = [] if self.multipolygon is EMPTY\
- else self.multipolygon.polygons``.
+        ``segments = [] if self.linear is EMPTY\
+ else self.linear.segments``,
+        ``polygons = [] if self.shaped is EMPTY\
+ else self.shaped.polygons``.
 
         >>> mix = Mix.from_raw(([(3, 3), (7, 7)],
         ...                     [((0, 6), (0, 8)), ((6, 6), (6, 8))],
@@ -958,9 +939,9 @@ class Mix(Indexable):
         ...                     [[(0, 2), (-2, 2), (-2, 4), (0, 4)]])])))
         True
         """
-        return Mix(self._multipoint.rotate(cosine, sine, point),
-                   self._multisegment.rotate(cosine, sine, point),
-                   self._multipolygon.rotate(cosine, sine, point))
+        return Mix(self.multipoint.rotate(cosine, sine, point),
+                   self.linear.rotate(cosine, sine, point),
+                   self.shaped.rotate(cosine, sine, point))
 
     def scale(self,
               factor_x: Coordinate,
@@ -982,10 +963,10 @@ class Mix(Indexable):
  for polygon in polygons)``,
         ``points = [] if self.multipoint is EMPTY\
  else self.multipoint.points``,
-        ``segments = [] if self.multisegment is EMPTY\
- else self.multisegment.segments``,
-        ``polygons = [] if self.multipolygon is EMPTY\
- else self.multipolygon.polygons``.
+        ``segments = [] if self.linear is EMPTY\
+ else self.linear.segments``,
+        ``polygons = [] if self.shaped is EMPTY\
+ else self.shaped.polygons``.
 
         >>> mix = Mix.from_raw(([(3, 3), (7, 7)],
         ...                     [((0, 6), (0, 8)), ((6, 6), (6, 8))],
@@ -1002,13 +983,13 @@ class Mix(Indexable):
         """
         if factor_y is None:
             factor_y = factor_x
-        return (Mix(self._multipoint.scale(factor_x, factor_y),
-                    self._multisegment.scale(factor_x, factor_y),
-                    self._multipolygon.scale(factor_x, factor_y))
+        return (Mix(self.multipoint.scale(factor_x, factor_y),
+                    self.linear.scale(factor_x, factor_y),
+                    self.shaped.scale(factor_x, factor_y))
                 if factor_x and factor_y
-                else ((self._multipoint.scale(factor_x, factor_y)
-                       | self._multisegment.scale(factor_x, factor_y)
-                       | self._multipolygon.scale(factor_x, factor_y))
+                else ((self.multipoint.scale(factor_x, factor_y)
+                       | self.linear.scale(factor_x, factor_y)
+                       | self.shaped.scale(factor_x, factor_y))
                       if factor_x or factor_y
                       else Multipoint([Point(factor_x, factor_y)])))
 
@@ -1030,10 +1011,10 @@ class Mix(Indexable):
  for polygon in polygons)``,
         ``points = [] if self.multipoint is EMPTY\
  else self.multipoint.points``,
-        ``segments = [] if self.multisegment is EMPTY\
- else self.multisegment.segments``,
-        ``polygons = [] if self.multipolygon is EMPTY\
- else self.multipolygon.polygons``.
+        ``segments = [] if self.linear is EMPTY\
+ else self.linear.segments``,
+        ``polygons = [] if self.shaped is EMPTY\
+ else self.shaped.polygons``.
 
         >>> mix = Mix.from_raw(([(3, 3), (7, 7)],
         ...                     [((0, 6), (0, 8)), ((6, 6), (6, 8))],
@@ -1046,9 +1027,9 @@ class Mix(Indexable):
         ...                     [[(3, 4), (3, 6), (5, 6), (5, 4)]])])))
         True
         """
-        return Mix(self._multipoint.translate(step_x, step_y),
-                   self._multisegment.translate(step_x, step_y),
-                   self._multipolygon.translate(step_x, step_y))
+        return Mix(self.multipoint.translate(step_x, step_y),
+                   self.linear.translate(step_x, step_y),
+                   self.shaped.translate(step_x, step_y))
 
     def validate(self) -> None:
         """
@@ -1068,10 +1049,10 @@ class Mix(Indexable):
  for polygon in polygons)``,
         ``points = [] if self.multipoint is EMPTY\
  else self.multipoint.points``,
-        ``segments = [] if self.multisegment is EMPTY\
- else self.multisegment.segments``,
-        ``polygons = [] if self.multipolygon is EMPTY\
- else self.multipolygon.polygons``.
+        ``segments = [] if self.linear is EMPTY\
+ else self.linear.segments``,
+        ``polygons = [] if self.shaped is EMPTY\
+ else self.shaped.polygons``.
 
         >>> mix = Mix.from_raw(([(3, 3), (7, 7)],
         ...                     [((0, 6), (0, 8)), ((6, 6), (6, 8))],
@@ -1085,43 +1066,41 @@ class Mix(Indexable):
                              .format(count=MIN_MIX_NON_EMPTY_COMPONENTS))
         for component in self._components:
             component.validate()
-        if (not self._multipoint.disjoint(self._multisegment)
-                or not self._multipoint.disjoint(self._multipolygon)):
+        if (not self.multipoint.disjoint(self.linear)
+                or not self.multipoint.disjoint(self.shaped)):
             raise ValueError('Multipoint should be disjoint '
                              'with other components.')
-        multipolygon_multisegment_relation = self._multipolygon.relate(
-                self._multisegment)
-        if multipolygon_multisegment_relation in (Relation.CROSS,
-                                                  Relation.COMPONENT,
-                                                  Relation.ENCLOSED,
-                                                  Relation.WITHIN):
-            raise ValueError('Multisegment should not {} multipolygon.'
+        shaped_linear_relation = self.shaped.relate(
+                self.linear)
+        if shaped_linear_relation in (Relation.CROSS, Relation.COMPONENT,
+                                      Relation.ENCLOSED, Relation.WITHIN):
+            raise ValueError('Linear component should not {} shaped component.'
                              .format('cross'
-                                     if (multipolygon_multisegment_relation
+                                     if (shaped_linear_relation
                                          is Relation.CROSS)
                                      else 'be subset of'))
-        elif (multipolygon_multisegment_relation is Relation.TOUCH
-              and any(polygon.border.relate(self._multisegment)
+        elif (shaped_linear_relation is Relation.TOUCH
+              and any(polygon.border.relate(self.linear)
                       in (Relation.OVERLAP,
                           Relation.COMPOSITE)
-                      or any(hole.relate(self._multisegment)
+                      or any(hole.relate(self.linear)
                              in (Relation.OVERLAP,
                                  Relation.COMPOSITE)
                              for hole in polygon.holes)
-                      for polygon in self._multipolygon.polygons)):
-            raise ValueError('Multisegment should not overlap '
-                             'multipolygon borders.')
+                      for polygon in self.shaped.polygons)):
+            raise ValueError('Linear component should not overlap '
+                             'shaped component borders.')
 
     def _relate_linear(self, other: Linear) -> Relation:
-        if self._multipolygon is EMPTY:
-            multisegment_relation = self._multisegment.relate(other)
+        if self.shaped is EMPTY:
+            multisegment_relation = self.linear.relate(other)
             if multisegment_relation is Relation.DISJOINT:
-                multipoint_relation = self._multipoint.relate(other)
+                multipoint_relation = self.multipoint.relate(other)
                 return (Relation.TOUCH
                         if multipoint_relation is Relation.COMPOSITE
                         else multipoint_relation)
             elif multisegment_relation is Relation.COMPOSITE:
-                multipoint_relation = self._multipoint.relate(other)
+                multipoint_relation = self.multipoint.relate(other)
                 return (multisegment_relation
                         if multipoint_relation is multisegment_relation
                         else Relation.OVERLAP)
@@ -1130,11 +1109,11 @@ class Mix(Indexable):
                         if multisegment_relation is Relation.EQUAL
                         else multisegment_relation)
         else:
-            multipolygon_relation = self._multipolygon.relate(other)
+            multipolygon_relation = self.shaped.relate(other)
             if multipolygon_relation is Relation.DISJOINT:
-                multisegment_relation = self._multisegment.relate(other)
+                multisegment_relation = self.linear.relate(other)
                 if multisegment_relation is Relation.DISJOINT:
-                    multipoint_relation = self._multipoint.relate(other)
+                    multipoint_relation = self.multipoint.relate(other)
                     return (Relation.TOUCH
                             if multipoint_relation is Relation.COMPOSITE
                             else multipoint_relation)
@@ -1148,8 +1127,8 @@ class Mix(Indexable):
                             else Relation.TOUCH)
             elif (multipolygon_relation is Relation.TOUCH
                   or multipolygon_relation is Relation.CROSS):
-                rest_other = other - self._multipolygon
-                multisegment_relation = self._multisegment.relate(rest_other)
+                rest_other = other - self.shaped
+                multisegment_relation = self.linear.relate(rest_other)
                 return (Relation.COMPONENT
                         if (multisegment_relation is Relation.EQUAL
                             or multisegment_relation is Relation.COMPONENT)
@@ -1158,42 +1137,42 @@ class Mix(Indexable):
                 return multipolygon_relation
 
     def _relate_mix(self, other: 'Mix') -> Relation:
-        if self._multipolygon is other._multipolygon is EMPTY:
-            multisegments_relation = self._multisegment.relate(
-                    other._multisegment)
+        if self.shaped is other.shaped is EMPTY:
+            multisegments_relation = self.linear.relate(
+                    other.linear)
             if multisegments_relation is Relation.DISJOINT:
                 return (multisegments_relation
-                        if (self._relate_multipoint(other._multipoint)
-                            is other._relate_multipoint(self._multipoint)
+                        if (self._relate_multipoint(other.multipoint)
+                            is other._relate_multipoint(self.multipoint)
                             is multisegments_relation)
                         else Relation.TOUCH)
             elif multisegments_relation is Relation.COMPOSITE:
                 multipoint_relation = other._relate_multipoint(
-                        self._multipoint)
+                        self.multipoint)
                 return (multisegments_relation
                         if multipoint_relation is Relation.COMPONENT
                         else Relation.OVERLAP)
             elif multisegments_relation is Relation.EQUAL:
-                other_multipoint_relation = self._multipoint.relate(
-                        other._multipoint)
+                other_multipoint_relation = self.multipoint.relate(
+                        other.multipoint)
                 return (Relation.OVERLAP
                         if other_multipoint_relation is Relation.DISJOINT
                         else other_multipoint_relation)
             elif multisegments_relation is Relation.COMPONENT:
                 other_multipoint_relation = self._relate_multipoint(
-                        other._multipoint)
+                        other.multipoint)
                 return (multisegments_relation
                         if other_multipoint_relation is Relation.COMPONENT
                         else Relation.OVERLAP)
             else:
                 return multisegments_relation
-        elif self._multipolygon is EMPTY:
+        elif self.shaped is EMPTY:
             multisegment_relation = other._relate_linear(
-                    self._multisegment)
+                    self.linear)
             if multisegment_relation is Relation.CROSS:
                 return multisegment_relation
             multipoint_relation = other._relate_multipoint(
-                    self._multipoint)
+                    self.multipoint)
             if multisegment_relation is Relation.DISJOINT:
                 return (multipoint_relation
                         if multipoint_relation in (Relation.DISJOINT,
@@ -1226,13 +1205,13 @@ class Mix(Indexable):
                         else (Relation.COVER
                               if multipoint_relation is Relation.WITHIN
                               else Relation.ENCLOSES))
-        elif other._multipolygon is EMPTY:
+        elif other.shaped is EMPTY:
             other_multisegment_relation = self._relate_linear(
-                    other._multisegment)
+                    other.linear)
             if other_multisegment_relation is Relation.CROSS:
                 return other_multisegment_relation
             other_multipoint_relation = self._relate_multipoint(
-                    other._multipoint)
+                    other.multipoint)
             if other_multisegment_relation is Relation.DISJOINT:
                 return (other_multipoint_relation
                         if other_multipoint_relation in (Relation.DISJOINT,
@@ -1272,13 +1251,13 @@ class Mix(Indexable):
                         (Relation.ENCLOSED
                          if other_multipoint_relation is Relation.COMPONENT
                          else other_multisegment_relation))
-        multipolygons_relation = self._multipolygon.relate(
-                other._multipolygon)
+        multipolygons_relation = self.shaped.relate(
+                other.shaped)
         if (multipolygons_relation is Relation.DISJOINT
                 or multipolygons_relation is Relation.TOUCH):
-            if self._multisegment is other._multisegment is EMPTY:
+            if self.linear is other.linear is EMPTY:
                 other_multipoint_relation = self._relate_multipoint(
-                        other._multipoint)
+                        other.multipoint)
                 if other_multipoint_relation is Relation.CROSS:
                     return other_multipoint_relation
                 elif (other_multipoint_relation is Relation.ENCLOSED
@@ -1286,7 +1265,7 @@ class Mix(Indexable):
                     return Relation.CROSS
                 else:
                     multipoint_relation = other._relate_multipoint(
-                            self._multipoint)
+                            self.multipoint)
                     if (multipoint_relation
                             is other_multipoint_relation
                             is Relation.DISJOINT):
@@ -1298,9 +1277,9 @@ class Mix(Indexable):
                         return Relation.CROSS
                     else:
                         return Relation.TOUCH
-            elif self._multisegment is EMPTY:
+            elif self.linear is EMPTY:
                 other_multisegment_relation = self._relate_linear(
-                        other._multisegment)
+                        other.linear)
                 if other_multisegment_relation is Relation.CROSS:
                     return other_multisegment_relation
                 elif (other_multisegment_relation is Relation.ENCLOSED
@@ -1308,13 +1287,13 @@ class Mix(Indexable):
                     return Relation.CROSS
                 else:
                     multipoint_relation = other._relate_multipoint(
-                            self._multipoint)
+                            self.multipoint)
                     if multipoint_relation is Relation.CROSS:
                         return multipoint_relation
                     elif (multipoint_relation is Relation.ENCLOSED
                           or multipoint_relation is Relation.WITHIN):
                         return Relation.CROSS
-                    elif other._multipoint is EMPTY:
+                    elif other.multipoint is EMPTY:
                         return (multipolygons_relation
                                 if (multipoint_relation
                                     is other_multisegment_relation
@@ -1322,7 +1301,7 @@ class Mix(Indexable):
                                 else Relation.TOUCH)
                     else:
                         other_multipoint_relation = self._relate_multipoint(
-                                other._multipoint)
+                                other.multipoint)
                         if other_multipoint_relation is Relation.CROSS:
                             return other_multipoint_relation
                         elif (other_multipoint_relation is Relation.ENCLOSED
@@ -1335,9 +1314,9 @@ class Mix(Indexable):
                             return multipolygons_relation
                         else:
                             return Relation.TOUCH
-            elif other._multisegment is EMPTY:
+            elif other.linear is EMPTY:
                 multisegment_relation = other._relate_linear(
-                        self._multisegment)
+                        self.linear)
                 if multisegment_relation is Relation.CROSS:
                     return multisegment_relation
                 elif (multisegment_relation is Relation.ENCLOSED
@@ -1345,13 +1324,13 @@ class Mix(Indexable):
                     return Relation.CROSS
                 else:
                     other_multipoint_relation = self._relate_multipoint(
-                            other._multipoint)
+                            other.multipoint)
                     if other_multipoint_relation is Relation.CROSS:
                         return other_multipoint_relation
                     elif (other_multipoint_relation is Relation.ENCLOSED
                           or other_multipoint_relation is Relation.WITHIN):
                         return Relation.CROSS
-                    elif self._multipoint is EMPTY:
+                    elif self.multipoint is EMPTY:
                         return (multipolygons_relation
                                 if (multisegment_relation
                                     is other_multipoint_relation
@@ -1359,7 +1338,7 @@ class Mix(Indexable):
                                 else Relation.TOUCH)
                     else:
                         multipoint_relation = other._relate_multipoint(
-                                self._multipoint)
+                                self.multipoint)
                         if multipoint_relation is Relation.CROSS:
                             return multipoint_relation
                         elif (multipoint_relation is Relation.ENCLOSED
@@ -1374,7 +1353,7 @@ class Mix(Indexable):
                             return Relation.TOUCH
             else:
                 other_multisegment_relation = self._relate_linear(
-                        other._multisegment)
+                        other.linear)
                 if other_multisegment_relation is Relation.CROSS:
                     return other_multisegment_relation
                 elif (other_multisegment_relation is Relation.ENCLOSED
@@ -1382,15 +1361,15 @@ class Mix(Indexable):
                     return Relation.CROSS
                 else:
                     multisegment_relation = other._relate_linear(
-                            self._multisegment)
+                            self.linear)
                     if multisegment_relation is Relation.CROSS:
                         return multisegment_relation
                     elif (multisegment_relation is Relation.ENCLOSED
                           or multisegment_relation is Relation.WITHIN):
                         return Relation.CROSS
-                    elif self._multipoint is EMPTY:
+                    elif self.multipoint is EMPTY:
                         other_multipoint_relation = self._relate_multipoint(
-                                other._multipoint)
+                                other.multipoint)
                         return (other_multipoint_relation
                                 if other_multipoint_relation is Relation.CROSS
                                 else
@@ -1405,9 +1384,9 @@ class Mix(Indexable):
                                            is other_multisegment_relation
                                            is Relation.DISJOINT)
                                        else Relation.TOUCH)))
-                    elif other._multipoint is EMPTY:
+                    elif other.multipoint is EMPTY:
                         multipoint_relation = other._relate_multipoint(
-                                self._multipoint)
+                                self.multipoint)
                         return (multipoint_relation
                                 if multipoint_relation is Relation.CROSS
                                 else
@@ -1422,7 +1401,7 @@ class Mix(Indexable):
                                        else Relation.TOUCH)))
                     else:
                         other_multipoint_relation = self._relate_multipoint(
-                                other._multipoint)
+                                other.multipoint)
                         if other_multipoint_relation is Relation.CROSS:
                             return other_multipoint_relation
                         elif (other_multipoint_relation is Relation.ENCLOSED
@@ -1430,7 +1409,7 @@ class Mix(Indexable):
                             return Relation.CROSS
                         else:
                             multipoint_relation = other._relate_multipoint(
-                                    self._multipoint)
+                                    self.multipoint)
                             return (multipoint_relation
                                     if multipoint_relation is Relation.CROSS
                                     else (Relation.CROSS
@@ -1449,9 +1428,9 @@ class Mix(Indexable):
         elif multipolygons_relation in (Relation.COVER,
                                         Relation.ENCLOSES,
                                         Relation.COMPOSITE):
-            if self._multisegment is EMPTY:
+            if self.linear is EMPTY:
                 multipoint_relation = other._relate_multipoint(
-                        self._multipoint).complement
+                        self.multipoint).complement
                 return (multipolygons_relation
                         if multipoint_relation is multipolygons_relation
                         else (Relation.ENCLOSES
@@ -1461,13 +1440,13 @@ class Mix(Indexable):
                               else Relation.OVERLAP))
             else:
                 multisegment_relation = other._relate_linear(
-                        self._multisegment).complement
+                        self.linear).complement
                 if multisegment_relation is multipolygons_relation:
-                    if self._multipoint is EMPTY:
+                    if self.multipoint is EMPTY:
                         return multipolygons_relation
                     else:
                         multipoint_relation = other._relate_multipoint(
-                                self._multipoint).complement
+                                self.multipoint).complement
                         return (multipolygons_relation
                                 if (multipoint_relation
                                     is multipolygons_relation)
@@ -1480,11 +1459,11 @@ class Mix(Indexable):
                 elif multisegment_relation in (Relation.COVER,
                                                Relation.ENCLOSES,
                                                Relation.COMPOSITE):
-                    if self._multipoint is EMPTY:
+                    if self.multipoint is EMPTY:
                         return Relation.ENCLOSES
                     else:
                         multipoint_relation = other._relate_multipoint(
-                                self._multipoint).complement
+                                self.multipoint).complement
                         return (Relation.ENCLOSES
                                 if multipoint_relation in (Relation.COVER,
                                                            Relation.ENCLOSES,
@@ -1493,53 +1472,53 @@ class Mix(Indexable):
                 else:
                     return Relation.OVERLAP
         elif multipolygons_relation is Relation.EQUAL:
-            multisegments_relation = self._multisegment.relate(
-                    other._multisegment)
-            if self._multisegment is other._multisegment is EMPTY:
-                multipoints_relation = self._multipoint.relate(
-                        other._multipoint)
+            multisegments_relation = self.linear.relate(
+                    other.linear)
+            if self.linear is other.linear is EMPTY:
+                multipoints_relation = self.multipoint.relate(
+                        other.multipoint)
                 return (multipolygons_relation
-                        if (self._multipoint is other._multipoint is EMPTY
+                        if (self.multipoint is other.multipoint is EMPTY
                             or multipoints_relation is Relation.EQUAL)
                         else
                         (multipoints_relation
                          if (multipoints_relation is Relation.COMPOSITE
                              or multipoints_relation is Relation.COMPONENT)
                          else Relation.OVERLAP))
-            elif self._multisegment is EMPTY:
+            elif self.linear is EMPTY:
                 multipoints_relation = other._relate_multipoint(
-                        self._multipoint)
+                        self.multipoint)
                 return (Relation.COMPOSITE
                         if (multipoints_relation is Relation.EQUAL
                             or multipoints_relation is Relation.COMPONENT)
                         else Relation.OVERLAP)
-            elif other._multisegment is EMPTY:
+            elif other.linear is EMPTY:
                 multipoints_relation = self._relate_multipoint(
-                        other._multipoint)
+                        other.multipoint)
                 return (Relation.COMPONENT
                         if (multipoints_relation is Relation.EQUAL
                             or multipoints_relation is Relation.COMPONENT)
                         else Relation.OVERLAP)
             elif multisegments_relation is Relation.COMPOSITE:
                 multipoints_relation = other._relate_multipoint(
-                        self._multipoint)
+                        self.multipoint)
                 return (multisegments_relation
-                        if (self._multipoint is EMPTY
+                        if (self.multipoint is EMPTY
                             or multipoints_relation is Relation.EQUAL
                             or multipoints_relation is Relation.COMPONENT)
                         else Relation.OVERLAP)
             elif multisegments_relation is Relation.EQUAL:
-                multipoints_relation = self._multipoint.relate(
-                        other._multipoint)
+                multipoints_relation = self.multipoint.relate(
+                        other.multipoint)
                 return (multipolygons_relation
-                        if (self._multipoint is other._multipoint is EMPTY
+                        if (self.multipoint is other.multipoint is EMPTY
                             or multipoints_relation is Relation.EQUAL)
                         else
                         (Relation.COMPOSITE
-                         if self._multipoint is EMPTY
+                         if self.multipoint is EMPTY
                          else
                          (Relation.COMPONENT
-                          if other._multipoint is EMPTY
+                          if other.multipoint is EMPTY
                           else
                           (multipoints_relation
                            if (multipoints_relation is Relation.COMPONENT
@@ -1547,9 +1526,9 @@ class Mix(Indexable):
                            else Relation.OVERLAP))))
             elif multisegments_relation is Relation.COMPONENT:
                 multipoints_relation = self._relate_multipoint(
-                        other._multipoint)
+                        other.multipoint)
                 return (multisegments_relation
-                        if (other._multipoint is EMPTY
+                        if (other.multipoint is EMPTY
                             or multipoints_relation is Relation.EQUAL
                             or multipoints_relation is Relation.COMPONENT)
                         else Relation.OVERLAP)
@@ -1558,9 +1537,9 @@ class Mix(Indexable):
         elif multipolygons_relation in (Relation.COMPONENT,
                                         Relation.ENCLOSED,
                                         Relation.WITHIN):
-            if other._multisegment is EMPTY:
+            if other.linear is EMPTY:
                 multipoint_relation = self._relate_multipoint(
-                        other._multipoint)
+                        other.multipoint)
                 return (multipolygons_relation
                         if multipoint_relation is multipolygons_relation
                         else (Relation.ENCLOSED
@@ -1570,13 +1549,13 @@ class Mix(Indexable):
                               else Relation.OVERLAP))
             else:
                 multisegment_relation = self._relate_linear(
-                        other._multisegment)
+                        other.linear)
                 if multisegment_relation is multipolygons_relation:
-                    if other._multipoint is EMPTY:
+                    if other.multipoint is EMPTY:
                         return multipolygons_relation
                     else:
                         multipoint_relation = self._relate_multipoint(
-                                other._multipoint)
+                                other.multipoint)
                         return (multipolygons_relation
                                 if (multipoint_relation
                                     is multipolygons_relation)
@@ -1589,11 +1568,11 @@ class Mix(Indexable):
                 elif multisegment_relation in (Relation.COMPONENT,
                                                Relation.ENCLOSED,
                                                Relation.WITHIN):
-                    if other._multipoint is EMPTY:
+                    if other.multipoint is EMPTY:
                         return Relation.ENCLOSED
                     else:
                         multipoint_relation = self._relate_multipoint(
-                                other._multipoint)
+                                other.multipoint)
                         return (Relation.ENCLOSED
                                 if multipoint_relation in (Relation.COMPONENT,
                                                            Relation.ENCLOSED,
@@ -1605,10 +1584,10 @@ class Mix(Indexable):
             return multipolygons_relation
 
     def _relate_multipoint(self, other: Multipoint) -> Relation:
-        if self._multipolygon is EMPTY:
-            multisegment_relation = self._multisegment.relate(other)
+        if self.shaped is EMPTY:
+            multisegment_relation = self.linear.relate(other)
             if multisegment_relation is Relation.DISJOINT:
-                multipoint_relation = self._multipoint.relate(other)
+                multipoint_relation = self.multipoint.relate(other)
                 return (multipoint_relation
                         if multipoint_relation is Relation.DISJOINT
                         else (Relation.COMPONENT
@@ -1616,8 +1595,8 @@ class Mix(Indexable):
                                   or multipoint_relation is Relation.EQUAL)
                               else Relation.TOUCH))
             elif multisegment_relation is Relation.TOUCH:
-                rest_other = other - self._multisegment
-                multipoint_relation = self._multipoint.relate(rest_other)
+                rest_other = other - self.linear
+                multipoint_relation = self.multipoint.relate(rest_other)
                 return (Relation.COMPONENT
                         if (multipoint_relation is Relation.EQUAL
                             or multipoint_relation is Relation.COMPONENT)
@@ -1625,25 +1604,25 @@ class Mix(Indexable):
             else:
                 return multisegment_relation
         else:
-            multipolygon_relation = self._multipolygon.relate(other)
+            multipolygon_relation = self.shaped.relate(other)
             if multipolygon_relation in (Relation.COMPONENT,
                                          Relation.ENCLOSED,
                                          Relation.WITHIN):
                 return multipolygon_relation
             elif (multipolygon_relation is Relation.TOUCH
                   or multipolygon_relation is Relation.CROSS):
-                rest_other = other - self._multipolygon
-                if self._multisegment is EMPTY:
-                    multipoint_relation = self._multipoint.relate(rest_other)
+                rest_other = other - self.shaped
+                if self.linear is EMPTY:
+                    multipoint_relation = self.multipoint.relate(rest_other)
                     return (Relation.COMPONENT
                             if (multipoint_relation is Relation.EQUAL
                                 or multipoint_relation is Relation.COMPONENT)
                             else multipolygon_relation)
                 else:
-                    multisegment_relation = self._multisegment.relate(
+                    multisegment_relation = self.linear.relate(
                             rest_other)
                     if multisegment_relation is Relation.DISJOINT:
-                        multipoint_relation = self._multipoint.relate(
+                        multipoint_relation = self.multipoint.relate(
                                 rest_other)
                         return ((Relation.COMPONENT
                                  if multipolygon_relation is Relation.TOUCH
@@ -1652,8 +1631,8 @@ class Mix(Indexable):
                                     or multipoint_relation is Relation.EQUAL)
                                 else multipolygon_relation)
                     elif multisegment_relation is Relation.TOUCH:
-                        rest_other -= self._multisegment
-                        multipoint_relation = self._multipoint.relate(
+                        rest_other -= self.linear
+                        multipoint_relation = self.multipoint.relate(
                                 rest_other)
                         return (Relation.COMPONENT
                                 if (multipoint_relation is Relation.COMPONENT
@@ -1664,9 +1643,9 @@ class Mix(Indexable):
                                 if multipolygon_relation is Relation.TOUCH
                                 else Relation.ENCLOSED)
             else:
-                multisegment_relation = self._multisegment.relate(other)
+                multisegment_relation = self.linear.relate(other)
                 if multisegment_relation is Relation.DISJOINT:
-                    multipoint_relation = self._multipoint.relate(other)
+                    multipoint_relation = self.multipoint.relate(other)
                     return (multipolygon_relation
                             if multipoint_relation is Relation.DISJOINT
                             else (Relation.COMPONENT
@@ -1674,8 +1653,8 @@ class Mix(Indexable):
                                       or multipoint_relation is Relation.EQUAL)
                                   else Relation.TOUCH))
                 elif multisegment_relation is Relation.TOUCH:
-                    rest_other = other - self._multisegment
-                    multipoint_relation = self._multipoint.relate(rest_other)
+                    rest_other = other - self.linear
+                    multipoint_relation = self.multipoint.relate(rest_other)
                     return (multipolygon_relation
                             if multipoint_relation is Relation.DISJOINT
                             else (Relation.COMPONENT
@@ -1686,11 +1665,11 @@ class Mix(Indexable):
                     return multisegment_relation
 
     def _relate_shaped(self, other: Shaped) -> Relation:
-        if self._multipolygon is EMPTY:
-            multisegment_relation = self._multisegment.relate(other)
+        if self.shaped is EMPTY:
+            multisegment_relation = self.linear.relate(other)
             if (multisegment_relation is Relation.DISJOINT
                     or multisegment_relation is Relation.TOUCH):
-                multipoint_relation = self._multipoint.relate(other)
+                multipoint_relation = self.multipoint.relate(other)
                 return (multisegment_relation
                         if multipoint_relation is Relation.DISJOINT
                         else (multipoint_relation
@@ -1702,7 +1681,7 @@ class Mix(Indexable):
                                     else Relation.CROSS)))
             elif (multisegment_relation is Relation.COVER
                   or multisegment_relation is Relation.ENCLOSES):
-                multipoint_relation = self._multipoint.relate(other)
+                multipoint_relation = self.multipoint.relate(other)
                 return (Relation.CROSS
                         if (multipoint_relation is Relation.DISJOINT
                             or multipoint_relation is Relation.TOUCH)
@@ -1711,7 +1690,7 @@ class Mix(Indexable):
                                   or multipoint_relation is Relation.CROSS)
                               else Relation.ENCLOSES))
             elif multisegment_relation is Relation.COMPOSITE:
-                multipoint_relation = self._multipoint.relate(other)
+                multipoint_relation = self.multipoint.relate(other)
                 return (Relation.TOUCH
                         if multipoint_relation is Relation.DISJOINT
                         else (multipoint_relation
@@ -1724,11 +1703,11 @@ class Mix(Indexable):
             else:
                 return multisegment_relation
         else:
-            multipolygon_relation = self._multipolygon.relate(other)
+            multipolygon_relation = self.shaped.relate(other)
             if multipolygon_relation is Relation.DISJOINT:
-                multisegment_relation = self._multisegment.relate(other)
+                multisegment_relation = self.linear.relate(other)
                 if multisegment_relation is Relation.DISJOINT:
-                    multipoint_relation = self._multipoint.relate(other)
+                    multipoint_relation = self.multipoint.relate(other)
                     return (multipoint_relation
                             if multipoint_relation in (Relation.DISJOINT,
                                                        Relation.TOUCH,
@@ -1738,7 +1717,7 @@ class Mix(Indexable):
                                   else Relation.CROSS))
                 elif (multisegment_relation is Relation.TOUCH
                       or multisegment_relation is Relation.COMPOSITE):
-                    multipoint_relation = self._multipoint.relate(other)
+                    multipoint_relation = self.multipoint.relate(other)
                     return (Relation.TOUCH
                             if multipoint_relation in (Relation.DISJOINT,
                                                        Relation.TOUCH,
@@ -1747,11 +1726,11 @@ class Mix(Indexable):
                 else:
                     return Relation.CROSS
             elif multipolygon_relation is Relation.TOUCH:
-                multisegment_relation = self._multisegment.relate(other)
+                multisegment_relation = self.linear.relate(other)
                 if multisegment_relation in (Relation.DISJOINT,
                                              Relation.TOUCH,
                                              Relation.COMPOSITE):
-                    multipoint_relation = self._multipoint.relate(other)
+                    multipoint_relation = self.multipoint.relate(other)
                     return (multipolygon_relation
                             if multipoint_relation in (Relation.DISJOINT,
                                                        Relation.TOUCH,
@@ -1761,8 +1740,8 @@ class Mix(Indexable):
                     return Relation.CROSS
             elif (multipolygon_relation is Relation.COVER
                   or multipolygon_relation is Relation.COMPOSITE):
-                if self._multisegment is EMPTY:
-                    multipoint_relation = self._multipoint.relate(other)
+                if self.linear is EMPTY:
+                    multipoint_relation = self.multipoint.relate(other)
                     return (Relation.OVERLAP
                             if multipoint_relation in (Relation.DISJOINT,
                                                        Relation.TOUCH,
@@ -1772,18 +1751,18 @@ class Mix(Indexable):
                                       is multipolygon_relation)
                                   else Relation.ENCLOSES))
                 else:
-                    multisegment_relation = self._multisegment.relate(other)
+                    multisegment_relation = self.linear.relate(other)
                     if multisegment_relation in (Relation.DISJOINT,
                                                  Relation.TOUCH,
                                                  Relation.CROSS):
                         return Relation.OVERLAP
-                    elif self._multipoint is EMPTY:
+                    elif self.multipoint is EMPTY:
                         return (multipolygon_relation
                                 if (multisegment_relation
                                     is multipolygon_relation)
                                 else Relation.ENCLOSES)
                     else:
-                        multipoint_relation = self._multipoint.relate(other)
+                        multipoint_relation = self.multipoint.relate(other)
                         return (Relation.OVERLAP
                                 if multipoint_relation in (Relation.DISJOINT,
                                                            Relation.TOUCH,
@@ -1794,23 +1773,23 @@ class Mix(Indexable):
                                           is multipolygon_relation)
                                       else Relation.ENCLOSES))
             elif multipolygon_relation is Relation.ENCLOSES:
-                if self._multisegment is EMPTY:
-                    multipoint_relation = self._multipoint.relate(other)
+                if self.linear is EMPTY:
+                    multipoint_relation = self.multipoint.relate(other)
                     return (Relation.OVERLAP
                             if multipoint_relation in (Relation.DISJOINT,
                                                        Relation.TOUCH,
                                                        Relation.CROSS)
                             else Relation.ENCLOSES)
                 else:
-                    multisegment_relation = self._multisegment.relate(other)
+                    multisegment_relation = self.linear.relate(other)
                     if multisegment_relation in (Relation.DISJOINT,
                                                  Relation.TOUCH,
                                                  Relation.CROSS):
                         return Relation.OVERLAP
-                    elif self._multipoint is EMPTY:
+                    elif self.multipoint is EMPTY:
                         return multipolygon_relation
                     else:
-                        multipoint_relation = self._multipoint.relate(other)
+                        multipoint_relation = self.multipoint.relate(other)
                         return (Relation.OVERLAP
                                 if multipoint_relation in (Relation.DISJOINT,
                                                            Relation.TOUCH,

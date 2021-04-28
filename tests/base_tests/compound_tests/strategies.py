@@ -137,11 +137,11 @@ def compound_to_points(compound: Compound) -> Iterable[Point]:
                      if compound.multipoint is EMPTY
                      else compound_to_points(compound.multipoint),
                      []
-                     if compound.multisegment is EMPTY
-                     else compound_to_points(compound.multisegment),
+                     if compound.linear is EMPTY
+                     else compound_to_points(compound.linear),
                      []
-                     if compound.multipolygon is EMPTY
-                     else compound_to_points(compound.multipolygon))
+                     if compound.shaped is EMPTY
+                     else compound_to_points(compound.shaped))
     else:
         raise TypeError('Unsupported geometry type: {type}.'
                         .format(type=type(compound)))
