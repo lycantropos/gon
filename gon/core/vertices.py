@@ -5,8 +5,7 @@ from typing import (Iterable,
 from .compound import Compound
 from .hints import Coordinate
 from .multipoint import Multipoint
-from .point import (Point,
-                    scale_point)
+from .point import Point
 from .segment import Segment
 
 Vertices = Sequence[Point]
@@ -43,12 +42,6 @@ def equal(left: Vertices, right: Vertices, same_oriented: bool) -> bool:
                         else range(size - 1, index - 1, right_step)))
     return all(left[left_index] == right[right_index]
                for left_index, right_index in indices)
-
-
-def scale(vertices: Vertices,
-          factor_x: Coordinate,
-          factor_y: Coordinate) -> Vertices:
-    return [scale_point(vertex, factor_x, factor_y) for vertex in vertices]
 
 
 def scale_degenerate(vertices: Iterable[Point],
