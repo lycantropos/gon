@@ -129,9 +129,9 @@ class Polygon(Indexable, Shaped):
 
     __rand__ = __and__
 
-    def __contains__(self, other: Geometry) -> bool:
+    def __contains__(self, point: Point) -> bool:
         """
-        Checks if the polygon contains the other geometry.
+        Checks if the polygon contains the point.
 
         Time complexity:
             ``O(log vertices_count)`` expected after indexing,
@@ -163,7 +163,7 @@ class Polygon(Indexable, Shaped):
         >>> Point(7, 0) in polygon
         False
         """
-        return isinstance(other, Point) and bool(self._locate(other))
+        return bool(self.locate(point))
 
     def __eq__(self, other: 'Polygon') -> bool:
         """

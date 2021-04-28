@@ -99,9 +99,9 @@ class Multisegment(Indexable, Linear):
 
     __rand__ = __and__
 
-    def __contains__(self, other: Geometry) -> bool:
+    def __contains__(self, point: Point) -> bool:
         """
-        Checks if the multisegment contains the other geometry.
+        Checks if the multisegment contains the point.
 
         Time complexity:
             ``O(log segments_count)`` expected after indexing,
@@ -117,7 +117,7 @@ class Multisegment(Indexable, Linear):
         ...     for segment in multisegment.segments)
         True
         """
-        return isinstance(other, Point) and bool(self._locate(other))
+        return bool(self.locate(point))
 
     def __eq__(self, other: 'Multisegment') -> bool:
         """

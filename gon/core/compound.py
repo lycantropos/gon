@@ -22,9 +22,9 @@ class Compound(Geometry):
         """
 
     @abstractmethod
-    def __contains__(self, other: 'Geometry') -> bool:
+    def __contains__(self, point: Point) -> bool:
         """
-        Checks if the geometry contains the other.
+        Checks if the geometry contains the point.
         """
 
     @abstractmethod
