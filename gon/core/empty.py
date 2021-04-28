@@ -59,9 +59,9 @@ class Empty(Compound):
 
     __rand__ = __and__
 
-    def __contains__(self, other: Geometry) -> bool:
+    def __contains__(self, point: Point) -> bool:
         """
-        Checks if the empty geometry contains the other geometry.
+        Checks if the empty geometry contains the point.
 
         Time complexity:
             ``O(1)``

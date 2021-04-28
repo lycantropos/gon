@@ -72,9 +72,9 @@ class Multipoint(Indexable):
 
     __rand__ = __and__
 
-    def __contains__(self, other: Geometry) -> bool:
+    def __contains__(self, point: Point) -> bool:
         """
-        Checks if the multipoint contains the other geometry.
+        Checks if the multipoint contains the point.
 
         Time complexity:
             ``O(1)`` expected,
@@ -86,7 +86,7 @@ class Multipoint(Indexable):
         >>> all(point in multipoint for point in multipoint.points)
         True
         """
-        return isinstance(other, Point) and other in self._points_set
+        return point in self._points_set
 
     def __eq__(self, other: 'Multipoint') -> bool:
         """

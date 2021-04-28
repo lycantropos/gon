@@ -105,9 +105,9 @@ class Contour(Indexable, Linear):
 
     __rand__ = __and__
 
-    def __contains__(self, other: Geometry) -> bool:
+    def __contains__(self, point: Point) -> bool:
         """
-        Checks if the contour contains the other geometry.
+        Checks if the contour contains the point.
 
         Time complexity:
             ``O(log vertices_count)`` expected after indexing,
@@ -121,7 +121,7 @@ class Contour(Indexable, Linear):
         >>> all(vertex in contour for vertex in contour.vertices)
         True
         """
-        return isinstance(other, Point) and bool(self.locate(other))
+        return bool(self.locate(point))
 
     def __eq__(self, other: 'Contour') -> bool:
         """

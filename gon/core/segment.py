@@ -63,9 +63,9 @@ class Segment(Compound, Linear):
 
     __rand__ = __and__
 
-    def __contains__(self, other: Geometry) -> bool:
+    def __contains__(self, point: Point) -> bool:
         """
-        Checks if the segment contains the other geometry.
+        Checks if the segment contains the point.
 
         Time complexity:
             ``O(1)``
@@ -78,7 +78,7 @@ class Segment(Compound, Linear):
         >>> segment.end in segment
         True
         """
-        return isinstance(other, Point) and bool(self.locate(other))
+        return bool(self.locate(point))
 
     def __eq__(self, other: 'Segment') -> bool:
         """

@@ -103,7 +103,7 @@ class Mix(Indexable):
 
     __rand__ = __and__
 
-    def __contains__(self, other: Geometry) -> bool:
+    def __contains__(self, point: Point) -> bool:
         """
         Returns intersection of the mix with the other geometry.
 
@@ -149,7 +149,7 @@ class Mix(Indexable):
         >>> Point(7, 0) in mix
         False
         """
-        return isinstance(other, Point) and bool(self.locate(other))
+        return bool(self.locate(point))
 
     def __eq__(self, other: Geometry) -> bool:
         """

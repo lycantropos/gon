@@ -119,9 +119,9 @@ class Multipolygon(Indexable, Shaped):
 
     __rand__ = __and__
 
-    def __contains__(self, other: Geometry) -> bool:
+    def __contains__(self, point: Point) -> bool:
         """
-        Checks if the multipolygon contains the other geometry.
+        Checks if the multipolygon contains the point.
 
         Time complexity:
             ``O(log vertices_count)`` expected after indexing,
@@ -159,7 +159,7 @@ class Multipolygon(Indexable, Shaped):
         >>> Point(7, 7) in multipolygon
         False
         """
-        return isinstance(other, Point) and bool(self._locate(other))
+        return bool(self.locate(point))
 
     def __eq__(self, other: 'Multipolygon') -> bool:
         """
