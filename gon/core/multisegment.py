@@ -136,12 +136,10 @@ class Multisegment(Indexable, Linear):
         ...                               Segment(Point(0, 0), Point(1, 0))])
         True
         """
-        return (self is other
-                or (self._segments_set == other._segments_set
-                    if isinstance(other, Multisegment)
-                    else (False
-                          if isinstance(other, Geometry)
-                          else NotImplemented)))
+        return self is other or (isinstance(other, Multisegment)
+                                 and self._segments_set == other._segments_set
+                                 if isinstance(other, Geometry)
+                                 else NotImplemented)
 
     def __ge__(self, other: Compound) -> bool:
         """
