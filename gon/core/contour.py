@@ -39,7 +39,8 @@ from .multipoint import (Multipoint,
                          rotate_translate_points)
 from .multisegment import Multisegment
 from .point import (Point,
-                    point_to_step)
+                    point_to_step,
+                    scale_point)
 from .segment import Segment
 from .vertices import Vertices
 
@@ -831,7 +832,8 @@ def rotate_translate_contour(contour: Contour,
 def scale_contour(contour: Contour,
                   factor_x: Coordinate,
                   factor_y: Coordinate) -> Contour:
-    return Contour(_vertices.scale(contour.vertices, factor_x, factor_y))
+    return Contour([scale_point(vertex, factor_x, factor_y)
+                    for vertex in contour.vertices])
 
 
 def scale_contour_degenerate(contour: Contour,
