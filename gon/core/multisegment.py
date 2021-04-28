@@ -62,15 +62,11 @@ class Multisegment(Indexable, Linear):
         """
         context = get_context()
         self._context = context
-        self._segments = segments
-        self._segments_set = frozenset(segments)
+        self._segments, self._segments_set = segments, frozenset(segments)
         self._locate = partial(locate_point, self)
-        self._segment_nearest_segment = partial(to_segment_nearest_segment,
-                                                segments,
-                                                context=context)
-        self._point_nearest_segment = partial(to_point_nearest_segment,
-                                              segments,
-                                              context=context)
+        self._point_nearest_segment, self._segment_nearest_segment = (
+            partial(to_point_nearest_segment, context, segments),
+            partial(to_segment_nearest_segment, context, segments))
 
     __repr__ = generate_repr(__init__)
 

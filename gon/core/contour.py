@@ -67,10 +67,8 @@ class Contour(Indexable, Linear):
         self._locate = partial(locate_point, self)
         self._edges = edges = context.contour_edges(vertices)
         self._point_nearest_edge, self._segment_nearest_edge = (
-            partial(to_point_nearest_segment, edges,
-                    context=context),
-            partial(to_segment_nearest_segment, edges,
-                    context=context))
+            partial(to_point_nearest_segment, context, edges),
+            partial(to_segment_nearest_segment, context, edges))
 
     __repr__ = generate_repr(__init__)
 
