@@ -15,24 +15,6 @@ class Geometry(ABC):
     __slots__ = ()
 
     @abstractmethod
-    def __eq__(self, other: 'Geometry') -> bool:
-        """
-        Checks if geometric objects are equal.
-        """
-
-    @abstractmethod
-    def __hash__(self) -> int:
-        """
-        Returns hash of the geometric object.
-        """
-
-    @abstractmethod
-    def __repr__(self) -> str:
-        """
-        Returns string representation of the geometric object.
-        """
-
-    @abstractmethod
     def distance_to(self, other: 'Geometry') -> Expression:
         """
         Returns distance between geometric objects.
