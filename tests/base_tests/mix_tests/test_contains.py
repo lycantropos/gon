@@ -13,16 +13,16 @@ from . import strategies
 def test_components(mix: Mix) -> None:
     assert mix.multipoint is EMPTY or all(point in mix
                                           for point in mix.multipoint.points)
-    assert (mix.multisegment is EMPTY
+    assert (mix.linear is EMPTY
             or all(segment.start in mix and segment.end in mix
-                   for segment in mix.multisegment.segments))
-    assert (mix.multipolygon is EMPTY
+                   for segment in mix.linear.segments))
+    assert (mix.shaped is EMPTY
             or all(all(vertex in polygon
                        for vertex in polygon.border.vertices)
                    and all(vertex in polygon
                            for hole in polygon.holes
                            for vertex in hole.vertices)
-                   for polygon in mix.multipolygon.polygons))
+                   for polygon in mix.shaped.polygons))
 
 
 @given(strategies.mixes_with_points)
