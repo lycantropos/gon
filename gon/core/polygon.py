@@ -103,8 +103,10 @@ class Polygon(Indexable, Shaped):
  + sum(len(hole.vertices) for hole in self.holes)``.
 
         >>> from gon.base import Multipolygon
-        >>> polygon = Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
-        ...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]]))
+        >>> polygon = Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
+        ...                            Point(0, 6)]),
+        ...                   [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
+        ...                             Point(4, 2)])])
         >>> polygon & polygon == polygon
         True
         """
@@ -144,8 +146,10 @@ class Polygon(Indexable, Shaped):
         where ``vertices_count = len(self.border.vertices)\
  + sum(len(hole.vertices) for hole in self.holes)``.
 
-        >>> polygon = Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
-        ...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]]))
+        >>> polygon = Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
+        ...                            Point(0, 6)]),
+        ...                   [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
+        ...                             Point(4, 2)])])
         >>> Point(0, 0) in polygon
         True
         >>> Point(1, 1) in polygon
@@ -177,8 +181,10 @@ class Polygon(Indexable, Shaped):
         where ``vertices_count = len(self.border.vertices)\
  + sum(len(hole.vertices) for hole in self.holes)``.
 
-        >>> polygon = Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
-        ...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]]))
+        >>> polygon = Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
+        ...                            Point(0, 6)]),
+        ...                   [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
+        ...                             Point(4, 2)])])
         >>> polygon == polygon
         True
         """
@@ -202,8 +208,10 @@ class Polygon(Indexable, Shaped):
         where ``vertices_count = len(self.border.vertices)\
  + sum(len(hole.vertices) for hole in self.holes)``.
 
-        >>> polygon = Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
-        ...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]]))
+        >>> polygon = Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
+        ...                            Point(0, 6)]),
+        ...                   [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
+        ...                             Point(4, 2)])])
         >>> polygon >= polygon
         True
         """
@@ -226,8 +234,10 @@ class Polygon(Indexable, Shaped):
         where ``vertices_count = len(self.border.vertices)\
  + sum(len(hole.vertices) for hole in self.holes)``.
 
-        >>> polygon = Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
-        ...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]]))
+        >>> polygon = Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
+        ...                            Point(0, 6)]),
+        ...                   [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
+        ...                             Point(4, 2)])])
         >>> polygon > polygon
         False
         """
@@ -250,8 +260,10 @@ class Polygon(Indexable, Shaped):
         where ``vertices_count = len(self.border.vertices)\
  + sum(len(hole.vertices) for hole in self.holes)``.
 
-        >>> polygon = Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
-        ...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]]))
+        >>> polygon = Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
+        ...                            Point(0, 6)]),
+        ...                   [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
+        ...                             Point(4, 2)])])
         >>> hash(polygon) == hash(polygon)
         True
         """
@@ -269,8 +281,10 @@ class Polygon(Indexable, Shaped):
         where ``vertices_count = len(self.border.vertices)\
  + sum(len(hole.vertices) for hole in self.holes)``.
 
-        >>> polygon = Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
-        ...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]]))
+        >>> polygon = Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
+        ...                            Point(0, 6)]),
+        ...                   [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
+        ...                             Point(4, 2)])])
         >>> polygon <= polygon
         True
         """
@@ -295,8 +309,10 @@ class Polygon(Indexable, Shaped):
         where ``vertices_count = len(self.border.vertices)\
  + sum(len(hole.vertices) for hole in self.holes)``.
 
-        >>> polygon = Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
-        ...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]]))
+        >>> polygon = Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
+        ...                            Point(0, 6)]),
+        ...                   [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
+        ...                             Point(4, 2)])])
         >>> polygon < polygon
         False
         """
@@ -321,8 +337,10 @@ class Polygon(Indexable, Shaped):
  + sum(len(hole.vertices) for hole in self.holes)``.
 
         >>> from gon.base import Multipolygon
-        >>> polygon = Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
-        ...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]]))
+        >>> polygon = Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
+        ...                            Point(0, 6)]),
+        ...                   [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
+        ...                             Point(4, 2)])])
         >>> polygon | polygon == polygon
         True
         """
@@ -381,8 +399,10 @@ class Polygon(Indexable, Shaped):
         where ``vertices_count = len(self.border.vertices)\
  + sum(len(hole.vertices) for hole in self.holes)``.
 
-        >>> polygon = Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
-        ...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]]))
+        >>> polygon = Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
+        ...                            Point(0, 6)]),
+        ...                   [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
+        ...                             Point(4, 2)])])
         >>> polygon - polygon is EMPTY
         True
         """
@@ -404,8 +424,10 @@ class Polygon(Indexable, Shaped):
         where ``vertices_count = len(self.border.vertices)\
  + sum(len(hole.vertices) for hole in self.holes)``.
 
-        >>> polygon = Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
-        ...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]]))
+        >>> polygon = Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
+        ...                            Point(0, 6)]),
+        ...                   [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
+        ...                             Point(4, 2)])])
         >>> polygon ^ polygon is EMPTY
         True
         """
@@ -446,11 +468,10 @@ class Polygon(Indexable, Shaped):
 
         >>> polygon = Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
         ...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]]))
-        >>> (polygon
-        ...  == Polygon(Contour([Point(0, 0), Point(6, 0),
-        ...                      Point(6, 6), Point(0, 6)]),
-        ...             [Contour([Point(2, 2), Point(2, 4),
-        ...                       Point(4, 4), Point(4, 2)])]))
+        >>> polygon == Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
+        ...                             Point(0, 6)]),
+        ...                    [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
+        ...                              Point(4, 2)])])
         True
         """
         raw_border, raw_holes = raw
@@ -470,8 +491,10 @@ class Polygon(Indexable, Shaped):
         where ``vertices_count = len(self.border.vertices)\
  + sum(len(hole.vertices) for hole in self.holes)``.
 
-        >>> polygon = Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
-        ...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]]))
+        >>> polygon = Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
+        ...                            Point(0, 6)]),
+        ...                   [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
+        ...                             Point(4, 2)])])
         >>> polygon.area == 32
         True
         """
@@ -490,8 +513,10 @@ class Polygon(Indexable, Shaped):
         Memory complexity:
             ``O(1)``
 
-        >>> polygon = Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
-        ...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]]))
+        >>> polygon = Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
+        ...                            Point(0, 6)]),
+        ...                   [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
+        ...                             Point(4, 2)])])
         >>> polygon.border == Contour([Point(0, 0), Point(6, 0), Point(6, 6),
         ...                            Point(0, 6)])
         True
@@ -511,8 +536,10 @@ class Polygon(Indexable, Shaped):
         where ``vertices_count = len(self.border.vertices)\
  + sum(len(hole.vertices) for hole in self.holes)``.
 
-        >>> polygon = Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
-        ...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]]))
+        >>> polygon = Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
+        ...                            Point(0, 6)]),
+        ...                   [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
+        ...                             Point(4, 2)])])
         >>> polygon.centroid == Point(3, 3)
         True
         """
@@ -528,8 +555,10 @@ class Polygon(Indexable, Shaped):
         Memory complexity:
             ``O(1)``
 
-        >>> polygon = Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
-        ...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]]))
+        >>> polygon = Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
+        ...                            Point(0, 6)]),
+        ...                   [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
+        ...                             Point(4, 2)])])
         >>> isinstance(polygon.context, Context)
         True
         """
@@ -550,8 +579,10 @@ class Polygon(Indexable, Shaped):
 
         where ``border_vertices_count = len(self.border.vertices)``.
 
-        >>> polygon = Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
-        ...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]]))
+        >>> polygon = Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
+        ...                            Point(0, 6)]),
+        ...                   [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
+        ...                             Point(4, 2)])])
         >>> polygon.convex_hull == Polygon(polygon.border, [])
         True
         """
@@ -574,8 +605,10 @@ class Polygon(Indexable, Shaped):
         where ``vertices_count = len(self.border.vertices)\
  + sum(len(hole.vertices) for hole in self.holes)``.
 
-        >>> polygon = Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
-        ...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]]))
+        >>> polygon = Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
+        ...                            Point(0, 6)]),
+        ...                   [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
+        ...                             Point(4, 2)])])
         >>> polygon.centroid == Point(3, 3)
         True
         """
@@ -593,8 +626,10 @@ class Polygon(Indexable, Shaped):
 
         where ``holes_count = len(self.holes)``.
 
-        >>> polygon = Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
-        ...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]]))
+        >>> polygon = Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
+        ...                            Point(0, 6)]),
+        ...                   [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
+        ...                             Point(4, 2)])])
         >>> polygon.holes == [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
         ...                            Point(4, 2)])]
         True
@@ -611,8 +646,10 @@ class Polygon(Indexable, Shaped):
         Memory complexity:
             ``O(1)``
 
-        >>> polygon = Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
-        ...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]]))
+        >>> polygon = Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
+        ...                            Point(0, 6)]),
+        ...                   [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
+        ...                             Point(4, 2)])])
         >>> polygon.is_convex
         False
         >>> polygon.convex_hull.is_convex
@@ -634,8 +671,10 @@ class Polygon(Indexable, Shaped):
         where ``vertices_count = len(self.border.vertices)\
  + sum(len(hole.vertices) for hole in self.holes)``.
 
-        >>> polygon = Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
-        ...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]]))
+        >>> polygon = Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
+        ...                            Point(0, 6)]),
+        ...                   [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
+        ...                             Point(4, 2)])])
         >>> polygon.perimeter == 32
         True
         """
@@ -653,8 +692,10 @@ class Polygon(Indexable, Shaped):
         where ``vertices_count = len(self.border.vertices)\
  + sum(len(hole.vertices) for hole in self.holes)``.
 
-        >>> polygon = Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
-        ...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]]))
+        >>> polygon = Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
+        ...                            Point(0, 6)]),
+        ...                   [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
+        ...                             Point(4, 2)])])
         >>> polygon.distance_to(polygon) == 0
         True
         """
@@ -696,8 +737,10 @@ class Polygon(Indexable, Shaped):
         where ``vertices_count = len(self.border.vertices)\
  + sum(len(hole.vertices) for hole in self.holes)``.
 
-        >>> polygon = Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
-        ...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]]))
+        >>> polygon = Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
+        ...                            Point(0, 6)]),
+        ...                   [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
+        ...                             Point(4, 2)])])
         >>> polygon.index()
         """
         self._locate = Graph.from_polygon(self,
@@ -719,8 +762,10 @@ class Polygon(Indexable, Shaped):
         where ``vertices_count = len(self.border.vertices)\
  + sum(len(hole.vertices) for hole in self.holes)``.
 
-        >>> polygon = Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
-        ...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]]))
+        >>> polygon = Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
+        ...                            Point(0, 6)]),
+        ...                   [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
+        ...                             Point(4, 2)])])
         >>> polygon.locate(Point(0, 0)) is Location.BOUNDARY
         True
         >>> polygon.locate(Point(1, 1)) is Location.INTERIOR
@@ -752,8 +797,10 @@ class Polygon(Indexable, Shaped):
         where ``vertices_count = len(self.border.vertices)\
  + sum(len(hole.vertices) for hole in self.holes)``.
 
-        >>> polygon = Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
-        ...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]]))
+        >>> polygon = Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
+        ...                            Point(0, 6)]),
+        ...                   [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
+        ...                             Point(4, 2)])])
         >>> polygon.raw()
         ([(0, 0), (6, 0), (6, 6), (0, 6)], [[(2, 2), (2, 4), (4, 4), (4, 2)]])
         """
@@ -772,8 +819,10 @@ class Polygon(Indexable, Shaped):
         where ``vertices_count = len(self.border.vertices)\
  + sum(len(hole.vertices) for hole in self.holes)``.
 
-        >>> polygon = Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
-        ...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]]))
+        >>> polygon = Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
+        ...                            Point(0, 6)]),
+        ...                   [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
+        ...                             Point(4, 2)])])
         >>> polygon.relate(polygon) is Relation.EQUAL
         True
         """
@@ -802,13 +851,17 @@ class Polygon(Indexable, Shaped):
         where ``vertices_count = len(self.border.vertices)\
  + sum(len(hole.vertices) for hole in self.holes)``.
 
-        >>> polygon = Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
-        ...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]]))
+        >>> polygon = Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
+        ...                            Point(0, 6)]),
+        ...                   [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
+        ...                             Point(4, 2)])])
         >>> polygon.rotate(1, 0) == polygon
         True
         >>> (polygon.rotate(0, 1, Point(1, 1))
-        ...  == Polygon.from_raw(([(2, 0), (2, 6), (-4, 6), (-4, 0)],
-        ...                       [[(0, 2), (-2, 2), (-2, 4), (0, 4)]])))
+        ...  == Polygon(Contour([Point(2, 0), Point(2, 6), Point(-4, 6),
+        ...                      Point(-4, 0)]),
+        ...             [Contour([Point(0, 2), Point(-2, 2), Point(-2, 4),
+        ...                       Point(0, 4)])]))
         True
         """
         return (rotate_polygon_around_origin(self, cosine, sine)
@@ -831,13 +884,17 @@ class Polygon(Indexable, Shaped):
         where ``vertices_count = len(self.border.vertices)\
  + sum(len(hole.vertices) for hole in self.holes)``.
 
-        >>> polygon = Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
-        ...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]]))
+        >>> polygon = Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
+        ...                            Point(0, 6)]),
+        ...                   [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
+        ...                             Point(4, 2)])])
         >>> polygon.scale(1) == polygon
         True
         >>> (polygon.scale(1, 2)
-        ...  == Polygon.from_raw(([(0, 0), (6, 0), (6, 12), (0, 12)],
-        ...                       [[(2, 4), (2, 8), (4, 8), (4, 4)]])))
+        ...  == Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 12),
+        ...                      Point(0, 12)]),
+        ...             [Contour([Point(2, 4), Point(2, 8), Point(4, 8),
+        ...                       Point(4, 4)])]))
         True
         """
         if factor_y is None:
@@ -859,11 +916,15 @@ class Polygon(Indexable, Shaped):
         where ``vertices_count = len(self.border.vertices)\
  + sum(len(hole.vertices) for hole in self.holes)``.
 
-        >>> polygon = Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
-        ...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]]))
+        >>> polygon = Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
+        ...                            Point(0, 6)]),
+        ...                   [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
+        ...                             Point(4, 2)])])
         >>> (polygon.translate(1, 2)
-        ...  == Polygon.from_raw(([(1, 2), (7, 2), (7, 8), (1, 8)],
-        ...                       [[(3, 4), (3, 6), (5, 6), (5, 4)]])))
+        ...  == Polygon(Contour([Point(1, 2), Point(7, 2), Point(7, 8),
+        ...                      Point(1, 8)]),
+        ...             [Contour([Point(3, 4), Point(3, 6), Point(5, 6),
+        ...                       Point(5, 4)])]))
         True
         """
         return Polygon(self._border.translate(step_x, step_y),
@@ -882,18 +943,20 @@ class Polygon(Indexable, Shaped):
         where ``vertices_count = len(self.border.vertices)\
  + sum(len(hole.vertices) for hole in self.holes)``.
 
-        >>> polygon = Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
-        ...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]]))
+        >>> polygon = Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
+        ...                            Point(0, 6)]),
+        ...                   [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
+        ...                             Point(4, 2)])])
         >>> triangulation = polygon.triangulate()
         >>> (triangulation.triangles()
-        ...  == [Contour.from_raw([(4, 4), (6, 0), (6, 6)]),
-        ...      Contour.from_raw([(4, 2), (6, 0), (4, 4)]),
-        ...      Contour.from_raw([(0, 6), (4, 4), (6, 6)]),
-        ...      Contour.from_raw([(0, 0), (2, 2), (0, 6)]),
-        ...      Contour.from_raw([(0, 0), (6, 0), (4, 2)]),
-        ...      Contour.from_raw([(0, 6), (2, 4), (4, 4)]),
-        ...      Contour.from_raw([(0, 6), (2, 2), (2, 4)]),
-        ...      Contour.from_raw([(0, 0), (4, 2), (2, 2)])])
+        ...  == [Contour([Point(4, 4), Point(6, 0), Point(6, 6)]),
+        ...      Contour([Point(4, 2), Point(6, 0), Point(4, 4)]),
+        ...      Contour([Point(0, 6), Point(4, 4), Point(6, 6)]),
+        ...      Contour([Point(0, 0), Point(2, 2), Point(0, 6)]),
+        ...      Contour([Point(0, 0), Point(6, 0), Point(4, 2)]),
+        ...      Contour([Point(0, 6), Point(2, 4), Point(4, 4)]),
+        ...      Contour([Point(0, 6), Point(2, 2), Point(2, 4)]),
+        ...      Contour([Point(0, 0), Point(4, 2), Point(2, 2)])])
         True
         """
         return Triangulation.constrained_delaunay(self,
@@ -911,8 +974,10 @@ class Polygon(Indexable, Shaped):
         where ``vertices_count = len(self.border.vertices)\
  + sum(len(hole.vertices) for hole in self.holes)``.
 
-        >>> polygon = Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
-        ...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]]))
+        >>> polygon = Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
+        ...                            Point(0, 6)]),
+        ...                   [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
+        ...                             Point(4, 2)])])
         >>> polygon.validate()
         """
         self._border.validate()
