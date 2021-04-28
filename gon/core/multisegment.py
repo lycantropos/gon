@@ -499,7 +499,7 @@ class Multisegment(Indexable, Linear):
         return (self._distance_to_point(other)
                 if isinstance(other, Point)
                 else
-                (non_negative_min(self._distance_to_pointSegment(Point)
+                (non_negative_min(self._distance_to_point(point)
                                   for point in other.points)
                  if isinstance(other, Multipoint)
                  else
