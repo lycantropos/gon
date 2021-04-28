@@ -33,7 +33,7 @@ from .linear_utils import (from_mix_components,
                            relate_multipoint_to_linear_compound,
                            to_point_nearest_segment,
                            to_segment_nearest_segment,
-                           unfold_multisegment)
+                           unpack_multisegment)
 from .multipoint import (Multipoint,
                          rotate_points_around_origin,
                          rotate_translate_points)
@@ -782,18 +782,18 @@ class Contour(Indexable, Linear):
         return from_mix_components(multipoint, multisegment)
 
     def _subtract_multisegment(self, other: Multisegment) -> Compound:
-        return unfold_multisegment(
+        return unpack_multisegment(
                 subtract_multisegments(self._as_multisegment(), other,
                                        context=self.context))
 
     def _subtract_from_multisegment(self, other: Multisegment) -> Compound:
-        return unfold_multisegment(
+        return unpack_multisegment(
                 subtract_multisegments(other, self._as_multisegment(),
                                        context=self.context))
 
     def _symmetric_subtract_multisegment(self, other: Multisegment
                                          ) -> Compound:
-        return unfold_multisegment(symmetric_subtract_multisegments(
+        return unpack_multisegment(symmetric_subtract_multisegments(
                 self._as_multisegment(), other,
                 context=self.context))
 

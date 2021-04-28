@@ -39,7 +39,7 @@ from .hints import Coordinate
 from .iterable import (flatten,
                        non_negative_min)
 from .linear_utils import (from_mix_components,
-                           unfold_multisegment)
+                           unpack_multisegment)
 from .multipoint import Multipoint
 from .point import (Point,
                     point_to_step)
@@ -48,8 +48,8 @@ from .polygon import (Polygon,
                       rotate_translate_polygon,
                       scale_polygon)
 from .shaped_utils import (from_holeless_mix_components,
-                           mix_from_unfolded_components,
-                           unfold_multipolygon)
+                           mix_from_packed_components,
+                           unpack_multipolygon)
 
 
 class Multipolygon(Indexable, Shaped):
@@ -1005,7 +1005,7 @@ class Multipolygon(Indexable, Shaped):
                                 for polygon in self._polygons)
 
     def _intersect_with_multipolygon(self, other: 'Multipolygon') -> Compound:
-        return (mix_from_unfolded_components(
+        return (mix_from_packed_components(
                 *complete_intersect_multipolygons(self, other))
                 if (_multipolygon_has_holes(self)
                     or _multipolygon_has_holes(other))
@@ -1021,20 +1021,20 @@ class Multipolygon(Indexable, Shaped):
                         multisegment, self))
 
     def _subtract_from_multipolygon(self, other: 'Multipolygon') -> Compound:
-        return unfold_multipolygon(subtract_multipolygons(other, self))
+        return unpack_multipolygon(subtract_multipolygons(other, self))
 
     def _subtract_from_multisegment(self, other: Multisegment) -> Compound:
-        return unfold_multisegment(subtract_multipolygon_from_multisegment(
+        return unpack_multisegment(subtract_multipolygon_from_multisegment(
                 other, self))
 
     def _subtract_multipolygon(self, other: 'Multipolygon') -> Compound:
-        return unfold_multipolygon(subtract_multipolygons(
+        return unpack_multipolygon(subtract_multipolygons(
                 self, other,
                 context=self.context))
 
     def _symmetric_subtract_multipolygon(self, other: 'Multipolygon'
                                          ) -> Compound:
-        return unfold_multipolygon(symmetric_subtract_multipolygons(
+        return unpack_multipolygon(symmetric_subtract_multipolygons(
                 self, other,
                 context=self.context))
 
@@ -1047,12 +1047,12 @@ class Multipolygon(Indexable, Shaped):
         from gon.core.mix import from_mix_components
         return from_mix_components(
                 EMPTY,
-                unfold_multisegment(subtract_multipolygon_from_multisegment(
+                unpack_multisegment(subtract_multipolygon_from_multisegment(
                         other, self,
                         context=self.context)), self)
 
     def _unite_with_multipolygon(self, other: 'Multipolygon') -> Compound:
-        return unfold_multipolygon(unite_multipolygons(self, other))
+        return unpack_multipolygon(unite_multipolygons(self, other))
 
 
 def _multipolygon_has_holes(multipolygon: Multipolygon) -> bool:

@@ -41,15 +41,15 @@ from .iterable import non_negative_min
 from .linear_utils import (from_mix_components,
                            to_point_nearest_segment,
                            to_segment_nearest_segment,
-                           unfold_multisegment)
+                           unpack_multisegment)
 from .multipoint import Multipoint
 from .multisegment import Multisegment
 from .point import (Point,
                     point_to_step)
 from .segment import Segment
 from .shaped_utils import (from_holeless_mix_components,
-                           mix_from_unfolded_components,
-                           unfold_multipolygon)
+                           mix_from_packed_components,
+                           unpack_multipolygon)
 
 Triangulation = Triangulation
 
@@ -114,7 +114,7 @@ class Polygon(Indexable, Shaped):
                               self.context.multisegment_cls(other.edges))
                        if isinstance(other, Contour)
                        else
-                       ((mix_from_unfolded_components(
+                       ((mix_from_packed_components(
                                *complete_intersect_multipolygons(
                                        self._as_multipolygon(),
                                        other._as_multipolygon()))
@@ -975,19 +975,19 @@ class Polygon(Indexable, Shaped):
                 nearest_edge.start, nearest_edge.end, other)
 
     def _subtract_from_multisegment(self, other: Multisegment) -> Compound:
-        return unfold_multisegment(subtract_multipolygon_from_multisegment(
+        return unpack_multisegment(subtract_multipolygon_from_multisegment(
                 other, self._as_multipolygon(),
                 context=self.context))
 
     def _subtract_multipolygon(self, multipolygon: Multipolygon
                                ) -> Compound:
-        return unfold_multipolygon(subtract_multipolygons(
+        return unpack_multipolygon(subtract_multipolygons(
                 self._as_multipolygon(), multipolygon,
                 context=self.context))
 
     def _symmetric_subtract_multipolygon(self, multipolygon: Multipolygon
                                          ) -> Compound:
-        return unfold_multipolygon(symmetric_subtract_multipolygons(
+        return unpack_multipolygon(symmetric_subtract_multipolygons(
                 self._as_multipolygon(), multipolygon,
                 context=self.context))
 
@@ -1001,13 +1001,13 @@ class Polygon(Indexable, Shaped):
         multipolygon = self._as_multipolygon()
         return from_mix_components(
                 EMPTY,
-                unfold_multisegment(subtract_multipolygon_from_multisegment(
+                unpack_multisegment(subtract_multipolygon_from_multisegment(
                         other, multipolygon,
                         context=self.context)),
                 self)
 
     def _unite_with_multipolygon(self, multipolygon: Multipolygon) -> Compound:
-        return unfold_multipolygon(unite_multipolygons(self._as_multipolygon(),
+        return unpack_multipolygon(unite_multipolygons(self._as_multipolygon(),
                                                        multipolygon,
                                                        context=self.context))
 
