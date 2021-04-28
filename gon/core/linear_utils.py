@@ -48,9 +48,9 @@ def unfold_multisegment(multisegment: Multisegment) -> Compound:
             else EMPTY)
 
 
-def to_point_nearest_segment(segments: Sequence[Segment],
-                             point: Point,
-                             context: Context) -> Segment:
+def to_point_nearest_segment(context: Context,
+                             segments: Sequence[Segment],
+                             point: Point) -> Segment:
     def distance_to_point(segment: Segment) -> Coordinate:
         return context.segment_point_squared_distance(segment.start,
                                                       segment.end, point)
@@ -59,9 +59,9 @@ def to_point_nearest_segment(segments: Sequence[Segment],
                key=distance_to_point)
 
 
-def to_segment_nearest_segment(edges: Sequence[Segment],
-                               segment: Segment,
-                               context: Context) -> Segment:
+def to_segment_nearest_segment(context: Context,
+                               edges: Sequence[Segment],
+                               segment: Segment) -> Segment:
     def distance_to_segment(candidate: Segment) -> Coordinate:
         return context.segments_squared_distance(
                 candidate.start, candidate.end, segment.start, segment.end)
