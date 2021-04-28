@@ -22,13 +22,15 @@ from hypothesis import strategies
 from hypothesis.strategies import SearchStrategy
 from symba.base import Expression
 
-from gon.base import (Compound,
+from gon.base import (EMPTY,
+                      Compound,
                       Contour,
                       Mix,
                       Multipoint,
                       Multipolygon,
                       Multisegment,
                       Point,
+                      Polygon,
                       Relation,
                       Segment)
 from gon.core.iterable import shift_sequence
@@ -192,6 +194,26 @@ def divide_by_int(dividend: Coordinate, divisor: int) -> Coordinate:
 def mix_to_components(mix: Mix
                       ) -> Tuple[Multipoint, Multisegment, Multipolygon]:
     return mix.multipoint, mix.linear, mix.shaped
+
+
+def mix_to_polygons(mix: Mix) -> List[Polygon]:
+    shaped = mix.shaped
+    return ([]
+            if shaped is EMPTY
+            else (shaped.polygons
+                  if isinstance(shaped, Multipolygon)
+                  else [shaped]))
+
+
+def mix_to_segments(mix: Mix) -> List[Segment]:
+    linear = mix.linear
+    return ([]
+            if linear is EMPTY
+            else (linear.segments
+                  if isinstance(linear, Multisegment)
+                  else (linear.edges
+                        if isinstance(linear, Contour)
+                        else [linear])))
 
 
 def segment_to_rotations(segment: Segment,
