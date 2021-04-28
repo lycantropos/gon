@@ -182,12 +182,10 @@ class Multipolygon(Indexable, Shaped):
         >>> multipolygon == multipolygon
         True
         """
-        return (self is other
-                or (self._polygons_set == other._polygons_set
-                    if isinstance(other, Multipolygon)
-                    else (False
-                          if isinstance(other, Geometry)
-                          else NotImplemented)))
+        return self is other or (isinstance(other, Multipolygon)
+                                 and self._polygons_set == other._polygons_set
+                                 if isinstance(other, Geometry)
+                                 else NotImplemented)
 
     def __ge__(self, other: Compound) -> bool:
         """
