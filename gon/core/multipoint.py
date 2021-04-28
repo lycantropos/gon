@@ -106,11 +106,10 @@ class Multipoint(Indexable):
         >>> multipoint == Multipoint([Point(1, 0), Point(0, 0), Point(0, 1)])
         True
         """
-        return self is other or (self._points_set == other._points_set
-                                 if isinstance(other, Multipoint)
-                                 else (False
-                                       if isinstance(other, Geometry)
-                                       else NotImplemented))
+        return self is other or (isinstance(other, Multipoint)
+                                 and self._points_set == other._points_set
+                                 if isinstance(other, Geometry)
+                                 else NotImplemented)
 
     def __ge__(self, other: Compound) -> bool:
         """
