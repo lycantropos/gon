@@ -1060,7 +1060,7 @@ class Polygon(Indexable, Shaped):
                 unfold_multisegment(subtract_multipolygon_from_multisegment(
                         other, multipolygon,
                         context=self.context)),
-                multipolygon)
+                self)
 
     def _unite_with_multipolygon(self, multipolygon: Multipolygon) -> Compound:
         return unfold_multipolygon(unite_multipolygons(self._as_multipolygon(),
