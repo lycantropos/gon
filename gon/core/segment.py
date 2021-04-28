@@ -24,11 +24,10 @@ from .point import (Point,
                     rotate_point_around_origin,
                     rotate_translate_point,
                     scale_point)
-from .raw import RawSegment
 
 
 class Segment(Compound, Linear):
-    __slots__ = '_context', '_start', '_end', '_raw'
+    __slots__ = '_context', '_start', '_end'
 
     def __init__(self, start: Point, end: Point) -> None:
         """
@@ -42,7 +41,6 @@ class Segment(Compound, Linear):
         context = get_context()
         self._context = context
         self._start, self._end = start, end
-        self._raw = start.raw(), end.raw()
 
     __repr__ = generate_repr(__init__)
 
@@ -291,24 +289,6 @@ class Segment(Compound, Linear):
 
     __rxor__ = __xor__
 
-    @classmethod
-    def from_raw(cls, raw: RawSegment) -> 'Segment':
-        """
-        Constructs segment from the combination of Python built-ins.
-
-        Time complexity:
-            ``O(1)``
-        Memory complexity:
-            ``O(1)``
-
-        >>> segment = Segment.from_raw(((0, 0), (2, 0)))
-        >>> segment == Segment(Point(0, 0), Point(2, 0))
-        True
-        """
-        raw_start, raw_end = raw
-        start, end = Point.from_raw(raw_start), Point.from_raw(raw_end)
-        return cls(start, end)
-
     @property
     def centroid(self) -> Point:
         """
@@ -470,21 +450,6 @@ class Segment(Compound, Linear):
         return (Location.BOUNDARY
                 if point_in_segment(point, self)
                 else Location.EXTERIOR)
-
-    def raw(self) -> RawSegment:
-        """
-        Returns the segment as combination of Python built-ins.
-
-        Time complexity:
-            ``O(1)``
-        Memory complexity:
-            ``O(1)``
-
-        >>> segment = Segment(Point(0, 0), Point(2, 0))
-        >>> segment.raw()
-        ((0, 0), (2, 0))
-        """
-        return self._raw
 
     def relate(self, other: Compound) -> Relation:
         """
