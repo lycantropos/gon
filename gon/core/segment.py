@@ -27,7 +27,7 @@ from .point import (Point,
 
 
 class Segment(Compound, Linear):
-    __slots__ = '_context', '_start', '_end'
+    __slots__ = '_context', '_endpoints', '_end', '_start'
 
     def __init__(self, start: Point, end: Point) -> None:
         """
@@ -40,7 +40,7 @@ class Segment(Compound, Linear):
         """
         context = get_context()
         self._context = context
-        self._start, self._end = start, end
+        self._start, self._end = self._endpoints = start, end
 
     __repr__ = generate_repr(__init__)
 
@@ -176,7 +176,7 @@ class Segment(Compound, Linear):
         >>> hash(segment) == hash(Segment(Point(2, 0), Point(0, 0)))
         True
         """
-        return hash(frozenset(self._raw))
+        return hash(frozenset(self._endpoints))
 
     def __le__(self, other: Compound) -> bool:
         """
@@ -616,8 +616,8 @@ class Segment(Compound, Linear):
 def rotate_segment_around_origin(segment: Segment,
                                  cosine: Coordinate,
                                  sine: Coordinate) -> Segment:
-    return Segment(rotate_point_around_origin(segment._start, cosine, sine),
-                   rotate_point_around_origin(segment._end, cosine, sine))
+    return Segment(rotate_point_around_origin(segment.start, cosine, sine),
+                   rotate_point_around_origin(segment.end, cosine, sine))
 
 
 def rotate_translate_segment(segment: Segment,
@@ -625,9 +625,9 @@ def rotate_translate_segment(segment: Segment,
                              sine: Coordinate,
                              step_x: Coordinate,
                              step_y: Coordinate) -> Segment:
-    return Segment(rotate_translate_point(segment._start, cosine, sine, step_x,
+    return Segment(rotate_translate_point(segment.start, cosine, sine, step_x,
                                           step_y),
-                   rotate_translate_point(segment._end, cosine, sine, step_x,
+                   rotate_translate_point(segment.end, cosine, sine, step_x,
                                           step_y))
 
 
