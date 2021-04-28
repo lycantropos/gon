@@ -916,8 +916,7 @@ class Multipolygon(Indexable, Shaped):
                               for polygon in self._polygons])
                 if factor_x and factor_y
                 else vertices.scale_degenerate(
-                flatten(polygon._border._vertices
-                        for polygon in self._polygons),
+                flatten(polygon.border.vertices for polygon in self._polygons),
                 factor_x, factor_y))
 
     def translate(self,
