@@ -10,7 +10,6 @@ from ground.base import (Context,
 from locus import kd
 from reprit.base import generate_repr
 
-from .arithmetic import non_negative_min
 from .compound import (Compound,
                        Indexable,
                        Location,
@@ -18,7 +17,8 @@ from .compound import (Compound,
 from .empty import EMPTY
 from .geometry import Geometry
 from .hints import Coordinate
-from .iterable import unique_ever_seen
+from .iterable import (non_negative_min,
+                       unique_ever_seen)
 from .point import (Point,
                     point_to_step,
                     rotate_point_around_origin,

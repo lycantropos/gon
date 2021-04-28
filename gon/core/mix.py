@@ -2,7 +2,6 @@ from typing import Optional
 
 from reprit.base import generate_repr
 
-from .arithmetic import non_negative_min
 from .compound import (Compound,
                        Indexable,
                        Linear,
@@ -13,6 +12,7 @@ from .empty import (EMPTY,
                     Maybe)
 from .geometry import Geometry
 from .hints import Coordinate
+from .iterable import non_negative_min
 from .multipoint import Multipoint
 from .multipolygon import Multipolygon
 from .point import Point

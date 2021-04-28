@@ -25,7 +25,6 @@ from reprit.base import generate_repr
 from sect.decomposition import Location
 
 from . import vertices
-from .arithmetic import non_negative_min
 from .compound import (Compound,
                        Indexable,
                        Linear,
@@ -37,7 +36,8 @@ from .contour import (Contour,
 from .empty import EMPTY
 from .geometry import Geometry
 from .hints import Coordinate
-from .iterable import flatten
+from .iterable import (flatten,
+                       non_negative_min)
 from .linear_utils import (from_mix_components,
                            unfold_multisegment)
 from .multipoint import Multipoint

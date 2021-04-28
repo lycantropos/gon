@@ -8,7 +8,6 @@ from orient.planar import (point_in_segment,
 from reprit.base import generate_repr
 from symba.base import Expression
 
-from .arithmetic import non_negative_min
 from .compound import (Compound,
                        Linear,
                        Location,
@@ -16,6 +15,7 @@ from .compound import (Compound,
 from .empty import EMPTY
 from .geometry import Geometry
 from .hints import Coordinate
+from .iterable import non_negative_min
 from .linear_utils import (relate_multipoint_to_linear_compound,
                            unfold_multisegment)
 from .multipoint import Multipoint
