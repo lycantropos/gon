@@ -65,7 +65,7 @@ class Multipoint(Indexable):
         >>> multipoint & multipoint == multipoint
         True
         """
-        return (from_points(self._points_set & other._points_set
+        return (pack_points(self._points_set & other._points_set
                             if isinstance(other, Multipoint)
                             else [point
                                   for point in self._points
@@ -252,7 +252,7 @@ class Multipoint(Indexable):
         >>> multipoint - multipoint is EMPTY
         True
         """
-        return (from_points(self._points_set - other._points_set
+        return (pack_points(self._points_set - other._points_set
                             if isinstance(other, Multipoint)
                             else [point
                                   for point in self._points
@@ -275,7 +275,7 @@ class Multipoint(Indexable):
         >>> multipoint ^ multipoint is EMPTY
         True
         """
-        return (from_points(self._points_set ^ other._points_set)
+        return (pack_points(self._points_set ^ other._points_set)
                 if isinstance(other, Multipoint)
                 else NotImplemented)
 
@@ -574,7 +574,7 @@ class Multipoint(Indexable):
                             else Relation.CROSS)))
 
 
-def from_points(points: AbstractSet[Point]) -> Compound:
+def pack_points(points: AbstractSet[Point]) -> Compound:
     return Multipoint(list(points)) if points else EMPTY
 
 
