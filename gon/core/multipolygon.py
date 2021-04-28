@@ -47,14 +47,13 @@ from .polygon import (Polygon,
                       rotate_polygon_around_origin,
                       rotate_translate_polygon,
                       scale_polygon)
-from .raw import RawMultipolygon
 from .shaped_utils import (from_holeless_mix_components,
                            mix_from_unfolded_components,
                            unfold_multipolygon)
 
 
 class Multipolygon(Indexable, Shaped):
-    __slots__ = '_context', '_locate', '_polygons', '_polygons_set', '_raw'
+    __slots__ = '_context', '_locate', '_polygons', '_polygons_set'
 
     def __init__(self, polygons: Sequence[Polygon]) -> None:
         """
@@ -71,10 +70,8 @@ class Multipolygon(Indexable, Shaped):
         """
         context = get_context()
         self._context = context
-        self._polygons = polygons
-        self._polygons_set = frozenset(polygons)
-        self._raw = [polygon.raw() for polygon in polygons]
-        self._locate = partial(_locate_point_in_polygons, self._polygons)
+        self._polygons, self._polygons_set = polygons, frozenset(polygons)
+        self._locate = partial(_locate_point_in_polygons, polygons)
 
     __repr__ = generate_repr(__init__)
 
@@ -504,38 +501,6 @@ class Multipolygon(Indexable, Shaped):
 
     __rxor__ = __xor__
 
-    @classmethod
-    def from_raw(cls, raw: RawMultipolygon) -> 'Multipolygon':
-        """
-        Constructs multipolygon from the combination of Python built-ins.
-
-        Time complexity:
-            ``O(raw_vertices_count)``
-        Memory complexity:
-            ``O(raw_vertices_count)``
-
-        where ``raw_vertices_count = sum(len(raw_border)\
- + sum(len(raw_hole) for raw_hole in raw_holes)\
- for raw_border, raw_holes in raw)``.
-
-        >>> multipolygon = Multipolygon.from_raw(
-        ...         [([(0, 0), (14, 0), (14, 14), (0, 14)],
-        ...           [[(2, 2), (2, 12), (12, 12), (12, 2)]]),
-        ...          ([(4, 4), (10, 4), (10, 10), (4, 10)],
-        ...           [[(6, 6), (6, 8), (8, 8), (8, 6)]])])
-        >>> (multipolygon
-        ...  == Multipolygon([Polygon(Contour([Point(0, 0), Point(14, 0),
-        ...                                    Point(14, 14), Point(0, 14)]),
-        ...                          [Contour([Point(2, 2), Point(2, 12),
-        ...                                    Point(12, 12), Point(12, 2)])]),
-        ...                   Polygon(Contour([Point(4, 4), Point(10, 4),
-        ...                                    Point(10, 10), Point(4, 10)]),
-        ...                          [Contour([Point(6, 6), Point(6, 8),
-        ...                                    Point(8, 8), Point(8, 6)])])]))
-        True
-        """
-        return cls([Polygon.from_raw(raw_polygon) for raw_polygon in raw])
-
     @property
     def area(self) -> Coordinate:
         """
@@ -826,38 +791,6 @@ class Multipolygon(Indexable, Shaped):
         True
         """
         return self._locate(point)
-
-    def raw(self) -> RawMultipolygon:
-        """
-        Returns the multipolygon as combination of Python built-ins.
-
-        Time complexity:
-            ``O(vertices_count)``
-        Memory complexity:
-            ``O(vertices_count)``
-
-        where ``vertices_count = sum(len(polygon.border.vertices)\
- + sum(len(hole.vertices) for hole in polygon.holes)\
- for polygon in self.polygons)``.
-
-        >>> multipolygon = Multipolygon(
-        ...         [Polygon(Contour([Point(0, 0), Point(14, 0), Point(14, 14),
-        ...                           Point(0, 14)]),
-        ...                  [Contour([Point(2, 2), Point(2, 12),
-        ...                            Point(12, 12), Point(12, 2)])]),
-        ...          Polygon(Contour([Point(4, 4), Point(10, 4), Point(10, 10),
-        ...                           Point(4, 10)]),
-        ...                  [Contour([Point(6, 6), Point(6, 8), Point(8, 8),
-        ...                            Point(8, 6)])])])
-        >>> (multipolygon.raw()
-        ...  == [([(0, 0), (14, 0), (14, 14), (0, 14)],
-        ...       [[(2, 2), (2, 12), (12, 12), (12, 2)]]),
-        ...      ([(4, 4), (10, 4), (10, 10), (4, 10)],
-        ...       [[(6, 6), (6, 8), (8, 8), (8, 6)]])])
-        True
-        """
-        return [(raw_border, [raw_hole[:] for raw_hole in raw_holes])
-                for raw_border, raw_holes in self._raw]
 
     def relate(self, other: Compound) -> Relation:
         """
