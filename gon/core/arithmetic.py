@@ -3,8 +3,8 @@ from typing import Iterable
 from .hints import Coordinate
 
 
-def non_negative_min(numbers: Iterable[Coordinate]) -> Coordinate:
-    iterator = iter(numbers)
+def non_negative_min(values: Iterable[Coordinate]) -> Coordinate:
+    iterator = iter(values)
     result = next(iterator)
     if not result:
         return result
