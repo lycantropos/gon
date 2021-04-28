@@ -191,6 +191,43 @@ def divide_by_int(dividend: Coordinate, divisor: int) -> Coordinate:
             else dividend / divisor)
 
 
+def compound_to_compound_with_multipoint(compound: Compound
+                                         ) -> Tuple[Compound, Multipoint]:
+    return (compound, Multipoint(list(to_unique_ever_seen(compound_to_points(
+            compound)))))
+
+
+def compound_to_points(compound: Compound) -> Iterable[Point]:
+    if isinstance(compound, Multipoint):
+        return compound.points
+    elif isinstance(compound, Segment):
+        return [compound.start, compound.end]
+    elif isinstance(compound, Multisegment):
+        return flatten((segment.start, segment.end)
+                       for segment in compound.segments)
+    elif isinstance(compound, Contour):
+        return compound.vertices
+    elif isinstance(compound, Polygon):
+        return chain(compound.border.vertices,
+                     flatten(hole.vertices for hole in compound.holes))
+    elif isinstance(compound, Multipolygon):
+        return flatten(compound_to_points(polygon)
+                       for polygon in compound.polygons)
+    elif isinstance(compound, Mix):
+        return chain([]
+                     if compound.multipoint is EMPTY
+                     else compound_to_points(compound.multipoint),
+                     []
+                     if compound.linear is EMPTY
+                     else compound_to_points(compound.linear),
+                     []
+                     if compound.shaped is EMPTY
+                     else compound_to_points(compound.shaped))
+    else:
+        raise TypeError('Unsupported geometry type: {type}.'
+                        .format(type=type(compound)))
+
+
 def mix_to_components(mix: Mix
                       ) -> Tuple[Multipoint, Multisegment, Multipolygon]:
     return mix.multipoint, mix.linear, mix.shaped
