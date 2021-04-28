@@ -215,8 +215,8 @@ def compound_to_points(compound: Compound) -> Iterable[Point]:
                        for polygon in compound.polygons)
     elif isinstance(compound, Mix):
         return chain([]
-                     if compound.multipoint is EMPTY
-                     else compound_to_points(compound.multipoint),
+                     if compound.discrete is EMPTY
+                     else compound_to_points(compound.discrete),
                      []
                      if compound.linear is EMPTY
                      else compound_to_points(compound.linear),
