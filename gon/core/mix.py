@@ -151,7 +151,7 @@ class Mix(Indexable):
         """
         return bool(self.locate(point))
 
-    def __eq__(self, other: Geometry) -> bool:
+    def __eq__(self, other: 'Mix') -> bool:
         """
         Checks if mixes are equal.
 
@@ -182,9 +182,8 @@ class Mix(Indexable):
         >>> mix == mix
         True
         """
-        return self is other or (isinstance(other, Mix)
-                                 and self._components == other._components
-                                 if isinstance(other, Geometry)
+        return self is other or (self._components == other._components
+                                 if isinstance(other, Mix)
                                  else NotImplemented)
 
     def __ge__(self, other: Compound) -> bool:

@@ -141,10 +141,9 @@ class Contour(Indexable, Linear):
         True
         """
         return (self is other
-                or (isinstance(other, Contour)
-                    and _vertices.equal(self._vertices, other._vertices,
-                                        self.orientation is other.orientation)
-                    if isinstance(other, Geometry)
+                or (_vertices.equal(self._vertices, other._vertices,
+                                    self.orientation is other.orientation)
+                    if isinstance(other, Contour)
                     else NotImplemented))
 
     def __ge__(self, other: Compound) -> bool:
