@@ -641,8 +641,7 @@ def scale_segment(segment: Segment,
             else Multipoint([scale_point(segment._start, factor_x, factor_y)]))
 
 
-def _subtract_overlap(minuend: Segment,
-                      subtrahend: Segment) -> Segment:
+def _subtract_overlap(minuend: Segment, subtrahend: Segment) -> Segment:
     left_start, left_end, right_start, right_end = sorted([
         minuend.start, minuend.end, subtrahend.start, subtrahend.end])
     return (Segment(left_start, left_end)
@@ -650,8 +649,7 @@ def _subtract_overlap(minuend: Segment,
             else Segment(right_start, right_end))
 
 
-def _subtract_composite(minuend: Segment,
-                        subtrahend: Segment) -> Multisegment:
+def _subtract_composite(minuend: Segment, subtrahend: Segment) -> Multisegment:
     left_start, left_end, right_start, right_end = sorted([
         minuend.start, minuend.end, subtrahend.start, subtrahend.end])
     context = minuend.context
@@ -672,7 +670,8 @@ def _symmetric_subtract_overlap(minuend: Segment,
                                 subtrahend: Segment) -> Multisegment:
     left_start, left_end, right_start, right_end = sorted([
         minuend.start, minuend.end, subtrahend.start, subtrahend.end])
-    return [(left_start, left_end), (right_start, right_end)]
+    return minuend.context.multisegment_cls([Segment(left_start, left_end),
+                                             Segment(right_start, right_end)])
 
 
 def _unite_cross(first_addend: Segment,
