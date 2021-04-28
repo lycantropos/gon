@@ -129,6 +129,10 @@ def call(function: Callable[..., Range],
     return function(*args, **kwargs)
 
 
+def lift(value: Domain) -> List[Domain]:
+    return [value]
+
+
 def are_compounds_equivalent(left: Compound, right: Compound) -> bool:
     return left == right or left.relate(right) is Relation.EQUAL
 

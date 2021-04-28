@@ -1,5 +1,4 @@
 from itertools import repeat
-from typing import List
 
 from hypothesis import strategies
 from hypothesis_geometry import planar
@@ -7,8 +6,8 @@ from hypothesis_geometry import planar
 from gon.base import (Contour,
                       Multipolygon,
                       Polygon)
-from tests.utils import (Domain,
-                         Strategy,
+from tests.utils import (Strategy,
+                         lift,
                          sub_lists,
                          to_points_convex_hull)
 from .base import (coordinates_strategies,
@@ -25,9 +24,6 @@ def contour_to_invalid_polygon(contour: Contour) -> Polygon:
 
 
 def contour_to_invalid_polygons(convex_contour: Contour) -> Strategy[Polygon]:
-    def lift(value: Domain) -> List[Domain]:
-        return [value]
-
     return strategies.builds(Polygon,
                              strategies.just(convex_contour),
                              sub_lists(convex_contour.vertices,
@@ -52,5 +48,6 @@ repeated_polygons = (strategies.builds(repeat, polygons,
                      .map(list))
 invalid_multipolygons = strategies.builds(Multipolygon,
                                           empty_sequences
+                                          | polygons.map(lift)
                                           | strategies.lists(invalid_polygons)
                                           | repeated_polygons)

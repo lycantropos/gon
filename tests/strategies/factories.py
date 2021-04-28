@@ -1,4 +1,5 @@
-from typing import Optional, Tuple
+from typing import (Optional,
+                    Tuple)
 
 from hypothesis import strategies
 from hypothesis_geometry import planar
@@ -81,7 +82,7 @@ def coordinates_to_segments(coordinates: Strategy[Coordinate]
 def coordinates_to_multisegments(coordinates: Strategy[Coordinate]
                                  ) -> Strategy[Multisegment]:
     return planar.multisegments(coordinates,
-                                min_size=1,
+                                min_size=2,
                                 max_size=MAX_LINEAR_SIZE)
 
 
@@ -106,15 +107,15 @@ def coordinates_to_mixes(coordinates: Strategy[Coordinate]) -> Strategy[Mix]:
 
     return ((planar.mixes(coordinates,
                           min_multipoint_size=1,
-                          min_multisegment_size=1)
+                          min_multisegment_size=2)
              .map(from_components))
             | (planar.mixes(coordinates,
                             min_multipoint_size=1,
-                            min_multipolygon_size=1)
+                            min_multipolygon_size=2)
                .map(from_components))
             | (planar.mixes(coordinates,
                             min_multisegment_size=1,
-                            min_multipolygon_size=1)
+                            min_multipolygon_size=2)
                .map(from_components)))
 
 
@@ -138,7 +139,7 @@ def coordinates_to_polygons(coordinates: Strategy[Coordinate],
 
 def coordinates_to_multipolygons(coordinates: Strategy[Coordinate],
                                  *,
-                                 min_size: int = 1,
+                                 min_size: int = 2,
                                  max_size: Optional[int] = None,
                                  min_border_size: int = 3,
                                  max_border_size: Optional[int] = None,
