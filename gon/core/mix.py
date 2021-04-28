@@ -1039,7 +1039,9 @@ class Mix(Indexable):
                              in (Relation.OVERLAP,
                                  Relation.COMPOSITE)
                              for hole in polygon.holes)
-                      for polygon in self.shaped.polygons)):
+                      for polygon in (self.shaped.polygons
+                                      if isinstance(self.shaped, Multipolygon)
+                                      else [self.shaped]))):
             raise ValueError('Linear component should not overlap '
                              'shaped component borders.')
 
