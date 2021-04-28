@@ -1,5 +1,6 @@
 from typing import Optional
 
+from ground.hints import Multipolygon
 from reprit.base import generate_repr
 
 from .compound import (Compound,
@@ -14,7 +15,6 @@ from .geometry import Geometry
 from .hints import Coordinate
 from .iterable import non_negative_min
 from .multipoint import Multipoint
-from .multipolygon import Multipolygon
 from .point import Point
 
 MIN_MIX_NON_EMPTY_COMPONENTS = 2
