@@ -737,6 +737,8 @@ class Mix(Indexable):
         ...                       [[(2, 2), (2, 4), (4, 4), (4, 2)]])]))
         >>> mix.index()
         """
+        if self.multipoint is not EMPTY:
+            self.multipoint.index()
         if self.linear is not EMPTY:
             self.linear.index()
         if self.shaped is not EMPTY:
