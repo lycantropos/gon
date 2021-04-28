@@ -1,9 +1,7 @@
 from abc import (ABC,
                  abstractmethod)
 from typing import (TYPE_CHECKING,
-                    Optional,
-                    Type,
-                    TypeVar)
+                    Optional)
 
 from symba.base import Expression
 
@@ -11,9 +9,6 @@ from gon.core.hints import Coordinate
 
 if TYPE_CHECKING:
     from .primitive import Point
-
-RawGeometry = TypeVar('RawGeometry', None, tuple, list)
-_T = TypeVar('_T')
 
 
 class Geometry(ABC):
@@ -37,23 +32,10 @@ class Geometry(ABC):
         Returns string representation of the geometric object.
         """
 
-    @classmethod
-    @abstractmethod
-    def from_raw(cls: Type[_T], raw: RawGeometry) -> _T:
-        """
-        Constructs geometric object from combination of Python built-ins.
-        """
-
     @abstractmethod
     def distance_to(self, other: 'Geometry') -> Expression:
         """
         Returns distance between geometric objects.
-        """
-
-    @abstractmethod
-    def raw(self) -> RawGeometry:
-        """
-        Returns geometric object as combination of Python built-ins.
         """
 
     @abstractmethod
