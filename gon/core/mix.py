@@ -17,10 +17,8 @@ from .multipoint import Multipoint
 from .multipolygon import Multipolygon
 from .multisegment import Multisegment
 from .point import Point
-from .polygon import Polygon
 from .raw import (RAW_EMPTY,
                   RawMix)
-from .segment import Segment
 
 MIN_MIX_NON_EMPTY_COMPONENTS = 2
 
@@ -1804,13 +1802,7 @@ class Mix(Indexable):
 def from_mix_components(multipoint: Maybe[Multipoint],
                         linear: Maybe[Linear],
                         shaped: Maybe[Shaped]) -> Compound:
-    return (Mix(multipoint,
-                Multisegment([linear])
-                if isinstance(linear, Segment)
-                else linear,
-                Multipolygon([shaped])
-                if isinstance(shaped, Polygon)
-                else shaped)
+    return (Mix(multipoint, linear, shaped)
             if (((multipoint is not EMPTY)
                  + (linear is not EMPTY)
                  + (shaped is not EMPTY))
