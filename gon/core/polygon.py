@@ -182,13 +182,11 @@ class Polygon(Indexable, Shaped):
         >>> polygon == polygon
         True
         """
-        return (self is other
-                or (self._border == other._border
-                    and self._holes_set == other._holes_set
-                    if isinstance(other, Polygon)
-                    else (False
-                          if isinstance(other, Geometry)
-                          else NotImplemented)))
+        return self is other or (isinstance(other, Polygon)
+                                 and self._border == other._border
+                                 and self._holes_set == other._holes_set
+                                 if isinstance(other, Geometry)
+                                 else NotImplemented)
 
     def __ge__(self, other: Compound) -> bool:
         """
