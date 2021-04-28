@@ -15,10 +15,7 @@ from .geometry import Geometry
 from .hints import Coordinate
 from .multipoint import Multipoint
 from .multipolygon import Multipolygon
-from .multisegment import Multisegment
 from .point import Point
-from .raw import (RAW_EMPTY,
-                  RawMix)
 
 MIN_MIX_NON_EMPTY_COMPONENTS = 2
 
@@ -578,51 +575,6 @@ class Mix(Indexable):
 
     __rxor__ = __xor__
 
-    @classmethod
-    def from_raw(cls, raw: RawMix) -> 'Mix':
-        """
-        Constructs mix from the combination of Python built-ins.
-
-        Time complexity:
-            ``O(raw_elements_count)``
-        Memory complexity:
-            ``O(raw_elements_count)``
-
-        where ``raw_elements_count = raw_multipoint_size +\
- raw_multisegment_size + raw_multipolygon_vertices_count``,
-        ``raw_multipoint_size = len(raw_multipoint)``,
-        ``raw_multisegment_size = len(raw_multisegment)``,
-        ``raw_multipolygon_vertices_count = sum(len(raw_border)\
- + sum(len(raw_hole) for raw_hole in raw_holes)\
- for raw_border, raw_holes in raw_multipolygon)``,
-        ``raw_multipoint, raw_multisegment, raw_multipolygon = raw``.
-
-        >>> mix = Mix.from_raw(([(3, 3), (7, 7)],
-        ...                     [((0, 6), (0, 8)), ((6, 6), (6, 8))],
-        ...                     [([(0, 0), (6, 0), (6, 6), (0, 6)],
-        ...                       [[(2, 2), (2, 4), (4, 4), (4, 2)]])]))
-        >>> from gon.base import Contour, Polygon, Segment
-        >>> (mix
-        ...  == Mix(Multipoint([Point(3, 3), Point(7, 7)]),
-        ...         Multisegment([Segment(Point(0, 6), Point(0, 8)),
-        ...                       Segment(Point(6, 6), Point(6, 8))]),
-        ...         Multipolygon([Polygon(Contour([Point(0, 0), Point(6, 0),
-        ...                                       Point(6, 6), Point(0, 6)]),
-        ...                       [Contour([Point(2, 2), Point(2, 4),
-        ...                                 Point(4, 4), Point(4, 2)])])])))
-        True
-        """
-        raw_multipoint, raw_multisegment, raw_multipolygon = raw
-        return cls(EMPTY
-                   if raw_multipoint is RAW_EMPTY
-                   else Multipoint.from_raw(raw_multipoint),
-                   EMPTY
-                   if raw_multisegment is RAW_EMPTY
-                   else Multisegment.from_raw(raw_multisegment),
-                   EMPTY
-                   if raw_multipolygon is RAW_EMPTY
-                   else Multipolygon.from_raw(raw_multipolygon))
-
     @property
     def centroid(self) -> Point:
         """
@@ -842,37 +794,6 @@ class Mix(Indexable):
             if location is not Location.EXTERIOR:
                 return location
         return Location.EXTERIOR
-
-    def raw(self) -> RawMix:
-        """
-        Returns the mix as combination of Python built-ins.
-
-        Time complexity:
-            ``O(elements_count)``
-        Memory complexity:
-            ``O(elements_count)``
-
-        where ``elements_count = multipoint_size + multisegment_size\
- + multipolygon_vertices_count``,
-        ``multipoint_size = len(points)``,
-        ``multisegment_size = len(segments)``,
-        ``multipolygon_vertices_count = sum(len(polygon.border.vertices)\
- + sum(len(hole.vertices) for hole in polygon.holes)\
- for polygon in polygons)``,
-        ``points = [] if self.multipoint is EMPTY\
- else self.multipoint.points``,
-        ``segments = [] if self.linear is EMPTY else self.linear.segments``,
-        ``polygons = [] if self.shaped is EMPTY else self.shaped.polygons``.
-
-        >>> mix = Mix.from_raw(([(3, 3), (7, 7)],
-        ...                     [((0, 6), (0, 8)), ((6, 6), (6, 8))],
-        ...                     [([(0, 0), (6, 0), (6, 6), (0, 6)],
-        ...                       [[(2, 2), (2, 4), (4, 4), (4, 2)]])]))
-        >>> mix.raw()
-        ([(3, 3), (7, 7)], [((0, 6), (0, 8)), ((6, 6), (6, 8))],\
- [([(0, 0), (6, 0), (6, 6), (0, 6)], [[(2, 2), (2, 4), (4, 4), (4, 2)]])])
-        """
-        return self.multipoint.raw(), self.linear.raw(), self.shaped.raw()
 
     def relate(self, other: Compound) -> Relation:
         """
