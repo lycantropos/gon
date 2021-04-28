@@ -64,10 +64,13 @@ class Mix(Indexable):
         ``segments = [] if self.linear is EMPTY else self.linear.segments``,
         ``polygons = [] if self.shaped is EMPTY else self.shaped.polygons``.
 
-        >>> mix = Mix.from_raw(([(3, 3), (7, 7)],
-        ...                     [((0, 6), (0, 8)), ((6, 6), (6, 8))],
-        ...                     [([(0, 0), (6, 0), (6, 6), (0, 6)],
-        ...                       [[(2, 2), (2, 4), (4, 4), (4, 2)]])]))
+        >>> from gon.base import Contour, Polygon, Segment
+        >>> mix = Mix(Multipoint([Point(3, 3)]),
+        ...           Segment(Point(6, 6), Point(6, 8)),
+        ...           Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
+        ...                            Point(0, 6)]),
+        ...                   [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
+        ...                             Point(4, 2)])]))
         >>> mix & mix == mix
         True
         """
@@ -125,10 +128,13 @@ class Mix(Indexable):
         ``segments = [] if self.linear is EMPTY else self.linear.segments``,
         ``polygons = [] if self.shaped is EMPTY else self.shaped.polygons``.
 
-        >>> mix = Mix.from_raw(([(3, 3), (7, 7)],
-        ...                     [((0, 6), (0, 8)), ((6, 6), (6, 8))],
-        ...                     [([(0, 0), (6, 0), (6, 6), (0, 6)],
-        ...                       [[(2, 2), (2, 4), (4, 4), (4, 2)]])]))
+        >>> from gon.base import Contour, Polygon, Segment
+        >>> mix = Mix(Multipoint([Point(3, 3)]),
+        ...           Segment(Point(6, 6), Point(6, 8)),
+        ...           Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
+        ...                            Point(0, 6)]),
+        ...                   [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
+        ...                             Point(4, 2)])]))
         >>> Point(0, 0) in mix
         True
         >>> Point(1, 1) in mix
@@ -169,10 +175,13 @@ class Mix(Indexable):
         ``segments = [] if self.linear is EMPTY else self.linear.segments``,
         ``polygons = [] if self.shaped is EMPTY else self.shaped.polygons``.
 
-        >>> mix = Mix.from_raw(([(3, 3), (7, 7)],
-        ...                     [((0, 6), (0, 8)), ((6, 6), (6, 8))],
-        ...                     [([(0, 0), (6, 0), (6, 6), (0, 6)],
-        ...                       [[(2, 2), (2, 4), (4, 4), (4, 2)]])]))
+        >>> from gon.base import Contour, Polygon, Segment
+        >>> mix = Mix(Multipoint([Point(3, 3)]),
+        ...           Segment(Point(6, 6), Point(6, 8)),
+        ...           Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
+        ...                            Point(0, 6)]),
+        ...                   [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
+        ...                             Point(4, 2)])]))
         >>> mix == mix
         True
         """
@@ -202,10 +211,13 @@ class Mix(Indexable):
         ``segments = [] if self.linear is EMPTY else self.linear.segments``,
         ``polygons = [] if self.shaped is EMPTY else self.shaped.polygons``.
 
-        >>> mix = Mix.from_raw(([(3, 3), (7, 7)],
-        ...                     [((0, 6), (0, 8)), ((6, 6), (6, 8))],
-        ...                     [([(0, 0), (6, 0), (6, 6), (0, 6)],
-        ...                       [[(2, 2), (2, 4), (4, 4), (4, 2)]])]))
+        >>> from gon.base import Contour, Polygon, Segment
+        >>> mix = Mix(Multipoint([Point(3, 3)]),
+        ...           Segment(Point(6, 6), Point(6, 8)),
+        ...           Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
+        ...                            Point(0, 6)]),
+        ...                   [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
+        ...                             Point(4, 2)])]))
         >>> mix >= mix
         True
         """
@@ -243,10 +255,13 @@ class Mix(Indexable):
         ``segments = [] if self.linear is EMPTY else self.linear.segments``,
         ``polygons = [] if self.shaped is EMPTY else self.shaped.polygons``.
 
-        >>> mix = Mix.from_raw(([(3, 3), (7, 7)],
-        ...                     [((0, 6), (0, 8)), ((6, 6), (6, 8))],
-        ...                     [([(0, 0), (6, 0), (6, 6), (0, 6)],
-        ...                       [[(2, 2), (2, 4), (4, 4), (4, 2)]])]))
+        >>> from gon.base import Contour, Polygon, Segment
+        >>> mix = Mix(Multipoint([Point(3, 3)]),
+        ...           Segment(Point(6, 6), Point(6, 8)),
+        ...           Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
+        ...                            Point(0, 6)]),
+        ...                   [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
+        ...                             Point(4, 2)])]))
         >>> mix > mix
         False
         """
@@ -281,10 +296,13 @@ class Mix(Indexable):
         ``segments = [] if self.linear is EMPTY else self.linear.segments``,
         ``polygons = [] if self.shaped is EMPTY else self.shaped.polygons``.
 
-        >>> mix = Mix.from_raw(([(3, 3), (7, 7)],
-        ...                     [((0, 6), (0, 8)), ((6, 6), (6, 8))],
-        ...                     [([(0, 0), (6, 0), (6, 6), (0, 6)],
-        ...                       [[(2, 2), (2, 4), (4, 4), (4, 2)]])]))
+        >>> from gon.base import Contour, Polygon, Segment
+        >>> mix = Mix(Multipoint([Point(3, 3)]),
+        ...           Segment(Point(6, 6), Point(6, 8)),
+        ...           Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
+        ...                            Point(0, 6)]),
+        ...                   [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
+        ...                             Point(4, 2)])]))
         >>> hash(mix) == hash(mix)
         True
         """
@@ -311,10 +329,13 @@ class Mix(Indexable):
         ``segments = [] if self.linear is EMPTY else self.linear.segments``,
         ``polygons = [] if self.shaped is EMPTY else self.shaped.polygons``.
 
-        >>> mix = Mix.from_raw(([(3, 3), (7, 7)],
-        ...                     [((0, 6), (0, 8)), ((6, 6), (6, 8))],
-        ...                     [([(0, 0), (6, 0), (6, 6), (0, 6)],
-        ...                       [[(2, 2), (2, 4), (4, 4), (4, 2)]])]))
+        >>> from gon.base import Contour, Polygon, Segment
+        >>> mix = Mix(Multipoint([Point(3, 3)]),
+        ...           Segment(Point(6, 6), Point(6, 8)),
+        ...           Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
+        ...                            Point(0, 6)]),
+        ...                   [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
+        ...                             Point(4, 2)])]))
         >>> mix <= mix
         True
         """
@@ -352,10 +373,13 @@ class Mix(Indexable):
         ``segments = [] if self.linear is EMPTY else self.linear.segments``,
         ``polygons = [] if self.shaped is EMPTY else self.shaped.polygons``.
 
-        >>> mix = Mix.from_raw(([(3, 3), (7, 7)],
-        ...                     [((0, 6), (0, 8)), ((6, 6), (6, 8))],
-        ...                     [([(0, 0), (6, 0), (6, 6), (0, 6)],
-        ...                       [[(2, 2), (2, 4), (4, 4), (4, 2)]])]))
+        >>> from gon.base import Contour, Polygon, Segment
+        >>> mix = Mix(Multipoint([Point(3, 3)]),
+        ...           Segment(Point(6, 6), Point(6, 8)),
+        ...           Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
+        ...                            Point(0, 6)]),
+        ...                   [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
+        ...                             Point(4, 2)])]))
         >>> mix < mix
         False
         """
@@ -392,10 +416,13 @@ class Mix(Indexable):
         ``segments = [] if self.linear is EMPTY else self.linear.segments``,
         ``polygons = [] if self.shaped is EMPTY else self.shaped.polygons``.
 
-        >>> mix = Mix.from_raw(([(3, 3), (7, 7)],
-        ...                     [((0, 6), (0, 8)), ((6, 6), (6, 8))],
-        ...                     [([(0, 0), (6, 0), (6, 6), (0, 6)],
-        ...                       [[(2, 2), (2, 4), (4, 4), (4, 2)]])]))
+        >>> from gon.base import Contour, Polygon, Segment
+        >>> mix = Mix(Multipoint([Point(3, 3)]),
+        ...           Segment(Point(6, 6), Point(6, 8)),
+        ...           Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
+        ...                            Point(0, 6)]),
+        ...                   [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
+        ...                             Point(4, 2)])]))
         >>> mix | mix == mix
         True
         """
@@ -475,10 +502,13 @@ class Mix(Indexable):
         ``segments = [] if self.linear is EMPTY else self.linear.segments``,
         ``polygons = [] if self.shaped is EMPTY else self.shaped.polygons``.
 
-        >>> mix = Mix.from_raw(([(3, 3), (7, 7)],
-        ...                     [((0, 6), (0, 8)), ((6, 6), (6, 8))],
-        ...                     [([(0, 0), (6, 0), (6, 6), (0, 6)],
-        ...                       [[(2, 2), (2, 4), (4, 4), (4, 2)]])]))
+        >>> from gon.base import Contour, Polygon, Segment
+        >>> mix = Mix(Multipoint([Point(3, 3)]),
+        ...           Segment(Point(6, 6), Point(6, 8)),
+        ...           Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
+        ...                            Point(0, 6)]),
+        ...                   [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
+        ...                             Point(4, 2)])]))
         >>> mix - mix is EMPTY
         True
         """
@@ -506,10 +536,13 @@ class Mix(Indexable):
         ``segments = [] if self.linear is EMPTY else self.linear.segments``,
         ``polygons = [] if self.shaped is EMPTY else self.shaped.polygons``.
 
-        >>> mix = Mix.from_raw(([(3, 3), (7, 7)],
-        ...                     [((0, 6), (0, 8)), ((6, 6), (6, 8))],
-        ...                     [([(0, 0), (6, 0), (6, 6), (0, 6)],
-        ...                       [[(2, 2), (2, 4), (4, 4), (4, 2)]])]))
+        >>> from gon.base import Contour, Polygon, Segment
+        >>> mix = Mix(Multipoint([Point(3, 3)]),
+        ...           Segment(Point(6, 6), Point(6, 8)),
+        ...           Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
+        ...                            Point(0, 6)]),
+        ...                   [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
+        ...                             Point(4, 2)])]))
         >>> mix ^ mix is EMPTY
         True
         """
@@ -568,7 +601,7 @@ class Mix(Indexable):
         ...                     [((0, 6), (0, 8)), ((6, 6), (6, 8))],
         ...                     [([(0, 0), (6, 0), (6, 6), (0, 6)],
         ...                       [[(2, 2), (2, 4), (4, 4), (4, 2)]])]))
-        >>> from gon.base import Contour
+        >>> from gon.base import Contour, Polygon, Segment
         >>> (mix
         ...  == Mix(Multipoint([Point(3, 3), Point(7, 7)]),
         ...         Multisegment([Segment(Point(0, 6), Point(0, 8)),
@@ -609,10 +642,13 @@ class Mix(Indexable):
         ``segments = [] if self.linear is EMPTY else self.linear.segments``,
         ``polygons = [] if self.shaped is EMPTY else self.shaped.polygons``.
 
-        >>> mix = Mix.from_raw(([(3, 3), (7, 7)],
-        ...                     [((0, 6), (0, 8)), ((6, 6), (6, 8))],
-        ...                     [([(0, 0), (6, 0), (6, 6), (0, 6)],
-        ...                       [[(2, 2), (2, 4), (4, 4), (4, 2)]])]))
+        >>> from gon.base import Contour, Polygon, Segment
+        >>> mix = Mix(Multipoint([Point(3, 3)]),
+        ...           Segment(Point(6, 6), Point(6, 8)),
+        ...           Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
+        ...                            Point(0, 6)]),
+        ...                   [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
+        ...                             Point(4, 2)])]))
         >>> mix.centroid == Point(3, 3)
         True
         """
@@ -628,11 +664,14 @@ class Mix(Indexable):
         Memory complexity:
             ``O(1)``
 
-        >>> mix = Mix.from_raw(([(3, 3), (7, 7)],
-        ...                     [((0, 6), (0, 8)), ((6, 6), (6, 8))],
-        ...                     [([(0, 0), (6, 0), (6, 6), (0, 6)],
-        ...                       [[(2, 2), (2, 4), (4, 4), (4, 2)]])]))
-        >>> mix.multipoint == Multipoint([Point(3, 3), Point(7, 7)])
+        >>> from gon.base import Contour, Polygon, Segment
+        >>> mix = Mix(Multipoint([Point(3, 3)]),
+        ...           Segment(Point(6, 6), Point(6, 8)),
+        ...           Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
+        ...                            Point(0, 6)]),
+        ...                   [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
+        ...                             Point(4, 2)])]))
+        >>> mix.multipoint == Multipoint([Point(3, 3)])
         True
         """
         return self._multipoint
@@ -647,16 +686,18 @@ class Mix(Indexable):
         Memory complexity:
             ``O(1)``
 
-        >>> mix = Mix.from_raw(([(3, 3), (7, 7)],
-        ...                     [((0, 6), (0, 8)), ((6, 6), (6, 8))],
-        ...                     [([(0, 0), (6, 0), (6, 6), (0, 6)],
-        ...                       [[(2, 2), (2, 4), (4, 4), (4, 2)]])]))
+        >>> from gon.base import Contour, Polygon, Segment
+        >>> mix = Mix(Multipoint([Point(3, 3)]),
+        ...           Segment(Point(6, 6), Point(6, 8)),
+        ...           Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
+        ...                            Point(0, 6)]),
+        ...                   [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
+        ...                             Point(4, 2)])]))
         >>> from gon.base import Contour
-        >>> (mix.shaped
-        ...  == Multipolygon([Polygon(Contour([Point(0, 0), Point(6, 0),
-        ...                                   Point(6, 6), Point(0, 6)]),
-        ...                  [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
-        ...                            Point(4, 2)])])]))
+        >>> mix.shaped == Polygon(Contour([Point(0, 0), Point(6, 0),
+        ...                                Point(6, 6), Point(0, 6)]),
+        ...                       [Contour([Point(2, 2), Point(2, 4),
+        ...                                 Point(4, 4), Point(4, 2)])])
         True
         """
         return self._shaped
@@ -671,13 +712,14 @@ class Mix(Indexable):
         Memory complexity:
             ``O(1)``
 
-        >>> mix = Mix.from_raw(([(3, 3), (7, 7)],
-        ...                     [((0, 6), (0, 8)), ((6, 6), (6, 8))],
-        ...                     [([(0, 0), (6, 0), (6, 6), (0, 6)],
-        ...                       [[(2, 2), (2, 4), (4, 4), (4, 2)]])]))
-        >>> (mix.linear
-        ...  == Multisegment([Segment(Point(0, 6), Point(0, 8)),
-        ...                   Segment(Point(6, 6), Point(6, 8))]))
+        >>> from gon.base import Contour, Polygon, Segment
+        >>> mix = Mix(Multipoint([Point(3, 3)]),
+        ...           Segment(Point(6, 6), Point(6, 8)),
+        ...           Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
+        ...                            Point(0, 6)]),
+        ...                   [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
+        ...                             Point(4, 2)])]))
+        >>> mix.linear == Segment(Point(6, 6), Point(6, 8))
         True
         """
         return self._linear
@@ -700,10 +742,13 @@ class Mix(Indexable):
         ``segments = [] if self.linear is EMPTY else self.linear.segments``,
         ``polygons = [] if self.shaped is EMPTY else self.shaped.polygons``.
 
-        >>> mix = Mix.from_raw(([(3, 3), (7, 7)],
-        ...                     [((0, 6), (0, 8)), ((6, 6), (6, 8))],
-        ...                     [([(0, 0), (6, 0), (6, 6), (0, 6)],
-        ...                       [[(2, 2), (2, 4), (4, 4), (4, 2)]])]))
+        >>> from gon.base import Contour, Polygon, Segment
+        >>> mix = Mix(Multipoint([Point(3, 3)]),
+        ...           Segment(Point(6, 6), Point(6, 8)),
+        ...           Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
+        ...                            Point(0, 6)]),
+        ...                   [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
+        ...                             Point(4, 2)])]))
         >>> mix.distance_to(mix) == 0
         True
         """
@@ -730,17 +775,20 @@ class Mix(Indexable):
         ``segments = [] if self.linear is EMPTY else self.linear.segments``,
         ``polygons = [] if self.shaped is EMPTY else self.shaped.polygons``.
 
-        >>> mix = Mix.from_raw(([(3, 3), (7, 7)],
-        ...                     [((0, 6), (0, 8)), ((6, 6), (6, 8))],
-        ...                     [([(0, 0), (6, 0), (6, 6), (0, 6)],
-        ...                       [[(2, 2), (2, 4), (4, 4), (4, 2)]])]))
+        >>> from gon.base import Contour, Polygon, Segment
+        >>> mix = Mix(Multipoint([Point(3, 3)]),
+        ...           Segment(Point(6, 6), Point(6, 8)),
+        ...           Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
+        ...                            Point(0, 6)]),
+        ...                   [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
+        ...                             Point(4, 2)])]))
         >>> mix.index()
         """
-        if self.multipoint is not EMPTY:
+        if isinstance(self.multipoint, Indexable):
             self.multipoint.index()
-        if self.linear is not EMPTY:
+        if isinstance(self.linear, Indexable):
             self.linear.index()
-        if self.shaped is not EMPTY:
+        if isinstance(self.shaped, Indexable):
             self.shaped.index()
 
     def locate(self, point: Point) -> Location:
@@ -765,10 +813,13 @@ class Mix(Indexable):
         ``segments = [] if self.linear is EMPTY else self.linear.segments``,
         ``polygons = [] if self.shaped is EMPTY else self.shaped.polygons``.
 
-        >>> mix = Mix.from_raw(([(3, 3), (7, 7)],
-        ...                     [((0, 6), (0, 8)), ((6, 6), (6, 8))],
-        ...                     [([(0, 0), (6, 0), (6, 6), (0, 6)],
-        ...                       [[(2, 2), (2, 4), (4, 4), (4, 2)]])]))
+        >>> from gon.base import Contour, Polygon, Segment
+        >>> mix = Mix(Multipoint([Point(3, 3)]),
+        ...           Segment(Point(6, 6), Point(6, 8)),
+        ...           Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
+        ...                            Point(0, 6)]),
+        ...                   [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
+        ...                             Point(4, 2)])]))
         >>> mix.locate(Point(0, 0)) is Location.BOUNDARY
         True
         >>> mix.locate(Point(1, 1)) is Location.INTERIOR
@@ -844,10 +895,13 @@ class Mix(Indexable):
         ``segments = [] if self.linear is EMPTY else self.linear.segments``,
         ``polygons = [] if self.shaped is EMPTY else self.shaped.polygons``.
 
-        >>> mix = Mix.from_raw(([(3, 3), (7, 7)],
-        ...                     [((0, 6), (0, 8)), ((6, 6), (6, 8))],
-        ...                     [([(0, 0), (6, 0), (6, 6), (0, 6)],
-        ...                       [[(2, 2), (2, 4), (4, 4), (4, 2)]])]))
+        >>> from gon.base import Contour, Polygon, Segment
+        >>> mix = Mix(Multipoint([Point(3, 3)]),
+        ...           Segment(Point(6, 6), Point(6, 8)),
+        ...           Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
+        ...                            Point(0, 6)]),
+        ...                   [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
+        ...                             Point(4, 2)])]))
         >>> mix.relate(mix) is Relation.EQUAL
         True
         """
@@ -885,17 +939,22 @@ class Mix(Indexable):
         ``segments = [] if self.linear is EMPTY else self.linear.segments``,
         ``polygons = [] if self.shaped is EMPTY else self.shaped.polygons``.
 
-        >>> mix = Mix.from_raw(([(3, 3), (7, 7)],
-        ...                     [((0, 6), (0, 8)), ((6, 6), (6, 8))],
-        ...                     [([(0, 0), (6, 0), (6, 6), (0, 6)],
-        ...                       [[(2, 2), (2, 4), (4, 4), (4, 2)]])]))
+        >>> from gon.base import Contour, Polygon, Segment
+        >>> mix = Mix(Multipoint([Point(3, 3)]),
+        ...           Segment(Point(6, 6), Point(6, 8)),
+        ...           Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
+        ...                            Point(0, 6)]),
+        ...                   [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
+        ...                             Point(4, 2)])]))
         >>> mix.rotate(1, 0) == mix
         True
         >>> (mix.rotate(0, 1, Point(1, 1))
-        ...  == Mix.from_raw(([(-1, 3), (-5, 7)],
-        ...                   [((-4, 0), (-6, 0)), ((-4, 6), (-6, 6))],
-        ...                   [([(2, 0), (2, 6), (-4, 6), (-4, 0)],
-        ...                     [[(0, 2), (-2, 2), (-2, 4), (0, 4)]])])))
+        ...  == Mix(Multipoint([Point(-1, 3)]),
+        ...         Segment(Point(-4, 6), Point(-6, 6)),
+        ...         Polygon(Contour([Point(2, 0), Point(2, 6), Point(-4, 6),
+        ...                          Point(-4, 0)]),
+        ...                 [Contour([Point(0, 2), Point(-2, 2), Point(-2, 4),
+        ...                           Point(0, 4)])])))
         True
         """
         return Mix(self.multipoint.rotate(cosine, sine, point),
@@ -925,17 +984,22 @@ class Mix(Indexable):
         ``segments = [] if self.linear is EMPTY else self.linear.segments``,
         ``polygons = [] if self.shaped is EMPTY else self.shaped.polygons``.
 
-        >>> mix = Mix.from_raw(([(3, 3), (7, 7)],
-        ...                     [((0, 6), (0, 8)), ((6, 6), (6, 8))],
-        ...                     [([(0, 0), (6, 0), (6, 6), (0, 6)],
-        ...                       [[(2, 2), (2, 4), (4, 4), (4, 2)]])]))
+        >>> from gon.base import Contour, Polygon, Segment
+        >>> mix = Mix(Multipoint([Point(3, 3)]),
+        ...           Segment(Point(6, 6), Point(6, 8)),
+        ...           Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
+        ...                            Point(0, 6)]),
+        ...                   [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
+        ...                             Point(4, 2)])]))
         >>> mix.scale(1) == mix
         True
         >>> (mix.scale(1, 2)
-        ...  == Mix.from_raw(([(3, 6), (7, 14)],
-        ...                   [((0, 12), (0, 16)), ((6, 12), (6, 16))],
-        ...                   [([(0, 0), (6, 0), (6, 12), (0, 12)],
-        ...                     [[(2, 4), (2, 8), (4, 8), (4, 4)]])])))
+        ...  == Mix(Multipoint([Point(3, 6)]),
+        ...         Segment(Point(6, 12), Point(6, 16)),
+        ...         Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 12),
+        ...                          Point(0, 12)]),
+        ...                 [Contour([Point(2, 4), Point(2, 8), Point(4, 8),
+        ...                           Point(4, 4)])])))
         True
         """
         if factor_y is None:
@@ -971,15 +1035,20 @@ class Mix(Indexable):
         ``segments = [] if self.linear is EMPTY else self.linear.segments``,
         ``polygons = [] if self.shaped is EMPTY else self.shaped.polygons``.
 
-        >>> mix = Mix.from_raw(([(3, 3), (7, 7)],
-        ...                     [((0, 6), (0, 8)), ((6, 6), (6, 8))],
-        ...                     [([(0, 0), (6, 0), (6, 6), (0, 6)],
-        ...                       [[(2, 2), (2, 4), (4, 4), (4, 2)]])]))
+        >>> from gon.base import Contour, Polygon, Segment
+        >>> mix = Mix(Multipoint([Point(3, 3)]),
+        ...           Segment(Point(6, 6), Point(6, 8)),
+        ...           Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
+        ...                            Point(0, 6)]),
+        ...                   [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
+        ...                             Point(4, 2)])]))
         >>> (mix.translate(1, 2)
-        ...  == Mix.from_raw(([(4, 5), (8, 9)],
-        ...                   [((1, 8), (1, 10)), ((7, 8), (7, 10))],
-        ...                   [([(1, 2), (7, 2), (7, 8), (1, 8)],
-        ...                     [[(3, 4), (3, 6), (5, 6), (5, 4)]])])))
+        ...  == Mix(Multipoint([Point(4, 5)]),
+        ...         Segment(Point(7, 8), Point(7, 10)),
+        ...         Polygon(Contour([Point(1, 2), Point(7, 2), Point(7, 8),
+        ...                          Point(1, 8)]),
+        ...                 [Contour([Point(3, 4), Point(3, 6), Point(5, 6),
+        ...                           Point(5, 4)])])))
         True
         """
         return Mix(self.multipoint.translate(step_x, step_y),
@@ -1007,10 +1076,13 @@ class Mix(Indexable):
         ``segments = [] if self.linear is EMPTY else self.linear.segments``,
         ``polygons = [] if self.shaped is EMPTY else self.shaped.polygons``.
 
-        >>> mix = Mix.from_raw(([(3, 3), (7, 7)],
-        ...                     [((0, 6), (0, 8)), ((6, 6), (6, 8))],
-        ...                     [([(0, 0), (6, 0), (6, 6), (0, 6)],
-        ...                       [[(2, 2), (2, 4), (4, 4), (4, 2)]])]))
+        >>> from gon.base import Contour, Polygon, Segment
+        >>> mix = Mix(Multipoint([Point(3, 3)]),
+        ...           Segment(Point(6, 6), Point(6, 8)),
+        ...           Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
+        ...                            Point(0, 6)]),
+        ...                   [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
+        ...                             Point(4, 2)])]))
         >>> mix.validate()
         """
         if (sum(component is not EMPTY for component in self._components)
