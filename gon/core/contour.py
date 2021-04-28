@@ -40,15 +40,13 @@ from .multipoint import (Multipoint,
 from .multisegment import Multisegment
 from .point import (Point,
                     point_to_step)
-from .raw import RawContour
 from .segment import Segment
 from .vertices import Vertices
 
 
 class Contour(Indexable, Linear):
-    __slots__ = ('_context', '_edges', '_min_index', '_raw', '_locate',
-                 '_point_nearest_edge', '_segment_nearest_edge',
-                 '_vertices')
+    __slots__ = ('_context', '_edges', '_locate', '_min_index',
+                 '_point_nearest_edge', '_segment_nearest_edge', '_vertices')
 
     def __init__(self, vertices: Vertices) -> None:
         """
@@ -66,13 +64,13 @@ class Contour(Indexable, Linear):
         self._vertices = vertices = tuple(vertices)
         self._min_index = min(range(len(vertices)),
                               key=vertices.__getitem__)
-        self._raw = [vertex.raw() for vertex in vertices]
         self._locate = partial(locate_point, self)
         self._edges = edges = context.contour_edges(vertices)
-        self._segment_nearest_edge = partial(to_segment_nearest_segment, edges,
-                                             context=context)
-        self._point_nearest_edge = partial(to_point_nearest_segment, edges,
-                                           context=context)
+        self._point_nearest_edge, self._segment_nearest_edge = (
+            partial(to_point_nearest_segment, edges,
+                    context=context),
+            partial(to_segment_nearest_segment, edges,
+                    context=context))
 
     __repr__ = generate_repr(__init__)
 
@@ -398,24 +396,6 @@ class Contour(Indexable, Linear):
 
     __rxor__ = __xor__
 
-    @classmethod
-    def from_raw(cls, raw: RawContour) -> 'Contour':
-        """
-        Constructs contour from the combination of Python built-ins.
-
-        Time complexity:
-            ``O(raw_vertices_count)``
-        Memory complexity:
-            ``O(raw_vertices_count)``
-
-        where ``raw_vertices_count = len(raw)``.
-
-        >>> contour = Contour.from_raw([(0, 0), (1, 0), (0, 1)])
-        >>> contour == Contour([Point(0, 0), Point(1, 0), Point(0, 1)])
-        True
-        """
-        return cls([Point.from_raw(raw_vertex) for raw_vertex in raw])
-
     @property
     def centroid(self) -> Point:
         """
@@ -593,23 +573,6 @@ class Contour(Indexable, Linear):
         True
         """
         return self._locate(point)
-
-    def raw(self) -> RawContour:
-        """
-        Returns the contour as combination of Python built-ins.
-
-        Time complexity:
-            ``O(vertices_count)``
-        Memory complexity:
-            ``O(vertices_count)``
-
-        where ``vertices_count = len(self.vertices)``.
-
-        >>> contour = Contour([Point(0, 0), Point(1, 0), Point(0, 1)])
-        >>> contour.raw()
-        [(0, 0), (1, 0), (0, 1)]
-        """
-        return self._raw[:]
 
     def relate(self, other: Compound) -> Relation:
         """
