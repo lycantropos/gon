@@ -2,10 +2,10 @@ from typing import Tuple
 
 from hypothesis import given
 
-from gon.base import (EMPTY,
-                      Mix,
+from gon.base import (Mix,
                       Point)
 from tests.utils import (equivalence,
+                         mix_to_points,
                          mix_to_polygons,
                          mix_to_segments)
 from . import strategies
@@ -13,8 +13,7 @@ from . import strategies
 
 @given(strategies.mixes)
 def test_components(mix: Mix) -> None:
-    assert mix.multipoint is EMPTY or all(point in mix
-                                          for point in mix.multipoint.points)
+    assert all(point in mix for point in mix_to_points(mix))
     assert all(segment.start in mix and segment.end in mix
                for segment in mix_to_segments(mix))
     assert all(all(vertex in polygon

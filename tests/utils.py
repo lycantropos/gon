@@ -230,10 +230,15 @@ def compound_to_points(compound: Compound) -> Iterable[Point]:
 
 def mix_to_components(mix: Mix
                       ) -> Tuple[Multipoint, Multisegment, Multipolygon]:
-    return mix.multipoint, mix.linear, mix.shaped
+    return mix.discrete, mix.linear, mix.shaped
 
 
-def mix_to_polygons(mix: Mix) -> List[Polygon]:
+def mix_to_points(mix: Mix) -> Sequence[Point]:
+    discrete = mix.discrete
+    return [] if discrete is EMPTY else discrete.points
+
+
+def mix_to_polygons(mix: Mix) -> Sequence[Polygon]:
     shaped = mix.shaped
     return ([]
             if shaped is EMPTY
@@ -242,7 +247,7 @@ def mix_to_polygons(mix: Mix) -> List[Polygon]:
                   else [shaped]))
 
 
-def mix_to_segments(mix: Mix) -> List[Segment]:
+def mix_to_segments(mix: Mix) -> Sequence[Segment]:
     linear = mix.linear
     return ([]
             if linear is EMPTY
