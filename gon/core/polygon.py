@@ -46,7 +46,6 @@ from .multipoint import Multipoint
 from .multisegment import Multisegment
 from .point import (Point,
                     point_to_step)
-from .raw import RawPolygon
 from .segment import Segment
 from .shaped_utils import (from_holeless_mix_components,
                            mix_from_unfolded_components,
@@ -56,9 +55,8 @@ Triangulation = Triangulation
 
 
 class Polygon(Indexable, Shaped):
-    __slots__ = ('_border', '_context', '_holes', '_holes_set', '_raw_border',
-                 '_raw_holes', '_locate', '_point_nearest_edge',
-                 '_segment_nearest_edge')
+    __slots__ = ('_border', '_context', '_holes', '_holes_set', '_locate',
+                 '_point_nearest_edge', '_segment_nearest_edge')
 
     def __init__(self,
                  border: Contour,
@@ -79,14 +77,13 @@ class Polygon(Indexable, Shaped):
         holes = tuple(holes or ())
         self._border, self._holes, self._holes_set = (border, holes,
                                                       frozenset(holes))
-        self._raw_border, self._raw_holes = border.raw(), [hole.raw()
-                                                           for hole in holes]
         self._locate = partial(locate_point, self)
         edges = self.edges
-        self._segment_nearest_edge = partial(to_segment_nearest_segment, edges,
-                                             context=context)
-        self._point_nearest_edge = partial(to_point_nearest_segment, edges,
-                                           context=context)
+        self._point_nearest_edge, self._segment_nearest_edge = (
+            partial(to_point_nearest_segment, edges,
+                    context=context),
+            partial(to_segment_nearest_segment, edges,
+                    context=context))
 
     __repr__ = generate_repr(__init__)
 
@@ -452,32 +449,6 @@ class Polygon(Indexable, Shaped):
 
     __rxor__ = __xor__
 
-    @classmethod
-    def from_raw(cls, raw: RawPolygon) -> 'Polygon':
-        """
-        Constructs polygon from the combination of Python built-ins.
-
-        Time complexity:
-            ``O(raw_vertices_count)``
-        Memory complexity:
-            ``O(raw_vertices_count)``
-
-        where ``raw_vertices_count = len(raw_border)\
- + sum(len(raw_hole) for raw_hole in raw_holes)``,
-        ``raw_border, raw_holes = raw``.
-
-        >>> polygon = Polygon.from_raw(([(0, 0), (6, 0), (6, 6), (0, 6)],
-        ...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]]))
-        >>> polygon == Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
-        ...                             Point(0, 6)]),
-        ...                    [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
-        ...                              Point(4, 2)])])
-        True
-        """
-        raw_border, raw_holes = raw
-        return cls(Contour.from_raw(raw_border),
-                   [Contour.from_raw(raw_hole) for raw_hole in raw_holes])
-
     @property
     def area(self) -> Coordinate:
         """
@@ -784,28 +755,6 @@ class Polygon(Indexable, Shaped):
         True
         """
         return self._locate(point)
-
-    def raw(self) -> RawPolygon:
-        """
-        Returns the polygon as combination of Python built-ins.
-
-        Time complexity:
-            ``O(vertices_count)``
-        Memory complexity:
-            ``O(vertices_count)``
-
-        where ``vertices_count = len(self.border.vertices)\
- + sum(len(hole.vertices) for hole in self.holes)``.
-
-        >>> polygon = Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
-        ...                            Point(0, 6)]),
-        ...                   [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
-        ...                             Point(4, 2)])])
-        >>> polygon.raw()
-        ([(0, 0), (6, 0), (6, 6), (0, 6)], [[(2, 2), (2, 4), (4, 4), (4, 2)]])
-        """
-        return self._raw_border[:], [raw_hole[:]
-                                     for raw_hole in self._raw_holes]
 
     def relate(self, other: Compound) -> Relation:
         """
