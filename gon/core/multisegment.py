@@ -35,7 +35,7 @@ from .linear_utils import (from_mix_components,
                            to_segment_nearest_segment,
                            unfold_multisegment)
 from .multipoint import (Multipoint,
-                         from_points)
+                         pack_points)
 from .point import (Point,
                     point_to_step,
                     scale_point)
@@ -761,5 +761,5 @@ def _scale_segments(segments: Iterable[Segment],
         else:
             scaled_points.append(scale_point(segment.start, factor_x,
                                              factor_y))
-    return (from_points(unique_ever_seen(scaled_points))
+    return (pack_points(unique_ever_seen(scaled_points))
             | Multisegment(scaled_segments))
