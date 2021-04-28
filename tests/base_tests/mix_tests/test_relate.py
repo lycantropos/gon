@@ -8,7 +8,9 @@ from gon.base import (EMPTY,
                       Relation)
 from tests.utils import (equivalence,
                          implication,
-                         mix_to_components)
+                         mix_to_components,
+                         mix_to_polygons,
+                         mix_to_segments)
 from . import strategies
 
 
@@ -17,12 +19,10 @@ def test_components(mix: Mix) -> None:
     assert all(component is EMPTY
                or mix.relate(component) is Relation.COMPONENT
                for component in mix_to_components(mix))
-    assert (mix.linear is EMPTY
-            or all(mix.relate(segment) is Relation.COMPONENT
-                   for segment in mix.linear.segments))
-    assert (mix.shaped is EMPTY
-            or all(mix.relate(polygon) is Relation.COMPONENT
-                   for polygon in mix.shaped.polygons))
+    assert all(mix.relate(segment) is Relation.COMPONENT
+               for segment in mix_to_segments(mix))
+    assert all(mix.relate(polygon) is Relation.COMPONENT
+               for polygon in mix_to_polygons(mix))
 
 
 @given(strategies.mixes_pairs)
