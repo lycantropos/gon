@@ -39,7 +39,6 @@ from .multipoint import (Multipoint,
 from .point import (Point,
                     point_to_step,
                     scale_point)
-from .raw import RawMultisegment
 from .segment import (Segment,
                       rotate_segment_around_origin,
                       rotate_translate_segment,
@@ -47,9 +46,8 @@ from .segment import (Segment,
 
 
 class Multisegment(Indexable, Linear):
-    __slots__ = ('_context', '_segments', '_segments_set', '_raw',
-                 '_locate', '_point_nearest_segment',
-                 '_segment_nearest_segment')
+    __slots__ = ('_context', '_locate', '_point_nearest_segment',
+                 '_segment_nearest_segment', '_segments', '_segments_set')
 
     def __init__(self, segments: Sequence[Segment]) -> None:
         """
@@ -65,7 +63,6 @@ class Multisegment(Indexable, Linear):
         context = get_context()
         self._context = context
         self._segments = segments
-        self._raw = [segment.raw() for segment in segments]
         self._segments_set = frozenset(segments)
         self._locate = partial(locate_point, self)
         self._segment_nearest_segment = partial(to_segment_nearest_segment,
@@ -391,27 +388,6 @@ class Multisegment(Indexable, Linear):
 
     __rxor__ = __xor__
 
-    @classmethod
-    def from_raw(cls, raw: RawMultisegment) -> 'Multisegment':
-        """
-        Constructs multisegment from the combination of Python built-ins.
-
-        Time complexity:
-            ``O(raw_segments_count)``
-        Memory complexity:
-            ``O(raw_segments_count)``
-
-        where ``raw_segments_count = len(raw)``.
-
-        >>> multisegment = Multisegment.from_raw([((0, 0), (1, 0)),
-        ...                                       ((0, 1), (1, 1))])
-        >>> multisegment == Multisegment([Segment(Point(0, 0), Point(1, 0)),
-        ...                               Segment(Point(0, 1), Point(1, 1))])
-        True
-        """
-        return Multisegment([Segment.from_raw(raw_segment)
-                             for raw_segment in raw])
-
     @property
     def centroid(self) -> Point:
         """
@@ -554,24 +530,6 @@ class Multisegment(Indexable, Linear):
         True
         """
         return self._locate(point)
-
-    def raw(self) -> RawMultisegment:
-        """
-        Returns the multisegment as combination of Python built-ins.
-
-        Time complexity:
-            ``O(segments_count)``
-        Memory complexity:
-            ``O(segments_count)``
-
-        where ``segments_count = len(self.segments)``.
-
-        >>> multisegment = Multisegment([Segment(Point(0, 0), Point(1, 0)),
-        ...                              Segment(Point(0, 1), Point(1, 1))])
-        >>> multisegment.raw()
-        [((0, 0), (1, 0)), ((0, 1), (1, 1))]
-        """
-        return self._raw[:]
 
     def relate(self, other: Compound) -> Relation:
         """
