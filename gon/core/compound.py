@@ -15,6 +15,31 @@ Location = Location
 class Compound(Geometry):
     __slots__ = ()
 
+    @property
+    @abstractmethod
+    def centroid(self) -> Point:
+        """
+        Returns centroid of the geometry.
+        """
+
+    def disjoint(self, other: 'Compound') -> bool:
+        """
+        Checks if the geometry is disjoint from the other.
+        """
+        return self.relate(other) is Relation.DISJOINT
+
+    @abstractmethod
+    def locate(self, point: Point) -> Location:
+        """
+        Finds location of point relative to the geometry.
+        """
+
+    @abstractmethod
+    def relate(self, other: 'Compound') -> Relation:
+        """
+        Finds relation between geometric objects.
+        """
+
     @abstractmethod
     def __and__(self, other: 'Compound') -> 'Compound':
         """
@@ -67,31 +92,6 @@ class Compound(Geometry):
     def __xor__(self, other: 'Compound') -> 'Compound':
         """
         Returns symmetric difference of the geometry with the other geometry.
-        """
-
-    @property
-    @abstractmethod
-    def centroid(self) -> Point:
-        """
-        Returns centroid of the geometry.
-        """
-
-    def disjoint(self, other: 'Compound') -> bool:
-        """
-        Checks if the geometry is disjoint with the other.
-        """
-        return self.relate(other) is Relation.DISJOINT
-
-    @abstractmethod
-    def locate(self, point: Point) -> Location:
-        """
-        Finds location of point relative to the geometry.
-        """
-
-    @abstractmethod
-    def relate(self, other: 'Compound') -> Relation:
-        """
-        Finds relation between geometric objects.
         """
 
 
