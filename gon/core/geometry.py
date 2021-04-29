@@ -3,8 +3,6 @@ from abc import (ABC,
 from typing import (TYPE_CHECKING,
                     Optional)
 
-from symba.base import Expression
-
 from .hints import Coordinate
 
 if TYPE_CHECKING:
@@ -15,7 +13,7 @@ class Geometry(ABC):
     __slots__ = ()
 
     @abstractmethod
-    def distance_to(self, other: 'Geometry') -> Expression:
+    def distance_to(self, other: 'Geometry') -> Coordinate:
         """
         Returns distance between geometric objects.
         """

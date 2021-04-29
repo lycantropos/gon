@@ -2,7 +2,6 @@ from abc import abstractmethod
 
 from ground.base import Relation
 from sect.decomposition import Location
-from symba.base import Expression
 
 from .geometry import Geometry
 from .hints import Coordinate
@@ -100,7 +99,7 @@ class Linear(Geometry):
 
     @property
     @abstractmethod
-    def length(self) -> Expression:
+    def length(self) -> Coordinate:
         """
         Returns length of the geometry.
         """
@@ -118,7 +117,7 @@ class Shaped(Geometry):
 
     @property
     @abstractmethod
-    def perimeter(self) -> Expression:
+    def perimeter(self) -> Coordinate:
         """
         Returns perimeter of the geometry.
         """

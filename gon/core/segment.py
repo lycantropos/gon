@@ -6,7 +6,6 @@ from ground.hints import Multisegment
 from orient.planar import (point_in_segment,
                            segment_in_segment)
 from reprit.base import generate_repr
-from symba.base import Expression
 
 from .compound import (Compound,
                        Linear,
@@ -370,7 +369,7 @@ class Segment(Compound, Linear):
         return self._start.x == self._end.x
 
     @property
-    def length(self) -> Expression:
+    def length(self) -> Coordinate:
         """
         Returns length of the segment.
 
@@ -402,7 +401,7 @@ class Segment(Compound, Linear):
         """
         return self._start
 
-    def distance_to(self, other: Geometry) -> Expression:
+    def distance_to(self, other: Geometry) -> Coordinate:
         """
         Returns distance between the segment and the other geometry.
 
