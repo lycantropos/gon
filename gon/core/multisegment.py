@@ -17,7 +17,6 @@ from orient.planar import (multisegment_in_multisegment,
                            segment_in_multisegment)
 from reprit.base import generate_repr
 from sect.decomposition import Graph
-from symba.base import Expression
 
 from .compound import (Compound,
                        Indexable,
@@ -418,7 +417,7 @@ class Multisegment(Indexable, Linear):
         return self._context
 
     @property
-    def length(self) -> Expression:
+    def length(self) -> Coordinate:
         """
         Returns length of the multisegment.
 
