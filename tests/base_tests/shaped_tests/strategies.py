@@ -1,6 +1,6 @@
 from hypothesis import strategies
 
-from gon.hints import Coordinate
+from gon.hints import Scalar
 from tests.strategies import (coordinates_strategies,
                               coordinates_to_points,
                               coordinates_to_shaped_geometries,
@@ -20,8 +20,8 @@ rational_shaped_geometries_with_coordinates_pairs = (
                              identity)))
 
 
-def coordinates_to_non_zero_coordinates(coordinates: Strategy[Coordinate]
-                                        ) -> Strategy[Coordinate]:
+def coordinates_to_non_zero_coordinates(coordinates: Strategy[Scalar]
+                                        ) -> Strategy[Scalar]:
     return coordinates.filter(bool)
 
 

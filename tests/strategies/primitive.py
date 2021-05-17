@@ -11,7 +11,7 @@ from hypothesis_geometry import planar
 from gon.base import Point
 from gon.core.vertices import (MIN_COUNT,
                                Vertices)
-from gon.hints import Coordinate
+from gon.hints import Scalar
 from tests.utils import (Strategy,
                          identity)
 from .base import coordinates_strategies
@@ -27,7 +27,7 @@ invalid_points = (strategies.builds(Point, valid_coordinates,
                                       valid_coordinates))
 
 
-def to_repeated_points(coordinates: Strategy[Coordinate],
+def to_repeated_points(coordinates: Strategy[Scalar],
                        *,
                        min_size: int = MIN_COUNT,
                        max_size: Optional[int] = None
