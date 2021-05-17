@@ -496,11 +496,12 @@ class Multipoint(Indexable):
         >>> multipoint = Multipoint([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> multipoint.validate()
         """
-        if not self._points:
+        points = self._points
+        if not points:
             raise ValueError('Multipoint is empty.')
-        elif len(self._points) > len(self._points_set):
+        elif len(points) > len(self._points_set):
             raise ValueError('Duplicate points found.')
-        for point in self._points:
+        for point in points:
             point.validate()
 
     def _distance_to_point(self, other: Point) -> Scalar:
