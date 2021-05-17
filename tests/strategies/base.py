@@ -7,14 +7,14 @@ from typing import (Optional,
 
 from hypothesis import strategies
 
-from gon.hints import Coordinate
+from gon.hints import Scalar
 from tests.utils import (MAX_COORDINATE,
                          MIN_COORDINATE,
                          Strategy)
 
 
-def to_floats(min_value: Optional[Coordinate] = None,
-              max_value: Optional[Coordinate] = None) -> Strategy:
+def to_floats(min_value: Optional[Scalar] = None,
+              max_value: Optional[Scalar] = None) -> Strategy:
     return (strategies.floats(min_value=min_value,
                               max_value=max_value,
                               allow_nan=False,
@@ -93,9 +93,9 @@ def to_pythagorean_triplets(*,
             .map(to_pythagorean_triplet))
 
 
-def pythagorean_triplet_to_rational_cosine_sine(
-        triplet: Tuple[Coordinate, Coordinate, Coordinate]
-) -> Tuple[Coordinate, Coordinate]:
+def pythagorean_triplet_to_rational_cosine_sine(triplet
+                                                : Tuple[Scalar, Scalar, Scalar]
+                                                ) -> Tuple[Scalar, Scalar]:
     area_cosine, area_sine, area = triplet
     return Fraction(area_cosine, area), Fraction(area_sine, area)
 
