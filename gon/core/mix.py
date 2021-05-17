@@ -104,7 +104,7 @@ class Mix(Indexable):
 
     def __contains__(self, point: Point) -> bool:
         """
-        Returns intersection of the mix with the other geometry.
+        Checks if the mix contains the point.
 
         Time complexity:
             ``O(log elements_count)`` expected after indexing,
