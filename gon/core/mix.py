@@ -12,7 +12,7 @@ from .compound import (Compound,
 from .empty import (EMPTY,
                     Maybe)
 from .geometry import Geometry
-from .hints import Coordinate
+from .hints import Scalar
 from .iterable import non_negative_min
 from .multipoint import Multipoint
 from .point import Point
@@ -658,7 +658,7 @@ class Mix(Indexable):
         """
         return self._linear
 
-    def distance_to(self, other: Geometry) -> Coordinate:
+    def distance_to(self, other: Geometry) -> Scalar:
         """
         Returns distance between the mix and the other geometry.
 
@@ -815,8 +815,8 @@ class Mix(Indexable):
                                   else other.relate(self).complement))))
 
     def rotate(self,
-               cosine: Coordinate,
-               sine: Coordinate,
+               cosine: Scalar,
+               sine: Scalar,
                point: Optional[Point] = None) -> 'Mix':
         """
         Rotates the mix by given cosine & sine around given point.
@@ -860,8 +860,8 @@ class Mix(Indexable):
                    self.shaped.rotate(cosine, sine, point))
 
     def scale(self,
-              factor_x: Coordinate,
-              factor_y: Optional[Coordinate] = None) -> Compound:
+              factor_x: Scalar,
+              factor_y: Optional[Scalar] = None) -> Compound:
         """
         Scales the mix by given factor.
 
@@ -911,7 +911,7 @@ class Mix(Indexable):
                       if factor_x or factor_y
                       else Multipoint([Point(factor_x, factor_y)])))
 
-    def translate(self, step_x: Coordinate, step_y: Coordinate) -> 'Mix':
+    def translate(self, step_x: Scalar, step_y: Scalar) -> 'Mix':
         """
         Translates the mix by given step.
 
@@ -1007,8 +1007,8 @@ class Mix(Indexable):
                                  Relation.COMPOSITE)
                              for hole in polygon.holes)
                       for polygon in (self.shaped.polygons
-                                      if isinstance(self.shaped, Multipolygon)
-                                      else [self.shaped]))):
+                if isinstance(self.shaped, Multipolygon)
+                else [self.shaped]))):
             raise ValueError('Linear component should not overlap '
                              'shaped component borders.')
 
@@ -1700,16 +1700,16 @@ class Mix(Indexable):
                         else shaped_relation)
 
 
-def from_mix_components(multipoint: Maybe[Multipoint],
+def from_mix_components(discrete: Maybe[Multipoint],
                         linear: Maybe[Linear],
                         shaped: Maybe[Shaped]) -> Compound:
-    return (Mix(multipoint, linear, shaped)
-            if (((multipoint is not EMPTY)
+    return (Mix(discrete, linear, shaped)
+            if (((discrete is not EMPTY)
                  + (linear is not EMPTY)
                  + (shaped is not EMPTY))
                 >= MIN_MIX_NON_EMPTY_COMPONENTS)
-            else (multipoint
-                  if multipoint is not EMPTY
+            else (discrete
+                  if discrete is not EMPTY
                   else (linear
                         if linear is not EMPTY
                         else shaped)))

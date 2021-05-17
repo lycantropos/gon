@@ -1,10 +1,10 @@
 from typing import Sequence
 
 from ground.base import Context
-from ground.hints import (Coordinate,
-                          Multipoint,
+from ground.hints import (Multipoint,
                           Multisegment,
                           Point,
+                          Scalar,
                           Segment)
 
 from .compound import (Compound,
@@ -51,9 +51,8 @@ def unpack_multisegment(multisegment: Multisegment) -> Compound:
 def to_point_nearest_segment(context: Context,
                              segments: Sequence[Segment],
                              point: Point) -> Segment:
-    def distance_to_point(segment: Segment) -> Coordinate:
-        return context.segment_point_squared_distance(segment.start,
-                                                      segment.end, point)
+    def distance_to_point(segment: Segment) -> Scalar:
+        return context.segment_point_squared_distance(segment, point)
 
     return min(segments,
                key=distance_to_point)
@@ -62,9 +61,8 @@ def to_point_nearest_segment(context: Context,
 def to_segment_nearest_segment(context: Context,
                                edges: Sequence[Segment],
                                segment: Segment) -> Segment:
-    def distance_to_segment(candidate: Segment) -> Coordinate:
-        return context.segments_squared_distance(
-                candidate.start, candidate.end, segment.start, segment.end)
+    def distance_to_segment(candidate: Segment) -> Scalar:
+        return context.segments_squared_distance(candidate, segment)
 
     return min(edges,
                key=distance_to_segment)

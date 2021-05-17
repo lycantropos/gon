@@ -1,10 +1,11 @@
 from typing import Optional
 
+from clipping.planar import (intersect_segments,
+                             subtract_segments,
+                             symmetric_subtract_segments, unite_segments)
 from ground.base import (Context,
                          get_context)
-from ground.hints import Multisegment
-from orient.planar import (point_in_segment,
-                           segment_in_segment)
+from orient.planar import (segment_in_segment)
 from reprit.base import generate_repr
 
 from .compound import (Compound,
@@ -13,10 +14,10 @@ from .compound import (Compound,
                        Relation)
 from .empty import EMPTY
 from .geometry import Geometry
-from .hints import Coordinate
+from .hints import Scalar
 from .iterable import non_negative_min
-from .linear_utils import (relate_multipoint_to_linear_compound,
-                           unpack_multisegment)
+from .linear_utils import (relate_multipoint_to_linear_compound)
+from .mix import from_mix_components
 from .multipoint import Multipoint
 from .point import (Point,
                     point_to_step,
@@ -56,7 +57,8 @@ class Segment(Compound, Linear):
         >>> segment & segment == segment
         True
         """
-        return (self._intersect_with_segment(other)
+        return (intersect_segments(self, other,
+                                   context=self.context)
                 if isinstance(other, Segment)
                 else NotImplemented)
 
@@ -240,9 +242,10 @@ class Segment(Compound, Linear):
         >>> segment | segment == segment
         True
         """
-        return (self._unite_with_multipoint(other)
+        return (from_mix_components(other - self, self, EMPTY)
                 if isinstance(other, Multipoint)
-                else (self._unite_with_segment(other)
+                else (unite_segments(self, other,
+                                     context=self.context)
                       if isinstance(other, Segment)
                       else NotImplemented))
 
@@ -263,7 +266,8 @@ class Segment(Compound, Linear):
         """
         return (self
                 if isinstance(other, Multipoint)
-                else (self._subtract_segment(other)
+                else (subtract_segments(self, other,
+                                        context=self.context)
                       if isinstance(other, Segment)
                       else NotImplemented))
 
@@ -280,9 +284,10 @@ class Segment(Compound, Linear):
         >>> segment ^ segment is EMPTY
         True
         """
-        return (self._unite_with_multipoint(other)
+        return (from_mix_components(other - self, self, EMPTY)
                 if isinstance(other, Multipoint)
-                else (self._symmetric_subtract_segment(other)
+                else (symmetric_subtract_segments(self, other,
+                                                  context=self.context)
                       if isinstance(other, Segment)
                       else NotImplemented))
 
@@ -350,7 +355,7 @@ class Segment(Compound, Linear):
         >>> segment.is_horizontal
         True
         """
-        return self._start.y == self._end.y
+        return self.start.y == self.end.y
 
     @property
     def is_vertical(self) -> bool:
@@ -366,10 +371,10 @@ class Segment(Compound, Linear):
         >>> segment.is_vertical
         False
         """
-        return self._start.x == self._end.x
+        return self.start.x == self.end.x
 
     @property
-    def length(self) -> Coordinate:
+    def length(self) -> Scalar:
         """
         Returns length of the segment.
 
@@ -401,7 +406,7 @@ class Segment(Compound, Linear):
         """
         return self._start
 
-    def distance_to(self, other: Geometry) -> Coordinate:
+    def distance_to(self, other: Geometry) -> Scalar:
         """
         Returns distance between the segment and the other geometry.
 
@@ -415,21 +420,19 @@ class Segment(Compound, Linear):
         True
         """
         return (self.context.sqrt(self.context.segment_point_squared_distance(
-                self.start, self.end, other))
+                self, other))
                 if isinstance(other, Point)
                 else
                 (non_negative_min(
                         self.context.sqrt(
                                 self.context.segment_point_squared_distance(
-                                        self.start, self.end, point))
+                                        self, point))
                         for point in other.points)
                  if isinstance(other, Multipoint)
-                 else
-                 (self.context.sqrt(
-                         self.context.segments_squared_distance(
-                                 self.start, self.end, other.start, other.end))
-                  if isinstance(other, Segment)
-                  else other.distance_to(self))))
+                 else (self.context.sqrt(
+                        self.context.segments_squared_distance(self, other))
+                       if isinstance(other, Segment)
+                       else other.distance_to(self))))
 
     def locate(self, point: Point) -> Location:
         """
@@ -447,7 +450,7 @@ class Segment(Compound, Linear):
         True
         """
         return (Location.BOUNDARY
-                if point_in_segment(point, self)
+                if self.context.segment_contains_point(self, point)
                 else Location.EXTERIOR)
 
     def relate(self, other: Compound) -> Relation:
@@ -465,13 +468,14 @@ class Segment(Compound, Linear):
         """
         return (relate_multipoint_to_linear_compound(other, self)
                 if isinstance(other, Multipoint)
-                else (segment_in_segment(other, self)
+                else (segment_in_segment(other, self,
+                                         context=self.context)
                       if isinstance(other, Segment)
                       else other.relate(self).complement))
 
     def rotate(self,
-               cosine: Coordinate,
-               sine: Coordinate,
+               cosine: Scalar,
+               sine: Scalar,
                point: Optional[Point] = None) -> 'Segment':
         """
         Rotates the segment by given cosine & sine around given point.
@@ -495,8 +499,8 @@ class Segment(Compound, Linear):
                                                              sine)))
 
     def scale(self,
-              factor_x: Coordinate,
-              factor_y: Optional[Coordinate] = None) -> Compound:
+              factor_x: Scalar,
+              factor_y: Optional[Scalar] = None) -> Compound:
         """
         Scales the segment by given factor.
 
@@ -512,7 +516,7 @@ class Segment(Compound, Linear):
         return scale_segment(self, factor_x,
                              factor_x if factor_y is None else factor_y)
 
-    def translate(self, step_x: Coordinate, step_y: Coordinate) -> 'Segment':
+    def translate(self, step_x: Scalar, step_y: Scalar) -> 'Segment':
         """
         Translates the segment by given step.
 
@@ -525,8 +529,8 @@ class Segment(Compound, Linear):
         >>> segment.translate(1, 2) == Segment(Point(1, 2), Point(3, 2))
         True
         """
-        return Segment(self._start.translate(step_x, step_y),
-                       self._end.translate(step_x, step_y))
+        return Segment(self.start.translate(step_x, step_y),
+                       self.end.translate(step_x, step_y))
 
     def validate(self) -> None:
         """
@@ -540,90 +544,24 @@ class Segment(Compound, Linear):
         >>> segment = Segment(Point(0, 0), Point(2, 0))
         >>> segment.validate()
         """
-        self._start.validate()
-        self._end.validate()
-        if self._start == self._end:
+        self.start.validate()
+        self.end.validate()
+        if self.start == self.end:
             raise ValueError('Segment is degenerate.')
-
-    def _intersect_with_segment(self, other: 'Segment') -> Compound:
-        context = self.context
-        relation = segment_in_segment(self, other,
-                                      context=context)
-        return (EMPTY
-                if relation is Relation.DISJOINT
-                else
-                (Multipoint([context.segments_intersection(
-                        self.start, self.end, other.start, other.end)])
-                 if (relation is Relation.CROSS
-                     or relation is Relation.TOUCH)
-                 else Segment(*sorted([self.start, self.end, other.start,
-                                       other.end])[1:3])))
-
-    def _subtract_segment(self, other: 'Segment') -> Compound:
-        relation = segment_in_segment(self, other,
-                                      context=self.context)
-        return (EMPTY
-                if relation is Relation.EQUAL or relation is Relation.COMPONENT
-                else
-                (self
-                 if relation in (Relation.DISJOINT, Relation.TOUCH,
-                                 Relation.CROSS)
-                 else (_subtract_overlap(self, other)
-                       if relation is Relation.OVERLAP
-                       else unpack_multisegment(_subtract_composite(
-                        self, other)))))
-
-    def _symmetric_subtract_segment(self, other: 'Segment') -> Compound:
-        # importing here to avoid cyclic imports
-        relation = segment_in_segment(self, other,
-                                      context=self.context)
-        return (EMPTY
-                if relation is Relation.EQUAL
-                else
-                (self.context.multisegment_cls([self, other])
-                 if relation is Relation.DISJOINT or relation is Relation.TOUCH
-                 else (_unite_cross(self, other)
-                       if relation is Relation.CROSS
-                       else
-                       (_symmetric_subtract_overlap(self, other)
-                        if relation is Relation.OVERLAP
-                        else unpack_multisegment(
-                               _subtract_composite(self, other)
-                               if relation is Relation.COMPOSITE
-                               else _subtract_composite(other, self))))))
-
-    def _unite_with_multipoint(self, other: Multipoint) -> Compound:
-        # importing here to avoid cyclic imports
-        from gon.core.mix import from_mix_components
-        return from_mix_components(other - self, self, EMPTY)
-
-    def _unite_with_segment(self, other: 'Segment') -> Compound:
-        from .multisegment import Multisegment
-        relation = segment_in_segment(self, other,
-                                      context=self.context)
-        return (self
-                if relation is Relation.EQUAL or relation is Relation.COMPOSITE
-                else (other
-                      if relation is Relation.COMPONENT
-                      else (_unite_overlap(self, other)
-                            if relation is Relation.OVERLAP
-                            else (_unite_cross(self, other)
-                                  if relation is Relation.CROSS
-                                  else Multisegment([self, other])))))
 
 
 def rotate_segment_around_origin(segment: Segment,
-                                 cosine: Coordinate,
-                                 sine: Coordinate) -> Segment:
+                                 cosine: Scalar,
+                                 sine: Scalar) -> Segment:
     return Segment(rotate_point_around_origin(segment.start, cosine, sine),
                    rotate_point_around_origin(segment.end, cosine, sine))
 
 
 def rotate_translate_segment(segment: Segment,
-                             cosine: Coordinate,
-                             sine: Coordinate,
-                             step_x: Coordinate,
-                             step_y: Coordinate) -> Segment:
+                             cosine: Scalar,
+                             sine: Scalar,
+                             step_x: Scalar,
+                             step_y: Scalar) -> Segment:
     return Segment(rotate_translate_point(segment.start, cosine, sine, step_x,
                                           step_y),
                    rotate_translate_point(segment.end, cosine, sine, step_x,
@@ -631,61 +569,10 @@ def rotate_translate_segment(segment: Segment,
 
 
 def scale_segment(segment: Segment,
-                  factor_x: Coordinate,
-                  factor_y: Coordinate) -> Compound:
-    return (Segment(scale_point(segment._start, factor_x, factor_y),
-                    scale_point(segment._end, factor_x, factor_y))
+                  factor_x: Scalar,
+                  factor_y: Scalar) -> Compound:
+    return (Segment(scale_point(segment.start, factor_x, factor_y),
+                    scale_point(segment.end, factor_x, factor_y))
             if ((factor_x or not segment.is_horizontal) and factor_y
                 or factor_x and not segment.is_vertical)
-            else Multipoint([scale_point(segment._start, factor_x, factor_y)]))
-
-
-def _subtract_overlap(minuend: Segment, subtrahend: Segment) -> Segment:
-    left_start, left_end, right_start, right_end = sorted([
-        minuend.start, minuend.end, subtrahend.start, subtrahend.end])
-    return (Segment(left_start, left_end)
-            if left_start in minuend
-            else Segment(right_start, right_end))
-
-
-def _subtract_composite(minuend: Segment, subtrahend: Segment) -> Multisegment:
-    left_start, left_end, right_start, right_end = sorted([
-        minuend.start, minuend.end, subtrahend.start, subtrahend.end])
-    context = minuend.context
-    return context.multisegment_cls(
-            [Segment(right_start, right_end)]
-            if left_start in subtrahend
-            else ((([Segment(left_start, left_end)]
-                    if right_start == right_end
-                    else [Segment(left_start, left_end),
-                          Segment(right_start, right_end)])
-                   if right_start in subtrahend
-                   else [Segment(left_start, left_end)])
-                  if left_end in subtrahend
-                  else [Segment(left_start, right_start)]))
-
-
-def _symmetric_subtract_overlap(minuend: Segment,
-                                subtrahend: Segment) -> Multisegment:
-    left_start, left_end, right_start, right_end = sorted([
-        minuend.start, minuend.end, subtrahend.start, subtrahend.end])
-    return minuend.context.multisegment_cls([Segment(left_start, left_end),
-                                             Segment(right_start, right_end)])
-
-
-def _unite_cross(first_addend: Segment,
-                 second_addend: Segment) -> Multisegment:
-    context = first_addend.context
-    cross_point = context.segments_intersection(
-            first_addend.start, first_addend.end, second_addend.start,
-            second_addend.end)
-    return context.multisegment_cls([Segment(first_addend.start, cross_point),
-                                     Segment(second_addend.start, cross_point),
-                                     Segment(cross_point, first_addend.end),
-                                     Segment(cross_point, second_addend.end)])
-
-
-def _unite_overlap(first_addend: Segment, second_addend: Segment) -> Segment:
-    start, _, _, end = sorted([first_addend.start, first_addend.end,
-                               second_addend.start, second_addend.end])
-    return Segment(start, end)
+            else Multipoint([scale_point(segment.start, factor_x, factor_y)]))

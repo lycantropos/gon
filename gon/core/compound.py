@@ -4,7 +4,7 @@ from ground.base import Relation
 from sect.decomposition import Location
 
 from .geometry import Geometry
-from .hints import Coordinate
+from .hints import Scalar
 from .point import Point
 
 Relation = Relation
@@ -99,7 +99,7 @@ class Linear(Geometry):
 
     @property
     @abstractmethod
-    def length(self) -> Coordinate:
+    def length(self) -> Scalar:
         """
         Returns length of the geometry.
         """
@@ -110,14 +110,14 @@ class Shaped(Geometry):
 
     @property
     @abstractmethod
-    def area(self) -> Coordinate:
+    def area(self) -> Scalar:
         """
         Returns area of the geometry.
         """
 
     @property
     @abstractmethod
-    def perimeter(self) -> Coordinate:
+    def perimeter(self) -> Scalar:
         """
         Returns perimeter of the geometry.
         """

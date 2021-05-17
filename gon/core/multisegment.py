@@ -6,9 +6,14 @@ from typing import (Iterable,
 
 from bentley_ottmann.planar import segments_cross_or_overlap
 from clipping.planar import (complete_intersect_multisegments,
+                             complete_intersect_segment_with_multisegment,
+                             subtract_multisegment_from_segment,
                              subtract_multisegments,
+                             subtract_segment_from_multisegment,
+                             symmetric_subtract_multisegment_from_segment,
                              symmetric_subtract_multisegments,
-                             unite_multisegments)
+                             unite_multisegments,
+                             unite_segment_with_multisegment)
 from ground.base import (Context,
                          get_context)
 from locus import segmental
@@ -25,14 +30,13 @@ from .compound import (Compound,
                        Relation)
 from .empty import EMPTY
 from .geometry import Geometry
-from .hints import Coordinate
+from .hints import Scalar
 from .iterable import (non_negative_min,
                        unique_ever_seen)
-from .linear_utils import (from_mix_components,
-                           relate_multipoint_to_linear_compound,
+from .linear_utils import (relate_multipoint_to_linear_compound,
                            to_point_nearest_segment,
-                           to_segment_nearest_segment,
-                           unpack_multisegment)
+                           to_segment_nearest_segment)
+from .mix import from_mix_components
 from .multipoint import (Multipoint,
                          pack_points)
 from .point import (Point,
@@ -87,10 +91,12 @@ class Multisegment(Indexable, Linear):
         >>> multisegment & multisegment == multisegment
         True
         """
-        return (self._intersect_with_multisegment(
-                self.context.multisegment_cls([other]))
+        return (complete_intersect_segment_with_multisegment(
+                other, self,
+                context=self.context)
                 if isinstance(other, Segment)
-                else (self._intersect_with_multisegment(other)
+                else (complete_intersect_multisegments(self, other,
+                                                       context=self.context)
                       if isinstance(other, Multisegment)
                       else NotImplemented))
 
@@ -301,13 +307,13 @@ class Multisegment(Indexable, Linear):
         """
         return (self._unite_with_multipoint(other)
                 if isinstance(other, Multipoint)
-                else
-                (self._unite_with_multisegment(
-                        self.context.multisegment_cls([other]))
-                 if isinstance(other, Segment)
-                 else (self._unite_with_multisegment(other)
-                       if isinstance(other, Multisegment)
-                       else NotImplemented)))
+                else (unite_segment_with_multisegment(other, self,
+                                                      context=self.context)
+                      if isinstance(other, Segment)
+                      else (unite_multisegments(self, other,
+                                                context=self.context)
+                            if isinstance(other, Multisegment)
+                            else NotImplemented)))
 
     __ror__ = __or__
 
@@ -322,8 +328,8 @@ class Multisegment(Indexable, Linear):
 
         where ``segments_count = len(self.segments)``.
         """
-        return (self._subtract_from_multisegment(
-                self.context.multisegment_cls([other]))
+        return (subtract_multisegment_from_segment(other, self,
+                                                   context=self.context)
                 if isinstance(other, Segment)
                 else NotImplemented)
 
@@ -345,13 +351,13 @@ class Multisegment(Indexable, Linear):
         """
         return (self
                 if isinstance(other, Multipoint)
-                else
-                (self._subtract_multisegment(
-                        self.context.multisegment_cls([other]))
-                 if isinstance(other, Segment)
-                 else (self._subtract_multisegment(other)
-                       if isinstance(other, Multisegment)
-                       else NotImplemented)))
+                else (subtract_segment_from_multisegment(self, other,
+                                                         context=self.context)
+                      if isinstance(other, Segment)
+                      else (subtract_multisegments(self, other,
+                                                   context=self.context)
+                            if isinstance(other, Multisegment)
+                            else NotImplemented)))
 
     def __xor__(self, other: Compound) -> Compound:
         """
@@ -373,10 +379,12 @@ class Multisegment(Indexable, Linear):
         return (self._unite_with_multipoint(other)
                 if isinstance(other, Multipoint)
                 else
-                (self._symmetric_subtract_multisegment(
-                        self.context.multisegment_cls([other]))
+                (symmetric_subtract_multisegment_from_segment(
+                        other, self,
+                        context=self.context)
                  if isinstance(other, Segment)
-                 else (self._symmetric_subtract_multisegment(other)
+                 else (symmetric_subtract_multisegments(self, other,
+                                                        context=self.context)
                        if isinstance(other, Multisegment)
                        else NotImplemented)))
 
@@ -397,7 +405,7 @@ class Multisegment(Indexable, Linear):
         >>> multisegment.centroid == Point(1, 1)
         True
         """
-        return self.context.multisegment_centroid(self.segments)
+        return self.context.multisegment_centroid(self)
 
     @property
     def context(self) -> Context:
@@ -417,7 +425,7 @@ class Multisegment(Indexable, Linear):
         return self._context
 
     @property
-    def length(self) -> Coordinate:
+    def length(self) -> Scalar:
         """
         Returns length of the multisegment.
 
@@ -452,7 +460,7 @@ class Multisegment(Indexable, Linear):
         """
         return list(self._segments)
 
-    def distance_to(self, other: Geometry) -> Coordinate:
+    def distance_to(self, other: Geometry) -> Scalar:
         """
         Returns distance between the multisegment and the other geometry.
 
@@ -550,8 +558,8 @@ class Multisegment(Indexable, Linear):
                             else other.relate(self).complement)))
 
     def rotate(self,
-               cosine: Coordinate,
-               sine: Coordinate,
+               cosine: Scalar,
+               sine: Scalar,
                point: Optional[Point] = None) -> 'Multisegment':
         """
         Rotates the multisegment by given cosine & sine around given point.
@@ -582,8 +590,8 @@ class Multisegment(Indexable, Linear):
                  for segment in self._segments]))
 
     def scale(self,
-              factor_x: Coordinate,
-              factor_y: Optional[Coordinate] = None) -> Compound:
+              factor_x: Scalar,
+              factor_y: Optional[Scalar] = None) -> Compound:
         """
         Scales the multisegment by given factor.
 
@@ -613,8 +621,8 @@ class Multisegment(Indexable, Linear):
                       else Multipoint([Point(factor_x, factor_y)])))
 
     def translate(self,
-                  step_x: Coordinate,
-                  step_y: Coordinate) -> 'Multisegment':
+                  step_x: Scalar,
+                  step_y: Scalar) -> 'Multisegment':
         """
         Translates the multisegment by given step.
 
@@ -663,41 +671,16 @@ class Multisegment(Indexable, Linear):
         if segments_cross_or_overlap(self._segments):
             raise ValueError('Crossing or overlapping segments found.')
 
-    def _distance_to_point(self, other: Point) -> Coordinate:
-        nearest_segment = self._point_nearest_segment(other)
+    def _distance_to_point(self, other: Point) -> Scalar:
         return self.context.sqrt(self.context.segment_point_squared_distance(
-                nearest_segment.start, nearest_segment.end, other))
+                self._point_nearest_segment(other), other))
 
-    def _distance_to_segment(self, other: Segment) -> Coordinate:
-        nearest_segment = self._segment_nearest_segment(other)
+    def _distance_to_segment(self, other: Segment) -> Scalar:
         return self.context.sqrt(self.context.segments_squared_distance(
-                nearest_segment.start, nearest_segment.end, other.start,
-                other.end))
-
-    def _intersect_with_multisegment(self, other: 'Multisegment') -> Compound:
-        multipoint, multisegment = complete_intersect_multisegments(self,
-                                                                    other)
-        return from_mix_components(multipoint, multisegment)
-
-    def _subtract_multisegment(self, other: 'Multisegment') -> Compound:
-        return unpack_multisegment(subtract_multisegments(self, other))
-
-    def _subtract_from_multisegment(self, other: 'Multisegment') -> Compound:
-        return unpack_multisegment(subtract_multisegments(other, self))
-
-    def _symmetric_subtract_multisegment(self, other: 'Multisegment'
-                                         ) -> Compound:
-        return unpack_multisegment(symmetric_subtract_multisegments(
-                self, other,
-                context=self.context))
+                self._segment_nearest_segment(other), other))
 
     def _unite_with_multipoint(self, other: Multipoint) -> Compound:
-        # importing here to avoid cyclic imports
-        from gon.core.mix import from_mix_components
         return from_mix_components(other - self, self, EMPTY)
-
-    def _unite_with_multisegment(self, other: 'Multisegment') -> Compound:
-        return unite_multisegments(self, other)
 
 
 def locate_point(multisegment: Multisegment, point: Point) -> Location:
@@ -707,8 +690,8 @@ def locate_point(multisegment: Multisegment, point: Point) -> Location:
 
 
 def _scale_segments(segments: Iterable[Segment],
-                    factor_x: Coordinate,
-                    factor_y: Coordinate) -> Compound:
+                    factor_x: Scalar,
+                    factor_y: Scalar) -> Compound:
     scaled_points, scaled_segments = [], []
     for segment in segments:
         if ((factor_x or not segment.is_horizontal) and factor_y

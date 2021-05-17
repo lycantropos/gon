@@ -3,7 +3,7 @@ from abc import (ABC,
 from typing import (TYPE_CHECKING,
                     Optional)
 
-from .hints import Coordinate
+from .hints import Scalar
 
 if TYPE_CHECKING:
     from .primitive import Point
@@ -13,15 +13,15 @@ class Geometry(ABC):
     __slots__ = ()
 
     @abstractmethod
-    def distance_to(self, other: 'Geometry') -> Coordinate:
+    def distance_to(self, other: 'Geometry') -> Scalar:
         """
         Returns distance between geometric objects.
         """
 
     @abstractmethod
     def rotate(self,
-               cosine: Coordinate,
-               sine: Coordinate,
+               cosine: Scalar,
+               sine: Scalar,
                point: Optional['Point'] = None) -> 'Geometry':
         """
         Rotates geometric object by given cosine & sine around given point.
@@ -29,14 +29,14 @@ class Geometry(ABC):
 
     @abstractmethod
     def scale(self,
-              factor_x: Coordinate,
-              factor_y: Optional[Coordinate] = None) -> 'Geometry':
+              factor_x: Scalar,
+              factor_y: Optional[Scalar] = None) -> 'Geometry':
         """
         Scales geometric object by given factor.
         """
 
     @abstractmethod
-    def translate(self, step_x: Coordinate, step_y: Coordinate) -> 'Geometry':
+    def translate(self, step_x: Scalar, step_y: Scalar) -> 'Geometry':
         """
         Translates geometric object by given step.
         """

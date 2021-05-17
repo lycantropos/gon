@@ -3,7 +3,7 @@ from typing import (Iterable,
                     Sequence)
 
 from .compound import Compound
-from .hints import Coordinate
+from .hints import Scalar
 from .multipoint import Multipoint
 from .point import Point
 from .segment import Segment
@@ -17,7 +17,7 @@ def rotate_positions(vertices: Vertices) -> Vertices:
     return vertices[:1] + vertices[:0:-1]
 
 
-def length(vertices: Vertices) -> Coordinate:
+def length(vertices: Vertices) -> Scalar:
     return sum(vertices[index].distance_to(vertices[index - 1])
                for index in range(len(vertices)))
 
@@ -45,8 +45,8 @@ def equal(left: Vertices, right: Vertices, same_oriented: bool) -> bool:
 
 
 def scale_degenerate(vertices: Iterable[Point],
-                     factor_x: Coordinate,
-                     factor_y: Coordinate) -> Compound:
+                     factor_x: Scalar,
+                     factor_y: Scalar) -> Compound:
     return (scale_projecting_on_ox(vertices, factor_x, factor_y)
             if factor_x
             else (scale_projecting_on_oy(vertices, factor_x, factor_y)
@@ -55,8 +55,8 @@ def scale_degenerate(vertices: Iterable[Point],
 
 
 def scale_projecting_on_ox(vertices: Iterable[Point],
-                           factor_x: Coordinate,
-                           factor_y: Coordinate) -> Segment:
+                           factor_x: Scalar,
+                           factor_y: Scalar) -> Segment:
     vertices = iter(vertices)
     min_x = max_x = next(vertices).x
     for vertex in vertices:
@@ -69,8 +69,8 @@ def scale_projecting_on_ox(vertices: Iterable[Point],
 
 
 def scale_projecting_on_oy(vertices: Iterable[Point],
-                           factor_x: Coordinate,
-                           factor_y: Coordinate) -> Segment:
+                           factor_x: Scalar,
+                           factor_y: Scalar) -> Segment:
     vertices = iter(vertices)
     min_y = max_y = next(vertices).y
     for vertex in vertices:

@@ -9,13 +9,13 @@ from reprit.base import generate_repr
 from symba.base import Expression
 
 from .geometry import Geometry
-from .hints import Coordinate
+from .hints import Scalar
 
 
 class Point(Geometry):
     __slots__ = '_context', '_coordinates', '_x', '_y'
 
-    def __init__(self, x: Coordinate, y: Coordinate) -> None:
+    def __init__(self, x: Scalar, y: Scalar) -> None:
         """
         Initializes point.
 
@@ -132,7 +132,7 @@ class Point(Geometry):
         return self._context
 
     @property
-    def x(self) -> Coordinate:
+    def x(self) -> Scalar:
         """
         Returns abscissa of the point.
 
@@ -147,7 +147,7 @@ class Point(Geometry):
         return self._x
 
     @property
-    def y(self) -> Coordinate:
+    def y(self) -> Scalar:
         """
         Returns ordinate of the point.
 
@@ -161,7 +161,7 @@ class Point(Geometry):
         """
         return self._y
 
-    def distance_to(self, other: Geometry) -> Coordinate:
+    def distance_to(self, other: Geometry) -> Scalar:
         """
         Returns distance between the point and the other geometry.
 
@@ -179,8 +179,8 @@ class Point(Geometry):
                 else other.distance_to(self))
 
     def rotate(self,
-               cosine: Coordinate,
-               sine: Coordinate,
+               cosine: Scalar,
+               sine: Scalar,
                point: Optional['Point'] = None) -> 'Point':
         """
         Rotates the point by given cosine & sine around given point.
@@ -202,8 +202,8 @@ class Point(Geometry):
                 self, cosine, sine, *point_to_step(point, cosine, sine)))
 
     def scale(self,
-              factor_x: Coordinate,
-              factor_y: Optional[Coordinate] = None) -> 'Point':
+              factor_x: Scalar,
+              factor_y: Optional[Scalar] = None) -> 'Point':
         """
         Scales the point by given factor.
 
@@ -219,7 +219,7 @@ class Point(Geometry):
         return scale_point(self, factor_x,
                            factor_x if factor_y is None else factor_y)
 
-    def translate(self, step_x: Coordinate, step_y: Coordinate) -> 'Point':
+    def translate(self, step_x: Scalar, step_y: Scalar) -> 'Point':
         """
         Translates the point by given step.
 
@@ -247,41 +247,41 @@ class Point(Geometry):
         if not (is_finite(self.x) and is_finite(self.y)):
             raise ValueError('NaN/infinity coordinates are not supported.')
 
-    def _distance_to_point(self, other: 'Point') -> Coordinate:
+    def _distance_to_point(self, other: 'Point') -> Scalar:
         return self.context.sqrt(self.context.points_squared_distance(self,
                                                                       other))
 
 
 def point_to_step(point: Point,
-                  cosine: Coordinate,
-                  sine: Coordinate) -> Tuple[Coordinate, Coordinate]:
+                  cosine: Scalar,
+                  sine: Scalar) -> Tuple[Scalar, Scalar]:
     rotated_point = rotate_point_around_origin(point, cosine, sine)
     return point.x - rotated_point.x, point.y - rotated_point.y
 
 
 def rotate_point_around_origin(point: Point,
-                               cosine: Coordinate,
-                               sine: Coordinate) -> Point:
+                               cosine: Scalar,
+                               sine: Scalar) -> Point:
     return Point(cosine * point.x - sine * point.y,
                  sine * point.x + cosine * point.y)
 
 
 def rotate_translate_point(point: Point,
-                           cosine: Coordinate,
-                           sine: Coordinate,
-                           step_x: Coordinate,
-                           step_y: Coordinate) -> Point:
+                           cosine: Scalar,
+                           sine: Scalar,
+                           step_x: Scalar,
+                           step_y: Scalar) -> Point:
     return Point(cosine * point.x - sine * point.y + step_x,
                  sine * point.x + cosine * point.y + step_y)
 
 
 def scale_point(point: Point,
-                factor_x: Coordinate,
-                factor_y: Coordinate) -> Point:
+                factor_x: Scalar,
+                factor_y: Scalar) -> Point:
     return Point(point.x * factor_x, point.y * factor_y)
 
 
-def is_finite(value: Coordinate) -> bool:
+def is_finite(value: Scalar) -> bool:
     return (math.isfinite(value)
             if isinstance(value, Real)
             else isinstance(value, Expression) and value.is_finite)

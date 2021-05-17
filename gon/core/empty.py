@@ -8,7 +8,7 @@ from .compound import (Compound,
                        Location,
                        Relation)
 from .geometry import Geometry
-from .hints import Coordinate
+from .hints import Scalar
 from .point import Point
 
 try:
@@ -268,8 +268,8 @@ class Empty(Compound):
         return Relation.DISJOINT
 
     def rotate(self,
-               cosine: Coordinate,
-               sine: Coordinate,
+               cosine: Scalar,
+               sine: Scalar,
                point: Optional[Point] = None) -> 'Geometry':
         """
         Rotates the empty geometry by given cosine & sine around given point.
@@ -285,8 +285,8 @@ class Empty(Compound):
         return self
 
     def scale(self,
-              factor_x: Coordinate,
-              factor_y: Optional[Coordinate] = None) -> 'Empty':
+              factor_x: Scalar,
+              factor_y: Optional[Scalar] = None) -> 'Empty':
         """
         Scales the empty geometry by given factor.
 
@@ -300,7 +300,7 @@ class Empty(Compound):
         """
         return self
 
-    def translate(self, step_x: Coordinate, step_y: Coordinate) -> 'Empty':
+    def translate(self, step_x: Scalar, step_y: Scalar) -> 'Empty':
         """
         Translates the empty geometry by given step.
 
