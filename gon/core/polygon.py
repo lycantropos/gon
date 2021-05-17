@@ -7,9 +7,9 @@ from clipping.planar import (complete_intersect_multisegment_with_polygon,
                              complete_intersect_regions,
                              complete_intersect_segment_with_polygon,
                              subtract_multipolygon_from_polygon,
-                             subtract_multipolygons,
                              subtract_polygon_from_multisegment,
-                             subtract_polygon_from_segment, subtract_polygons,
+                             subtract_polygon_from_segment,
+                             subtract_polygons,
                              symmetric_subtract_polygons,
                              unite_multisegment_with_polygon,
                              unite_polygons,
@@ -42,15 +42,14 @@ from .empty import EMPTY
 from .geometry import Geometry
 from .hints import Scalar
 from .iterable import non_negative_min
-from .linear_utils import (from_mix_components,
-                           to_point_nearest_segment,
-                           to_segment_nearest_segment)
 from .mix import from_mix_components
 from .multipoint import Multipoint
 from .multisegment import Multisegment
 from .point import (Point,
                     point_to_step)
 from .segment import Segment
+from .utils import (to_point_nearest_segment,
+                    to_segment_nearest_segment)
 
 Triangulation = Triangulation
 
@@ -924,16 +923,21 @@ class Polygon(Indexable, Shaped):
         if self._holes:
             for hole in self._holes:
                 hole.validate()
-            relation = region_in_multiregion(self._border, self._holes)
+            context = self.context
+            relation = region_in_multiregion(self._border, self._holes,
+                                             context=context)
             if not (relation is Relation.COVER
                     or relation is Relation.ENCLOSES):
                 raise ValueError('Holes should lie inside the border.')
-            context = self.context
-            border_minus_holes = subtract_multipolygon_from_polygon(
-                    context.polygon_cls(self._border, []),
-                    context.multipolygon_cls(
-                            [context.polygon_cls(hole, [])
-                             for hole in self._holes]))
+            border_minus_holes = (
+                subtract_multipolygon_from_polygon(
+                        context.polygon_cls(self._border, []),
+                        context.multipolygon_cls([context.polygon_cls(hole, [])
+                                                  for hole in self._holes]))
+                if len(self._holes) > 1
+                else subtract_polygons(
+                        context.polygon_cls(self._border, []),
+                        context.polygon_cls(self._holes[0], [])))
             if border_minus_holes != self:
                 raise ValueError('Holes should not tear polygon apart.')
 

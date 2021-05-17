@@ -33,9 +33,6 @@ from .geometry import Geometry
 from .hints import Scalar
 from .iterable import (non_negative_min,
                        unique_ever_seen)
-from .linear_utils import (relate_multipoint_to_linear_compound,
-                           to_point_nearest_segment,
-                           to_segment_nearest_segment)
 from .mix import from_mix_components
 from .multipoint import (Multipoint,
                          pack_points)
@@ -46,6 +43,9 @@ from .segment import (Segment,
                       rotate_segment_around_origin,
                       rotate_translate_segment,
                       scale_segment)
+from .utils import (relate_multipoint_to_linear_compound,
+                    to_point_nearest_segment,
+                    to_segment_nearest_segment)
 
 MIN_MULTISEGMENT_SEGMENTS_COUNT = 2
 

@@ -2,7 +2,8 @@ from typing import Optional
 
 from clipping.planar import (intersect_segments,
                              subtract_segments,
-                             symmetric_subtract_segments, unite_segments)
+                             symmetric_subtract_segments,
+                             unite_segments)
 from ground.base import (Context,
                          get_context)
 from orient.planar import (segment_in_segment)
@@ -16,7 +17,6 @@ from .empty import EMPTY
 from .geometry import Geometry
 from .hints import Scalar
 from .iterable import non_negative_min
-from .linear_utils import (relate_multipoint_to_linear_compound)
 from .mix import from_mix_components
 from .multipoint import Multipoint
 from .point import (Point,
@@ -24,6 +24,7 @@ from .point import (Point,
                     rotate_point_around_origin,
                     rotate_translate_point,
                     scale_point)
+from .utils import relate_multipoint_to_linear_compound
 
 
 class Segment(Compound, Linear):
