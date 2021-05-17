@@ -10,7 +10,8 @@ from clipping.planar import (complete_intersect_multisegments,
                              subtract_segment_from_multisegment,
                              symmetric_subtract_multisegment_from_segment,
                              symmetric_subtract_multisegments,
-                             unite_multisegments)
+                             unite_multisegments,
+                             unite_segment_with_multisegment)
 from ground.base import (Context,
                          get_context)
 from locus import segmental
@@ -304,11 +305,12 @@ class Contour(Indexable, Linear):
         """
         return (self._unite_with_multipoint(other)
                 if isinstance(other, Multipoint)
-                else
-                (self._unite_with_multisegment(
-                        self.context.multisegment_cls([other]))
-                 if isinstance(other, Segment)
-                 else (self._unite_with_multisegment(other)
+                else (unite_segment_with_multisegment(other,
+                                                      self._as_multisegment(),
+                                                      context=self.context)
+                      if isinstance(other, Segment)
+                      else
+                      (self._unite_with_multisegment(other)
                        if isinstance(other, Multisegment)
                        else
                        (self._unite_with_multisegment(
