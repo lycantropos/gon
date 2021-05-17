@@ -6,7 +6,7 @@ from typing import (TYPE_CHECKING,
 from .hints import Scalar
 
 if TYPE_CHECKING:
-    from .primitive import Point
+    from .point import Point
 
 
 class Geometry(ABC):
