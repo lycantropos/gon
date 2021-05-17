@@ -658,18 +658,19 @@ class Multisegment(Indexable, Linear):
         ...                              Segment(Point(0, 1), Point(1, 1))])
         >>> multisegment.validate()
         """
-        if len(self._segments) < MIN_MULTISEGMENT_SEGMENTS_COUNT:
+        segments = self._segments
+        if len(segments) < MIN_MULTISEGMENT_SEGMENTS_COUNT:
             raise ValueError('Multisegment should have '
                              'at least {min_size} segments, '
                              'but found {size}.'
                              .format(min_size=MIN_MULTISEGMENT_SEGMENTS_COUNT,
-                                     size=len(self._segments)))
-        elif len(self.segments) > len(self._segments_set):
+                                     size=len(segments)))
+        elif len(segments) > len(self._segments_set):
             raise ValueError('Duplicate segments found.')
-        for segment in self._segments:
-            segment.validate()
-        if segments_cross_or_overlap(self._segments):
+        elif segments_cross_or_overlap(segments):
             raise ValueError('Crossing or overlapping segments found.')
+        for segment in segments:
+            segment.validate()
 
     def _distance_to_point(self, other: Point) -> Scalar:
         return self.context.sqrt(self.context.segment_point_squared_distance(
