@@ -34,7 +34,7 @@ from gon.base import (EMPTY,
                       Relation,
                       Segment)
 from gon.core.iterable import shift_sequence
-from gon.hints import Coordinate
+from gon.hints import Scalar
 
 Domain = TypeVar('Domain')
 Range = TypeVar('Range')
@@ -141,13 +141,13 @@ def is_scalar(value: Any) -> bool:
     return isinstance(value, (Real, Expression))
 
 
-def robust_invert(value: Coordinate) -> Coordinate:
+def robust_invert(value: Scalar) -> Scalar:
     return 1 / Fraction(value)
 
 
 def scale_segment(segment: Segment,
                   *,
-                  scale: Coordinate) -> Segment:
+                  scale: Scalar) -> Segment:
     return Segment(segment.start,
                    Point(segment.start.x
                          + scale * (segment.end.x - segment.start.x),
@@ -189,7 +189,7 @@ def shift_multisegment(multisegment: Multisegment, step: int) -> Multisegment:
     return Multisegment(shift_sequence(multisegment.segments, step))
 
 
-def divide_by_int(dividend: Coordinate, divisor: int) -> Coordinate:
+def divide_by_int(dividend: Scalar, divisor: int) -> Scalar:
     return (Fraction(dividend, divisor)
             if isinstance(dividend, int)
             else dividend / divisor)
