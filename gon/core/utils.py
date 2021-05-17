@@ -3,11 +3,11 @@ from typing import Sequence
 from ground.base import Context
 from ground.hints import (Multipoint,
                           Point,
-                          Scalar,
                           Segment)
 
 from .compound import (Compound,
                        Relation)
+from .hints import Scalar
 
 
 def relate_multipoint_to_linear_compound(multipoint: Multipoint,
