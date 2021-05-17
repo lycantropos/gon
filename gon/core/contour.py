@@ -34,9 +34,6 @@ from .geometry import Geometry
 from .hints import Scalar
 from .iterable import (non_negative_min,
                        shift_sequence)
-from .linear_utils import (relate_multipoint_to_linear_compound,
-                           to_point_nearest_segment,
-                           to_segment_nearest_segment)
 from .mix import from_mix_components
 from .multipoint import (Multipoint,
                          rotate_points_around_origin,
@@ -46,6 +43,9 @@ from .point import (Point,
                     point_to_step,
                     scale_point)
 from .segment import Segment
+from .utils import (relate_multipoint_to_linear_compound,
+                    to_point_nearest_segment,
+                    to_segment_nearest_segment)
 from .vertices import Vertices
 
 

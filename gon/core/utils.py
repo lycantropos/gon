@@ -2,14 +2,12 @@ from typing import Sequence
 
 from ground.base import Context
 from ground.hints import (Multipoint,
-                          Multisegment,
                           Point,
                           Scalar,
                           Segment)
 
 from .compound import (Compound,
                        Relation)
-from .empty import EMPTY
 
 
 def relate_multipoint_to_linear_compound(multipoint: Multipoint,
@@ -26,26 +24,6 @@ def relate_multipoint_to_linear_compound(multipoint: Multipoint,
             else (Relation.COMPONENT
                   if is_subset
                   else Relation.TOUCH))
-
-
-def from_mix_components(multipoint: Multipoint,
-                        multisegment: Multisegment) -> Compound:
-    # importing here to avoid cyclic imports
-    from .mix import from_mix_components
-    return from_mix_components(unpack_multipoint(multipoint),
-                               unpack_multisegment(multisegment), EMPTY)
-
-
-def unpack_multipoint(multipoint: Multipoint) -> Compound:
-    return multipoint if multipoint.points else EMPTY
-
-
-def unpack_multisegment(multisegment: Multisegment) -> Compound:
-    return ((multisegment
-             if len(multisegment.segments) > 1
-             else multisegment.segments[0])
-            if multisegment.segments
-            else EMPTY)
 
 
 def to_point_nearest_segment(context: Context,
