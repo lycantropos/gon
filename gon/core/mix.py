@@ -1000,15 +1000,14 @@ class Mix(Indexable):
                                      else 'be subset of'))
         elif (shaped_linear_relation is Relation.TOUCH
               and any(polygon.border.relate(self.linear)
-                      in (Relation.OVERLAP,
-                          Relation.COMPOSITE)
+                      in (Relation.OVERLAP, Relation.COMPOSITE)
                       or any(hole.relate(self.linear)
                              in (Relation.OVERLAP,
                                  Relation.COMPOSITE)
                              for hole in polygon.holes)
                       for polygon in (self.shaped.polygons
-                if isinstance(self.shaped, Multipolygon)
-                else [self.shaped]))):
+                                      if isinstance(self.shaped, Multipolygon)
+                                      else [self.shaped]))):
             raise ValueError('Linear component should not overlap '
                              'shaped component borders.')
 
