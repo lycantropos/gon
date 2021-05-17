@@ -6,13 +6,13 @@ from gon.base import (Linear,
                       Multipoint,
                       Point,
                       Segment)
-from gon.hints import Coordinate
+from gon.hints import Scalar
 from . import strategies
 
 
 @given(strategies.contours_with_zero_non_zero_coordinates)
 def test_degenerate(contour_with_zero_non_zero_factors
-                    : Tuple[Linear, Coordinate, Coordinate]) -> None:
+                    : Tuple[Linear, Scalar, Scalar]) -> None:
     contour, zero_factor, non_zero_factors = contour_with_zero_non_zero_factors
 
     zero_result = contour.scale(zero_factor)

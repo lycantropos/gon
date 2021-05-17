@@ -4,7 +4,7 @@ from hypothesis import strategies
 
 from gon.base import (Contour,
                       Point)
-from gon.hints import Coordinate
+from gon.hints import Scalar
 from tests.strategies import (coordinates_strategies,
                               coordinates_to_contours,
                               coordinates_to_points,
@@ -19,7 +19,7 @@ from tests.utils import (Strategy,
 contours = coordinates_strategies.flatmap(coordinates_to_contours)
 
 
-def coordinates_to_contours_with_points(coordinates: Strategy[Coordinate]
+def coordinates_to_contours_with_points(coordinates: Strategy[Scalar]
                                         ) -> Strategy[Tuple[Contour, Point]]:
     return strategies.tuples(coordinates_to_contours(coordinates),
                              coordinates_to_points(coordinates))
