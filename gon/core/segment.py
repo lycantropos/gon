@@ -6,7 +6,7 @@ from clipping.planar import (intersect_segments,
                              unite_segments)
 from ground.base import (Context,
                          get_context)
-from orient.planar import (segment_in_segment)
+from orient.planar import segment_in_segment
 from reprit.base import generate_repr
 
 from .compound import (Compound,
