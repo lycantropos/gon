@@ -1,5 +1,5 @@
 from .core.empty import Maybe
-from .core.hints import Coordinate
+from .core.hints import Scalar
 
-Coordinate = Coordinate
+Scalar = Scalar
 Maybe = Maybe

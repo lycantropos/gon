@@ -1,3 +1,3 @@
-from ground.hints import Coordinate
+from ground.hints import Scalar
 
-Coordinate = Coordinate
+Scalar = Scalar

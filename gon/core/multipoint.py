@@ -16,7 +16,7 @@ from .compound import (Compound,
                        Relation)
 from .empty import EMPTY
 from .geometry import Geometry
-from .hints import Coordinate
+from .hints import Scalar
 from .iterable import (non_negative_min,
                        unique_ever_seen)
 from .point import (Point,
@@ -290,7 +290,7 @@ class Multipoint(Indexable):
         >>> multipoint.centroid == Point(1, 1)
         True
         """
-        return self.context.multipoint_centroid(self.points)
+        return self.context.multipoint_centroid(self)
 
     @property
     def context(self) -> Context:
@@ -326,7 +326,7 @@ class Multipoint(Indexable):
         """
         return list(self._points)
 
-    def distance_to(self, other: Geometry) -> Coordinate:
+    def distance_to(self, other: Geometry) -> Scalar:
         """
         Returns distance between the multipoint and the other geometry.
 
@@ -403,8 +403,8 @@ class Multipoint(Indexable):
                 else self._relate_geometry(other))
 
     def rotate(self,
-               cosine: Coordinate,
-               sine: Coordinate,
+               cosine: Scalar,
+               sine: Scalar,
                point: Optional[Point] = None) -> 'Multipoint':
         """
         Rotates geometric object by given cosine & sine around given point.
@@ -432,8 +432,8 @@ class Multipoint(Indexable):
                         *point_to_step(point, cosine, sine))))
 
     def scale(self,
-              factor_x: Coordinate,
-              factor_y: Optional[Coordinate] = None) -> 'Multipoint':
+              factor_x: Scalar,
+              factor_y: Optional[Scalar] = None) -> 'Multipoint':
         """
         Scales the multipoint by given factor.
 
@@ -464,8 +464,8 @@ class Multipoint(Indexable):
                  else Multipoint([Point(factor_x, factor_y)])))
 
     def translate(self,
-                  step_x: Coordinate,
-                  step_y: Coordinate) -> 'Multipoint':
+                  step_x: Scalar,
+                  step_y: Scalar) -> 'Multipoint':
         """
         Translates the multipoint by given step.
 
@@ -503,7 +503,7 @@ class Multipoint(Indexable):
         for point in self._points:
             point.validate()
 
-    def _distance_to_point(self, other: Point) -> Coordinate:
+    def _distance_to_point(self, other: Point) -> Scalar:
         return self.context.sqrt(self.context.points_squared_distance(
                 self._nearest_point(other), other))
 
@@ -541,17 +541,17 @@ def pack_points(points: AbstractSet[Point]) -> Compound:
 
 
 def rotate_points_around_origin(points: Iterable[Point],
-                                cosine: Coordinate,
-                                sine: Coordinate) -> List[Point]:
+                                cosine: Scalar,
+                                sine: Scalar) -> List[Point]:
     return [rotate_point_around_origin(point, cosine, sine)
             for point in points]
 
 
 def rotate_translate_points(points: Iterable[Point],
-                            cosine: Coordinate,
-                            sine: Coordinate,
-                            step_x: Coordinate,
-                            step_y: Coordinate) -> List[Point]:
+                            cosine: Scalar,
+                            sine: Scalar,
+                            step_x: Scalar,
+                            step_y: Scalar) -> List[Point]:
     return [rotate_translate_point(point, cosine, sine, step_x, step_y)
             for point in points]
 

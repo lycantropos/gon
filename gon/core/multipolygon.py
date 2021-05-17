@@ -8,10 +8,19 @@ from bentley_ottmann.planar import segments_cross_or_overlap
 from clipping.planar import (complete_intersect_multipolygons,
                              complete_intersect_multiregions,
                              complete_intersect_multisegment_with_multipolygon,
+                             complete_intersect_polygon_with_multipolygon,
+                             complete_intersect_region_with_multiregion,
+                             complete_intersect_segment_with_multipolygon,
                              subtract_multipolygon_from_multisegment,
+                             subtract_multipolygon_from_polygon,
+                             subtract_multipolygon_from_segment,
                              subtract_multipolygons,
+                             subtract_polygon_from_multipolygon,
+                             symmetric_subtract_multipolygon_from_polygon,
                              symmetric_subtract_multipolygons,
-                             unite_multipolygons)
+                             unite_multipolygons,
+                             unite_polygon_with_multipolygon,
+                             unite_segment_with_multipolygon)
 from ground.base import (Context,
                          get_context)
 from ground.hints import Box
@@ -35,11 +44,10 @@ from .contour import (Contour,
                       Segment)
 from .empty import EMPTY
 from .geometry import Geometry
-from .hints import Coordinate
+from .hints import Scalar
 from .iterable import (flatten,
                        non_negative_min)
-from .linear_utils import (from_mix_components,
-                           unpack_multisegment)
+from .mix import from_mix_components
 from .multipoint import Multipoint
 from .point import (Point,
                     point_to_step)
@@ -47,9 +55,6 @@ from .polygon import (Polygon,
                       rotate_polygon_around_origin,
                       rotate_translate_polygon,
                       scale_polygon)
-from .shaped_utils import (from_holeless_mix_components,
-                           mix_from_packed_components,
-                           unpack_multipolygon)
 
 MIN_MULTIPOLYGON_POLYGONS_COUNT = 2
 
@@ -102,8 +107,9 @@ class Multipolygon(Indexable, Shaped):
         >>> multipolygon & multipolygon == multipolygon
         True
         """
-        return (self._intersect_with_multisegment(
-                self.context.multisegment_cls([other]))
+        return (complete_intersect_segment_with_multipolygon(
+                other, self,
+                context=self.context)
                 if isinstance(other, Segment)
                 else (self._intersect_with_multisegment(other)
                       if isinstance(other, Multisegment)
@@ -111,13 +117,11 @@ class Multipolygon(Indexable, Shaped):
                       (self._intersect_with_multisegment(
                               self.context.multisegment_cls(other.edges))
                        if isinstance(other, Contour)
-                       else
-                       (self._intersect_with_multipolygon(
-                               self.context.multipolygon_cls([other]))
-                        if isinstance(other, Polygon)
-                        else (self._intersect_with_multipolygon(other)
-                              if isinstance(other, Multipolygon)
-                              else NotImplemented)))))
+                       else (self._intersect_with_polygon(other)
+                             if isinstance(other, Polygon)
+                             else (self._intersect_with_multipolygon(other)
+                                   if isinstance(other, Multipolygon)
+                                   else NotImplemented)))))
 
     __rand__ = __and__
 
@@ -370,8 +374,8 @@ class Multipolygon(Indexable, Shaped):
         return (self._unite_with_multipoint(other)
                 if isinstance(other, Multipoint)
                 else
-                (self._unite_with_multisegment(
-                        self.context.multisegment_cls([other]))
+                (unite_segment_with_multipolygon(other, self,
+                                                 context=self.context)
                  if isinstance(other, Segment)
                  else
                  (self._unite_with_multisegment(other)
@@ -380,10 +384,11 @@ class Multipolygon(Indexable, Shaped):
                   (self._unite_with_multisegment(
                           self.context.multisegment_cls(other.edges))
                    if isinstance(other, Contour)
-                   else (self._unite_with_multipolygon(
-                          self.context.multipolygon_cls([other]))
+                   else (unite_polygon_with_multipolygon(other, self,
+                                                         context=self.context)
                          if isinstance(other, Polygon)
-                         else (self._unite_with_multipolygon(other)
+                         else (unite_multipolygons(self, other,
+                                                   context=self.context)
                                if isinstance(other, Multipolygon)
                                else NotImplemented))))))
 
@@ -402,8 +407,8 @@ class Multipolygon(Indexable, Shaped):
  + sum(len(hole.vertices) for hole in polygon.holes)\
  for polygon in self.polygons)``.
         """
-        return (self._subtract_from_multisegment(
-                self.context.multisegment_cls([other]))
+        return (subtract_multipolygon_from_segment(other, self,
+                                                   context=self.context)
                 if isinstance(other, Segment)
                 else (self._subtract_from_multisegment(other)
                       if isinstance(other, Multisegment)
@@ -411,8 +416,9 @@ class Multipolygon(Indexable, Shaped):
                       (self._subtract_from_multisegment(
                               self.context.multisegment_cls(other.edges))
                        if isinstance(other, Contour)
-                       else (self._subtract_from_multipolygon(
-                              self.context.multipolygon_cls([other]))
+                       else (subtract_multipolygon_from_polygon(
+                              other, self,
+                              context=self.context)
                              if isinstance(other, Polygon)
                              else NotImplemented))))
 
@@ -444,10 +450,11 @@ class Multipolygon(Indexable, Shaped):
         return (self
                 if isinstance(other, (Linear, Multipoint))
                 else
-                (self._subtract_multipolygon(
-                        self.context.multipolygon_cls([other]))
+                (subtract_polygon_from_multipolygon(self, other,
+                                                    context=self.context)
                  if isinstance(other, Polygon)
-                 else (self._subtract_multipolygon(other)
+                 else (subtract_multipolygons(self, other,
+                                              context=self.context)
                        if isinstance(other, Multipolygon)
                        else NotImplemented)))
 
@@ -491,17 +498,20 @@ class Multipolygon(Indexable, Shaped):
                           self.context.multisegment_cls(other.edges))
                    if isinstance(other, Contour)
                    else
-                   (self._symmetric_subtract_multipolygon(
-                           self.context.multipolygon_cls([other]))
+                   (symmetric_subtract_multipolygon_from_polygon(
+                           other, self,
+                           context=self.context)
                     if isinstance(other, Polygon)
-                    else (self._symmetric_subtract_multipolygon(other)
+                    else (symmetric_subtract_multipolygons(
+                           self, other,
+                           context=self.context)
                           if isinstance(other, Multipolygon)
                           else NotImplemented))))))
 
     __rxor__ = __xor__
 
     @property
-    def area(self) -> Coordinate:
+    def area(self) -> Scalar:
         """
         Returns area of the multipolygon.
 
@@ -554,7 +564,7 @@ class Multipolygon(Indexable, Shaped):
         >>> multipolygon.centroid == Point(7, 7)
         True
         """
-        return get_context().multipolygon_centroid(self._polygons)
+        return self.context.multipolygon_centroid(self)
 
     @property
     def context(self) -> Context:
@@ -581,7 +591,7 @@ class Multipolygon(Indexable, Shaped):
         return self._context
 
     @property
-    def perimeter(self) -> Coordinate:
+    def perimeter(self) -> Scalar:
         """
         Returns perimeter of the multipolygon.
 
@@ -642,7 +652,7 @@ class Multipolygon(Indexable, Shaped):
         """
         return list(self._polygons)
 
-    def distance_to(self, other: Geometry) -> Coordinate:
+    def distance_to(self, other: Geometry) -> Scalar:
         """
         Returns distance between the multipolygon and the other geometry.
 
@@ -830,8 +840,8 @@ class Multipolygon(Indexable, Shaped):
                                    else other.relate(self).complement)))))
 
     def rotate(self,
-               cosine: Coordinate,
-               sine: Coordinate,
+               cosine: Scalar,
+               sine: Scalar,
                point: Optional[Point] = None) -> 'Multipolygon':
         """
         Rotates the multipolygon by given cosine & sine around given point.
@@ -874,8 +884,8 @@ class Multipolygon(Indexable, Shaped):
                 self, cosine, sine, *point_to_step(point, cosine, sine)))
 
     def scale(self,
-              factor_x: Coordinate,
-              factor_y: Optional[Coordinate] = None) -> Compound:
+              factor_x: Scalar,
+              factor_y: Optional[Scalar] = None) -> Compound:
         """
         Scales the multipolygon by given factor.
 
@@ -921,8 +931,8 @@ class Multipolygon(Indexable, Shaped):
                 factor_x, factor_y))
 
     def translate(self,
-                  step_x: Coordinate,
-                  step_y: Coordinate) -> 'Multipolygon':
+                  step_x: Scalar,
+                  step_y: Scalar) -> 'Multipolygon':
         """
         Translates the multipolygon by given step.
 
@@ -1001,63 +1011,49 @@ class Multipolygon(Indexable, Shaped):
     def _as_multiregion(self) -> Sequence[Contour]:
         return [polygon.border for polygon in self._polygons]
 
-    def _distance_to_point(self, other: Point) -> Coordinate:
+    def _distance_to_point(self, other: Point) -> Scalar:
         return non_negative_min(polygon._distance_to_point(other)
                                 for polygon in self._polygons)
 
-    def _distance_to_segment(self, other: Segment) -> Coordinate:
+    def _distance_to_segment(self, other: Segment) -> Scalar:
         return non_negative_min(polygon._distance_to_segment(other)
                                 for polygon in self._polygons)
 
     def _intersect_with_multipolygon(self, other: 'Multipolygon') -> Compound:
-        return (mix_from_packed_components(
-                *complete_intersect_multipolygons(self, other))
+        return (complete_intersect_multipolygons(self, other,
+                                                 context=self.context)
                 if (_multipolygon_has_holes(self)
                     or _multipolygon_has_holes(other))
-                else from_holeless_mix_components(
-                *complete_intersect_multiregions(self._as_multiregion(),
-                                                 other._as_multiregion(),
-                                                 context=self.context)))
+                else complete_intersect_multiregions(self._as_multiregion(),
+                                                     other._as_multiregion(),
+                                                     context=self.context))
 
     def _intersect_with_multisegment(self, multisegment: Multisegment
                                      ) -> Compound:
-        return from_mix_components(
-                *complete_intersect_multisegment_with_multipolygon(
-                        multisegment, self))
+        return complete_intersect_multisegment_with_multipolygon(multisegment,
+                                                                 self)
 
-    def _subtract_from_multipolygon(self, other: 'Multipolygon') -> Compound:
-        return unpack_multipolygon(subtract_multipolygons(other, self))
+    def _intersect_with_polygon(self, other: Polygon) -> Compound:
+        return (complete_intersect_polygon_with_multipolygon(
+                other, self,
+                context=self.context)
+                if _multipolygon_has_holes(self) or other.holes
+                else complete_intersect_region_with_multiregion(
+                other.border, self._as_multiregion(),
+                context=self.context))
 
     def _subtract_from_multisegment(self, other: Multisegment) -> Compound:
-        return unpack_multisegment(subtract_multipolygon_from_multisegment(
-                other, self))
-
-    def _subtract_multipolygon(self, other: 'Multipolygon') -> Compound:
-        return unpack_multipolygon(subtract_multipolygons(
-                self, other,
-                context=self.context))
-
-    def _symmetric_subtract_multipolygon(self, other: 'Multipolygon'
-                                         ) -> Compound:
-        return unpack_multipolygon(symmetric_subtract_multipolygons(
-                self, other,
-                context=self.context))
+        return subtract_multipolygon_from_multisegment(other, self,
+                                                       context=self.context)
 
     def _unite_with_multipoint(self, other: Multipoint) -> Compound:
         # importing here to avoid cyclic imports
-        from gon.core.mix import from_mix_components
         return from_mix_components(other - self, EMPTY, self)
 
     def _unite_with_multisegment(self, other: Multisegment) -> Compound:
-        from gon.core.mix import from_mix_components
-        return from_mix_components(
-                EMPTY,
-                unpack_multisegment(subtract_multipolygon_from_multisegment(
-                        other, self,
-                        context=self.context)), self)
-
-    def _unite_with_multipolygon(self, other: 'Multipolygon') -> Compound:
-        return unpack_multipolygon(unite_multipolygons(self, other))
+        return subtract_multipolygon_from_multisegment(
+                other, self,
+                context=self.context)
 
 
 def _multipolygon_has_holes(multipolygon: Multipolygon) -> bool:
@@ -1087,17 +1083,17 @@ def _locate_point_in_indexed_polygons(tree: r.Tree,
 
 
 def _rotate_multipolygon_around_origin(multipolygon: Multipolygon,
-                                       cosine: Coordinate,
-                                       sine: Coordinate) -> Multipolygon:
+                                       cosine: Scalar,
+                                       sine: Scalar) -> Multipolygon:
     return Multipolygon([rotate_polygon_around_origin(polygon, cosine, sine)
-                         for polygon in multipolygon._polygons])
+                         for polygon in multipolygon.polygons])
 
 
 def _rotate_translate_multipolygon(multipolygon: Multipolygon,
-                                   cosine: Coordinate,
-                                   sine: Coordinate,
-                                   step_x: Coordinate,
-                                   step_y: Coordinate) -> Multipolygon:
+                                   cosine: Scalar,
+                                   sine: Scalar,
+                                   step_x: Scalar,
+                                   step_y: Scalar) -> Multipolygon:
     return Multipolygon([rotate_translate_polygon(polygon, cosine, sine,
                                                   step_x, step_y)
-                         for polygon in multipolygon._polygons])
+                         for polygon in multipolygon.polygons])
