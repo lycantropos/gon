@@ -1,3 +1,5 @@
+from itertools import chain
+
 from bentley_ottmann.planar import segments_cross_or_overlap
 from hypothesis import strategies
 
@@ -18,6 +20,7 @@ from tests.strategies import (coordinates_strategies,
                               invalid_multisegments)
 from tests.utils import (Strategy,
                          cleave_in_tuples,
+                         flatten,
                          sub_lists,
                          to_pairs,
                          to_triplets)
@@ -30,10 +33,11 @@ multipolygons = coordinates_strategies.flatmap(coordinates_to_multipolygons)
 
 
 def multipolygon_to_invalid_mix(multipolygon: Multipolygon) -> Strategy[Mix]:
-    vertices = sum([sum((hole.vertices for hole in polygon.holes),
-                        polygon.border.vertices)
-                    for polygon in multipolygon.polygons], [])
-    edges = sum([polygon.edges for polygon in multipolygon.polygons], [])
+    vertices = list(flatten(chain(polygon.border.vertices,
+                                  flatten(hole.vertices
+                                          for hole in polygon.holes))
+                            for polygon in multipolygon.polygons))
+    edges = list(flatten(polygon.edges for polygon in multipolygon.polygons))
     segments = edges + [Segment(vertices[index - 1], vertices[index])
                         for index in range(len(vertices))]
     return strategies.builds(
