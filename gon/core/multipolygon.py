@@ -19,6 +19,7 @@ from clipping.planar import (complete_intersect_multipolygons,
                              symmetric_subtract_multipolygon_from_polygon,
                              symmetric_subtract_multipolygons,
                              unite_multipolygons,
+                             unite_multisegment_with_multipolygon,
                              unite_polygon_with_multipolygon,
                              unite_segment_with_multipolygon)
 from ground.base import (Context,
@@ -1051,9 +1052,8 @@ class Multipolygon(Indexable, Shaped):
         return from_mix_components(other - self, EMPTY, self)
 
     def _unite_with_multisegment(self, other: Multisegment) -> Compound:
-        return subtract_multipolygon_from_multisegment(
-                other, self,
-                context=self.context)
+        return unite_multisegment_with_multipolygon(other, self,
+                                                    context=self.context)
 
 
 def _multipolygon_has_holes(multipolygon: Multipolygon) -> bool:
