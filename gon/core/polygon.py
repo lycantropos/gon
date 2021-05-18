@@ -978,7 +978,6 @@ class Polygon(Indexable, Shaped):
                 context=self.context)
 
     def _unite_with_multipoint(self, other: Multipoint) -> Compound:
-        # importing here to avoid cyclic imports
         return from_mix_components(other - self, EMPTY, self)
 
     def _unite_with_multisegment(self, other: Multisegment) -> Compound:
