@@ -573,14 +573,14 @@ class Polygon(Indexable, Shaped):
         ...                            Point(0, 6)]),
         ...                   [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
         ...                             Point(4, 2)])])
-        >>> (polygon.edges == [Segment(Point(0, 6), Point(0, 0)),
-        ...                    Segment(Point(0, 0), Point(6, 0)),
-        ...                    Segment(Point(6, 0), Point(6, 6)),
-        ...                    Segment(Point(6, 6), Point(0, 6)),
-        ...                    Segment(Point(4, 2), Point(2, 2)),
-        ...                    Segment(Point(2, 2), Point(2, 4)),
-        ...                    Segment(Point(2, 4), Point(4, 4)),
-        ...                    Segment(Point(4, 4), Point(4, 2))]
+        >>> polygon.edges == [Segment(Point(0, 6), Point(0, 0)),
+        ...                   Segment(Point(0, 0), Point(6, 0)),
+        ...                   Segment(Point(6, 0), Point(6, 6)),
+        ...                   Segment(Point(6, 6), Point(0, 6)),
+        ...                   Segment(Point(4, 2), Point(2, 2)),
+        ...                   Segment(Point(2, 2), Point(2, 4)),
+        ...                   Segment(Point(2, 4), Point(4, 4)),
+        ...                   Segment(Point(4, 4), Point(4, 2))]
         True
         """
         return list(chain(self.border.edges,
