@@ -118,7 +118,7 @@ class Polygon(Indexable, Shaped):
                        else
                        ((complete_intersect_polygons(self, other,
                                                      context=self.context)
-                         if self._holes or other._holes
+                         if self.holes or other.holes
                          else complete_intersect_regions(self.border,
                                                          other.border,
                                                          context=self.context))
@@ -182,7 +182,7 @@ class Polygon(Indexable, Shaped):
         >>> polygon == polygon
         True
         """
-        return self is other or (self._border == other._border
+        return self is other or (self.border == other.border
                                  and self._holes_set == other._holes_set
                                  if isinstance(other, Polygon)
                                  else NotImplemented)
@@ -258,7 +258,7 @@ class Polygon(Indexable, Shaped):
         >>> hash(polygon) == hash(polygon)
         True
         """
-        return hash((self._border, self._holes_set))
+        return hash((self.border, self._holes_set))
 
     def __le__(self, other: Compound) -> bool:
         """
@@ -463,7 +463,7 @@ class Polygon(Indexable, Shaped):
         region_signed_measure = self.context.region_signed_area
         return (abs(region_signed_measure(self.border))
                 - sum(abs(region_signed_measure(hole))
-                      for hole in self._holes))
+                      for hole in self.holes))
 
     @property
     def border(self) -> Contour:
@@ -617,7 +617,7 @@ class Polygon(Indexable, Shaped):
         >>> polygon.convex_hull.is_convex
         True
         """
-        return not self._holes and self.context.is_region_convex(self.border)
+        return not self.holes and self.context.is_region_convex(self.border)
 
     @property
     def perimeter(self) -> Scalar:
@@ -639,7 +639,7 @@ class Polygon(Indexable, Shaped):
         >>> polygon.perimeter == 32
         True
         """
-        return self._border.length + sum(hole.length for hole in self._holes)
+        return self.border.length + sum(hole.length for hole in self.holes)
 
     def distance_to(self, other: Geometry) -> Scalar:
         """
@@ -840,7 +840,7 @@ class Polygon(Indexable, Shaped):
             factor_y = factor_x
         return (scale_polygon(self, factor_x, factor_y)
                 if factor_x and factor_y
-                else scale_contour_degenerate(self._border, factor_x,
+                else scale_contour_degenerate(self.border, factor_x,
                                               factor_y))
 
     def translate(self, step_x: Scalar, step_y: Scalar) -> 'Polygon':
@@ -866,9 +866,9 @@ class Polygon(Indexable, Shaped):
         ...                       Point(5, 4)])]))
         True
         """
-        return Polygon(self._border.translate(step_x, step_y),
+        return Polygon(self.border.translate(step_x, step_y),
                        [hole.translate(step_x, step_y)
-                        for hole in self._holes])
+                        for hole in self.holes])
 
     def triangulate(self) -> Triangulation:
         """
@@ -919,25 +919,25 @@ class Polygon(Indexable, Shaped):
         ...                             Point(4, 2)])])
         >>> polygon.validate()
         """
-        self._border.validate()
-        if self._holes:
-            for hole in self._holes:
+        self.border.validate()
+        if self.holes:
+            for hole in self.holes:
                 hole.validate()
             context = self.context
-            relation = region_in_multiregion(self._border, self._holes,
+            relation = region_in_multiregion(self.border, self.holes,
                                              context=context)
             if not (relation is Relation.COVER
                     or relation is Relation.ENCLOSES):
                 raise ValueError('Holes should lie inside the border.')
             border_minus_holes = (
                 subtract_multipolygon_from_polygon(
-                        context.polygon_cls(self._border, []),
+                        context.polygon_cls(self.border, []),
                         context.multipolygon_cls([context.polygon_cls(hole, [])
-                                                  for hole in self._holes]))
-                if len(self._holes) > 1
+                                                  for hole in self.holes]))
+                if len(self.holes) > 1
                 else subtract_polygons(
-                        context.polygon_cls(self._border, []),
-                        context.polygon_cls(self._holes[0], [])))
+                        context.polygon_cls(self.border, []),
+                        context.polygon_cls(self.holes[0], [])))
             if border_minus_holes != self:
                 raise ValueError('Holes should not tear polygon apart.')
 
