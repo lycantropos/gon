@@ -988,8 +988,8 @@ class Mix(Indexable):
             component.validate()
         if (not self.discrete.disjoint(self.linear)
                 or not self.discrete.disjoint(self.shaped)):
-            raise ValueError('Multipoint should be disjoint '
-                             'with other components.')
+            raise ValueError('Discrete component should be disjoint '
+                             'from other components.')
         shaped_linear_relation = self.shaped.relate(self.linear)
         if shaped_linear_relation in (Relation.CROSS, Relation.COMPONENT,
                                       Relation.ENCLOSED, Relation.WITHIN):
@@ -1002,8 +1002,7 @@ class Mix(Indexable):
               and any(polygon.border.relate(self.linear)
                       in (Relation.OVERLAP, Relation.COMPOSITE)
                       or any(hole.relate(self.linear)
-                             in (Relation.OVERLAP,
-                                 Relation.COMPOSITE)
+                             in (Relation.OVERLAP, Relation.COMPOSITE)
                              for hole in polygon.holes)
                       for polygon in (self.shaped.polygons
                                       if isinstance(self.shaped, Multipolygon)
