@@ -997,17 +997,17 @@ def locate_point(polygon: Polygon, point: Point) -> Location:
 def scale_polygon(polygon: Polygon,
                   factor_x: Scalar,
                   factor_y: Scalar) -> Polygon:
-    return Polygon(scale_contour(polygon._border, factor_x, factor_y),
+    return Polygon(scale_contour(polygon.border, factor_x, factor_y),
                    [scale_contour(hole, factor_x, factor_y)
-                    for hole in polygon._holes])
+                    for hole in polygon.holes])
 
 
 def rotate_polygon_around_origin(polygon: Polygon,
                                  cosine: Scalar,
                                  sine: Scalar) -> Polygon:
-    return Polygon(rotate_contour_around_origin(polygon._border, cosine, sine),
+    return Polygon(rotate_contour_around_origin(polygon.border, cosine, sine),
                    [rotate_contour_around_origin(hole, cosine, sine)
-                    for hole in polygon._holes])
+                    for hole in polygon.holes])
 
 
 def rotate_translate_polygon(polygon: Polygon,
@@ -1015,8 +1015,8 @@ def rotate_translate_polygon(polygon: Polygon,
                              sine: Scalar,
                              step_x: Scalar,
                              step_y: Scalar) -> Polygon:
-    return Polygon(rotate_translate_contour(polygon._border, cosine, sine,
+    return Polygon(rotate_translate_contour(polygon.border, cosine, sine,
                                             step_x, step_y),
                    [rotate_translate_contour(hole, cosine, sine, step_x,
                                              step_y)
-                    for hole in polygon._holes])
+                    for hole in polygon.holes])
