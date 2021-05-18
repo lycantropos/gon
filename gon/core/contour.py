@@ -751,8 +751,6 @@ class Contour(Indexable, Linear):
         >>> contour.validate()
         """
         vertices = self._vertices
-        for vertex in vertices:
-            vertex.validate()
         vertices_count = len(vertices)
         if vertices_count < _vertices.MIN_COUNT:
             raise ValueError('Contour should have '
@@ -760,6 +758,8 @@ class Contour(Indexable, Linear):
                              'but found {actual}.'
                              .format(expected=_vertices.MIN_COUNT,
                                      actual=vertices_count))
+        for vertex in vertices:
+            vertex.validate()
         orienteer = self.context.angle_orientation
         if any(orienteer(vertices[index - 1], vertices[index],
                          vertices[(index + 1) % vertices_count])
