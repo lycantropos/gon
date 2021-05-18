@@ -667,10 +667,10 @@ class Multisegment(Indexable, Linear):
                                      size=len(segments)))
         elif len(segments) > len(self._segments_set):
             raise ValueError('Duplicate segments found.')
-        elif segments_cross_or_overlap(segments):
-            raise ValueError('Crossing or overlapping segments found.')
         for segment in segments:
             segment.validate()
+        if segments_cross_or_overlap(segments):
+            raise ValueError('Crossing or overlapping segments found.')
 
     def _distance_to_point(self, other: Point) -> Scalar:
         return self.context.sqrt(self.context.segment_point_squared_distance(
