@@ -10,6 +10,8 @@ from clipping.planar import (complete_intersect_multisegment_with_polygon,
                              subtract_polygon_from_multisegment,
                              subtract_polygon_from_segment,
                              subtract_polygons,
+                             symmetric_subtract_polygon_from_multisegment,
+                             symmetric_subtract_polygon_from_segment,
                              symmetric_subtract_polygons,
                              unite_multisegment_with_polygon,
                              unite_polygons,
@@ -422,21 +424,19 @@ class Polygon(Indexable, Shaped):
         return (self._unite_with_multipoint(other)
                 if isinstance(other, Multipoint)
                 else
-                (self._unite_with_multisegment(
-                        self.context.multisegment_cls([other]))
+                (symmetric_subtract_polygon_from_segment(other, self,
+                                                         context=self.context)
                  if isinstance(other, Segment)
-                 else
-                 (self._unite_with_multisegment(other)
-                  if isinstance(other, Multisegment)
-                  else
-                  (self._unite_with_multisegment(
-                          self.context.multisegment_cls(other.edges))
-                   if isinstance(other, Contour)
-                   else
-                   (symmetric_subtract_polygons(self, other,
-                                                context=self.context)
-                    if isinstance(other, Polygon)
-                    else NotImplemented)))))
+                 else (self._symmetric_subtract_from_multisegment(other)
+                       if isinstance(other, Multisegment)
+                       else
+                       (self._symmetric_subtract_from_multisegment(
+                               self.context.multisegment_cls(other.edges))
+                        if isinstance(other, Contour)
+                        else (symmetric_subtract_polygons(self, other,
+                                                          context=self.context)
+                              if isinstance(other, Polygon)
+                              else NotImplemented)))))
 
     __rxor__ = __xor__
 
@@ -970,6 +970,12 @@ class Polygon(Indexable, Shaped):
     def _subtract_from_multisegment(self, other: Multisegment) -> Compound:
         return subtract_polygon_from_multisegment(other, self,
                                                   context=self.context)
+
+    def _symmetric_subtract_from_multisegment(self, other: Multisegment
+                                              ) -> Compound:
+        return symmetric_subtract_polygon_from_multisegment(
+                other, self,
+                context=self.context)
 
     def _unite_with_multipoint(self, other: Multipoint) -> Compound:
         # importing here to avoid cyclic imports
