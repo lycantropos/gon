@@ -4,8 +4,7 @@ from clipping.planar import (intersect_segments,
                              subtract_segments,
                              symmetric_subtract_segments,
                              unite_segments)
-from ground.base import (Context,
-                         get_context)
+from ground.hints import Scalar
 from orient.planar import segment_in_segment
 from reprit.base import generate_repr
 
@@ -13,12 +12,10 @@ from .compound import (Compound,
                        Linear,
                        Location,
                        Relation)
-from .empty import EMPTY
 from .geometry import Geometry
-from .hints import Scalar
 from .iterable import non_negative_min
-from .mix import from_mix_components
 from .multipoint import Multipoint
+from .packing import pack_mix
 from .point import Point
 from .rotating import (point_to_step,
                        rotate_segment_around_origin,
@@ -28,11 +25,9 @@ from .utils import relate_multipoint_to_linear_compound
 
 
 class Segment(Compound, Linear):
-    __slots__ = '_context', '_endpoints', '_end', '_start'
+    __slots__ = '_endpoints', '_end', '_start'
 
-    def __init__(self, start: Point, end: Point,
-                 *,
-                 context: Optional[Context] = None) -> None:
+    def __init__(self, start: Point, end: Point) -> None:
         """
         Initializes segment.
 
@@ -42,7 +37,6 @@ class Segment(Compound, Linear):
             ``O(1)``
         """
         self._start, self._end = self._endpoints = start, end
-        self._context = get_context() if context is None else context
 
     __repr__ = generate_repr(__init__)
 
@@ -55,12 +49,13 @@ class Segment(Compound, Linear):
         Memory complexity:
             ``O(1)``
 
+        >>> from gon.base import Point, Segment
         >>> segment = Segment(Point(0, 0), Point(2, 0))
         >>> segment & segment == segment
         True
         """
         return (intersect_segments(self, other,
-                                   context=self.context)
+                                   context=self._context)
                 if isinstance(other, Segment)
                 else NotImplemented)
 
@@ -75,6 +70,7 @@ class Segment(Compound, Linear):
         Memory complexity:
             ``O(1)``
 
+        >>> from gon.base import Point, Segment
         >>> segment = Segment(Point(0, 0), Point(2, 0))
         >>> segment.start in segment
         True
@@ -92,6 +88,7 @@ class Segment(Compound, Linear):
         Memory complexity:
             ``O(1)``
 
+        >>> from gon.base import Point, Segment
         >>> segment = Segment(Point(0, 0), Point(2, 0))
         >>> segment == segment
         True
@@ -117,6 +114,7 @@ class Segment(Compound, Linear):
         Memory complexity:
             ``O(1)``
 
+        >>> from gon.base import Point, Segment
         >>> segment = Segment(Point(0, 0), Point(2, 0))
         >>> segment >= segment
         True
@@ -127,7 +125,7 @@ class Segment(Compound, Linear):
         >>> segment >= Segment(Point(0, 0), Point(0, 2))
         False
         """
-        return (other is EMPTY
+        return (other is self._context.empty
                 or self == other
                 or ((self.relate(other) is Relation.COMPONENT
                      if isinstance(other, (Multipoint, Segment))
@@ -145,6 +143,7 @@ class Segment(Compound, Linear):
         Memory complexity:
             ``O(1)``
 
+        >>> from gon.base import Point, Segment
         >>> segment = Segment(Point(0, 0), Point(2, 0))
         >>> segment > segment
         False
@@ -155,7 +154,7 @@ class Segment(Compound, Linear):
         >>> segment > Segment(Point(0, 0), Point(0, 2))
         False
         """
-        return (other is EMPTY
+        return (other is self._context.empty
                 or self != other
                 and ((self.relate(other) is Relation.COMPONENT
                       if isinstance(other, (Multipoint, Segment))
@@ -173,6 +172,7 @@ class Segment(Compound, Linear):
         Memory complexity:
             ``O(1)``
 
+        >>> from gon.base import Point, Segment
         >>> segment = Segment(Point(0, 0), Point(2, 0))
         >>> hash(segment) == hash(segment)
         True
@@ -190,6 +190,7 @@ class Segment(Compound, Linear):
         Memory complexity:
             ``O(1)``
 
+        >>> from gon.base import Point, Segment
         >>> segment = Segment(Point(0, 0), Point(2, 0))
         >>> segment <= segment
         True
@@ -215,6 +216,7 @@ class Segment(Compound, Linear):
         Memory complexity:
             ``O(1)``
 
+        >>> from gon.base import Point, Segment
         >>> segment = Segment(Point(0, 0), Point(2, 0))
         >>> segment < segment
         False
@@ -240,14 +242,16 @@ class Segment(Compound, Linear):
         Memory complexity:
             ``O(1)``
 
+        >>> from gon.base import Point, Segment
         >>> segment = Segment(Point(0, 0), Point(2, 0))
         >>> segment | segment == segment
         True
         """
-        return (from_mix_components(other - self, self, EMPTY)
+        return (pack_mix(other - self, self, self._context.empty,
+                         self._context.empty, self._context.mix_cls)
                 if isinstance(other, Multipoint)
                 else (unite_segments(self, other,
-                                     context=self.context)
+                                     context=self._context)
                       if isinstance(other, Segment)
                       else NotImplemented))
 
@@ -262,6 +266,7 @@ class Segment(Compound, Linear):
         Memory complexity:
             ``O(1)``
 
+        >>> from gon.base import EMPTY, Point, Segment
         >>> segment = Segment(Point(0, 0), Point(2, 0))
         >>> segment - segment is EMPTY
         True
@@ -269,7 +274,7 @@ class Segment(Compound, Linear):
         return (self
                 if isinstance(other, Multipoint)
                 else (subtract_segments(self, other,
-                                        context=self.context)
+                                        context=self._context)
                       if isinstance(other, Segment)
                       else NotImplemented))
 
@@ -282,14 +287,16 @@ class Segment(Compound, Linear):
         Memory complexity:
             ``O(1)``
 
+        >>> from gon.base import EMPTY, Point, Segment
         >>> segment = Segment(Point(0, 0), Point(2, 0))
         >>> segment ^ segment is EMPTY
         True
         """
-        return (from_mix_components(other - self, self, EMPTY)
+        return (pack_mix(other - self, self, self._context.empty,
+                         self._context.empty, self._context.mix_cls)
                 if isinstance(other, Multipoint)
                 else (symmetric_subtract_segments(self, other,
-                                                  context=self.context)
+                                                  context=self._context)
                       if isinstance(other, Segment)
                       else NotImplemented))
 
@@ -305,27 +312,12 @@ class Segment(Compound, Linear):
         Memory complexity:
             ``O(1)``
 
+        >>> from gon.base import Point, Segment
         >>> segment = Segment(Point(0, 0), Point(2, 0))
         >>> segment.centroid == Point(1, 0)
         True
         """
-        return self.context.segment_centroid(self)
-
-    @property
-    def context(self) -> Context:
-        """
-        Returns centroid of the segment.
-
-        Time complexity:
-            ``O(1)``
-        Memory complexity:
-            ``O(1)``
-
-        >>> segment = Segment(Point(0, 0), Point(2, 0))
-        >>> isinstance(segment.context, Context)
-        True
-        """
-        return self._context
+        return self._context.segment_centroid(self)
 
     @property
     def end(self) -> Point:
@@ -337,6 +329,7 @@ class Segment(Compound, Linear):
         Memory complexity:
             ``O(1)``
 
+        >>> from gon.base import Point, Segment
         >>> segment = Segment(Point(0, 0), Point(2, 0))
         >>> segment.end == Point(2, 0)
         True
@@ -353,6 +346,7 @@ class Segment(Compound, Linear):
         Memory complexity:
             ``O(1)``
 
+        >>> from gon.base import Point, Segment
         >>> segment = Segment(Point(0, 0), Point(2, 0))
         >>> segment.is_horizontal
         True
@@ -369,6 +363,7 @@ class Segment(Compound, Linear):
         Memory complexity:
             ``O(1)``
 
+        >>> from gon.base import Point, Segment
         >>> segment = Segment(Point(0, 0), Point(2, 0))
         >>> segment.is_vertical
         False
@@ -385,12 +380,13 @@ class Segment(Compound, Linear):
         Memory complexity:
             ``O(1)``
 
+        >>> from gon.base import Point, Segment
         >>> segment = Segment(Point(0, 0), Point(2, 0))
         >>> segment.length == 2
         True
         """
-        return self.context.sqrt(
-                self.context.points_squared_distance(self.start, self.end))
+        return self._context.sqrt(
+                self._context.points_squared_distance(self.start, self.end))
 
     @property
     def start(self) -> Point:
@@ -402,6 +398,7 @@ class Segment(Compound, Linear):
         Memory complexity:
             ``O(1)``
 
+        >>> from gon.base import Point, Segment
         >>> segment = Segment(Point(0, 0), Point(2, 0))
         >>> segment.start == Point(0, 0)
         True
@@ -417,24 +414,26 @@ class Segment(Compound, Linear):
         Memory complexity:
             ``O(1)``
 
+        >>> from gon.base import Point, Segment
         >>> segment = Segment(Point(0, 0), Point(2, 0))
         >>> segment.distance_to(segment) == 0
         True
         """
-        return (self.context.sqrt(self.context.segment_point_squared_distance(
-                self, other))
-                if isinstance(other, Point)
-                else
-                (non_negative_min(
-                        self.context.sqrt(
-                                self.context.segment_point_squared_distance(
-                                        self, point))
-                        for point in other.points)
-                 if isinstance(other, Multipoint)
-                 else (self.context.sqrt(
-                        self.context.segments_squared_distance(self, other))
-                       if isinstance(other, Segment)
-                       else other.distance_to(self))))
+        return (
+            self._context.sqrt(self._context.segment_point_squared_distance(
+                    self, other))
+            if isinstance(other, Point)
+            else
+            (non_negative_min(
+                    self._context.sqrt(
+                            self._context.segment_point_squared_distance(
+                                    self, point))
+                    for point in other.points)
+             if isinstance(other, Multipoint)
+             else (self._context.sqrt(
+                    self._context.segments_squared_distance(self, other))
+                   if isinstance(other, Segment)
+                   else other.distance_to(self))))
 
     def locate(self, point: Point) -> Location:
         """
@@ -445,6 +444,7 @@ class Segment(Compound, Linear):
         Memory complexity:
             ``O(1)``
 
+        >>> from gon.base import Point, Segment
         >>> segment = Segment(Point(0, 0), Point(2, 0))
         >>> segment.locate(segment.start) is Location.BOUNDARY
         True
@@ -452,7 +452,7 @@ class Segment(Compound, Linear):
         True
         """
         return (Location.BOUNDARY
-                if self.context.segment_contains_point(self, point)
+                if self._context.segment_contains_point(self, point)
                 else Location.EXTERIOR)
 
     def relate(self, other: Compound) -> Relation:
@@ -464,6 +464,7 @@ class Segment(Compound, Linear):
         Memory complexity:
             ``O(1)``
 
+        >>> from gon.base import Point, Segment
         >>> segment = Segment(Point(0, 0), Point(2, 0))
         >>> segment.relate(segment) is Relation.EQUAL
         True
@@ -471,7 +472,7 @@ class Segment(Compound, Linear):
         return (relate_multipoint_to_linear_compound(other, self)
                 if isinstance(other, Multipoint)
                 else (segment_in_segment(other, self,
-                                         context=self.context)
+                                         context=self._context)
                       if isinstance(other, Segment)
                       else other.relate(self).complement))
 
@@ -487,6 +488,7 @@ class Segment(Compound, Linear):
         Memory complexity:
             ``O(1)``
 
+        >>> from gon.base import Point, Segment
         >>> segment = Segment(Point(0, 0), Point(2, 0))
         >>> segment.rotate(1, 0) == segment
         True
@@ -495,12 +497,12 @@ class Segment(Compound, Linear):
         True
         """
         return (rotate_segment_around_origin(self, cosine, sine,
-                                             self.context.point_cls,
-                                             self.context.segment_cls)
+                                             self._context.point_cls,
+                                             self._context.segment_cls)
                 if point is None
                 else rotate_translate_segment(
                 self, cosine, sine, *point_to_step(point, cosine, sine),
-                self.context.point_cls, self.context.segment_cls))
+                self._context.point_cls, self._context.segment_cls))
 
     def scale(self,
               factor_x: Scalar,
@@ -513,11 +515,12 @@ class Segment(Compound, Linear):
         Memory complexity:
             ``O(1)``
 
+        >>> from gon.base import Point, Segment
         >>> segment = Segment(Point(0, 0), Point(2, 0))
         >>> segment.scale(1) == segment.scale(1, 2) == segment
         True
         """
-        context = self.context
+        context = self._context
         return scale_segment(self, factor_x,
                              factor_x if factor_y is None else factor_y,
                              context.multipoint_cls, context.point_cls,
@@ -532,12 +535,13 @@ class Segment(Compound, Linear):
         Memory complexity:
             ``O(1)``
 
+        >>> from gon.base import Point, Segment
         >>> segment = Segment(Point(0, 0), Point(2, 0))
         >>> segment.translate(1, 2) == Segment(Point(1, 2), Point(3, 2))
         True
         """
-        return self.context.segment_cls(self.start.translate(step_x, step_y),
-                                        self.end.translate(step_x, step_y))
+        return self._context.segment_cls(self.start.translate(step_x, step_y),
+                                         self.end.translate(step_x, step_y))
 
     def validate(self) -> None:
         """
@@ -548,6 +552,7 @@ class Segment(Compound, Linear):
         Memory complexity:
             ``O(1)``
 
+        >>> from gon.base import Point, Segment
         >>> segment = Segment(Point(0, 0), Point(2, 0))
         >>> segment.validate()
         """

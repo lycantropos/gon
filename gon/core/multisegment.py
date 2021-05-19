@@ -13,8 +13,8 @@ from clipping.planar import (complete_intersect_multisegments,
                              symmetric_subtract_multisegments,
                              unite_multisegments,
                              unite_segment_with_multisegment)
-from ground.base import (Context,
-                         get_context)
+from ground.base import Context
+from ground.hints import Scalar
 from locus import segmental
 from orient.planar import (multisegment_in_multisegment,
                            point_in_multisegment,
@@ -27,12 +27,10 @@ from .compound import (Compound,
                        Linear,
                        Location,
                        Relation)
-from .empty import EMPTY
 from .geometry import Geometry
-from .hints import Scalar
 from .iterable import non_negative_min
-from .mix import from_mix_components
 from .multipoint import Multipoint
+from .packing import pack_mix
 from .point import Point
 from .rotating import (point_to_step,
                        rotate_segment_around_origin,
@@ -48,12 +46,10 @@ MIN_MULTISEGMENT_SEGMENTS_COUNT = 2
 
 
 class Multisegment(Indexable, Linear):
-    __slots__ = ('_context', '_locate', '_point_nearest_segment',
+    __slots__ = ('_locate', '_point_nearest_segment',
                  '_segment_nearest_segment', '_segments', '_segments_set')
 
-    def __init__(self, segments: Sequence[Segment],
-                 *,
-                 context: Optional[Context] = None) -> None:
+    def __init__(self, segments: Sequence[Segment]) -> None:
         """
         Initializes multisegment.
 
@@ -64,10 +60,8 @@ class Multisegment(Indexable, Linear):
 
         where ``segments_count = len(segments)``.
         """
-        if context is None:
-            context = get_context()
-        self._context = context
         self._segments, self._segments_set = segments, frozenset(segments)
+        context = self._context
         self._locate = partial(_locate_point, self,
                                context=context)
         self._point_nearest_segment, self._segment_nearest_segment = (
@@ -87,6 +81,7 @@ class Multisegment(Indexable, Linear):
 
         where ``segments_count = len(self.segments)``.
 
+        >>> from gon.base import Multisegment, Point, Segment
         >>> multisegment = Multisegment([Segment(Point(0, 0), Point(1, 0)),
         ...                              Segment(Point(0, 1), Point(1, 1))])
         >>> multisegment & multisegment == multisegment
@@ -94,10 +89,10 @@ class Multisegment(Indexable, Linear):
         """
         return (complete_intersect_segment_with_multisegment(
                 other, self,
-                context=self.context)
+                context=self._context)
                 if isinstance(other, Segment)
                 else (complete_intersect_multisegments(self, other,
-                                                       context=self.context)
+                                                       context=self._context)
                       if isinstance(other, Multisegment)
                       else NotImplemented))
 
@@ -115,6 +110,7 @@ class Multisegment(Indexable, Linear):
 
         where ``segments_count = len(self.segments)``.
 
+        >>> from gon.base import Multisegment, Point, Segment
         >>> multisegment = Multisegment([Segment(Point(0, 0), Point(1, 0)),
         ...                              Segment(Point(0, 1), Point(1, 1))])
         >>> all(segment.start in multisegment and segment.end in multisegment
@@ -132,6 +128,7 @@ class Multisegment(Indexable, Linear):
         Memory complexity:
             ``O(1)``
 
+        >>> from gon.base import Multisegment, Point, Segment
         >>> multisegment = Multisegment([Segment(Point(0, 0), Point(1, 0)),
         ...                              Segment(Point(0, 1), Point(1, 1))])
         >>> multisegment == multisegment
@@ -159,6 +156,7 @@ class Multisegment(Indexable, Linear):
 
         where ``segments_count = len(self.segments)``.
 
+        >>> from gon.base import Multisegment, Point, Segment
         >>> multisegment = Multisegment([Segment(Point(0, 0), Point(1, 0)),
         ...                              Segment(Point(0, 1), Point(1, 1))])
         >>> multisegment >= multisegment
@@ -171,7 +169,7 @@ class Multisegment(Indexable, Linear):
         ...                               Segment(Point(0, 0), Point(1, 0))])
         True
         """
-        return (other is EMPTY
+        return (other is self._context.empty
                 or self == other
                 or ((self.relate(other) is Relation.COMPONENT
                      if isinstance(other, (Multipoint, Multisegment, Segment))
@@ -193,6 +191,7 @@ class Multisegment(Indexable, Linear):
 
         where ``segments_count = len(self.segments)``.
 
+        >>> from gon.base import Multisegment, Point, Segment
         >>> multisegment = Multisegment([Segment(Point(0, 0), Point(1, 0)),
         ...                              Segment(Point(0, 1), Point(1, 1))])
         >>> multisegment > multisegment
@@ -205,7 +204,7 @@ class Multisegment(Indexable, Linear):
         ...                              Segment(Point(0, 0), Point(1, 0))])
         False
         """
-        return (other is EMPTY
+        return (other is self._context.empty
                 or self != other
                 and ((self.relate(other) is Relation.COMPONENT
                       if isinstance(other, (Multipoint, Multisegment, Segment))
@@ -225,6 +224,7 @@ class Multisegment(Indexable, Linear):
         Memory complexity:
             ``O(1)``
 
+        >>> from gon.base import Multisegment, Point, Segment
         >>> multisegment = Multisegment([Segment(Point(0, 0), Point(1, 0)),
         ...                              Segment(Point(0, 1), Point(1, 1))])
         >>> hash(multisegment) == hash(multisegment)
@@ -243,6 +243,7 @@ class Multisegment(Indexable, Linear):
 
         where ``segments_count = len(self.segments)``.
 
+        >>> from gon.base import Multisegment, Point, Segment
         >>> multisegment = Multisegment([Segment(Point(0, 0), Point(1, 0)),
         ...                              Segment(Point(0, 1), Point(1, 1))])
         >>> multisegment <= multisegment
@@ -272,6 +273,7 @@ class Multisegment(Indexable, Linear):
 
         where ``segments_count = len(self.segments)``.
 
+        >>> from gon.base import Multisegment, Point, Segment
         >>> multisegment = Multisegment([Segment(Point(0, 0), Point(1, 0)),
         ...                              Segment(Point(0, 1), Point(1, 1))])
         >>> multisegment < multisegment
@@ -301,6 +303,7 @@ class Multisegment(Indexable, Linear):
 
         where ``segments_count = len(self.segments)``.
 
+        >>> from gon.base import Multisegment, Point, Segment
         >>> multisegment = Multisegment([Segment(Point(0, 0), Point(1, 0)),
         ...                              Segment(Point(0, 1), Point(1, 1))])
         >>> multisegment | multisegment == multisegment
@@ -309,10 +312,10 @@ class Multisegment(Indexable, Linear):
         return (self._unite_with_multipoint(other)
                 if isinstance(other, Multipoint)
                 else (unite_segment_with_multisegment(other, self,
-                                                      context=self.context)
+                                                      context=self._context)
                       if isinstance(other, Segment)
                       else (unite_multisegments(self, other,
-                                                context=self.context)
+                                                context=self._context)
                             if isinstance(other, Multisegment)
                             else NotImplemented)))
 
@@ -330,7 +333,7 @@ class Multisegment(Indexable, Linear):
         where ``segments_count = len(self.segments)``.
         """
         return (subtract_multisegment_from_segment(other, self,
-                                                   context=self.context)
+                                                   context=self._context)
                 if isinstance(other, Segment)
                 else NotImplemented)
 
@@ -345,6 +348,7 @@ class Multisegment(Indexable, Linear):
 
         where ``segments_count = len(self.segments)``.
 
+        >>> from gon.base import EMPTY, Multisegment, Point, Segment
         >>> multisegment = Multisegment([Segment(Point(0, 0), Point(1, 0)),
         ...                              Segment(Point(0, 1), Point(1, 1))])
         >>> multisegment - multisegment is EMPTY
@@ -353,10 +357,10 @@ class Multisegment(Indexable, Linear):
         return (self
                 if isinstance(other, Multipoint)
                 else (subtract_segment_from_multisegment(self, other,
-                                                         context=self.context)
+                                                         context=self._context)
                       if isinstance(other, Segment)
                       else (subtract_multisegments(self, other,
-                                                   context=self.context)
+                                                   context=self._context)
                             if isinstance(other, Multisegment)
                             else NotImplemented)))
 
@@ -372,6 +376,7 @@ class Multisegment(Indexable, Linear):
 
         where ``segments_count = len(self.segments)``.
 
+        >>> from gon.base import EMPTY, Multisegment, Point, Segment
         >>> multisegment = Multisegment([Segment(Point(0, 0), Point(1, 0)),
         ...                              Segment(Point(0, 1), Point(1, 1))])
         >>> multisegment ^ multisegment is EMPTY
@@ -382,10 +387,10 @@ class Multisegment(Indexable, Linear):
                 else
                 (symmetric_subtract_multisegment_from_segment(
                         other, self,
-                        context=self.context)
+                        context=self._context)
                  if isinstance(other, Segment)
                  else (symmetric_subtract_multisegments(self, other,
-                                                        context=self.context)
+                                                        context=self._context)
                        if isinstance(other, Multisegment)
                        else NotImplemented)))
 
@@ -401,29 +406,13 @@ class Multisegment(Indexable, Linear):
         Memory complexity:
             ``O(1)``
 
+        >>> from gon.base import Multisegment, Point, Segment
         >>> multisegment = Multisegment([Segment(Point(0, 0), Point(2, 0)),
         ...                              Segment(Point(0, 2), Point(2, 2))])
         >>> multisegment.centroid == Point(1, 1)
         True
         """
-        return self.context.multisegment_centroid(self)
-
-    @property
-    def context(self) -> Context:
-        """
-        Returns context of the multisegment.
-
-        Time complexity:
-            ``O(1)``
-        Memory complexity:
-            ``O(1)``
-
-        >>> multisegment = Multisegment([Segment(Point(0, 0), Point(2, 0)),
-        ...                              Segment(Point(0, 2), Point(2, 2))])
-        >>> isinstance(multisegment.context, Context)
-        True
-        """
-        return self._context
+        return self._context.multisegment_centroid(self)
 
     @property
     def length(self) -> Scalar:
@@ -435,6 +424,7 @@ class Multisegment(Indexable, Linear):
         Memory complexity:
             ``O(1)``
 
+        >>> from gon.base import Multisegment, Point, Segment
         >>> multisegment = Multisegment([Segment(Point(0, 0), Point(1, 0)),
         ...                              Segment(Point(0, 1), Point(1, 1))])
         >>> multisegment.length == 2
@@ -454,6 +444,7 @@ class Multisegment(Indexable, Linear):
 
         where ``segments_count = len(self.segments)``.
 
+        >>> from gon.base import Multisegment, Point, Segment
         >>> multisegment = Multisegment([Segment(Point(0, 0), Point(1, 0)),
         ...                              Segment(Point(0, 1), Point(1, 1))])
         >>> multisegment.segments == [Segment(Point(0, 0), Point(1, 0)),
@@ -471,6 +462,7 @@ class Multisegment(Indexable, Linear):
         Memory complexity:
             ``O(1)``
 
+        >>> from gon.base import Multisegment, Point, Segment
         >>> multisegment = Multisegment([Segment(Point(0, 0), Point(1, 0)),
         ...                              Segment(Point(0, 1), Point(1, 1))])
         >>> multisegment.distance_to(multisegment) == 0
@@ -502,13 +494,14 @@ class Multisegment(Indexable, Linear):
 
         where ``segments_count = len(self.segments)``.
 
+        >>> from gon.base import Multisegment, Point, Segment
         >>> multisegment = Multisegment([Segment(Point(0, 0), Point(1, 0)),
         ...                              Segment(Point(0, 1), Point(1, 1))])
         >>> multisegment.index()
         """
         if len(self._segments) > 1:
             self._locate = Graph.from_multisegment(self,
-                                                   context=self.context).locate
+                                                   context=self._context).locate
             tree = segmental.Tree(self._segments)
             self._point_nearest_segment = tree.nearest_to_point_segment
             self._segment_nearest_segment = tree.nearest_segment
@@ -525,6 +518,7 @@ class Multisegment(Indexable, Linear):
 
         where ``segments_count = len(self.segments)``.
 
+        >>> from gon.base import Multisegment, Point, Segment
         >>> multisegment = Multisegment([Segment(Point(0, 0), Point(1, 0)),
         ...                              Segment(Point(0, 1), Point(1, 1))])
         >>> all(multisegment.locate(segment.start)
@@ -546,6 +540,7 @@ class Multisegment(Indexable, Linear):
 
         where ``segments_count = len(self.segments)``.
 
+        >>> from gon.base import Multisegment, Point, Segment
         >>> multisegment = Multisegment([Segment(Point(0, 0), Point(1, 0)),
         ...                              Segment(Point(0, 1), Point(1, 1))])
         >>> multisegment.relate(multisegment) is Relation.EQUAL
@@ -573,6 +568,7 @@ class Multisegment(Indexable, Linear):
 
         where ``segments_count = len(self.segments)``.
 
+        >>> from gon.base import Multisegment, Point, Segment
         >>> multisegment = Multisegment([Segment(Point(0, 0), Point(1, 0)),
         ...                              Segment(Point(0, 1), Point(1, 1))])
         >>> multisegment.rotate(1, 0) == multisegment
@@ -582,7 +578,7 @@ class Multisegment(Indexable, Linear):
         ...                   Segment(Point(1, 0), Point(1, 1))]))
         True
         """
-        context = self.context
+        context = self._context
         return context.multisegment_cls(
                 [rotate_segment_around_origin(segment, cosine, sine,
                                               context.point_cls,
@@ -609,6 +605,7 @@ class Multisegment(Indexable, Linear):
 
         where ``segments_count = len(self.segments)``.
 
+        >>> from gon.base import Multisegment, Point, Segment
         >>> multisegment = Multisegment([Segment(Point(0, 0), Point(1, 0)),
         ...                              Segment(Point(0, 1), Point(1, 1))])
         >>> multisegment.scale(1) == multisegment
@@ -620,7 +617,7 @@ class Multisegment(Indexable, Linear):
         """
         if factor_y is None:
             factor_y = factor_x
-        context = self.context
+        context = self._context
         return (context.multisegment_cls(
                 [scale_segment(segment, factor_x, factor_y,
                                context.multipoint_cls, context.point_cls,
@@ -650,6 +647,7 @@ class Multisegment(Indexable, Linear):
 
         where ``segments_count = len(self.segments)``.
 
+        >>> from gon.base import Multisegment, Point, Segment
         >>> multisegment = Multisegment([Segment(Point(0, 0), Point(1, 0)),
         ...                              Segment(Point(0, 1), Point(1, 1))])
         >>> (multisegment.translate(1, 2)
@@ -657,8 +655,8 @@ class Multisegment(Indexable, Linear):
         ...                   Segment(Point(1, 3), Point(2, 3))]))
         True
         """
-        return self.context.multisegment_cls([segment.translate(step_x, step_y)
-                                              for segment in self._segments])
+        return self._context.multisegment_cls([segment.translate(step_x, step_y)
+                                               for segment in self._segments])
 
     def validate(self) -> None:
         """
@@ -671,6 +669,7 @@ class Multisegment(Indexable, Linear):
 
         where ``segments_count = len(self.segments)``.
 
+        >>> from gon.base import Multisegment, Point, Segment
         >>> multisegment = Multisegment([Segment(Point(0, 0), Point(1, 0)),
         ...                              Segment(Point(0, 1), Point(1, 1))])
         >>> multisegment.validate()
@@ -690,15 +689,16 @@ class Multisegment(Indexable, Linear):
             raise ValueError('Crossing or overlapping segments found.')
 
     def _distance_to_point(self, other: Point) -> Scalar:
-        return self.context.sqrt(self.context.segment_point_squared_distance(
+        return self._context.sqrt(self._context.segment_point_squared_distance(
                 self._point_nearest_segment(other), other))
 
     def _distance_to_segment(self, other: Segment) -> Scalar:
-        return self.context.sqrt(self.context.segments_squared_distance(
+        return self._context.sqrt(self._context.segments_squared_distance(
                 self._segment_nearest_segment(other), other))
 
     def _unite_with_multipoint(self, other: Multipoint) -> Compound:
-        return from_mix_components(other - self, self, EMPTY)
+        return pack_mix(other - self, self, self._context.empty,
+                        self._context.empty, self._context.mix_cls)
 
 
 def _locate_point(multisegment: Multisegment,

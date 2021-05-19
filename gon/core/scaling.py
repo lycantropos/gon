@@ -15,8 +15,8 @@ from ground.hints import (Contour,
 from .contracts import (is_segment_horizontal,
                         is_segment_vertical)
 from .iterable import unique_ever_seen
-from .utils import (pack_points,
-                    pack_segments)
+from .packing import (pack_points,
+                      pack_segments)
 
 
 def scale_contour(contour: Contour,

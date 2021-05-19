@@ -1,5 +1,5 @@
-from .core.empty import Maybe
-from .core.hints import Scalar
+from ground.hints import (Maybe,
+                          Scalar)
 
 Scalar = Scalar
 Maybe = Maybe

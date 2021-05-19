@@ -1,36 +1,13 @@
-from typing import (AbstractSet,
-                    Sequence,
-                    Type,
-                    Union)
+from typing import Sequence
 
 from ground.base import Context
-from ground.hints import (Empty,
-                          Maybe,
-                          Multipoint,
-                          Multisegment,
+from ground.hints import (Multipoint,
                           Point,
+                          Scalar,
                           Segment)
 
 from .compound import (Compound,
                        Relation)
-from .hints import Scalar
-
-
-def pack_points(points: AbstractSet[Point],
-                empty: Empty,
-                multipoint_cls: Type[Multipoint]) -> Maybe[Multipoint]:
-    return multipoint_cls(list(points)) if points else empty
-
-
-def pack_segments(segments: Sequence[Point],
-                  empty: Empty,
-                  multisegment_cls: Type[Multisegment]
-                  ) -> Union[Empty, Multisegment, Segment]:
-    return ((multisegment_cls(segments)
-             if len(segments) > 1
-             else segments[0])
-            if segments
-            else empty)
 
 
 def relate_multipoint_to_linear_compound(multipoint: Multipoint,

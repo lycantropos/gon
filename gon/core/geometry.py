@@ -2,6 +2,7 @@ from abc import (ABC,
                  abstractmethod)
 from typing import Optional
 
+from ground.base import Context
 from ground.hints import (Point,
                           Scalar)
 
@@ -43,4 +44,11 @@ class Geometry(ABC):
         """
         Checks geometric object's constraints
         and raises error if any violation was found.
+        """
+
+    @property
+    @abstractmethod
+    def _context(self) -> Context:
+        """
+        Returns context of the geometry.
         """

@@ -24,9 +24,9 @@ from clipping.planar import (complete_intersect_multipolygons,
                              unite_multisegment_with_multipolygon,
                              unite_polygon_with_multipolygon,
                              unite_segment_with_multipolygon)
-from ground.base import (Context,
-                         get_context)
-from ground.hints import Box
+from ground.base import Context
+from ground.hints import (Box,
+                          Scalar)
 from locus import r
 from orient.planar import (contour_in_multipolygon,
                            multipolygon_in_multipolygon,
@@ -44,13 +44,11 @@ from .compound import (Compound,
 from .contour import (Contour,
                       Multisegment,
                       Segment)
-from .empty import EMPTY
 from .geometry import Geometry
-from .hints import Scalar
 from .iterable import (flatten,
                        non_negative_min)
-from .mix import from_mix_components
 from .multipoint import Multipoint
+from .packing import pack_mix
 from .point import Point
 from .polygon import Polygon
 from .rotating import (point_to_step,
@@ -63,11 +61,9 @@ MIN_MULTIPOLYGON_POLYGONS_COUNT = 2
 
 
 class Multipolygon(Indexable, Shaped):
-    __slots__ = '_context', '_locate', '_polygons', '_polygons_set'
+    __slots__ = '_locate', '_polygons', '_polygons_set'
 
-    def __init__(self, polygons: Sequence[Polygon],
-                 *,
-                 context: Optional[Context] = None) -> None:
+    def __init__(self, polygons: Sequence[Polygon]) -> None:
         """
         Initializes multipolygon.
 
@@ -80,7 +76,6 @@ class Multipolygon(Indexable, Shaped):
  + sum(len(hole.vertices) for hole in polygon.holes)\
  for polygon in polygons)``.
         """
-        self._context = get_context() if context is None else context
         self._polygons, self._polygons_set = polygons, frozenset(polygons)
         self._locate = partial(_locate_point_in_polygons, polygons)
 
@@ -99,6 +94,7 @@ class Multipolygon(Indexable, Shaped):
  + sum(len(hole.vertices) for hole in polygon.holes)\
  for polygon in self.polygons)``.
 
+        >>> from gon.base import Contour, Multipolygon, Point, Polygon
         >>> multipolygon = Multipolygon(
         ...         [Polygon(Contour([Point(0, 0), Point(14, 0), Point(14, 14),
         ...                           Point(0, 14)]),
@@ -113,13 +109,13 @@ class Multipolygon(Indexable, Shaped):
         """
         return (complete_intersect_segment_with_multipolygon(
                 other, self,
-                context=self.context)
+                context=self._context)
                 if isinstance(other, Segment)
                 else (self._intersect_with_multisegment(other)
                       if isinstance(other, Multisegment)
                       else
                       (self._intersect_with_multisegment(
-                              self.context.multisegment_cls(other.edges))
+                              self._context.multisegment_cls(other.edges))
                        if isinstance(other, Contour)
                        else (self._intersect_with_polygon(other)
                              if isinstance(other, Polygon)
@@ -143,6 +139,7 @@ class Multipolygon(Indexable, Shaped):
  + sum(len(hole.vertices) for hole in polygon.holes)\
  for polygon in self.polygons)``.
 
+        >>> from gon.base import Contour, Multipolygon, Point, Polygon
         >>> multipolygon = Multipolygon(
         ...         [Polygon(Contour([Point(0, 0), Point(14, 0), Point(14, 14),
         ...                           Point(0, 14)]),
@@ -180,6 +177,7 @@ class Multipolygon(Indexable, Shaped):
         Memory complexity:
             ``O(1)``
 
+        >>> from gon.base import Contour, Multipolygon, Point, Polygon
         >>> multipolygon = Multipolygon(
         ...         [Polygon(Contour([Point(0, 0), Point(14, 0), Point(14, 14),
         ...                           Point(0, 14)]),
@@ -209,6 +207,7 @@ class Multipolygon(Indexable, Shaped):
  + sum(len(hole.vertices) for hole in polygon.holes)\
  for polygon in self.polygons)``.
 
+        >>> from gon.base import Contour, Multipolygon, Point, Polygon
         >>> multipolygon = Multipolygon(
         ...         [Polygon(Contour([Point(0, 0), Point(14, 0), Point(14, 14),
         ...                           Point(0, 14)]),
@@ -221,7 +220,7 @@ class Multipolygon(Indexable, Shaped):
         >>> multipolygon >= multipolygon
         True
         """
-        return (other is EMPTY
+        return (other is self._context.empty
                 or self == other
                 or (self.relate(other) in (Relation.EQUAL, Relation.COMPONENT,
                                            Relation.ENCLOSED, Relation.WITHIN)
@@ -241,6 +240,7 @@ class Multipolygon(Indexable, Shaped):
  + sum(len(hole.vertices) for hole in polygon.holes)\
  for polygon in self.polygons)``.
 
+        >>> from gon.base import Contour, Multipolygon, Point, Polygon
         >>> multipolygon = Multipolygon(
         ...         [Polygon(Contour([Point(0, 0), Point(14, 0), Point(14, 14),
         ...                           Point(0, 14)]),
@@ -253,7 +253,7 @@ class Multipolygon(Indexable, Shaped):
         >>> multipolygon > multipolygon
         False
         """
-        return (other is EMPTY
+        return (other is self._context.empty
                 or self != other
                 and (self.relate(other) in (Relation.COMPONENT,
                                             Relation.ENCLOSED, Relation.WITHIN)
@@ -269,6 +269,7 @@ class Multipolygon(Indexable, Shaped):
         Memory complexity:
             ``O(1)``
 
+        >>> from gon.base import Contour, Multipolygon, Point, Polygon
         >>> multipolygon = Multipolygon(
         ...         [Polygon(Contour([Point(0, 0), Point(14, 0), Point(14, 14),
         ...                           Point(0, 14)]),
@@ -296,6 +297,7 @@ class Multipolygon(Indexable, Shaped):
  + sum(len(hole.vertices) for hole in polygon.holes)\
  for polygon in self.polygons)``.
 
+        >>> from gon.base import Contour, Multipolygon, Point, Polygon
         >>> multipolygon = Multipolygon(
         ...         [Polygon(Contour([Point(0, 0), Point(14, 0), Point(14, 14),
         ...                           Point(0, 14)]),
@@ -330,6 +332,7 @@ class Multipolygon(Indexable, Shaped):
  + sum(len(hole.vertices) for hole in polygon.holes)\
  for polygon in self.polygons)``.
 
+        >>> from gon.base import Contour, Multipolygon, Point, Polygon
         >>> multipolygon = Multipolygon(
         ...         [Polygon(Contour([Point(0, 0), Point(14, 0), Point(14, 14),
         ...                           Point(0, 14)]),
@@ -363,6 +366,7 @@ class Multipolygon(Indexable, Shaped):
  + sum(len(hole.vertices) for hole in polygon.holes)\
  for polygon in self.polygons)``.
 
+        >>> from gon.base import Contour, Multipolygon, Point, Polygon
         >>> multipolygon = Multipolygon(
         ...         [Polygon(Contour([Point(0, 0), Point(14, 0), Point(14, 14),
         ...                           Point(0, 14)]),
@@ -379,20 +383,20 @@ class Multipolygon(Indexable, Shaped):
                 if isinstance(other, Multipoint)
                 else
                 (unite_segment_with_multipolygon(other, self,
-                                                 context=self.context)
+                                                 context=self._context)
                  if isinstance(other, Segment)
                  else
                  (self._unite_with_multisegment(other)
                   if isinstance(other, Multisegment)
                   else
                   (self._unite_with_multisegment(
-                          self.context.multisegment_cls(other.edges))
+                          self._context.multisegment_cls(other.edges))
                    if isinstance(other, Contour)
                    else (unite_polygon_with_multipolygon(other, self,
-                                                         context=self.context)
+                                                         context=self._context)
                          if isinstance(other, Polygon)
                          else (unite_multipolygons(self, other,
-                                                   context=self.context)
+                                                   context=self._context)
                                if isinstance(other, Multipolygon)
                                else NotImplemented))))))
 
@@ -412,17 +416,17 @@ class Multipolygon(Indexable, Shaped):
  for polygon in self.polygons)``.
         """
         return (subtract_multipolygon_from_segment(other, self,
-                                                   context=self.context)
+                                                   context=self._context)
                 if isinstance(other, Segment)
                 else (self._subtract_from_multisegment(other)
                       if isinstance(other, Multisegment)
                       else
                       (self._subtract_from_multisegment(
-                              self.context.multisegment_cls(other.edges))
+                              self._context.multisegment_cls(other.edges))
                        if isinstance(other, Contour)
                        else (subtract_multipolygon_from_polygon(
                               other, self,
-                              context=self.context)
+                              context=self._context)
                              if isinstance(other, Polygon)
                              else NotImplemented))))
 
@@ -439,6 +443,7 @@ class Multipolygon(Indexable, Shaped):
  + sum(len(hole.vertices) for hole in polygon.holes)\
  for polygon in self.polygons)``.
 
+        >>> from gon.base import EMPTY, Contour, Multipolygon, Point, Polygon
         >>> multipolygon = Multipolygon(
         ...         [Polygon(Contour([Point(0, 0), Point(14, 0), Point(14, 14),
         ...                           Point(0, 14)]),
@@ -455,10 +460,10 @@ class Multipolygon(Indexable, Shaped):
                 if isinstance(other, (Linear, Multipoint))
                 else
                 (subtract_polygon_from_multipolygon(self, other,
-                                                    context=self.context)
+                                                    context=self._context)
                  if isinstance(other, Polygon)
                  else (subtract_multipolygons(self, other,
-                                              context=self.context)
+                                              context=self._context)
                        if isinstance(other, Multipolygon)
                        else NotImplemented)))
 
@@ -476,6 +481,7 @@ class Multipolygon(Indexable, Shaped):
  + sum(len(hole.vertices) for hole in polygon.holes)\
  for polygon in self.polygons)``.
 
+        >>> from gon.base import EMPTY, Contour, Multipolygon, Point, Polygon
         >>> multipolygon = Multipolygon(
         ...         [Polygon(Contour([Point(0, 0), Point(14, 0), Point(14, 14),
         ...                           Point(0, 14)]),
@@ -493,21 +499,21 @@ class Multipolygon(Indexable, Shaped):
                 else
                 (symmetric_subtract_multipolygon_from_segment(
                         other, self,
-                        context=self.context)
+                        context=self._context)
                  if isinstance(other, Segment)
                  else (self._symmetric_subtract_from_multisegment(other)
                        if isinstance(other, Multisegment)
                        else (self._symmetric_subtract_from_multisegment(
-                        self.context.multisegment_cls(other.edges))
+                        self._context.multisegment_cls(other.edges))
                              if isinstance(other, Contour)
                              else
                              (symmetric_subtract_multipolygon_from_polygon(
                                      other, self,
-                                     context=self.context)
+                                     context=self._context)
                               if isinstance(other, Polygon)
                               else (symmetric_subtract_multipolygons(
                                      self, other,
-                                     context=self.context)
+                                     context=self._context)
                                     if isinstance(other, Multipolygon)
                                     else NotImplemented))))))
 
@@ -527,6 +533,7 @@ class Multipolygon(Indexable, Shaped):
  + sum(len(hole.vertices) for hole in polygon.holes)\
  for polygon in self.polygons)``.
 
+        >>> from gon.base import Contour, Multipolygon, Point, Polygon
         >>> multipolygon = Multipolygon(
         ...         [Polygon(Contour([Point(0, 0), Point(14, 0), Point(14, 14),
         ...                           Point(0, 14)]),
@@ -555,6 +562,7 @@ class Multipolygon(Indexable, Shaped):
  + sum(len(hole.vertices) for hole in polygon.holes)\
  for polygon in self.polygons)``.
 
+        >>> from gon.base import Contour, Multipolygon, Point, Polygon
         >>> multipolygon = Multipolygon(
         ...         [Polygon(Contour([Point(0, 0), Point(14, 0), Point(14, 14),
         ...                           Point(0, 14)]),
@@ -567,31 +575,7 @@ class Multipolygon(Indexable, Shaped):
         >>> multipolygon.centroid == Point(7, 7)
         True
         """
-        return self.context.multipolygon_centroid(self)
-
-    @property
-    def context(self) -> Context:
-        """
-        Returns context of the multipolygon.
-
-        Time complexity:
-            ``O(1)``
-        Memory complexity:
-            ``O(1)``
-
-        >>> multipolygon = Multipolygon(
-        ...         [Polygon(Contour([Point(0, 0), Point(14, 0), Point(14, 14),
-        ...                           Point(0, 14)]),
-        ...                  [Contour([Point(2, 2), Point(2, 12),
-        ...                            Point(12, 12), Point(12, 2)])]),
-        ...          Polygon(Contour([Point(4, 4), Point(10, 4), Point(10, 10),
-        ...                           Point(4, 10)]),
-        ...                  [Contour([Point(6, 6), Point(6, 8), Point(8, 8),
-        ...                            Point(8, 6)])])])
-        >>> isinstance(multipolygon.context, Context)
-        True
-        """
-        return self._context
+        return self._context.multipolygon_centroid(self)
 
     @property
     def perimeter(self) -> Scalar:
@@ -607,6 +591,7 @@ class Multipolygon(Indexable, Shaped):
  + sum(len(hole.vertices) for hole in polygon.holes)\
  for polygon in self.polygons)``.
 
+        >>> from gon.base import Contour, Multipolygon, Point, Polygon
         >>> multipolygon = Multipolygon(
         ...         [Polygon(Contour([Point(0, 0), Point(14, 0), Point(14, 14),
         ...                           Point(0, 14)]),
@@ -633,6 +618,7 @@ class Multipolygon(Indexable, Shaped):
 
         where ``polygons_count = len(self.polygons)``.
 
+        >>> from gon.base import Contour, Multipolygon, Point, Polygon
         >>> multipolygon = Multipolygon(
         ...         [Polygon(Contour([Point(0, 0), Point(14, 0), Point(14, 14),
         ...                           Point(0, 14)]),
@@ -668,6 +654,7 @@ class Multipolygon(Indexable, Shaped):
  + sum(len(hole.vertices) for hole in polygon.holes)\
  for polygon in self.polygons)``.
 
+        >>> from gon.base import Contour, Multipolygon, Point, Polygon
         >>> multipolygon = Multipolygon(
         ...         [Polygon(Contour([Point(0, 0), Point(14, 0), Point(14, 14),
         ...                           Point(0, 14)]),
@@ -723,6 +710,7 @@ class Multipolygon(Indexable, Shaped):
  + sum(len(hole.vertices) for hole in polygon.holes)\
  for polygon in self.polygons)``.
 
+        >>> from gon.base import Contour, Multipolygon, Point, Polygon
         >>> multipolygon = Multipolygon(
         ...         [Polygon(Contour([Point(0, 0), Point(14, 0), Point(14, 14),
         ...                           Point(0, 14)]),
@@ -737,7 +725,7 @@ class Multipolygon(Indexable, Shaped):
         polygons = self._polygons
         for polygon in polygons:
             polygon.index()
-        context = self.context
+        context = self._context
 
         def polygon_to_interval(polygon: Polygon,
                                 box_cls: Type[Box] = context.box_cls) -> Box:
@@ -776,6 +764,7 @@ class Multipolygon(Indexable, Shaped):
  + sum(len(hole.vertices) for hole in polygon.holes)\
  for polygon in self.polygons)``.
 
+        >>> from gon.base import Contour, Multipolygon, Point, Polygon
         >>> multipolygon = Multipolygon(
         ...         [Polygon(Contour([Point(0, 0), Point(14, 0), Point(14, 14),
         ...                           Point(0, 14)]),
@@ -817,6 +806,7 @@ class Multipolygon(Indexable, Shaped):
  + sum(len(hole.vertices) for hole in polygon.holes)\
  for polygon in self.polygons)``.
 
+        >>> from gon.base import Contour, Multipolygon, Point, Polygon
         >>> multipolygon = Multipolygon(
         ...         [Polygon(Contour([Point(0, 0), Point(14, 0), Point(14, 14),
         ...                           Point(0, 14)]),
@@ -858,6 +848,7 @@ class Multipolygon(Indexable, Shaped):
  + sum(len(hole.vertices) for hole in polygon.holes)\
  for polygon in self.polygons)``.
 
+        >>> from gon.base import Contour, Multipolygon, Point, Polygon
         >>> multipolygon = Multipolygon(
         ...         [Polygon(Contour([Point(0, 0), Point(14, 0), Point(14, 14),
         ...                           Point(0, 14)]),
@@ -881,7 +872,7 @@ class Multipolygon(Indexable, Shaped):
         ...                            Point(-6, 8), Point(-4, 8)])])]))
         True
         """
-        context = self.context
+        context = self._context
         return (rotate_multipolygon_around_origin(
                 self, cosine, sine, context.contour_cls,
                 context.multipolygon_cls, context.point_cls,
@@ -907,6 +898,7 @@ class Multipolygon(Indexable, Shaped):
  + sum(len(hole.vertices) for hole in polygon.holes)\
  for polygon in self.polygons)``.
 
+        >>> from gon.base import Contour, Multipolygon, Point, Polygon
         >>> multipolygon = Multipolygon(
         ...         [Polygon(Contour([Point(0, 0), Point(14, 0), Point(14, 14),
         ...                           Point(0, 14)]),
@@ -932,7 +924,7 @@ class Multipolygon(Indexable, Shaped):
         """
         if factor_y is None:
             factor_y = factor_x
-        context = self.context
+        context = self._context
         return (context.multipolygon_cls(
                 [scale_polygon(polygon, factor_x, factor_y,
                                context.contour_cls, context.point_cls,
@@ -959,6 +951,7 @@ class Multipolygon(Indexable, Shaped):
  + sum(len(hole.vertices) for hole in polygon.holes)\
  for polygon in self.polygons)``.
 
+        >>> from gon.base import Contour, Multipolygon, Point, Polygon
         >>> multipolygon = Multipolygon(
         ...         [Polygon(Contour([Point(0, 0), Point(14, 0), Point(14, 14),
         ...                           Point(0, 14)]),
@@ -980,8 +973,8 @@ class Multipolygon(Indexable, Shaped):
         ...                            Point(9, 8)])])]))
         True
         """
-        return self.context.multipolygon_cls([polygon.translate(step_x, step_y)
-                                              for polygon in self._polygons])
+        return self._context.multipolygon_cls([polygon.translate(step_x, step_y)
+                                               for polygon in self._polygons])
 
     def validate(self) -> None:
         """
@@ -996,6 +989,7 @@ class Multipolygon(Indexable, Shaped):
  + sum(len(hole.vertices) for hole in polygon.holes)\
  for polygon in self.polygons)``.
 
+        >>> from gon.base import Contour, Multipolygon, Point, Polygon
         >>> multipolygon = Multipolygon(
         ...         [Polygon(Contour([Point(0, 0), Point(14, 0), Point(14, 14),
         ...                           Point(0, 14)]),
@@ -1035,12 +1029,12 @@ class Multipolygon(Indexable, Shaped):
 
     def _intersect_with_multipolygon(self, other: 'Multipolygon') -> Compound:
         return (complete_intersect_multipolygons(self, other,
-                                                 context=self.context)
+                                                 context=self._context)
                 if (_multipolygon_has_holes(self)
                     or _multipolygon_has_holes(other))
                 else complete_intersect_multiregions(self._as_multiregion(),
                                                      other._as_multiregion(),
-                                                     context=self.context))
+                                                     context=self._context))
 
     def _intersect_with_multisegment(self, multisegment: Multisegment
                                      ) -> Compound:
@@ -1050,28 +1044,29 @@ class Multipolygon(Indexable, Shaped):
     def _intersect_with_polygon(self, other: Polygon) -> Compound:
         return (complete_intersect_polygon_with_multipolygon(
                 other, self,
-                context=self.context)
+                context=self._context)
                 if _multipolygon_has_holes(self) or other.holes
                 else complete_intersect_region_with_multiregion(
                 other.border, self._as_multiregion(),
-                context=self.context))
+                context=self._context))
 
     def _subtract_from_multisegment(self, other: Multisegment) -> Compound:
         return subtract_multipolygon_from_multisegment(other, self,
-                                                       context=self.context)
+                                                       context=self._context)
 
     def _symmetric_subtract_from_multisegment(self, other: Multisegment
                                               ) -> Compound:
         return symmetric_subtract_multipolygon_from_multisegment(
                 other, self,
-                context=self.context)
+                context=self._context)
 
     def _unite_with_multipoint(self, other: Multipoint) -> Compound:
-        return from_mix_components(other - self, EMPTY, self)
+        return pack_mix(other - self, self._context.empty, self,
+                        self._context.empty, self._context.mix_cls)
 
     def _unite_with_multisegment(self, other: Multisegment) -> Compound:
         return unite_multisegment_with_multipolygon(other, self,
-                                                    context=self.context)
+                                                    context=self._context)
 
 
 def _multipolygon_has_holes(multipolygon: Multipolygon) -> bool:

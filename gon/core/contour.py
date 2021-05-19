@@ -12,8 +12,8 @@ from clipping.planar import (complete_intersect_multisegments,
                              symmetric_subtract_multisegments,
                              unite_multisegments,
                              unite_segment_with_multisegment)
-from ground.base import (Context,
-                         get_context)
+from ground.base import Context
+from ground.hints import Scalar
 from locus import segmental
 from orient.planar import (contour_in_contour,
                            multisegment_in_contour,
@@ -29,14 +29,12 @@ from .compound import (Compound,
                        Linear,
                        Location,
                        Relation)
-from .empty import EMPTY
 from .geometry import Geometry
-from .hints import Scalar
 from .iterable import (non_negative_min,
                        shift_sequence)
-from .mix import from_mix_components
 from .multipoint import Multipoint
 from .multisegment import Multisegment
+from .packing import pack_mix
 from .point import Point
 from .rotating import (point_to_step,
                        rotate_contour_around_origin,
@@ -50,12 +48,10 @@ from .utils import (relate_multipoint_to_linear_compound,
 
 
 class Contour(Indexable, Linear):
-    __slots__ = ('_context', '_edges', '_locate', '_min_index',
-                 '_point_nearest_edge', '_segment_nearest_edge', '_vertices')
+    __slots__ = ('_edges', '_locate', '_min_index', '_point_nearest_edge',
+                 '_segment_nearest_edge', '_vertices')
 
-    def __init__(self, vertices: Sequence[Point],
-                 *,
-                 context: Optional[Context] = None) -> None:
+    def __init__(self, vertices: Sequence[Point]) -> None:
         """
         Initializes contour.
 
@@ -66,12 +62,10 @@ class Contour(Indexable, Linear):
 
         where ``vertices_count = len(vertices)``.
         """
-        if context is None:
-            context = get_context()
-        self._context = context
         self._vertices = vertices = tuple(vertices)
         self._min_index = min(range(len(vertices)),
                               key=vertices.__getitem__)
+        context = self._context
         self._locate = partial(_locate_point, self,
                                context=context)
         self._edges = edges = context.contour_edges(self)
@@ -92,6 +86,7 @@ class Contour(Indexable, Linear):
 
         where ``vertices_count = len(self.vertices)``.
 
+        >>> from gon.base import Contour, Multisegment, Point, Segment
         >>> contour = Contour([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> (contour & contour
         ...  == Multisegment([Segment(Point(0, 0), Point(1, 0)),
@@ -101,7 +96,7 @@ class Contour(Indexable, Linear):
         """
         return (complete_intersect_segment_with_multisegment(
                 other, self._as_multisegment(),
-                context=self.context)
+                context=self._context)
                 if isinstance(other, Segment)
                 else (self._intersect_with_multisegment(other)
                       if isinstance(other, Multisegment)
@@ -125,6 +120,7 @@ class Contour(Indexable, Linear):
 
         where ``vertices_count = len(self.vertices)``.
 
+        >>> from gon.base import Contour, Point
         >>> contour = Contour([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> all(vertex in contour for vertex in contour.vertices)
         True
@@ -140,6 +136,7 @@ class Contour(Indexable, Linear):
         Memory complexity:
             ``O(1)``
 
+        >>> from gon.base import Contour, Point
         >>> contour = Contour([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> contour == contour
         True
@@ -166,6 +163,7 @@ class Contour(Indexable, Linear):
 
         where ``vertices_count = len(self.vertices)``.
 
+        >>> from gon.base import Contour, Point
         >>> contour = Contour([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> contour >= contour
         True
@@ -193,6 +191,7 @@ class Contour(Indexable, Linear):
 
         where ``vertices_count = len(self.vertices)``.
 
+        >>> from gon.base import Contour, Point
         >>> contour = Contour([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> contour > contour
         False
@@ -222,15 +221,16 @@ class Contour(Indexable, Linear):
 
         where ``vertices_count = len(self.vertices)``.
 
+        >>> from gon.base import Contour, Point
         >>> contour = Contour([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> hash(contour) == hash(contour)
         True
         """
         vertices = shift_sequence(self._vertices, self._min_index)
         return hash(vertices
-                    if (self.context.angle_orientation(vertices[-1],
-                                                       vertices[0],
-                                                       vertices[1])
+                    if (self._context.angle_orientation(vertices[-1],
+                                                        vertices[0],
+                                                        vertices[1])
                         is Orientation.COUNTERCLOCKWISE)
                     else _vertices.rotate_positions(vertices))
 
@@ -245,6 +245,7 @@ class Contour(Indexable, Linear):
 
         where ``vertices_count = len(self.vertices)``.
 
+        >>> from gon.base import Contour, Point
         >>> contour = Contour([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> contour <= contour
         True
@@ -273,6 +274,7 @@ class Contour(Indexable, Linear):
 
         where ``vertices_count = len(self.vertices)``.
 
+        >>> from gon.base import Contour, Point
         >>> contour = Contour([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> contour < contour
         False
@@ -300,6 +302,7 @@ class Contour(Indexable, Linear):
 
         where ``vertices_count = len(self.vertices)``.
 
+        >>> from gon.base import Contour, Multisegment, Point, Segment
         >>> contour = Contour([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> (contour | contour
         ...  == Multisegment([Segment(Point(0, 0), Point(1, 0)),
@@ -311,14 +314,14 @@ class Contour(Indexable, Linear):
                 if isinstance(other, Multipoint)
                 else (unite_segment_with_multisegment(other,
                                                       self._as_multisegment(),
-                                                      context=self.context)
+                                                      context=self._context)
                       if isinstance(other, Segment)
                       else
                       (self._unite_with_multisegment(other)
                        if isinstance(other, Multisegment)
                        else
                        (self._unite_with_multisegment(
-                               self.context.multisegment_cls(other._edges))
+                               self._context.multisegment_cls(other._edges))
                         if isinstance(other, Contour)
                         else NotImplemented))))
 
@@ -337,10 +340,10 @@ class Contour(Indexable, Linear):
         """
         return (subtract_multisegment_from_segment(other,
                                                    self._as_multisegment(),
-                                                   context=self.context)
+                                                   context=self._context)
                 if isinstance(other, Segment)
                 else (subtract_multisegments(other, self._as_multisegment(),
-                                             context=self.context)
+                                             context=self._context)
                       if isinstance(other, Multisegment)
                       else NotImplemented))
 
@@ -355,6 +358,7 @@ class Contour(Indexable, Linear):
 
         where ``vertices_count = len(self.vertices)``.
 
+        >>> from gon.base import EMPTY, Contour, Point
         >>> contour = Contour([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> contour - contour is EMPTY
         True
@@ -364,7 +368,7 @@ class Contour(Indexable, Linear):
                 else
                 (subtract_segment_from_multisegment(self._as_multisegment(),
                                                     other,
-                                                    context=self.context)
+                                                    context=self._context)
                  if isinstance(other, Segment)
                  else (self._subtract_multisegment(other)
                        if isinstance(other, Multisegment)
@@ -384,6 +388,7 @@ class Contour(Indexable, Linear):
 
         where ``vertices_count = len(self.vertices)``.
 
+        >>> from gon.base import EMPTY, Contour, Point
         >>> contour = Contour([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> contour ^ contour is EMPTY
         True
@@ -393,7 +398,7 @@ class Contour(Indexable, Linear):
                 else
                 (symmetric_subtract_multisegment_from_segment(
                         other, self._as_multisegment(),
-                        context=self.context)
+                        context=self._context)
                  if isinstance(other, Segment)
                  else
                  (self._symmetric_subtract_multisegment(other)
@@ -415,29 +420,13 @@ class Contour(Indexable, Linear):
         Memory complexity:
             ``O(1)``
 
+        >>> from gon.base import Contour, Point
         >>> contour = Contour([Point(0, 0), Point(2, 0), Point(2, 2),
         ...                    Point(0, 2)])
         >>> contour.centroid == Point(1, 1)
         True
         """
-        return self.context.contour_centroid(self)
-
-    @property
-    def context(self) -> Context:
-        """
-        Returns context of the contour.
-
-        Time complexity:
-            ``O(1)``
-        Memory complexity:
-            ``O(1)``
-
-        >>> contour = Contour([Point(0, 0), Point(2, 0), Point(2, 2),
-        ...                    Point(0, 2)])
-        >>> isinstance(contour.context, Context)
-        True
-        """
-        return self._context
+        return self._context.contour_centroid(self)
 
     @property
     def edges(self) -> Sequence[Segment]:
@@ -451,6 +440,7 @@ class Contour(Indexable, Linear):
 
         where ``vertices_count = len(self.vertices)``.
 
+        >>> from gon.base import Contour, Point, Segment
         >>> contour = Contour([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> contour.edges == [Segment(Point(0, 1), Point(0, 0)),
         ...                   Segment(Point(0, 0), Point(1, 0)),
@@ -469,6 +459,7 @@ class Contour(Indexable, Linear):
         Memory complexity:
             ``O(1)``
 
+        >>> from gon.base import Contour, Point
         >>> contour = Contour([Point(0, 0), Point(1, 0), Point(1, 1),
         ...                    Point(0, 1)])
         >>> contour.length == 4
@@ -488,12 +479,13 @@ class Contour(Indexable, Linear):
         Memory complexity:
             ``O(1)``
 
+        >>> from gon.base import Contour, Orientation, Point
         >>> contour = Contour([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> contour.orientation is Orientation.COUNTERCLOCKWISE
         True
         """
         vertices, min_index = self._vertices, self._min_index
-        return self.context.angle_orientation(
+        return self._context.angle_orientation(
                 vertices[min_index - 1], vertices[min_index],
                 vertices[(min_index + 1) % len(vertices)])
 
@@ -509,6 +501,7 @@ class Contour(Indexable, Linear):
 
         where ``vertices_count = len(self.vertices)``.
 
+        >>> from gon.base import Contour, Point
         >>> contour = Contour([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> contour.vertices == [Point(0, 0), Point(1, 0), Point(0, 1)]
         True
@@ -524,6 +517,7 @@ class Contour(Indexable, Linear):
         Memory complexity:
             ``O(1)``
 
+        >>> from gon.base import Contour, Point
         >>> contour = Contour([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> contour.distance_to(contour) == 0
         True
@@ -557,11 +551,12 @@ class Contour(Indexable, Linear):
 
         where ``vertices_count = len(self.vertices)``.
 
+        >>> from gon.base import Contour, Point
         >>> contour = Contour([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> contour.index()
         """
         graph = Graph.from_multisegment(self._as_multisegment(),
-                                        context=self.context)
+                                        context=self._context)
         self._locate = graph.locate
         tree = segmental.Tree(self._edges)
         self._point_nearest_edge = tree.nearest_to_point_segment
@@ -579,8 +574,10 @@ class Contour(Indexable, Linear):
 
         where ``vertices_count = len(self.vertices)``.
 
+        >>> from gon.base import Contour, Location, Point
         >>> contour = Contour([Point(0, 0), Point(1, 0), Point(0, 1)])
-        >>> all(vertex in contour for vertex in contour.vertices)
+        >>> all(contour.locate(vertex) is Location.BOUNDARY
+        ...     for vertex in contour.vertices)
         True
         """
         return self._locate(point)
@@ -596,6 +593,7 @@ class Contour(Indexable, Linear):
 
         where ``vertices_count = len(self.vertices)``.
 
+        >>> from gon.base import Contour, Point, Relation
         >>> contour = Contour([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> contour.relate(contour) is Relation.EQUAL
         True
@@ -621,11 +619,12 @@ class Contour(Indexable, Linear):
 
         where ``vertices_count = len(self.vertices)``.
 
+        >>> from gon.base import Contour, Point
         >>> contour = Contour([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> contour.reverse().reverse() == contour
         True
         """
-        return self.context.contour_cls(
+        return self._context.contour_cls(
                 _vertices.rotate_positions(self._vertices))
 
     def rotate(self,
@@ -642,6 +641,7 @@ class Contour(Indexable, Linear):
 
         where ``vertices_count = len(self.vertices)``.
 
+        >>> from gon.base import Contour, Point
         >>> contour = Contour([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> contour.rotate(1, 0) == contour
         True
@@ -649,7 +649,7 @@ class Contour(Indexable, Linear):
         ...  == Contour([Point(2, 0), Point(2, 1), Point(1, 0)]))
         True
         """
-        context = self.context
+        context = self._context
         return (rotate_contour_around_origin(
                 self, cosine, sine, context.contour_cls, context.point_cls)
                 if point is None
@@ -670,6 +670,7 @@ class Contour(Indexable, Linear):
 
         where ``vertices_count = len(self.vertices)``.
 
+        >>> from gon.base import Contour, Point
         >>> contour = Contour([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> contour.scale(1) == contour
         True
@@ -679,7 +680,7 @@ class Contour(Indexable, Linear):
         """
         if factor_y is None:
             factor_y = factor_x
-        context = self.context
+        context = self._context
         return (scale_contour(self, factor_x, factor_y, context.contour_cls,
                               context.point_cls)
                 if factor_x and factor_y
@@ -701,6 +702,7 @@ class Contour(Indexable, Linear):
 
         where ``vertices_count = len(self.vertices)``.
 
+        >>> from gon.base import Contour, Orientation, Point
         >>> contour = Contour([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> contour.to_clockwise().orientation is Orientation.CLOCKWISE
         True
@@ -722,6 +724,7 @@ class Contour(Indexable, Linear):
 
         where ``vertices_count = len(self.vertices)``.
 
+        >>> from gon.base import Contour, Orientation, Point
         >>> contour = Contour([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> (contour.to_counterclockwise().orientation
         ...  is Orientation.COUNTERCLOCKWISE)
@@ -742,13 +745,14 @@ class Contour(Indexable, Linear):
 
         where ``vertices_count = len(self.vertices)``.
 
+        >>> from gon.base import Contour, Point
         >>> contour = Contour([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> (contour.translate(1, 2)
         ...  == Contour([Point(1, 2), Point(2, 2), Point(1, 3)]))
         True
         """
-        return self.context.contour_cls([vertex.translate(step_x, step_y)
-                                         for vertex in self._vertices])
+        return self._context.contour_cls([vertex.translate(step_x, step_y)
+                                          for vertex in self._vertices])
 
     def validate(self) -> None:
         """
@@ -761,6 +765,7 @@ class Contour(Indexable, Linear):
 
         where ``vertices_count = len(self.vertices)``.
 
+        >>> from gon.base import Contour, Point
         >>> contour = Contour([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> contour.validate()
         """
@@ -774,7 +779,7 @@ class Contour(Indexable, Linear):
                                      actual=vertices_count))
         for vertex in vertices:
             vertex.validate()
-        orienteer = self.context.angle_orientation
+        orienteer = self._context.angle_orientation
         if any(orienteer(vertices[index - 1], vertices[index],
                          vertices[(index + 1) % vertices_count])
                is Orientation.COLLINEAR
@@ -785,35 +790,36 @@ class Contour(Indexable, Linear):
             raise ValueError('Contour should not be self-intersecting.')
 
     def _as_multisegment(self) -> Multisegment:
-        return self.context.multisegment_cls(self._edges)
+        return self._context.multisegment_cls(self._edges)
 
     def _distance_to_point(self, other: Point) -> Scalar:
-        return self.context.sqrt(self.context.segment_point_squared_distance(
+        return self._context.sqrt(self._context.segment_point_squared_distance(
                 self._point_nearest_edge(other), other))
 
     def _distance_to_segment(self, other: Segment) -> Scalar:
-        return self.context.sqrt(self.context.segments_squared_distance(
+        return self._context.sqrt(self._context.segments_squared_distance(
                 self._segment_nearest_edge(other), other))
 
     def _intersect_with_multisegment(self, other: Multisegment) -> Compound:
         return complete_intersect_multisegments(self._as_multisegment(), other,
-                                                context=self.context)
+                                                context=self._context)
 
     def _subtract_multisegment(self, other: Multisegment) -> Compound:
         return subtract_multisegments(self._as_multisegment(), other,
-                                      context=self.context)
+                                      context=self._context)
 
     def _symmetric_subtract_multisegment(self, other: Multisegment
                                          ) -> Compound:
         return symmetric_subtract_multisegments(self._as_multisegment(), other,
-                                                context=self.context)
+                                                context=self._context)
 
     def _unite_with_multipoint(self, other: Multipoint) -> Compound:
-        return from_mix_components(other - self, self, EMPTY)
+        return pack_mix(other - self, self, self._context.empty,
+                        self._context.empty, self._context.mix_cls)
 
     def _unite_with_multisegment(self, other: Multisegment) -> Compound:
         return unite_multisegments(self._as_multisegment(), other,
-                                   context=self.context)
+                                   context=self._context)
 
 
 def _locate_point(contour: Contour,

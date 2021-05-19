@@ -2,13 +2,11 @@ import math
 from numbers import Real
 from typing import Optional
 
-from ground.base import (Context,
-                         get_context)
+from ground.hints import Scalar
 from reprit.base import generate_repr
 from symba.base import Expression
 
 from .geometry import Geometry
-from .hints import Scalar
 from .rotating import (point_to_step,
                        rotate_point_around_origin,
                        rotate_translate_point)
@@ -16,11 +14,9 @@ from .scaling import scale_point
 
 
 class Point(Geometry):
-    __slots__ = '_context', '_coordinates', '_x', '_y'
+    __slots__ = '_coordinates', '_x', '_y'
 
-    def __init__(self, x: Scalar, y: Scalar,
-                 *,
-                 context: Optional[Context] = None) -> None:
+    def __init__(self, x: Scalar, y: Scalar) -> None:
         """
         Initializes point.
 
@@ -29,7 +25,6 @@ class Point(Geometry):
         Memory complexity:
             ``O(1)``
         """
-        self._context = get_context() if context is None else context
         self._coordinates = self._x, self._y = x, y
 
     __repr__ = generate_repr(__init__)
@@ -43,6 +38,7 @@ class Point(Geometry):
         Memory complexity:
             ``O(1)``
 
+        >>> from gon.base import Point
         >>> hash(Point(0, 0)) == hash(Point(0, 0))
         True
         """
@@ -57,6 +53,7 @@ class Point(Geometry):
         Memory complexity:
             ``O(1)``
 
+        >>> from gon.base import Point
         >>> Point(0, 0) == Point(0, 0)
         True
         >>> Point(0, 0) == Point(0, 1)
@@ -82,6 +79,7 @@ class Point(Geometry):
         Reference:
             https://en.wikipedia.org/wiki/Lexicographical_order
 
+        >>> from gon.base import Point
         >>> Point(0, 0) <= Point(0, 0)
         True
         >>> Point(0, 0) <= Point(0, 1)
@@ -107,6 +105,7 @@ class Point(Geometry):
         Reference:
             https://en.wikipedia.org/wiki/Lexicographical_order
 
+        >>> from gon.base import Point
         >>> Point(0, 0) < Point(0, 0)
         False
         >>> Point(0, 0) < Point(0, 1)
@@ -121,22 +120,6 @@ class Point(Geometry):
                 else NotImplemented)
 
     @property
-    def context(self) -> Context:
-        """
-        Returns context of the point.
-
-        Time complexity:
-            ``O(1)``
-        Memory complexity:
-            ``O(1)``
-
-        >>> point = Point(1, 0)
-        >>> isinstance(point.context, Context)
-        True
-        """
-        return self._context
-
-    @property
     def x(self) -> Scalar:
         """
         Returns abscissa of the point.
@@ -146,6 +129,7 @@ class Point(Geometry):
         Memory complexity:
             ``O(1)``
 
+        >>> from gon.base import Point
         >>> Point(1, 0).x == 1
         True
         """
@@ -161,6 +145,7 @@ class Point(Geometry):
         Memory complexity:
             ``O(1)``
 
+        >>> from gon.base import Point
         >>> Point(1, 0).y == 0
         True
         """
@@ -175,6 +160,7 @@ class Point(Geometry):
         Memory complexity:
             ``O(1)``
 
+        >>> from gon.base import Point
         >>> point = Point(1, 0)
         >>> point.distance_to(point) == 0
         True
@@ -195,6 +181,7 @@ class Point(Geometry):
         Memory complexity:
             ``O(1)``
 
+        >>> from gon.base import Point
         >>> point = Point(1, 0)
         >>> point.rotate(1, 0) == point
         True
@@ -202,11 +189,11 @@ class Point(Geometry):
         True
         """
         return (rotate_point_around_origin(self, cosine, sine,
-                                           self.context.point_cls)
+                                           self._context.point_cls)
                 if point is None
                 else rotate_translate_point(
                 self, cosine, sine, *point_to_step(point, cosine, sine),
-                self.context.point_cls))
+                self._context.point_cls))
 
     def scale(self,
               factor_x: Scalar,
@@ -219,13 +206,14 @@ class Point(Geometry):
         Memory complexity:
             ``O(1)``
 
+        >>> from gon.base import Point
         >>> point = Point(1, 0)
         >>> point.scale(1) == point.scale(1, 2) == point
         True
         """
         return scale_point(self, factor_x,
                            factor_x if factor_y is None else factor_y,
-                           self.context.point_cls)
+                           self._context.point_cls)
 
     def translate(self, step_x: Scalar, step_y: Scalar) -> 'Point':
         """
@@ -236,10 +224,11 @@ class Point(Geometry):
         Memory complexity:
             ``O(1)``
 
+        >>> from gon.base import Point
         >>> Point(1, 0).translate(1, 2) == Point(2, 2)
         True
         """
-        return self.context.point_cls(self.x + step_x, self.y + step_y)
+        return self._context.point_cls(self.x + step_x, self.y + step_y)
 
     def validate(self) -> None:
         """
@@ -250,14 +239,15 @@ class Point(Geometry):
         Memory complexity:
             ``O(1)``
 
+        >>> from gon.base import Point
         >>> Point(0, 0).validate()
         """
         if not (is_finite(self.x) and is_finite(self.y)):
             raise ValueError('NaN/infinity coordinates are not supported.')
 
     def _distance_to_point(self, other: 'Point') -> Scalar:
-        return self.context.sqrt(self.context.points_squared_distance(self,
-                                                                      other))
+        return self._context.sqrt(self._context.points_squared_distance(self,
+                                                                        other))
 
 
 def is_finite(value: Scalar) -> bool:
