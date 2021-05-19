@@ -53,4 +53,4 @@ master_doc = 'index'
 #
 html_theme = 'sphinx_rtd_theme'
 
-autodoc_member_order = 'bysource'
+autodoc_member_order = 'alphabetical'
