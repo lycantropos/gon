@@ -1,6 +1,5 @@
 from functools import partial
 from typing import (AbstractSet,
-                    Iterable,
                     List,
                     Optional,
                     Sequence)
@@ -14,16 +13,16 @@ from .compound import (Compound,
                        Indexable,
                        Location,
                        Relation)
-from .empty import EMPTY
 from .geometry import Geometry
 from .hints import Scalar
 from .iterable import (non_negative_min,
                        unique_ever_seen)
-from .point import (Point,
-                    point_to_step,
-                    rotate_point_around_origin,
-                    rotate_translate_point,
-                    scale_point)
+from .point import Point
+from .rotating import (point_to_step,
+                       rotate_points_around_origin,
+                       rotate_translate_points)
+from .scaling import scale_point
+from .utils import pack_points
 
 
 class Multipoint(Indexable):
@@ -69,7 +68,9 @@ class Multipoint(Indexable):
                             if isinstance(other, Multipoint)
                             else [point
                                   for point in self._points
-                                  if point in other])
+                                  if point in other],
+                            self.context.empty,
+                            self.context.multipoint_cls)
                 if isinstance(other, Compound)
                 else NotImplemented)
 
@@ -231,7 +232,8 @@ class Multipoint(Indexable):
         >>> multipoint | multipoint == multipoint
         True
         """
-        return (Multipoint(list(self._points_set | other._points_set))
+        return (self.context.multipoint_cls(list(self._points_set
+                                                 | other._points_set))
                 if isinstance(other, Multipoint)
                 else NotImplemented)
 
@@ -246,6 +248,7 @@ class Multipoint(Indexable):
 
         where ``points_count = len(self.points)``.
 
+        >>> from gon.base import EMPTY, Multipoint, Point
         >>> multipoint = Multipoint([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> multipoint - multipoint is EMPTY
         True
@@ -254,7 +257,8 @@ class Multipoint(Indexable):
                             if isinstance(other, Multipoint)
                             else [point
                                   for point in self._points
-                                  if point not in other])
+                                  if point not in other],
+                            self.context.empty, self.context.multipoint_cls)
                 if isinstance(other, Compound)
                 else NotImplemented)
 
@@ -269,11 +273,13 @@ class Multipoint(Indexable):
 
         where ``points_count = len(self.points)``.
 
+        >>> from gon.base import EMPTY, Multipoint, Point
         >>> multipoint = Multipoint([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> multipoint ^ multipoint is EMPTY
         True
         """
-        return (pack_points(self._points_set ^ other._points_set)
+        return (pack_points(self._points_set ^ other._points_set,
+                            self.context.empty, self.context.multipoint_cls)
                 if isinstance(other, Multipoint)
                 else NotImplemented)
 
@@ -426,13 +432,15 @@ class Multipoint(Indexable):
         ...  == Multipoint([Point(2, 0), Point(2, 1), Point(1, 0)]))
         True
         """
-        return (Multipoint(rotate_points_around_origin(self._points, cosine,
-                                                       sine))
+        context = self.context
+        return context.multipoint_cls(
+                rotate_points_around_origin(self._points, cosine, sine,
+                                            context.point_cls)
                 if point is None
-                else
-                Multipoint(rotate_translate_points(
-                        self._points, cosine, sine,
-                        *point_to_step(point, cosine, sine))))
+                else rotate_translate_points(self._points, cosine, sine,
+                                             *point_to_step(point, cosine,
+                                                            sine),
+                                             context.point_cls))
 
     def scale(self,
               factor_x: Scalar,
@@ -456,19 +464,19 @@ class Multipoint(Indexable):
         """
         if factor_y is None:
             factor_y = factor_x
-        return (Multipoint([scale_point(point, factor_x, factor_y)
-                            for point in self._points])
+        context = self.context
+        return context.multipoint_cls(
+                [scale_point(point, factor_x, factor_y, context.point_cls)
+                 for point in self._points]
                 if factor_x and factor_y
                 else
-                (Multipoint(list(unique_ever_seen(scale_point(point, factor_x,
-                                                              factor_y)
-                                                  for point in self._points)))
+                (list(unique_ever_seen(scale_point(point, factor_x, factor_y,
+                                                   context.point_cls)
+                                       for point in self._points))
                  if factor_x or factor_y
-                 else Multipoint([Point(factor_x, factor_y)])))
+                 else [context.point_cls(factor_x, factor_y)]))
 
-    def translate(self,
-                  step_x: Scalar,
-                  step_y: Scalar) -> 'Multipoint':
+    def translate(self, step_x: Scalar, step_y: Scalar) -> 'Multipoint':
         """
         Translates the multipoint by given step.
 
@@ -484,8 +492,8 @@ class Multipoint(Indexable):
         ...  == Multipoint([Point(1, 2), Point(2, 2), Point(1, 3)]))
         True
         """
-        return Multipoint([point.translate(step_x, step_y)
-                           for point in self._points])
+        return self.context.multipoint_cls([point.translate(step_x, step_y)
+                                            for point in self._points])
 
     def validate(self) -> None:
         """
@@ -538,26 +546,6 @@ class Multipoint(Indexable):
                              else Relation.ENCLOSES)
                             if is_subset
                             else Relation.CROSS)))
-
-
-def pack_points(points: AbstractSet[Point]) -> Compound:
-    return Multipoint(list(points)) if points else EMPTY
-
-
-def rotate_points_around_origin(points: Iterable[Point],
-                                cosine: Scalar,
-                                sine: Scalar) -> List[Point]:
-    return [rotate_point_around_origin(point, cosine, sine)
-            for point in points]
-
-
-def rotate_translate_points(points: Iterable[Point],
-                            cosine: Scalar,
-                            sine: Scalar,
-                            step_x: Scalar,
-                            step_y: Scalar) -> List[Point]:
-    return [rotate_translate_point(point, cosine, sine, step_x, step_y)
-            for point in points]
 
 
 def _relate_sets(left: AbstractSet, right: AbstractSet) -> Relation:

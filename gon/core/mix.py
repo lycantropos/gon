@@ -837,7 +837,8 @@ class Mix(Indexable):
         ``segments = [] if self.linear is EMPTY else self.linear.segments``,
         ``polygons = [] if self.shaped is EMPTY else self.shaped.polygons``.
 
-        >>> from gon.base import Contour, Polygon, Segment
+        >>> from gon.base import (Contour, Mix, Multipoint, Point, Polygon,
+        ...                       Segment)
         >>> mix = Mix(Multipoint([Point(3, 3)]),
         ...           Segment(Point(6, 6), Point(6, 8)),
         ...           Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),

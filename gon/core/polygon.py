@@ -36,11 +36,7 @@ from .compound import (Compound,
                        Location,
                        Relation,
                        Shaped)
-from .contour import (Contour,
-                      rotate_contour_around_origin,
-                      rotate_translate_contour,
-                      scale_contour,
-                      scale_contour_degenerate)
+from .contour import Contour
 from .empty import EMPTY
 from .geometry import Geometry
 from .hints import Scalar
@@ -49,8 +45,12 @@ from .iterable import (flatten,
 from .mix import from_mix_components
 from .multipoint import Multipoint
 from .multisegment import Multisegment
-from .point import (Point,
-                    point_to_step)
+from .point import Point
+from .rotating import (point_to_step,
+                       rotate_polygon_around_origin,
+                       rotate_translate_polygon)
+from .scaling import (scale_contour_degenerate,
+                      scale_polygon)
 from .segment import Segment
 from .utils import (to_point_nearest_segment,
                     to_segment_nearest_segment)
@@ -554,11 +554,14 @@ class Polygon(Indexable, Shaped):
         >>> polygon.convex_hull == Polygon(polygon.border, [])
         True
         """
+        context = self.context
         return (self
                 if self.is_convex
                 else
-                Polygon(Contour(self.context.points_convex_hull(self.border
-                                                                .vertices))))
+                context.polygon_cls(
+                        context.contour_cls(context.points_convex_hull(
+                                self.border.vertices)),
+                        []))
 
     @property
     def edges(self) -> Sequence[Segment]:
@@ -817,11 +820,15 @@ class Polygon(Indexable, Shaped):
         ...                       Point(0, 4)])]))
         True
         """
-        return (rotate_polygon_around_origin(self, cosine, sine)
+        context = self.context
+        return (rotate_polygon_around_origin(self, cosine, sine,
+                                             context.contour_cls,
+                                             context.point_cls,
+                                             context.polygon_cls)
                 if point is None
-                else rotate_translate_polygon(self, cosine, sine,
-                                              *point_to_step(point, cosine,
-                                                             sine)))
+                else rotate_translate_polygon(
+                self, cosine, sine, *point_to_step(point, cosine, sine),
+                context.contour_cls, context.point_cls, context.polygon_cls))
 
     def scale(self,
               factor_x: Scalar,
@@ -852,10 +859,14 @@ class Polygon(Indexable, Shaped):
         """
         if factor_y is None:
             factor_y = factor_x
-        return (scale_polygon(self, factor_x, factor_y)
+        context = self.context
+        return (scale_polygon(self, factor_x, factor_y, context.contour_cls,
+                              context.point_cls, context.polygon_cls)
                 if factor_x and factor_y
                 else scale_contour_degenerate(self.border, factor_x,
-                                              factor_y))
+                                              factor_y, context.multipoint_cls,
+                                              context.point_cls,
+                                              context.segment_cls))
 
     def translate(self, step_x: Scalar, step_y: Scalar) -> 'Polygon':
         """
@@ -880,9 +891,9 @@ class Polygon(Indexable, Shaped):
         ...                       Point(5, 4)])]))
         True
         """
-        return Polygon(self.border.translate(step_x, step_y),
-                       [hole.translate(step_x, step_y)
-                        for hole in self.holes])
+        return self.context.polygon_cls(self.border.translate(step_x, step_y),
+                                        [hole.translate(step_x, step_y)
+                                         for hole in self.holes])
 
     def triangulate(self) -> Triangulation:
         """
@@ -1009,31 +1020,3 @@ def _locate_point(polygon: Polygon,
             else (Location.BOUNDARY
                   if relation is Relation.COMPONENT
                   else Location.INTERIOR))
-
-
-def scale_polygon(polygon: Polygon,
-                  factor_x: Scalar,
-                  factor_y: Scalar) -> Polygon:
-    return Polygon(scale_contour(polygon.border, factor_x, factor_y),
-                   [scale_contour(hole, factor_x, factor_y)
-                    for hole in polygon.holes])
-
-
-def rotate_polygon_around_origin(polygon: Polygon,
-                                 cosine: Scalar,
-                                 sine: Scalar) -> Polygon:
-    return Polygon(rotate_contour_around_origin(polygon.border, cosine, sine),
-                   [rotate_contour_around_origin(hole, cosine, sine)
-                    for hole in polygon.holes])
-
-
-def rotate_translate_polygon(polygon: Polygon,
-                             cosine: Scalar,
-                             sine: Scalar,
-                             step_x: Scalar,
-                             step_y: Scalar) -> Polygon:
-    return Polygon(rotate_translate_contour(polygon.border, cosine, sine,
-                                            step_x, step_y),
-                   [rotate_translate_contour(hole, cosine, sine, step_x,
-                                             step_y)
-                    for hole in polygon.holes])

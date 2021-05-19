@@ -35,25 +35,25 @@ from .hints import Scalar
 from .iterable import (non_negative_min,
                        shift_sequence)
 from .mix import from_mix_components
-from .multipoint import (Multipoint,
-                         rotate_points_around_origin,
-                         rotate_translate_points)
+from .multipoint import Multipoint
 from .multisegment import Multisegment
-from .point import (Point,
-                    point_to_step,
-                    scale_point)
+from .point import Point
+from .rotating import (point_to_step,
+                       rotate_contour_around_origin,
+                       rotate_translate_contour)
+from .scaling import (scale_contour,
+                      scale_contour_degenerate)
 from .segment import Segment
 from .utils import (relate_multipoint_to_linear_compound,
                     to_point_nearest_segment,
                     to_segment_nearest_segment)
-from .vertices import Vertices
 
 
 class Contour(Indexable, Linear):
     __slots__ = ('_context', '_edges', '_locate', '_min_index',
                  '_point_nearest_edge', '_segment_nearest_edge', '_vertices')
 
-    def __init__(self, vertices: Vertices,
+    def __init__(self, vertices: Sequence[Point],
                  *,
                  context: Optional[Context] = None) -> None:
         """
@@ -496,7 +496,7 @@ class Contour(Indexable, Linear):
                 vertices[(min_index + 1) % len(vertices)])
 
     @property
-    def vertices(self) -> Vertices:
+    def vertices(self) -> Sequence[Point]:
         """
         Returns vertices of the contour.
 
@@ -623,7 +623,8 @@ class Contour(Indexable, Linear):
         >>> contour.reverse().reverse() == contour
         True
         """
-        return Contour(_vertices.rotate_positions(self._vertices))
+        return self.context.contour_cls(
+                _vertices.rotate_positions(self._vertices))
 
     def rotate(self,
                cosine: Scalar,
@@ -646,11 +647,13 @@ class Contour(Indexable, Linear):
         ...  == Contour([Point(2, 0), Point(2, 1), Point(1, 0)]))
         True
         """
-        return (rotate_contour_around_origin(self, cosine, sine)
+        context = self.context
+        return (rotate_contour_around_origin(
+                self, cosine, sine, context.contour_cls, context.point_cls)
                 if point is None
-                else rotate_translate_contour(self, cosine, sine,
-                                              *point_to_step(point, cosine,
-                                                             sine)))
+                else rotate_translate_contour(
+                self, cosine, sine, *point_to_step(point, cosine, sine),
+                context.contour_cls, context.point_cls))
 
     def scale(self,
               factor_x: Scalar,
@@ -674,9 +677,14 @@ class Contour(Indexable, Linear):
         """
         if factor_y is None:
             factor_y = factor_x
-        return (scale_contour(self, factor_x, factor_y)
+        context = self.context
+        return (scale_contour(self, factor_x, factor_y, context.contour_cls,
+                              context.point_cls)
                 if factor_x and factor_y
-                else scale_contour_degenerate(self, factor_x, factor_y))
+                else scale_contour_degenerate(self, factor_x, factor_y,
+                                              context.multipoint_cls,
+                                              context.point_cls,
+                                              context.segment_cls))
 
     def to_clockwise(self) -> 'Contour':
         """
@@ -737,8 +745,8 @@ class Contour(Indexable, Linear):
         ...  == Contour([Point(1, 2), Point(2, 2), Point(1, 3)]))
         True
         """
-        return Contour([vertex.translate(step_x, step_y)
-                        for vertex in self._vertices])
+        return self.context.contour_cls([vertex.translate(step_x, step_y)
+                                         for vertex in self._vertices])
 
     def validate(self) -> None:
         """
@@ -813,32 +821,3 @@ def _locate_point(contour: Contour,
             if point_in_contour(point, contour,
                                 context=context)
             else Location.EXTERIOR)
-
-
-def rotate_contour_around_origin(contour: Contour,
-                                 cosine: Scalar,
-                                 sine: Scalar) -> Contour:
-    return Contour(rotate_points_around_origin(contour.vertices, cosine,
-                                               sine))
-
-
-def rotate_translate_contour(contour: Contour,
-                             cosine: Scalar,
-                             sine: Scalar,
-                             step_x: Scalar,
-                             step_y: Scalar) -> Contour:
-    return Contour(rotate_translate_points(contour.vertices, cosine, sine,
-                                           step_x, step_y))
-
-
-def scale_contour(contour: Contour,
-                  factor_x: Scalar,
-                  factor_y: Scalar) -> Contour:
-    return Contour([scale_point(vertex, factor_x, factor_y)
-                    for vertex in contour.vertices])
-
-
-def scale_contour_degenerate(contour: Contour,
-                             factor_x: Scalar,
-                             factor_y: Scalar) -> Compound:
-    return _vertices.scale_degenerate(contour.vertices, factor_x, factor_y)
