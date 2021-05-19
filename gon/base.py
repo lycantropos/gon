@@ -22,6 +22,7 @@ from .core.polygon import (Polygon,
                            Triangulation)
 from .core.segment import Segment
 
+#: Empty geometry instance, equivalent of an empty set.
 EMPTY = EMPTY
 Compound = Compound
 Contour = Contour
