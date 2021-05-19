@@ -17,8 +17,8 @@ from clipping.planar import (complete_intersect_multisegment_with_polygon,
                              unite_multisegment_with_polygon,
                              unite_polygons,
                              unite_segment_with_polygon)
-from ground.base import (Context,
-                         get_context)
+from ground.base import Context
+from ground.hints import Scalar
 from locus import segmental
 from orient.planar import (contour_in_polygon,
                            multisegment_in_polygon,
@@ -37,14 +37,12 @@ from .compound import (Compound,
                        Relation,
                        Shaped)
 from .contour import Contour
-from .empty import EMPTY
 from .geometry import Geometry
-from .hints import Scalar
 from .iterable import (flatten,
                        non_negative_min)
-from .mix import from_mix_components
 from .multipoint import Multipoint
 from .multisegment import Multisegment
+from .packing import pack_mix
 from .point import Point
 from .rotating import (point_to_step,
                        rotate_polygon_around_origin,
@@ -59,14 +57,12 @@ Triangulation = Triangulation
 
 
 class Polygon(Indexable, Shaped):
-    __slots__ = ('_border', '_context', '_holes', '_holes_set', '_locate',
+    __slots__ = ('_border', '_holes', '_holes_set', '_locate',
                  '_point_nearest_edge', '_segment_nearest_edge')
 
     def __init__(self,
                  border: Contour,
-                 holes: Optional[Sequence[Contour]] = None,
-                 *,
-                 context: Optional[Context] = None) -> None:
+                 holes: Optional[Sequence[Contour]] = None) -> None:
         """
         Initializes polygon.
 
@@ -78,11 +74,9 @@ class Polygon(Indexable, Shaped):
         where ``vertices_count = len(border.vertices)\
  + sum(len(hole.vertices) for hole in holes)``.
         """
-        if context is None:
-            context = get_context()
-        self._context = context
         self._holes = holes = tuple(holes or ())
         self._border, self._holes_set = border, frozenset(holes)
+        context = self._context
         self._locate = partial(_locate_point, self,
                                context=context)
         edges = self.edges
@@ -104,7 +98,7 @@ class Polygon(Indexable, Shaped):
         where ``vertices_count = len(self.border.vertices)\
  + sum(len(hole.vertices) for hole in self.holes)``.
 
-        >>> from gon.base import Multipolygon
+        >>> from gon.base import Contour, Point, Polygon
         >>> polygon = Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
         ...                            Point(0, 6)]),
         ...                   [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
@@ -113,21 +107,21 @@ class Polygon(Indexable, Shaped):
         True
         """
         return (complete_intersect_segment_with_polygon(other, self,
-                                                        context=self.context)
+                                                        context=self._context)
                 if isinstance(other, Segment)
                 else (self._intersect_with_multisegment(other)
                       if isinstance(other, Multisegment)
                       else
                       (self._intersect_with_multisegment(
-                              self.context.multisegment_cls(other.edges))
+                              self._context.multisegment_cls(other.edges))
                        if isinstance(other, Contour)
                        else
                        ((complete_intersect_polygons(self, other,
-                                                     context=self.context)
+                                                     context=self._context)
                          if self.holes or other.holes
                          else complete_intersect_regions(self.border,
                                                          other.border,
-                                                         context=self.context))
+                                                         context=self._context))
                         if isinstance(other, Polygon)
                         else NotImplemented))))
 
@@ -146,6 +140,7 @@ class Polygon(Indexable, Shaped):
         where ``vertices_count = len(self.border.vertices)\
  + sum(len(hole.vertices) for hole in self.holes)``.
 
+        >>> from gon.base import Contour, Point, Polygon
         >>> polygon = Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
         ...                            Point(0, 6)]),
         ...                   [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
@@ -181,6 +176,7 @@ class Polygon(Indexable, Shaped):
         where ``vertices_count = len(self.border.vertices)\
  + sum(len(hole.vertices) for hole in self.holes)``.
 
+        >>> from gon.base import Contour, Point, Polygon
         >>> polygon = Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
         ...                            Point(0, 6)]),
         ...                   [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
@@ -205,6 +201,7 @@ class Polygon(Indexable, Shaped):
         where ``vertices_count = len(self.border.vertices)\
  + sum(len(hole.vertices) for hole in self.holes)``.
 
+        >>> from gon.base import Contour, Point, Polygon
         >>> polygon = Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
         ...                            Point(0, 6)]),
         ...                   [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
@@ -212,7 +209,7 @@ class Polygon(Indexable, Shaped):
         >>> polygon >= polygon
         True
         """
-        return (other is EMPTY
+        return (other is self._context.empty
                 or self == other
                 or (self.relate(other) in (Relation.EQUAL, Relation.COMPONENT,
                                            Relation.ENCLOSED, Relation.WITHIN)
@@ -231,6 +228,7 @@ class Polygon(Indexable, Shaped):
         where ``vertices_count = len(self.border.vertices)\
  + sum(len(hole.vertices) for hole in self.holes)``.
 
+        >>> from gon.base import Contour, Point, Polygon
         >>> polygon = Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
         ...                            Point(0, 6)]),
         ...                   [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
@@ -238,7 +236,7 @@ class Polygon(Indexable, Shaped):
         >>> polygon > polygon
         False
         """
-        return (other is EMPTY
+        return (other is self._context.empty
                 or self != other
                 and (self.relate(other) in (Relation.COMPONENT,
                                             Relation.ENCLOSED, Relation.WITHIN)
@@ -257,6 +255,7 @@ class Polygon(Indexable, Shaped):
         where ``vertices_count = len(self.border.vertices)\
  + sum(len(hole.vertices) for hole in self.holes)``.
 
+        >>> from gon.base import Contour, Point, Polygon
         >>> polygon = Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
         ...                            Point(0, 6)]),
         ...                   [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
@@ -278,6 +277,7 @@ class Polygon(Indexable, Shaped):
         where ``vertices_count = len(self.border.vertices)\
  + sum(len(hole.vertices) for hole in self.holes)``.
 
+        >>> from gon.base import Contour, Point, Polygon
         >>> polygon = Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
         ...                            Point(0, 6)]),
         ...                   [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
@@ -306,6 +306,7 @@ class Polygon(Indexable, Shaped):
         where ``vertices_count = len(self.border.vertices)\
  + sum(len(hole.vertices) for hole in self.holes)``.
 
+        >>> from gon.base import Contour, Point, Polygon
         >>> polygon = Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
         ...                            Point(0, 6)]),
         ...                   [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
@@ -334,6 +335,7 @@ class Polygon(Indexable, Shaped):
  + sum(len(hole.vertices) for hole in self.holes)``.
 
         >>> from gon.base import Multipolygon
+        >>> from gon.base import Contour, Point, Polygon
         >>> polygon = Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
         ...                            Point(0, 6)]),
         ...                   [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
@@ -344,16 +346,16 @@ class Polygon(Indexable, Shaped):
         return (self._unite_with_multipoint(other)
                 if isinstance(other, Multipoint)
                 else (unite_segment_with_polygon(other, self,
-                                                 context=self.context)
+                                                 context=self._context)
                       if isinstance(other, Segment)
                       else
                       (self._unite_with_multisegment(other)
                        if isinstance(other, Multisegment)
                        else (self._unite_with_multisegment(
-                              self.context.multisegment_cls(other.edges))
+                              self._context.multisegment_cls(other.edges))
                              if isinstance(other, Contour)
                              else (unite_polygons(self, other,
-                                                  context=self.context)
+                                                  context=self._context)
                                    if isinstance(other, Polygon)
                                    else NotImplemented)))))
 
@@ -372,13 +374,13 @@ class Polygon(Indexable, Shaped):
  + sum(len(hole.vertices) for hole in self.holes)``.
         """
         return (subtract_polygon_from_segment(other, self,
-                                              context=self.context)
+                                              context=self._context)
                 if isinstance(other, Segment)
                 else (self._subtract_from_multisegment(other)
                       if isinstance(other, Multisegment)
                       else
                       (self._subtract_from_multisegment(
-                              self.context.multisegment_cls(other.edges))
+                              self._context.multisegment_cls(other.edges))
                        if isinstance(other, Contour)
                        else NotImplemented)))
 
@@ -394,6 +396,7 @@ class Polygon(Indexable, Shaped):
         where ``vertices_count = len(self.border.vertices)\
  + sum(len(hole.vertices) for hole in self.holes)``.
 
+        >>> from gon.base import EMPTY, Contour, Point, Polygon
         >>> polygon = Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
         ...                            Point(0, 6)]),
         ...                   [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
@@ -404,7 +407,7 @@ class Polygon(Indexable, Shaped):
         return (self
                 if isinstance(other, (Linear, Multipoint))
                 else (subtract_polygons(self, other,
-                                        context=self.context)
+                                        context=self._context)
                       if isinstance(other, Polygon)
                       else NotImplemented))
 
@@ -420,6 +423,7 @@ class Polygon(Indexable, Shaped):
         where ``vertices_count = len(self.border.vertices)\
  + sum(len(hole.vertices) for hole in self.holes)``.
 
+        >>> from gon.base import EMPTY, Contour, Point, Polygon
         >>> polygon = Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
         ...                            Point(0, 6)]),
         ...                   [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
@@ -431,16 +435,16 @@ class Polygon(Indexable, Shaped):
                 if isinstance(other, Multipoint)
                 else
                 (symmetric_subtract_polygon_from_segment(other, self,
-                                                         context=self.context)
+                                                         context=self._context)
                  if isinstance(other, Segment)
                  else (self._symmetric_subtract_from_multisegment(other)
                        if isinstance(other, Multisegment)
                        else
                        (self._symmetric_subtract_from_multisegment(
-                               self.context.multisegment_cls(other.edges))
+                               self._context.multisegment_cls(other.edges))
                         if isinstance(other, Contour)
                         else (symmetric_subtract_polygons(self, other,
-                                                          context=self.context)
+                                                          context=self._context)
                               if isinstance(other, Polygon)
                               else NotImplemented)))))
 
@@ -459,6 +463,7 @@ class Polygon(Indexable, Shaped):
         where ``vertices_count = len(self.border.vertices)\
  + sum(len(hole.vertices) for hole in self.holes)``.
 
+        >>> from gon.base import Contour, Point, Polygon
         >>> polygon = Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
         ...                            Point(0, 6)]),
         ...                   [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
@@ -466,7 +471,7 @@ class Polygon(Indexable, Shaped):
         >>> polygon.area == 32
         True
         """
-        region_signed_measure = self.context.region_signed_area
+        region_signed_measure = self._context.region_signed_area
         return (abs(region_signed_measure(self.border))
                 - sum(abs(region_signed_measure(hole))
                       for hole in self.holes))
@@ -481,6 +486,7 @@ class Polygon(Indexable, Shaped):
         Memory complexity:
             ``O(1)``
 
+        >>> from gon.base import Contour, Point, Polygon
         >>> polygon = Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
         ...                            Point(0, 6)]),
         ...                   [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
@@ -504,6 +510,7 @@ class Polygon(Indexable, Shaped):
         where ``vertices_count = len(self.border.vertices)\
  + sum(len(hole.vertices) for hole in self.holes)``.
 
+        >>> from gon.base import Contour, Point, Polygon
         >>> polygon = Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
         ...                            Point(0, 6)]),
         ...                   [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
@@ -511,26 +518,7 @@ class Polygon(Indexable, Shaped):
         >>> polygon.centroid == Point(3, 3)
         True
         """
-        return self.context.polygon_centroid(self)
-
-    @property
-    def context(self) -> Context:
-        """
-        Returns context of the polygon.
-
-        Time complexity:
-            ``O(1)``
-        Memory complexity:
-            ``O(1)``
-
-        >>> polygon = Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
-        ...                            Point(0, 6)]),
-        ...                   [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
-        ...                             Point(4, 2)])])
-        >>> isinstance(polygon.context, Context)
-        True
-        """
-        return self._context
+        return self._context.polygon_centroid(self)
 
     @property
     def convex_hull(self) -> 'Polygon':
@@ -547,6 +535,7 @@ class Polygon(Indexable, Shaped):
 
         where ``border_vertices_count = len(self.border.vertices)``.
 
+        >>> from gon.base import Contour, Point, Polygon
         >>> polygon = Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
         ...                            Point(0, 6)]),
         ...                   [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
@@ -554,7 +543,7 @@ class Polygon(Indexable, Shaped):
         >>> polygon.convex_hull == Polygon(polygon.border, [])
         True
         """
-        context = self.context
+        context = self._context
         return (self
                 if self.is_convex
                 else
@@ -576,6 +565,7 @@ class Polygon(Indexable, Shaped):
         where ``vertices_count = len(self.border.vertices)\
  + sum(len(hole.vertices) for hole in self.holes)``.
 
+        >>> from gon.base import Contour, Point, Polygon, Segment
         >>> polygon = Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
         ...                            Point(0, 6)]),
         ...                   [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
@@ -605,6 +595,7 @@ class Polygon(Indexable, Shaped):
 
         where ``holes_count = len(self.holes)``.
 
+        >>> from gon.base import Contour, Point, Polygon
         >>> polygon = Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
         ...                            Point(0, 6)]),
         ...                   [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
@@ -625,6 +616,7 @@ class Polygon(Indexable, Shaped):
         Memory complexity:
             ``O(1)``
 
+        >>> from gon.base import Contour, Point, Polygon
         >>> polygon = Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
         ...                            Point(0, 6)]),
         ...                   [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
@@ -634,7 +626,7 @@ class Polygon(Indexable, Shaped):
         >>> polygon.convex_hull.is_convex
         True
         """
-        return not self.holes and self.context.is_region_convex(self.border)
+        return not self.holes and self._context.is_region_convex(self.border)
 
     @property
     def perimeter(self) -> Scalar:
@@ -649,6 +641,7 @@ class Polygon(Indexable, Shaped):
         where ``vertices_count = len(self.border.vertices)\
  + sum(len(hole.vertices) for hole in self.holes)``.
 
+        >>> from gon.base import Contour, Point, Polygon
         >>> polygon = Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
         ...                            Point(0, 6)]),
         ...                   [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
@@ -670,6 +663,7 @@ class Polygon(Indexable, Shaped):
         where ``vertices_count = len(self.border.vertices)\
  + sum(len(hole.vertices) for hole in self.holes)``.
 
+        >>> from gon.base import Contour, Point, Polygon
         >>> polygon = Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
         ...                            Point(0, 6)]),
         ...                   [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
@@ -715,6 +709,7 @@ class Polygon(Indexable, Shaped):
         where ``vertices_count = len(self.border.vertices)\
  + sum(len(hole.vertices) for hole in self.holes)``.
 
+        >>> from gon.base import Contour, Point, Polygon
         >>> polygon = Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
         ...                            Point(0, 6)]),
         ...                   [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
@@ -722,7 +717,7 @@ class Polygon(Indexable, Shaped):
         >>> polygon.index()
         """
         self._locate = Graph.from_polygon(self,
-                                          context=self.context).locate
+                                          context=self._context).locate
         tree = segmental.Tree(self.edges)
         self._point_nearest_edge, self._segment_nearest_edge = (
             tree.nearest_to_point_segment, tree.nearest_segment)
@@ -740,6 +735,7 @@ class Polygon(Indexable, Shaped):
         where ``vertices_count = len(self.border.vertices)\
  + sum(len(hole.vertices) for hole in self.holes)``.
 
+        >>> from gon.base import Contour, Point, Polygon
         >>> polygon = Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
         ...                            Point(0, 6)]),
         ...                   [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
@@ -775,6 +771,7 @@ class Polygon(Indexable, Shaped):
         where ``vertices_count = len(self.border.vertices)\
  + sum(len(hole.vertices) for hole in self.holes)``.
 
+        >>> from gon.base import Contour, Point, Polygon
         >>> polygon = Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
         ...                            Point(0, 6)]),
         ...                   [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
@@ -807,6 +804,7 @@ class Polygon(Indexable, Shaped):
         where ``vertices_count = len(self.border.vertices)\
  + sum(len(hole.vertices) for hole in self.holes)``.
 
+        >>> from gon.base import Contour, Point, Polygon
         >>> polygon = Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
         ...                            Point(0, 6)]),
         ...                   [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
@@ -820,7 +818,7 @@ class Polygon(Indexable, Shaped):
         ...                       Point(0, 4)])]))
         True
         """
-        context = self.context
+        context = self._context
         return (rotate_polygon_around_origin(self, cosine, sine,
                                              context.contour_cls,
                                              context.point_cls,
@@ -844,6 +842,7 @@ class Polygon(Indexable, Shaped):
         where ``vertices_count = len(self.border.vertices)\
  + sum(len(hole.vertices) for hole in self.holes)``.
 
+        >>> from gon.base import Contour, Point, Polygon
         >>> polygon = Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
         ...                            Point(0, 6)]),
         ...                   [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
@@ -859,7 +858,7 @@ class Polygon(Indexable, Shaped):
         """
         if factor_y is None:
             factor_y = factor_x
-        context = self.context
+        context = self._context
         return (scale_polygon(self, factor_x, factor_y, context.contour_cls,
                               context.point_cls, context.polygon_cls)
                 if factor_x and factor_y
@@ -880,6 +879,7 @@ class Polygon(Indexable, Shaped):
         where ``vertices_count = len(self.border.vertices)\
  + sum(len(hole.vertices) for hole in self.holes)``.
 
+        >>> from gon.base import Contour, Point, Polygon
         >>> polygon = Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
         ...                            Point(0, 6)]),
         ...                   [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
@@ -891,9 +891,9 @@ class Polygon(Indexable, Shaped):
         ...                       Point(5, 4)])]))
         True
         """
-        return self.context.polygon_cls(self.border.translate(step_x, step_y),
-                                        [hole.translate(step_x, step_y)
-                                         for hole in self.holes])
+        return self._context.polygon_cls(self.border.translate(step_x, step_y),
+                                         [hole.translate(step_x, step_y)
+                                          for hole in self.holes])
 
     def triangulate(self) -> Triangulation:
         """
@@ -907,6 +907,7 @@ class Polygon(Indexable, Shaped):
         where ``vertices_count = len(self.border.vertices)\
  + sum(len(hole.vertices) for hole in self.holes)``.
 
+        >>> from gon.base import Contour, Point, Polygon
         >>> polygon = Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
         ...                            Point(0, 6)]),
         ...                   [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
@@ -924,7 +925,7 @@ class Polygon(Indexable, Shaped):
         True
         """
         return Triangulation.constrained_delaunay(self,
-                                                  context=self.context)
+                                                  context=self._context)
 
     def validate(self) -> None:
         """
@@ -938,6 +939,7 @@ class Polygon(Indexable, Shaped):
         where ``vertices_count = len(self.border.vertices)\
  + sum(len(hole.vertices) for hole in self.holes)``.
 
+        >>> from gon.base import Contour, Point, Polygon
         >>> polygon = Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
         ...                            Point(0, 6)]),
         ...                   [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
@@ -948,7 +950,7 @@ class Polygon(Indexable, Shaped):
         if self.holes:
             for hole in self.holes:
                 hole.validate()
-            context = self.context
+            context = self._context
             relation = region_in_multiregion(self.border, self.holes,
                                              context=context)
             if not (relation is Relation.COVER
@@ -967,7 +969,7 @@ class Polygon(Indexable, Shaped):
                 raise ValueError('Holes should not tear polygon apart.')
 
     def _distance_to_point(self, other: Point) -> Scalar:
-        return self.context.sqrt(
+        return self._context.sqrt(
                 self._squared_distance_to_exterior_point(other)
                 if self._locate(other) is Location.EXTERIOR
                 else 0)
@@ -982,32 +984,33 @@ class Polygon(Indexable, Shaped):
                                      ) -> Compound:
         return complete_intersect_multisegment_with_polygon(
                 multisegment, self,
-                context=self.context)
+                context=self._context)
 
     def _linear_distance_to_segment(self, other: Segment) -> Scalar:
-        return self.context.segments_squared_distance(
+        return self._context.segments_squared_distance(
                 self._segment_nearest_edge(other), other)
 
     def _squared_distance_to_exterior_point(self, other: Point) -> Scalar:
-        return self.context.segment_point_squared_distance(
+        return self._context.segment_point_squared_distance(
                 self._point_nearest_edge(other), other)
 
     def _subtract_from_multisegment(self, other: Multisegment) -> Compound:
         return subtract_polygon_from_multisegment(other, self,
-                                                  context=self.context)
+                                                  context=self._context)
 
     def _symmetric_subtract_from_multisegment(self, other: Multisegment
                                               ) -> Compound:
         return symmetric_subtract_polygon_from_multisegment(
                 other, self,
-                context=self.context)
+                context=self._context)
 
     def _unite_with_multipoint(self, other: Multipoint) -> Compound:
-        return from_mix_components(other - self, EMPTY, self)
+        return pack_mix(other - self, self._context.empty, self,
+                        self._context.empty, self._context.mix_cls)
 
     def _unite_with_multisegment(self, other: Multisegment) -> Compound:
         return unite_multisegment_with_polygon(other, self,
-                                               context=self.context)
+                                               context=self._context)
 
 
 def _locate_point(polygon: Polygon,

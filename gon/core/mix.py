@@ -1,6 +1,10 @@
 from typing import Optional
 
-from ground.hints import Multipolygon
+from ground.hints import (Maybe,
+                          Multipoint,
+                          Multipolygon,
+                          Point,
+                          Scalar)
 from reprit.base import generate_repr
 
 from .compound import (Compound,
@@ -9,15 +13,10 @@ from .compound import (Compound,
                        Location,
                        Relation,
                        Shaped)
-from .empty import (EMPTY,
-                    Maybe)
+from .contracts import MIN_MIX_NON_EMPTY_COMPONENTS
 from .geometry import Geometry
-from .hints import Scalar
 from .iterable import non_negative_min
-from .multipoint import Multipoint
-from .point import Point
-
-MIN_MIX_NON_EMPTY_COMPONENTS = 2
+from .packing import pack_mix
 
 
 class Mix(Indexable):
@@ -60,7 +59,8 @@ class Mix(Indexable):
         ``segments = [] if self.linear is EMPTY else self.linear.segments``,
         ``polygons = [] if self.shaped is EMPTY else self.shaped.polygons``.
 
-        >>> from gon.base import Contour, Polygon, Segment
+        >>> from gon.base import (Contour, Mix, Multipoint, Point, Polygon,
+        ...                       Segment)
         >>> mix = Mix(Multipoint([Point(3, 3)]),
         ...           Segment(Point(6, 6), Point(6, 8)),
         ...           Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
@@ -75,7 +75,7 @@ class Mix(Indexable):
         shaped_part = self.shaped & other
         if isinstance(linear_part, Multipoint):
             shaped_part |= linear_part
-            linear_part = EMPTY
+            linear_part = self._context.empty
         elif isinstance(linear_part, Mix):
             shaped_part |= linear_part.discrete
             linear_part = linear_part.linear
@@ -84,21 +84,22 @@ class Mix(Indexable):
             if isinstance(linear_part, Mix):
                 discrete_part |= linear_part.discrete
                 linear_part = linear_part.linear
-            shaped_part = EMPTY
+            shaped_part = self._context.empty
         elif isinstance(shaped_part, Linear):
             linear_part |= shaped_part
-            shaped_part = EMPTY
+            shaped_part = self._context.empty
         elif isinstance(shaped_part, Mix):
             linear_part = (linear_part | shaped_part.linear
                            | shaped_part.discrete)
             shaped_part = shaped_part.shaped
         if isinstance(linear_part, Multipoint):
             discrete_part |= linear_part
-            linear_part = EMPTY
+            linear_part = self._context.empty
         elif isinstance(linear_part, Mix):
             discrete_part |= linear_part.discrete
             linear_part = linear_part.linear
-        return from_mix_components(discrete_part, linear_part, shaped_part)
+        return pack_mix(discrete_part, linear_part, shaped_part,
+                        self._context.empty, self._context.mix_cls)
 
     __rand__ = __and__
 
@@ -123,7 +124,8 @@ class Mix(Indexable):
         ``segments = [] if self.linear is EMPTY else self.linear.segments``,
         ``polygons = [] if self.shaped is EMPTY else self.shaped.polygons``.
 
-        >>> from gon.base import Contour, Polygon, Segment
+        >>> from gon.base import (Contour, Mix, Multipoint, Point, Polygon,
+        ...                       Segment)
         >>> mix = Mix(Multipoint([Point(3, 3)]),
         ...           Segment(Point(6, 6), Point(6, 8)),
         ...           Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
@@ -169,7 +171,8 @@ class Mix(Indexable):
         ``segments = [] if self.linear is EMPTY else self.linear.segments``,
         ``polygons = [] if self.shaped is EMPTY else self.shaped.polygons``.
 
-        >>> from gon.base import Contour, Polygon, Segment
+        >>> from gon.base import (Contour, Mix, Multipoint, Point, Polygon,
+        ...                       Segment)
         >>> mix = Mix(Multipoint([Point(3, 3)]),
         ...           Segment(Point(6, 6), Point(6, 8)),
         ...           Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
@@ -203,7 +206,8 @@ class Mix(Indexable):
         ``segments = [] if self.linear is EMPTY else self.linear.segments``,
         ``polygons = [] if self.shaped is EMPTY else self.shaped.polygons``.
 
-        >>> from gon.base import Contour, Polygon, Segment
+        >>> from gon.base import (Contour, Mix, Multipoint, Point, Polygon,
+        ...                       Segment)
         >>> mix = Mix(Multipoint([Point(3, 3)]),
         ...           Segment(Point(6, 6), Point(6, 8)),
         ...           Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
@@ -213,12 +217,12 @@ class Mix(Indexable):
         >>> mix >= mix
         True
         """
-        return (other is EMPTY
+        return (other is self._context.empty
                 or self == other
-                or ((self.shaped is not EMPTY
+                or ((self.shaped is not self._context.empty
                      or not isinstance(other, Shaped)
                      and (not isinstance(other, Mix)
-                          or other.shaped is EMPTY))
+                          or other.shaped is self._context.empty))
                     and self.relate(other) in (Relation.EQUAL,
                                                Relation.COMPONENT,
                                                Relation.ENCLOSED,
@@ -246,7 +250,8 @@ class Mix(Indexable):
         ``segments = [] if self.linear is EMPTY else self.linear.segments``,
         ``polygons = [] if self.shaped is EMPTY else self.shaped.polygons``.
 
-        >>> from gon.base import Contour, Polygon, Segment
+        >>> from gon.base import (Contour, Mix, Multipoint, Point, Polygon,
+        ...                       Segment)
         >>> mix = Mix(Multipoint([Point(3, 3)]),
         ...           Segment(Point(6, 6), Point(6, 8)),
         ...           Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
@@ -256,12 +261,12 @@ class Mix(Indexable):
         >>> mix > mix
         False
         """
-        return (other is EMPTY
+        return (other is self._context.empty
                 or self != other
-                and ((self.shaped is not EMPTY
+                and ((self.shaped is not self._context.empty
                       or not isinstance(other, Shaped)
                       and (not isinstance(other, Mix)
-                           or other.shaped is EMPTY))
+                           or other.shaped is self._context.empty))
                      and self.relate(other) in (Relation.COMPONENT,
                                                 Relation.ENCLOSED,
                                                 Relation.WITHIN)
@@ -285,7 +290,8 @@ class Mix(Indexable):
         ``segments = [] if self.linear is EMPTY else self.linear.segments``,
         ``polygons = [] if self.shaped is EMPTY else self.shaped.polygons``.
 
-        >>> from gon.base import Contour, Polygon, Segment
+        >>> from gon.base import (Contour, Mix, Multipoint, Point, Polygon,
+        ...                       Segment)
         >>> mix = Mix(Multipoint([Point(3, 3)]),
         ...           Segment(Point(6, 6), Point(6, 8)),
         ...           Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
@@ -317,7 +323,8 @@ class Mix(Indexable):
         ``segments = [] if self.linear is EMPTY else self.linear.segments``,
         ``polygons = [] if self.shaped is EMPTY else self.shaped.polygons``.
 
-        >>> from gon.base import Contour, Polygon, Segment
+        >>> from gon.base import (Contour, Mix, Multipoint, Point, Polygon,
+        ...                       Segment)
         >>> mix = Mix(Multipoint([Point(3, 3)]),
         ...           Segment(Point(6, 6), Point(6, 8)),
         ...           Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
@@ -329,10 +336,10 @@ class Mix(Indexable):
         """
         return (self == other
                 or (not isinstance(other, Multipoint)
-                    and (self.shaped is EMPTY
+                    and (self.shaped is self._context.empty
                          or not isinstance(other, Linear)
                          and (not isinstance(other, Mix)
-                              or other.shaped is not EMPTY))
+                              or other.shaped is not self._context.empty))
                     and self.relate(other) in (Relation.COVER,
                                                Relation.ENCLOSES,
                                                Relation.COMPOSITE,
@@ -360,7 +367,8 @@ class Mix(Indexable):
         ``segments = [] if self.linear is EMPTY else self.linear.segments``,
         ``polygons = [] if self.shaped is EMPTY else self.shaped.polygons``.
 
-        >>> from gon.base import Contour, Polygon, Segment
+        >>> from gon.base import (Contour, Mix, Multipoint, Point, Polygon,
+        ...                       Segment)
         >>> mix = Mix(Multipoint([Point(3, 3)]),
         ...           Segment(Point(6, 6), Point(6, 8)),
         ...           Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
@@ -372,10 +380,10 @@ class Mix(Indexable):
         """
         return (self != other
                 and (not isinstance(other, Multipoint)
-                     and (self.shaped is EMPTY
+                     and (self.shaped is self._context.empty
                           or not isinstance(other, Linear)
                           and (not isinstance(other, Mix)
-                               or other.shaped is not EMPTY))
+                               or other.shaped is not self._context.empty))
                      and self.relate(other) in (Relation.COVER,
                                                 Relation.ENCLOSES,
                                                 Relation.COMPOSITE)
@@ -402,7 +410,8 @@ class Mix(Indexable):
         ``segments = [] if self.linear is EMPTY else self.linear.segments``,
         ``polygons = [] if self.shaped is EMPTY else self.shaped.polygons``.
 
-        >>> from gon.base import Contour, Polygon, Segment
+        >>> from gon.base import (Contour, Mix, Multipoint, Point, Polygon,
+        ...                       Segment)
         >>> mix = Mix(Multipoint([Point(3, 3)]),
         ...           Segment(Point(6, 6), Point(6, 8)),
         ...           Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
@@ -413,27 +422,31 @@ class Mix(Indexable):
         True
         """
         if isinstance(other, Multipoint):
-            return Mix(self.discrete | (other - self.shaped - self.linear),
-                       self.linear, self.shaped)
+            return self._context.mix_cls(
+                    self.discrete | (other - self.shaped - self.linear),
+                    self.linear, self.shaped)
         elif isinstance(other, Linear):
             discrete_part, linear_part = self.discrete, self.linear
             shaped_part = self.shaped | other
             if isinstance(shaped_part, Linear):
                 linear_part = linear_part | shaped_part | discrete_part
-                shaped_part = EMPTY
+                shaped_part = self._context.empty
             elif isinstance(shaped_part, Mix):
                 linear_part = linear_part | shaped_part.linear | discrete_part
                 shaped_part = shaped_part.shaped
             else:
                 # other is subset of the shaped component
-                return from_mix_components(discrete_part, linear_part,
-                                           shaped_part)
+                return pack_mix(discrete_part, linear_part,
+                                shaped_part, self._context.empty,
+                                self._context.mix_cls)
             if isinstance(linear_part, Mix):
                 discrete_part, linear_part = (linear_part.discrete,
                                               linear_part.linear)
             else:
-                discrete_part = EMPTY
-            return from_mix_components(discrete_part, linear_part, shaped_part)
+                discrete_part = self._context.empty
+            return pack_mix(discrete_part, linear_part, shaped_part,
+                            self._context.empty,
+                            self._context.mix_cls)
         elif isinstance(other, (Shaped, Mix)):
             return self.shaped | other | self.linear | self.discrete
         else:
@@ -484,7 +497,8 @@ class Mix(Indexable):
         ``segments = [] if self.linear is EMPTY else self.linear.segments``,
         ``polygons = [] if self.shaped is EMPTY else self.shaped.polygons``.
 
-        >>> from gon.base import Contour, Polygon, Segment
+        >>> from gon.base import (EMPTY, Contour, Mix, Multipoint, Point,
+        ...                       Polygon, Segment)
         >>> mix = Mix(Multipoint([Point(3, 3)]),
         ...           Segment(Point(6, 6), Point(6, 8)),
         ...           Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
@@ -494,8 +508,9 @@ class Mix(Indexable):
         >>> mix - mix is EMPTY
         True
         """
-        return from_mix_components(self.discrete - other, self.linear - other,
-                                   self.shaped - other)
+        return pack_mix(self.discrete - other, self.linear - other,
+                        self.shaped - other, self._context.empty,
+                        self._context.mix_cls)
 
     def __xor__(self, other: Compound) -> Compound:
         """
@@ -517,7 +532,8 @@ class Mix(Indexable):
         ``segments = [] if self.linear is EMPTY else self.linear.segments``,
         ``polygons = [] if self.shaped is EMPTY else self.shaped.polygons``.
 
-        >>> from gon.base import Contour, Polygon, Segment
+        >>> from gon.base import (EMPTY, Contour, Mix, Multipoint, Point,
+        ...                       Polygon, Segment)
         >>> mix = Mix(Multipoint([Point(3, 3)]),
         ...           Segment(Point(6, 6), Point(6, 8)),
         ...           Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
@@ -529,27 +545,31 @@ class Mix(Indexable):
         """
         if isinstance(other, Multipoint):
             rest_other = other - self.shaped - self.linear
-            return from_mix_components(self.discrete ^ rest_other,
-                                       self.linear, self.shaped)
+            return pack_mix(self.discrete ^ rest_other, self.linear,
+                            self.shaped, self._context.empty,
+                            self._context.mix_cls)
         elif isinstance(other, Linear):
             discrete_part, linear_part = self.discrete, self.linear
             shaped_part = self.shaped ^ other
             if isinstance(shaped_part, Linear):
                 linear_part = linear_part ^ shaped_part ^ discrete_part
-                shaped_part = EMPTY
+                shaped_part = self._context.empty
             elif isinstance(shaped_part, Mix):
                 linear_part = linear_part ^ shaped_part.linear ^ discrete_part
                 shaped_part = shaped_part.shaped
             else:
                 # other is subset of the shaped component
-                return from_mix_components(discrete_part, linear_part,
-                                           shaped_part)
+                return pack_mix(discrete_part, linear_part,
+                                shaped_part, self._context.empty,
+                                self._context.mix_cls)
             if isinstance(linear_part, Mix):
                 discrete_part, linear_part = (linear_part.discrete,
                                               linear_part.linear)
             else:
-                discrete_part = EMPTY
-            return from_mix_components(discrete_part, linear_part, shaped_part)
+                discrete_part = self._context.empty
+            return pack_mix(discrete_part, linear_part, shaped_part,
+                            self._context.empty,
+                            self._context.mix_cls)
         elif isinstance(other, (Shaped, Mix)):
             return self.shaped ^ other ^ self.linear ^ self.discrete
         else:
@@ -576,7 +596,8 @@ class Mix(Indexable):
         ``segments = [] if self.linear is EMPTY else self.linear.segments``,
         ``polygons = [] if self.shaped is EMPTY else self.shaped.polygons``.
 
-        >>> from gon.base import Contour, Polygon, Segment
+        >>> from gon.base import (Contour, Mix, Multipoint, Point, Polygon,
+        ...                       Segment)
         >>> mix = Mix(Multipoint([Point(3, 3)]),
         ...           Segment(Point(6, 6), Point(6, 8)),
         ...           Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
@@ -586,7 +607,8 @@ class Mix(Indexable):
         >>> mix.centroid == Point(3, 3)
         True
         """
-        return (self.linear if self.shaped is EMPTY else self.shaped).centroid
+        return (
+            self.linear if self.shaped is self._context.empty else self.shaped).centroid
 
     @property
     def discrete(self) -> Maybe[Multipoint]:
@@ -598,7 +620,8 @@ class Mix(Indexable):
         Memory complexity:
             ``O(1)``
 
-        >>> from gon.base import Contour, Polygon, Segment
+        >>> from gon.base import (Contour, Mix, Multipoint, Point, Polygon,
+        ...                       Segment)
         >>> mix = Mix(Multipoint([Point(3, 3)]),
         ...           Segment(Point(6, 6), Point(6, 8)),
         ...           Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
@@ -620,7 +643,8 @@ class Mix(Indexable):
         Memory complexity:
             ``O(1)``
 
-        >>> from gon.base import Contour, Polygon, Segment
+        >>> from gon.base import (Contour, Mix, Multipoint, Point, Polygon,
+        ...                       Segment)
         >>> mix = Mix(Multipoint([Point(3, 3)]),
         ...           Segment(Point(6, 6), Point(6, 8)),
         ...           Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
@@ -646,7 +670,8 @@ class Mix(Indexable):
         Memory complexity:
             ``O(1)``
 
-        >>> from gon.base import Contour, Polygon, Segment
+        >>> from gon.base import (Contour, Mix, Multipoint, Point, Polygon,
+        ...                       Segment)
         >>> mix = Mix(Multipoint([Point(3, 3)]),
         ...           Segment(Point(6, 6), Point(6, 8)),
         ...           Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
@@ -675,7 +700,8 @@ class Mix(Indexable):
         ``segments = [] if self.linear is EMPTY else self.linear.segments``,
         ``polygons = [] if self.shaped is EMPTY else self.shaped.polygons``.
 
-        >>> from gon.base import Contour, Polygon, Segment
+        >>> from gon.base import (Contour, Mix, Multipoint, Point, Polygon,
+        ...                       Segment)
         >>> mix = Mix(Multipoint([Point(3, 3)]),
         ...           Segment(Point(6, 6), Point(6, 8)),
         ...           Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
@@ -687,7 +713,7 @@ class Mix(Indexable):
         """
         return non_negative_min(component.distance_to(other)
                                 for component in self._components
-                                if component is not EMPTY)
+                                if component is not self._context.empty)
 
     def index(self) -> None:
         """
@@ -707,7 +733,8 @@ class Mix(Indexable):
         ``segments = [] if self.linear is EMPTY else self.linear.segments``,
         ``polygons = [] if self.shaped is EMPTY else self.shaped.polygons``.
 
-        >>> from gon.base import Contour, Polygon, Segment
+        >>> from gon.base import (Contour, Mix, Multipoint, Point, Polygon,
+        ...                       Segment)
         >>> mix = Mix(Multipoint([Point(3, 3)]),
         ...           Segment(Point(6, 6), Point(6, 8)),
         ...           Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
@@ -744,7 +771,8 @@ class Mix(Indexable):
         ``segments = [] if self.linear is EMPTY else self.linear.segments``,
         ``polygons = [] if self.shaped is EMPTY else self.shaped.polygons``.
 
-        >>> from gon.base import Contour, Polygon, Segment
+        >>> from gon.base import (Contour, Mix, Multipoint, Point, Polygon,
+        ...                       Segment)
         >>> mix = Mix(Multipoint([Point(3, 3)]),
         ...           Segment(Point(6, 6), Point(6, 8)),
         ...           Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
@@ -794,7 +822,8 @@ class Mix(Indexable):
         ``segments = [] if self.linear is EMPTY else self.linear.segments``,
         ``polygons = [] if self.shaped is EMPTY else self.shaped.polygons``.
 
-        >>> from gon.base import Contour, Polygon, Segment
+        >>> from gon.base import (Contour, Mix, Multipoint, Point, Polygon,
+        ...                       Segment)
         >>> mix = Mix(Multipoint([Point(3, 3)]),
         ...           Segment(Point(6, 6), Point(6, 8)),
         ...           Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
@@ -856,9 +885,9 @@ class Mix(Indexable):
         ...                           Point(0, 4)])])))
         True
         """
-        return Mix(self.discrete.rotate(cosine, sine, point),
-                   self.linear.rotate(cosine, sine, point),
-                   self.shaped.rotate(cosine, sine, point))
+        return self._context.mix_cls(self.discrete.rotate(cosine, sine, point),
+                                     self.linear.rotate(cosine, sine, point),
+                                     self.shaped.rotate(cosine, sine, point))
 
     def scale(self,
               factor_x: Scalar,
@@ -882,7 +911,8 @@ class Mix(Indexable):
         ``segments = [] if self.linear is EMPTY else self.linear.segments``,
         ``polygons = [] if self.shaped is EMPTY else self.shaped.polygons``.
 
-        >>> from gon.base import Contour, Polygon, Segment
+        >>> from gon.base import (Contour, Mix, Multipoint, Point, Polygon,
+        ...                       Segment)
         >>> mix = Mix(Multipoint([Point(3, 3)]),
         ...           Segment(Point(6, 6), Point(6, 8)),
         ...           Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
@@ -902,15 +932,17 @@ class Mix(Indexable):
         """
         if factor_y is None:
             factor_y = factor_x
-        return (Mix(self.discrete.scale(factor_x, factor_y),
-                    self.linear.scale(factor_x, factor_y),
-                    self.shaped.scale(factor_x, factor_y))
+        return (self._context.mix_cls(self.discrete.scale(factor_x, factor_y),
+                                      self.linear.scale(factor_x, factor_y),
+                                      self.shaped.scale(factor_x, factor_y))
                 if factor_x and factor_y
                 else ((self.discrete.scale(factor_x, factor_y)
                        | self.linear.scale(factor_x, factor_y)
                        | self.shaped.scale(factor_x, factor_y))
                       if factor_x or factor_y
-                      else Multipoint([Point(factor_x, factor_y)])))
+                      else
+                      self._context.multipoint_cls(
+                              [self._context.point_cls(factor_x, factor_y)])))
 
     def translate(self, step_x: Scalar, step_y: Scalar) -> 'Mix':
         """
@@ -932,7 +964,8 @@ class Mix(Indexable):
         ``segments = [] if self.linear is EMPTY else self.linear.segments``,
         ``polygons = [] if self.shaped is EMPTY else self.shaped.polygons``.
 
-        >>> from gon.base import Contour, Polygon, Segment
+        >>> from gon.base import (Contour, Mix, Multipoint, Point, Polygon,
+        ...                       Segment)
         >>> mix = Mix(Multipoint([Point(3, 3)]),
         ...           Segment(Point(6, 6), Point(6, 8)),
         ...           Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
@@ -948,9 +981,9 @@ class Mix(Indexable):
         ...                           Point(5, 4)])])))
         True
         """
-        return Mix(self.discrete.translate(step_x, step_y),
-                   self.linear.translate(step_x, step_y),
-                   self.shaped.translate(step_x, step_y))
+        return self._context.mix_cls(self.discrete.translate(step_x, step_y),
+                                     self.linear.translate(step_x, step_y),
+                                     self.shaped.translate(step_x, step_y))
 
     def validate(self) -> None:
         """
@@ -972,7 +1005,8 @@ class Mix(Indexable):
         ``segments = [] if self.linear is EMPTY else self.linear.segments``,
         ``polygons = [] if self.shaped is EMPTY else self.shaped.polygons``.
 
-        >>> from gon.base import Contour, Polygon, Segment
+        >>> from gon.base import (Contour, Mix, Multipoint, Point, Polygon,
+        ...                       Segment)
         >>> mix = Mix(Multipoint([Point(3, 3)]),
         ...           Segment(Point(6, 6), Point(6, 8)),
         ...           Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
@@ -981,7 +1015,8 @@ class Mix(Indexable):
         ...                             Point(4, 2)])]))
         >>> mix.validate()
         """
-        if (sum(component is not EMPTY for component in self._components)
+        if (sum(component is not self._context.empty for component in
+                self._components)
                 < MIN_MIX_NON_EMPTY_COMPONENTS):
             raise ValueError('At least {count} components should not be empty.'
                              .format(count=MIN_MIX_NON_EMPTY_COMPONENTS))
@@ -1006,13 +1041,13 @@ class Mix(Indexable):
                              in (Relation.OVERLAP, Relation.COMPOSITE)
                              for hole in polygon.holes)
                       for polygon in (self.shaped.polygons
-                                      if isinstance(self.shaped, Multipolygon)
-                                      else [self.shaped]))):
+                if isinstance(self.shaped, Multipolygon)
+                else [self.shaped]))):
             raise ValueError('Linear component should not overlap '
                              'shaped component borders.')
 
     def _relate_linear(self, other: Linear) -> Relation:
-        if self.shaped is EMPTY:
+        if self.shaped is self._context.empty:
             linear_relation = self.linear.relate(other)
             if linear_relation is Relation.DISJOINT:
                 discrete_relation = self.discrete.relate(other)
@@ -1057,7 +1092,7 @@ class Mix(Indexable):
                 return shaped_relation
 
     def _relate_mix(self, other: 'Mix') -> Relation:
-        if self.shaped is other.shaped is EMPTY:
+        if self.shaped is other.shaped is self._context.empty:
             linear_components_relation = self.linear.relate(other.linear)
             if linear_components_relation is Relation.DISJOINT:
                 return (linear_components_relation
@@ -1082,7 +1117,7 @@ class Mix(Indexable):
                         else Relation.OVERLAP)
             else:
                 return linear_components_relation
-        elif self.shaped is EMPTY:
+        elif self.shaped is self._context.empty:
             linear_relation = other._relate_linear(self.linear)
             if linear_relation is Relation.CROSS:
                 return linear_relation
@@ -1118,7 +1153,7 @@ class Mix(Indexable):
                         else (Relation.COVER
                               if discrete_relation is Relation.WITHIN
                               else Relation.ENCLOSES))
-        elif other.shaped is EMPTY:
+        elif other.shaped is self._context.empty:
             other_linear_relation = self._relate_linear(other.linear)
             if other_linear_relation is Relation.CROSS:
                 return other_linear_relation
@@ -1163,7 +1198,7 @@ class Mix(Indexable):
         shaped_components_relation = self.shaped.relate(other.shaped)
         if (shaped_components_relation is Relation.DISJOINT
                 or shaped_components_relation is Relation.TOUCH):
-            if self.linear is other.linear is EMPTY:
+            if self.linear is other.linear is self._context.empty:
                 other_discrete_relation = self._relate_discrete(other.discrete)
                 if other_discrete_relation is Relation.CROSS:
                     return other_discrete_relation
@@ -1183,7 +1218,7 @@ class Mix(Indexable):
                         return Relation.CROSS
                     else:
                         return Relation.TOUCH
-            elif self.linear is EMPTY:
+            elif self.linear is self._context.empty:
                 other_linear_relation = self._relate_linear(other.linear)
                 if other_linear_relation is Relation.CROSS:
                     return other_linear_relation
@@ -1197,7 +1232,7 @@ class Mix(Indexable):
                     elif (discrete_relation is Relation.ENCLOSED
                           or discrete_relation is Relation.WITHIN):
                         return Relation.CROSS
-                    elif other.discrete is EMPTY:
+                    elif other.discrete is self._context.empty:
                         return (shaped_components_relation
                                 if (discrete_relation
                                     is other_linear_relation
@@ -1218,7 +1253,7 @@ class Mix(Indexable):
                             return shaped_components_relation
                         else:
                             return Relation.TOUCH
-            elif other.linear is EMPTY:
+            elif other.linear is self._context.empty:
                 linear_relation = other._relate_linear(self.linear)
                 if linear_relation is Relation.CROSS:
                     return linear_relation
@@ -1233,7 +1268,7 @@ class Mix(Indexable):
                     elif (other_discrete_relation is Relation.ENCLOSED
                           or other_discrete_relation is Relation.WITHIN):
                         return Relation.CROSS
-                    elif self.discrete is EMPTY:
+                    elif self.discrete is self._context.empty:
                         return (shaped_components_relation
                                 if (linear_relation
                                     is other_discrete_relation
@@ -1268,7 +1303,7 @@ class Mix(Indexable):
                     elif (linear_relation is Relation.ENCLOSED
                           or linear_relation is Relation.WITHIN):
                         return Relation.CROSS
-                    elif self.discrete is EMPTY:
+                    elif self.discrete is self._context.empty:
                         other_discrete_relation = self._relate_discrete(
                                 other.discrete)
                         return (other_discrete_relation
@@ -1285,7 +1320,7 @@ class Mix(Indexable):
                                            is other_linear_relation
                                            is Relation.DISJOINT)
                                        else Relation.TOUCH)))
-                    elif other.discrete is EMPTY:
+                    elif other.discrete is self._context.empty:
                         discrete_relation = other._relate_discrete(
                                 self.discrete)
                         return (discrete_relation
@@ -1329,7 +1364,7 @@ class Mix(Indexable):
         elif shaped_components_relation in (Relation.COVER,
                                             Relation.ENCLOSES,
                                             Relation.COMPOSITE):
-            if self.linear is EMPTY:
+            if self.linear is self._context.empty:
                 discrete_relation = (other._relate_discrete(self.discrete)
                                      .complement)
                 return (shaped_components_relation
@@ -1342,7 +1377,7 @@ class Mix(Indexable):
             else:
                 linear_relation = other._relate_linear(self.linear).complement
                 if linear_relation is shaped_components_relation:
-                    if self.discrete is EMPTY:
+                    if self.discrete is self._context.empty:
                         return shaped_components_relation
                     else:
                         discrete_relation = other._relate_discrete(
@@ -1359,7 +1394,7 @@ class Mix(Indexable):
                 elif linear_relation in (Relation.COVER,
                                          Relation.ENCLOSES,
                                          Relation.COMPOSITE):
-                    if self.discrete is EMPTY:
+                    if self.discrete is self._context.empty:
                         return Relation.ENCLOSES
                     else:
                         discrete_relation = other._relate_discrete(
@@ -1373,19 +1408,19 @@ class Mix(Indexable):
                     return Relation.OVERLAP
         elif shaped_components_relation is Relation.EQUAL:
             linear_components_relation = self.linear.relate(other.linear)
-            if self.linear is other.linear is EMPTY:
+            if self.linear is other.linear is self._context.empty:
                 discrete_components_relation = self.discrete.relate(
                         other.discrete)
                 return (
                     shaped_components_relation
-                    if (self.discrete is other.discrete is EMPTY
+                    if (self.discrete is other.discrete is self._context.empty
                         or discrete_components_relation is Relation.EQUAL)
                     else
                     (discrete_components_relation
                      if (discrete_components_relation is Relation.COMPOSITE
                          or discrete_components_relation is Relation.COMPONENT)
                      else Relation.OVERLAP))
-            elif self.linear is EMPTY:
+            elif self.linear is self._context.empty:
                 discrete_components_relation = other._relate_discrete(
                         self.discrete)
                 return (
@@ -1393,7 +1428,7 @@ class Mix(Indexable):
                     if (discrete_components_relation is Relation.EQUAL
                         or discrete_components_relation is Relation.COMPONENT)
                     else Relation.OVERLAP)
-            elif other.linear is EMPTY:
+            elif other.linear is self._context.empty:
                 discrete_components_relation = self._relate_discrete(
                         other.discrete)
                 return (
@@ -1406,7 +1441,7 @@ class Mix(Indexable):
                         self.discrete)
                 return (
                     linear_components_relation
-                    if (self.discrete is EMPTY
+                    if (self.discrete is self._context.empty
                         or discrete_components_relation is Relation.EQUAL
                         or discrete_components_relation is Relation.COMPONENT)
                     else Relation.OVERLAP)
@@ -1415,14 +1450,14 @@ class Mix(Indexable):
                         other.discrete)
                 return (
                     shaped_components_relation
-                    if (self.discrete is other.discrete is EMPTY
+                    if (self.discrete is other.discrete is self._context.empty
                         or discrete_components_relation is Relation.EQUAL)
                     else
                     (Relation.COMPOSITE
-                     if self.discrete is EMPTY
+                     if self.discrete is self._context.empty
                      else
                      (Relation.COMPONENT
-                      if other.discrete is EMPTY
+                      if other.discrete is self._context.empty
                       else
                       (discrete_components_relation
                        if
@@ -1434,7 +1469,7 @@ class Mix(Indexable):
                         other.discrete)
                 return (
                     linear_components_relation
-                    if (other.discrete is EMPTY
+                    if (other.discrete is self._context.empty
                         or discrete_components_relation is Relation.EQUAL
                         or discrete_components_relation is Relation.COMPONENT)
                     else Relation.OVERLAP)
@@ -1443,7 +1478,7 @@ class Mix(Indexable):
         elif shaped_components_relation in (Relation.COMPONENT,
                                             Relation.ENCLOSED,
                                             Relation.WITHIN):
-            if other.linear is EMPTY:
+            if other.linear is self._context.empty:
                 discrete_relation = self._relate_discrete(other.discrete)
                 return (shaped_components_relation
                         if discrete_relation is shaped_components_relation
@@ -1455,7 +1490,7 @@ class Mix(Indexable):
             else:
                 linear_relation = self._relate_linear(other.linear)
                 if linear_relation is shaped_components_relation:
-                    if other.discrete is EMPTY:
+                    if other.discrete is self._context.empty:
                         return shaped_components_relation
                     else:
                         discrete_relation = self._relate_discrete(
@@ -1472,7 +1507,7 @@ class Mix(Indexable):
                 elif linear_relation in (Relation.COMPONENT,
                                          Relation.ENCLOSED,
                                          Relation.WITHIN):
-                    if other.discrete is EMPTY:
+                    if other.discrete is self._context.empty:
                         return Relation.ENCLOSED
                     else:
                         discrete_relation = self._relate_discrete(
@@ -1488,7 +1523,7 @@ class Mix(Indexable):
             return shaped_components_relation
 
     def _relate_discrete(self, other: Multipoint) -> Relation:
-        if self.shaped is EMPTY:
+        if self.shaped is self._context.empty:
             linear_relation = self.linear.relate(other)
             if linear_relation is Relation.DISJOINT:
                 discrete_relation = self.discrete.relate(other)
@@ -1516,7 +1551,7 @@ class Mix(Indexable):
             elif (shaped_relation is Relation.TOUCH
                   or shaped_relation is Relation.CROSS):
                 rest_other = other - self.shaped
-                if self.linear is EMPTY:
+                if self.linear is self._context.empty:
                     discrete_relation = self.discrete.relate(rest_other)
                     return (Relation.COMPONENT
                             if (discrete_relation is Relation.EQUAL
@@ -1566,7 +1601,7 @@ class Mix(Indexable):
                     return linear_relation
 
     def _relate_shaped(self, other: Shaped) -> Relation:
-        if self.shaped is EMPTY:
+        if self.shaped is self._context.empty:
             linear_relation = self.linear.relate(other)
             if (linear_relation is Relation.DISJOINT
                     or linear_relation is Relation.TOUCH):
@@ -1640,7 +1675,7 @@ class Mix(Indexable):
                     return Relation.CROSS
             elif (shaped_relation is Relation.COVER
                   or shaped_relation is Relation.COMPOSITE):
-                if self.linear is EMPTY:
+                if self.linear is self._context.empty:
                     discrete_relation = self.discrete.relate(other)
                     return (Relation.OVERLAP
                             if discrete_relation in (Relation.DISJOINT,
@@ -1655,7 +1690,7 @@ class Mix(Indexable):
                                            Relation.TOUCH,
                                            Relation.CROSS):
                         return Relation.OVERLAP
-                    elif self.discrete is EMPTY:
+                    elif self.discrete is self._context.empty:
                         return (shaped_relation
                                 if linear_relation is shaped_relation
                                 else Relation.ENCLOSES)
@@ -1671,7 +1706,7 @@ class Mix(Indexable):
                                           is shaped_relation)
                                       else Relation.ENCLOSES))
             elif shaped_relation is Relation.ENCLOSES:
-                if self.linear is EMPTY:
+                if self.linear is self._context.empty:
                     discrete_relation = self.discrete.relate(other)
                     return (Relation.OVERLAP
                             if discrete_relation in (Relation.DISJOINT,
@@ -1684,7 +1719,7 @@ class Mix(Indexable):
                                            Relation.TOUCH,
                                            Relation.CROSS):
                         return Relation.OVERLAP
-                    elif self.discrete is EMPTY:
+                    elif self.discrete is self._context.empty:
                         return shaped_relation
                     else:
                         discrete_relation = self.discrete.relate(other)
@@ -1697,18 +1732,3 @@ class Mix(Indexable):
                 return (Relation.COMPONENT
                         if shaped_relation is Relation.EQUAL
                         else shaped_relation)
-
-
-def from_mix_components(discrete: Maybe[Multipoint],
-                        linear: Maybe[Linear],
-                        shaped: Maybe[Shaped]) -> Compound:
-    return (Mix(discrete, linear, shaped)
-            if (((discrete is not EMPTY)
-                 + (linear is not EMPTY)
-                 + (shaped is not EMPTY))
-                >= MIN_MIX_NON_EMPTY_COMPONENTS)
-            else (discrete
-                  if discrete is not EMPTY
-                  else (linear
-                        if linear is not EMPTY
-                        else shaped)))

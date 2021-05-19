@@ -4,8 +4,8 @@ from typing import (AbstractSet,
                     Optional,
                     Sequence)
 
-from ground.base import (Context,
-                         get_context)
+from ground.base import Context
+from ground.hints import Scalar
 from locus import kd
 from reprit.base import generate_repr
 
@@ -14,23 +14,20 @@ from .compound import (Compound,
                        Location,
                        Relation)
 from .geometry import Geometry
-from .hints import Scalar
 from .iterable import (non_negative_min,
                        unique_ever_seen)
+from .packing import pack_points
 from .point import Point
 from .rotating import (point_to_step,
                        rotate_points_around_origin,
                        rotate_translate_points)
 from .scaling import scale_point
-from .utils import pack_points
 
 
 class Multipoint(Indexable):
-    __slots__ = '_context', '_points', '_points_set', '_nearest_point'
+    __slots__ = '_points', '_points_set', '_nearest_point'
 
-    def __init__(self, points: Sequence[Point],
-                 *,
-                 context: Optional[Context] = None) -> None:
+    def __init__(self, points: Sequence[Point]) -> None:
         """
         Initializes multipoint.
 
@@ -41,11 +38,8 @@ class Multipoint(Indexable):
 
         where ``points_count = len(points)``.
         """
-        if context is None:
-            context = get_context()
-        self._context = context
         self._points, self._points_set = points, frozenset(points)
-        self._nearest_point = partial(_to_nearest_point, context, points)
+        self._nearest_point = partial(_to_nearest_point, self._context, points)
 
     __repr__ = generate_repr(__init__)
 
@@ -60,6 +54,7 @@ class Multipoint(Indexable):
 
         where ``points_count = len(self.points)``.
 
+        >>> from gon.base import Multipoint, Point
         >>> multipoint = Multipoint([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> multipoint & multipoint == multipoint
         True
@@ -69,8 +64,7 @@ class Multipoint(Indexable):
                             else [point
                                   for point in self._points
                                   if point in other],
-                            self.context.empty,
-                            self.context.multipoint_cls)
+                            self._context.empty, self._context.multipoint_cls)
                 if isinstance(other, Compound)
                 else NotImplemented)
 
@@ -86,6 +80,7 @@ class Multipoint(Indexable):
         Memory complexity:
             ``O(1)``
 
+        >>> from gon.base import Multipoint, Point
         >>> multipoint = Multipoint([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> all(point in multipoint for point in multipoint.points)
         True
@@ -101,6 +96,7 @@ class Multipoint(Indexable):
         Memory complexity:
             ``O(1)``
 
+        >>> from gon.base import Multipoint, Point
         >>> multipoint = Multipoint([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> multipoint == multipoint
         True
@@ -123,6 +119,7 @@ class Multipoint(Indexable):
         Memory complexity:
             ``O(1)``
 
+        >>> from gon.base import Multipoint, Point
         >>> multipoint = Multipoint([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> multipoint >= multipoint
         True
@@ -145,6 +142,7 @@ class Multipoint(Indexable):
         Memory complexity:
             ``O(1)``
 
+        >>> from gon.base import Multipoint, Point
         >>> multipoint = Multipoint([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> multipoint > multipoint
         False
@@ -167,6 +165,7 @@ class Multipoint(Indexable):
         Memory complexity:
             ``O(1)``
 
+        >>> from gon.base import Multipoint, Point
         >>> multipoint = Multipoint([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> hash(multipoint) == hash(multipoint)
         True
@@ -182,6 +181,7 @@ class Multipoint(Indexable):
         Memory complexity:
             ``O(1)``
 
+        >>> from gon.base import Multipoint, Point
         >>> multipoint = Multipoint([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> multipoint <= multipoint
         True
@@ -204,6 +204,7 @@ class Multipoint(Indexable):
         Memory complexity:
             ``O(1)``
 
+        >>> from gon.base import Multipoint, Point
         >>> multipoint = Multipoint([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> multipoint < multipoint
         False
@@ -228,12 +229,13 @@ class Multipoint(Indexable):
 
         where ``points_count = len(self.points)``.
 
+        >>> from gon.base import Multipoint, Point
         >>> multipoint = Multipoint([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> multipoint | multipoint == multipoint
         True
         """
-        return (self.context.multipoint_cls(list(self._points_set
-                                                 | other._points_set))
+        return (self._context.multipoint_cls(list(self._points_set
+                                                  | other._points_set))
                 if isinstance(other, Multipoint)
                 else NotImplemented)
 
@@ -249,6 +251,7 @@ class Multipoint(Indexable):
         where ``points_count = len(self.points)``.
 
         >>> from gon.base import EMPTY, Multipoint, Point
+        >>> from gon.base import Multipoint, Point
         >>> multipoint = Multipoint([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> multipoint - multipoint is EMPTY
         True
@@ -258,7 +261,7 @@ class Multipoint(Indexable):
                             else [point
                                   for point in self._points
                                   if point not in other],
-                            self.context.empty, self.context.multipoint_cls)
+                            self._context.empty, self._context.multipoint_cls)
                 if isinstance(other, Compound)
                 else NotImplemented)
 
@@ -274,12 +277,13 @@ class Multipoint(Indexable):
         where ``points_count = len(self.points)``.
 
         >>> from gon.base import EMPTY, Multipoint, Point
+        >>> from gon.base import Multipoint, Point
         >>> multipoint = Multipoint([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> multipoint ^ multipoint is EMPTY
         True
         """
         return (pack_points(self._points_set ^ other._points_set,
-                            self.context.empty, self.context.multipoint_cls)
+                            self._context.empty, self._context.multipoint_cls)
                 if isinstance(other, Multipoint)
                 else NotImplemented)
 
@@ -295,27 +299,12 @@ class Multipoint(Indexable):
 
         where ``points_count = len(self.points)``.
 
+        >>> from gon.base import Multipoint, Point
         >>> multipoint = Multipoint([Point(0, 0), Point(3, 0), Point(0, 3)])
         >>> multipoint.centroid == Point(1, 1)
         True
         """
-        return self.context.multipoint_centroid(self)
-
-    @property
-    def context(self) -> Context:
-        """
-        Returns context of the multipoint.
-
-        Time complexity:
-            ``O(1)``
-        Memory complexity:
-            ``O(1)``
-
-        >>> multipoint = Multipoint([Point(0, 0), Point(3, 0), Point(0, 3)])
-        >>> isinstance(multipoint.context, Context)
-        True
-        """
-        return self._context
+        return self._context.multipoint_centroid(self)
 
     @property
     def points(self) -> List[Point]:
@@ -329,6 +318,7 @@ class Multipoint(Indexable):
 
         where ``points_count = len(self.points)``.
 
+        >>> from gon.base import Multipoint, Point
         >>> multipoint = Multipoint([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> multipoint.points == [Point(0, 0), Point(1, 0), Point(0, 1)]
         True
@@ -344,6 +334,7 @@ class Multipoint(Indexable):
         Memory complexity:
             ``O(1)``
 
+        >>> from gon.base import Multipoint, Point
         >>> multipoint = Multipoint([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> multipoint.distance_to(multipoint) == 0
         True
@@ -366,6 +357,7 @@ class Multipoint(Indexable):
 
         where ``points_count = len(self.points)``.
 
+        >>> from gon.base import Multipoint, Point
         >>> multipoint = Multipoint([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> multipoint.index()
         """
@@ -381,6 +373,7 @@ class Multipoint(Indexable):
         Memory complexity:
             ``O(1)``
 
+        >>> from gon.base import Multipoint, Point
         >>> multipoint = Multipoint([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> all(multipoint.locate(point) is Location.BOUNDARY
         ...     for point in multipoint.points)
@@ -401,6 +394,7 @@ class Multipoint(Indexable):
 
         where ``points_count = len(self.points)``.
 
+        >>> from gon.base import Multipoint, Point
         >>> multipoint = Multipoint([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> multipoint.relate(multipoint) is Relation.EQUAL
         True
@@ -425,6 +419,7 @@ class Multipoint(Indexable):
 
         where ``points_count = len(self.points)``.
 
+        >>> from gon.base import Multipoint, Point
         >>> multipoint = Multipoint([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> multipoint.rotate(1, 0) == multipoint
         True
@@ -432,7 +427,7 @@ class Multipoint(Indexable):
         ...  == Multipoint([Point(2, 0), Point(2, 1), Point(1, 0)]))
         True
         """
-        context = self.context
+        context = self._context
         return context.multipoint_cls(
                 rotate_points_around_origin(self._points, cosine, sine,
                                             context.point_cls)
@@ -455,6 +450,7 @@ class Multipoint(Indexable):
 
         where ``points_count = len(self.points)``.
 
+        >>> from gon.base import Multipoint, Point
         >>> multipoint = Multipoint([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> multipoint.scale(1) == multipoint
         True
@@ -464,7 +460,7 @@ class Multipoint(Indexable):
         """
         if factor_y is None:
             factor_y = factor_x
-        context = self.context
+        context = self._context
         return context.multipoint_cls(
                 [scale_point(point, factor_x, factor_y, context.point_cls)
                  for point in self._points]
@@ -487,13 +483,14 @@ class Multipoint(Indexable):
 
         where ``points_count = len(self.points)``.
 
+        >>> from gon.base import Multipoint, Point
         >>> multipoint = Multipoint([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> (multipoint.translate(1, 2)
         ...  == Multipoint([Point(1, 2), Point(2, 2), Point(1, 3)]))
         True
         """
-        return self.context.multipoint_cls([point.translate(step_x, step_y)
-                                            for point in self._points])
+        return self._context.multipoint_cls([point.translate(step_x, step_y)
+                                             for point in self._points])
 
     def validate(self) -> None:
         """
@@ -504,6 +501,7 @@ class Multipoint(Indexable):
         Memory complexity:
             ``O(1)``
 
+        >>> from gon.base import Multipoint, Point
         >>> multipoint = Multipoint([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> multipoint.validate()
         """
@@ -516,7 +514,7 @@ class Multipoint(Indexable):
             point.validate()
 
     def _distance_to_point(self, other: Point) -> Scalar:
-        return self.context.sqrt(self.context.points_squared_distance(
+        return self._context.sqrt(self._context.points_squared_distance(
                 self._nearest_point(other), other))
 
     def _relate_geometry(self, other: Compound) -> Relation:

@@ -7,3 +7,6 @@ def is_segment_horizontal(segment: Segment) -> bool:
 
 def is_segment_vertical(segment: Segment) -> bool:
     return segment.start.x == segment.end.x
+
+
+MIN_MIX_NON_EMPTY_COMPONENTS = 2

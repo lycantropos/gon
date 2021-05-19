@@ -1,14 +1,12 @@
-from typing import (Optional,
-                    TypeVar,
-                    Union)
+from typing import Optional
 
+from ground.hints import Scalar
 from reprit.base import generate_repr
 
 from .compound import (Compound,
                        Location,
                        Relation)
 from .geometry import Geometry
-from .hints import Scalar
 from .point import Point
 
 try:
@@ -50,6 +48,7 @@ class Empty(Compound):
         Memory complexity:
             ``O(1)``
 
+        >>> from gon.base import EMPTY
         >>> EMPTY & EMPTY is EMPTY
         True
         """
@@ -68,7 +67,8 @@ class Empty(Compound):
         Memory complexity:
             ``O(1)``
 
-        >>> EMPTY in EMPTY
+        >>> from gon.base import EMPTY, Point
+        >>> Point(0, 0) in EMPTY
         False
         """
         return False
@@ -82,6 +82,7 @@ class Empty(Compound):
         Memory complexity:
             ``O(1)``
 
+        >>> from gon.base import EMPTY
         >>> EMPTY == EMPTY
         True
         """
@@ -96,6 +97,7 @@ class Empty(Compound):
         Memory complexity:
             ``O(1)``
 
+        >>> from gon.base import EMPTY
         >>> EMPTY >= EMPTY
         True
         """
@@ -113,6 +115,7 @@ class Empty(Compound):
         Memory complexity:
             ``O(1)``
 
+        >>> from gon.base import EMPTY
         >>> EMPTY > EMPTY
         False
         """
@@ -129,6 +132,7 @@ class Empty(Compound):
         Memory complexity:
             ``O(1)``
 
+        >>> from gon.base import EMPTY
         >>> hash(EMPTY) == hash(EMPTY)
         True
         """
@@ -143,6 +147,7 @@ class Empty(Compound):
         Memory complexity:
             ``O(1)``
 
+        >>> from gon.base import EMPTY
         >>> EMPTY <= EMPTY
         True
         """
@@ -159,6 +164,7 @@ class Empty(Compound):
         Memory complexity:
             ``O(1)``
 
+        >>> from gon.base import EMPTY
         >>> EMPTY < EMPTY
         False
         """
@@ -175,6 +181,7 @@ class Empty(Compound):
         Memory complexity:
             ``O(1)``
 
+        >>> from gon.base import EMPTY
         >>> EMPTY | EMPTY is EMPTY
         True
         """
@@ -193,6 +200,7 @@ class Empty(Compound):
         Memory complexity:
             ``O(1)``
 
+        >>> from gon.base import EMPTY
         >>> EMPTY - EMPTY is EMPTY
         True
         """
@@ -223,6 +231,7 @@ class Empty(Compound):
         Memory complexity:
             ``O(1)``
 
+        >>> from gon.base import EMPTY
         >>> EMPTY ^ EMPTY is EMPTY
         True
         """
@@ -248,6 +257,7 @@ class Empty(Compound):
         Memory complexity:
             ``O(1)``
 
+        >>> from gon.base import EMPTY, Point
         >>> EMPTY.locate(Point(0, 0)) is Location.EXTERIOR
         True
         """
@@ -262,6 +272,7 @@ class Empty(Compound):
         Memory complexity:
             ``O(1)``
 
+        >>> from gon.base import EMPTY
         >>> EMPTY.relate(EMPTY) is Relation.DISJOINT
         True
         """
@@ -279,6 +290,7 @@ class Empty(Compound):
         Memory complexity:
             ``O(1)``
 
+        >>> from gon.base import EMPTY, Point
         >>> EMPTY.rotate(1, 0) is EMPTY.rotate(0, 1, Point(1, 1)) is EMPTY
         True
         """
@@ -295,6 +307,7 @@ class Empty(Compound):
         Memory complexity:
             ``O(1)``
 
+        >>> from gon.base import EMPTY
         >>> EMPTY.scale(1) is EMPTY.scale(1, 2) is EMPTY
         True
         """
@@ -309,6 +322,7 @@ class Empty(Compound):
         Memory complexity:
             ``O(1)``
 
+        >>> from gon.base import EMPTY
         >>> EMPTY.translate(1, 2) is EMPTY
         True
         """
@@ -324,8 +338,3 @@ class Empty(Compound):
             ``O(1)``
         """
         # empty geometry considered to be always valid
-
-
-EMPTY = Empty()
-_T = TypeVar('_T')
-Maybe = Union[Empty, _T]
