@@ -13,7 +13,8 @@ from gon.base import Point
 from gon.core.vertices import MIN_COUNT
 from gon.hints import Scalar
 from tests.utils import (Strategy,
-                         identity)
+                         identity,
+                         not_all_unique)
 from .base import coordinates_strategies
 from .factories import coordinates_to_points
 
@@ -39,17 +40,6 @@ def to_repeated_points(coordinates: Strategy[Scalar],
             .flatmap(strategies.permutations)
             .map(itemgetter(slice(max_size)))
             .filter(not_all_unique))
-
-
-def not_all_unique(vertices: Sequence[Point]) -> bool:
-    seen = set()
-    seen_add = seen.add
-    for value in vertices:
-        if value in seen:
-            return True
-        else:
-            seen_add(value)
-    return False
 
 
 repeated_points = coordinates_strategies.flatmap(to_repeated_points)
