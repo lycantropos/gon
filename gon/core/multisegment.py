@@ -458,8 +458,9 @@ class Multisegment(Indexable, Linear):
 
         >>> multisegment = Multisegment([Segment(Point(0, 0), Point(1, 0)),
         ...                              Segment(Point(0, 1), Point(1, 1))])
-        >>> multisegment.segments
-        [Segment(Point(0, 0), Point(1, 0)), Segment(Point(0, 1), Point(1, 1))]
+        >>> multisegment.segments == [Segment(Point(0, 0), Point(1, 0)),
+        ...                           Segment(Point(0, 1), Point(1, 1))]
+        True
         """
         return list(self._segments)
 
