@@ -72,7 +72,8 @@ class Contour(Indexable, Linear):
         self._vertices = vertices = tuple(vertices)
         self._min_index = min(range(len(vertices)),
                               key=vertices.__getitem__)
-        self._locate = partial(locate_point, self)
+        self._locate = partial(_locate_point, self,
+                               context=context)
         self._edges = edges = context.contour_edges(self)
         self._point_nearest_edge, self._segment_nearest_edge = (
             partial(to_point_nearest_segment, context, edges),
@@ -805,9 +806,12 @@ class Contour(Indexable, Linear):
                                    context=self.context)
 
 
-def locate_point(contour: Contour, point: Point) -> Location:
+def _locate_point(contour: Contour,
+                  point: Point,
+                  context: Context) -> Location:
     return (Location.BOUNDARY
-            if point_in_contour(point, contour)
+            if point_in_contour(point, contour,
+                                context=context)
             else Location.EXTERIOR)
 
 
