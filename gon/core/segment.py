@@ -30,7 +30,9 @@ from .utils import relate_multipoint_to_linear_compound
 class Segment(Compound, Linear):
     __slots__ = '_context', '_endpoints', '_end', '_start'
 
-    def __init__(self, start: Point, end: Point) -> None:
+    def __init__(self, start: Point, end: Point,
+                 *,
+                 context: Optional[Context] = None) -> None:
         """
         Initializes segment.
 
@@ -39,8 +41,7 @@ class Segment(Compound, Linear):
         Memory complexity:
             ``O(1)``
         """
-        context = get_context()
-        self._context = context
+        self._context = get_context() if context is None else context
         self._start, self._end = self._endpoints = start, end
 
     __repr__ = generate_repr(__init__)
