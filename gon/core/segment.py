@@ -12,6 +12,8 @@ from .compound import (Compound,
                        Linear,
                        Location,
                        Relation)
+from .contracts import (is_segment_horizontal,
+                        is_segment_vertical)
 from .geometry import Geometry
 from .iterable import non_negative_min
 from .multipoint import Multipoint
@@ -351,7 +353,7 @@ class Segment(Compound, Linear):
         >>> segment.is_horizontal
         True
         """
-        return self.start.y == self.end.y
+        return is_segment_horizontal(self)
 
     @property
     def is_vertical(self) -> bool:
@@ -368,7 +370,7 @@ class Segment(Compound, Linear):
         >>> segment.is_vertical
         False
         """
-        return self.start.x == self.end.x
+        return is_segment_vertical(self)
 
     @property
     def length(self) -> Scalar:
