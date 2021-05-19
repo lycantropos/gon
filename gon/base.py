@@ -35,13 +35,15 @@ Triangulation = Triangulation
 
 
 class _ContextMixin:
+    __slots__ = ()
+
     @property
     def _context(self) -> _Context:
         return _context
 
 
 class Empty(_ContextMixin, _Empty):
-    pass
+    __slots__ = ()
 
 
 #: Empty geometry instance, equivalent of empty set.
@@ -49,35 +51,35 @@ EMPTY = Empty()
 
 
 class Point(_ContextMixin, _Point):
-    pass
+    __slots__ = ()
 
 
 class Contour(_ContextMixin, _Contour):
-    pass
+    __slots__ = ()
 
 
 class Mix(_ContextMixin, _Mix):
-    pass
+    __slots__ = ()
 
 
 class Multipoint(_ContextMixin, _Multipoint):
-    pass
+    __slots__ = ()
 
 
 class Segment(_ContextMixin, _Segment):
-    pass
+    __slots__ = ()
 
 
 class Multisegment(_ContextMixin, _Multisegment):
-    pass
+    __slots__ = ()
 
 
 class Polygon(_ContextMixin, _Polygon):
-    pass
+    __slots__ = ()
 
 
 class Multipolygon(_ContextMixin, _Multipolygon):
-    pass
+    __slots__ = ()
 
 
 _initial_context = _get_context()
