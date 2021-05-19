@@ -83,7 +83,8 @@ class Polygon(Indexable, Shaped):
         self._context = context
         self._holes = holes = tuple(holes or ())
         self._border, self._holes_set = border, frozenset(holes)
-        self._locate = partial(locate_point, self)
+        self._locate = partial(_locate_point, self,
+                               context=context)
         edges = self.edges
         self._point_nearest_edge, self._segment_nearest_edge = (
             partial(to_point_nearest_segment, context, edges),
@@ -998,8 +999,11 @@ class Polygon(Indexable, Shaped):
                                                context=self.context)
 
 
-def locate_point(polygon: Polygon, point: Point) -> Location:
-    relation = point_in_polygon(point, polygon)
+def _locate_point(polygon: Polygon,
+                  point: Point,
+                  context: Context) -> Location:
+    relation = point_in_polygon(point, polygon,
+                                context=context)
     return (Location.EXTERIOR
             if relation is Relation.DISJOINT
             else (Location.BOUNDARY
