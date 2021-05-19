@@ -19,11 +19,11 @@ from .hints import Scalar
 from .iterable import non_negative_min
 from .mix import from_mix_components
 from .multipoint import Multipoint
-from .point import (Point,
-                    point_to_step,
-                    rotate_point_around_origin,
-                    rotate_translate_point,
-                    scale_point)
+from .point import Point
+from .rotating import (point_to_step,
+                       rotate_segment_around_origin,
+                       rotate_translate_segment)
+from .scaling import scale_segment
 from .utils import relate_multipoint_to_linear_compound
 
 
@@ -41,8 +41,8 @@ class Segment(Compound, Linear):
         Memory complexity:
             ``O(1)``
         """
-        self._context = get_context() if context is None else context
         self._start, self._end = self._endpoints = start, end
+        self._context = get_context() if context is None else context
 
     __repr__ = generate_repr(__init__)
 
@@ -494,11 +494,13 @@ class Segment(Compound, Linear):
         ...  == Segment(Point(2, 0), Point(2, 2)))
         True
         """
-        return (rotate_segment_around_origin(self, cosine, sine)
+        return (rotate_segment_around_origin(self, cosine, sine,
+                                             self.context.point_cls,
+                                             self.context.segment_cls)
                 if point is None
-                else rotate_translate_segment(self, cosine, sine,
-                                              *point_to_step(point, cosine,
-                                                             sine)))
+                else rotate_translate_segment(
+                self, cosine, sine, *point_to_step(point, cosine, sine),
+                self.context.point_cls, self.context.segment_cls))
 
     def scale(self,
               factor_x: Scalar,
@@ -515,8 +517,11 @@ class Segment(Compound, Linear):
         >>> segment.scale(1) == segment.scale(1, 2) == segment
         True
         """
+        context = self.context
         return scale_segment(self, factor_x,
-                             factor_x if factor_y is None else factor_y)
+                             factor_x if factor_y is None else factor_y,
+                             context.multipoint_cls, context.point_cls,
+                             context.segment_cls)
 
     def translate(self, step_x: Scalar, step_y: Scalar) -> 'Segment':
         """
@@ -531,8 +536,8 @@ class Segment(Compound, Linear):
         >>> segment.translate(1, 2) == Segment(Point(1, 2), Point(3, 2))
         True
         """
-        return Segment(self.start.translate(step_x, step_y),
-                       self.end.translate(step_x, step_y))
+        return self.context.segment_cls(self.start.translate(step_x, step_y),
+                                        self.end.translate(step_x, step_y))
 
     def validate(self) -> None:
         """
@@ -550,31 +555,3 @@ class Segment(Compound, Linear):
         self.end.validate()
         if self.start == self.end:
             raise ValueError('Segment is degenerate.')
-
-
-def rotate_segment_around_origin(segment: Segment,
-                                 cosine: Scalar,
-                                 sine: Scalar) -> Segment:
-    return Segment(rotate_point_around_origin(segment.start, cosine, sine),
-                   rotate_point_around_origin(segment.end, cosine, sine))
-
-
-def rotate_translate_segment(segment: Segment,
-                             cosine: Scalar,
-                             sine: Scalar,
-                             step_x: Scalar,
-                             step_y: Scalar) -> Segment:
-    return Segment(rotate_translate_point(segment.start, cosine, sine, step_x,
-                                          step_y),
-                   rotate_translate_point(segment.end, cosine, sine, step_x,
-                                          step_y))
-
-
-def scale_segment(segment: Segment,
-                  factor_x: Scalar,
-                  factor_y: Scalar) -> Compound:
-    return (Segment(scale_point(segment.start, factor_x, factor_y),
-                    scale_point(segment.end, factor_x, factor_y))
-            if ((factor_x or not segment.is_horizontal) and factor_y
-                or factor_x and not segment.is_vertical)
-            else Multipoint([scale_point(segment.start, factor_x, factor_y)]))

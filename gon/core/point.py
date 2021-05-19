@@ -1,7 +1,6 @@
 import math
 from numbers import Real
-from typing import (Optional,
-                    Tuple)
+from typing import Optional
 
 from ground.base import (Context,
                          get_context)
@@ -10,6 +9,10 @@ from symba.base import Expression
 
 from .geometry import Geometry
 from .hints import Scalar
+from .rotating import (point_to_step,
+                       rotate_point_around_origin,
+                       rotate_translate_point)
+from .scaling import scale_point
 
 
 class Point(Geometry):
@@ -198,10 +201,12 @@ class Point(Geometry):
         >>> point.rotate(0, 1, Point(1, 1)) == Point(2, 1)
         True
         """
-        return (rotate_point_around_origin(self, cosine, sine)
+        return (rotate_point_around_origin(self, cosine, sine,
+                                           self.context.point_cls)
                 if point is None
                 else rotate_translate_point(
-                self, cosine, sine, *point_to_step(point, cosine, sine)))
+                self, cosine, sine, *point_to_step(point, cosine, sine),
+                self.context.point_cls))
 
     def scale(self,
               factor_x: Scalar,
@@ -219,7 +224,8 @@ class Point(Geometry):
         True
         """
         return scale_point(self, factor_x,
-                           factor_x if factor_y is None else factor_y)
+                           factor_x if factor_y is None else factor_y,
+                           self.context.point_cls)
 
     def translate(self, step_x: Scalar, step_y: Scalar) -> 'Point':
         """
@@ -233,7 +239,7 @@ class Point(Geometry):
         >>> Point(1, 0).translate(1, 2) == Point(2, 2)
         True
         """
-        return Point(self.x + step_x, self.y + step_y)
+        return self.context.point_cls(self.x + step_x, self.y + step_y)
 
     def validate(self) -> None:
         """
@@ -252,35 +258,6 @@ class Point(Geometry):
     def _distance_to_point(self, other: 'Point') -> Scalar:
         return self.context.sqrt(self.context.points_squared_distance(self,
                                                                       other))
-
-
-def point_to_step(point: Point,
-                  cosine: Scalar,
-                  sine: Scalar) -> Tuple[Scalar, Scalar]:
-    rotated_point = rotate_point_around_origin(point, cosine, sine)
-    return point.x - rotated_point.x, point.y - rotated_point.y
-
-
-def rotate_point_around_origin(point: Point,
-                               cosine: Scalar,
-                               sine: Scalar) -> Point:
-    return Point(cosine * point.x - sine * point.y,
-                 sine * point.x + cosine * point.y)
-
-
-def rotate_translate_point(point: Point,
-                           cosine: Scalar,
-                           sine: Scalar,
-                           step_x: Scalar,
-                           step_y: Scalar) -> Point:
-    return Point(cosine * point.x - sine * point.y + step_x,
-                 sine * point.x + cosine * point.y + step_y)
-
-
-def scale_point(point: Point,
-                factor_x: Scalar,
-                factor_y: Scalar) -> Point:
-    return Point(point.x * factor_x, point.y * factor_y)
 
 
 def is_finite(value: Scalar) -> bool:

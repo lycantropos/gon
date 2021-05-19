@@ -36,7 +36,6 @@ from orient.planar import (contour_in_multipolygon,
 from reprit.base import generate_repr
 from sect.decomposition import Location
 
-from . import vertices
 from .compound import (Compound,
                        Indexable,
                        Linear,
@@ -52,12 +51,13 @@ from .iterable import (flatten,
                        non_negative_min)
 from .mix import from_mix_components
 from .multipoint import Multipoint
-from .point import (Point,
-                    point_to_step)
-from .polygon import (Polygon,
-                      rotate_polygon_around_origin,
-                      rotate_translate_polygon,
-                      scale_polygon)
+from .point import Point
+from .polygon import Polygon
+from .rotating import (point_to_step,
+                       rotate_multipolygon_around_origin,
+                       rotate_translate_multipolygon)
+from .scaling import (scale_polygon,
+                      scale_vertices_degenerate)
 
 MIN_MULTIPOLYGON_POLYGONS_COUNT = 2
 
@@ -881,10 +881,16 @@ class Multipolygon(Indexable, Shaped):
         ...                            Point(-6, 8), Point(-4, 8)])])]))
         True
         """
-        return (_rotate_multipolygon_around_origin(self, cosine, sine)
+        context = self.context
+        return (rotate_multipolygon_around_origin(
+                self, cosine, sine, context.contour_cls,
+                context.multipolygon_cls, context.point_cls,
+                context.polygon_cls)
                 if point is None
-                else _rotate_translate_multipolygon(
-                self, cosine, sine, *point_to_step(point, cosine, sine)))
+                else rotate_translate_multipolygon(
+                self, cosine, sine, *point_to_step(point, cosine, sine),
+                context.contour_cls, context.multipolygon_cls,
+                context.point_cls, context.polygon_cls))
 
     def scale(self,
               factor_x: Scalar,
@@ -926,12 +932,17 @@ class Multipolygon(Indexable, Shaped):
         """
         if factor_y is None:
             factor_y = factor_x
-        return (Multipolygon([scale_polygon(polygon, factor_x, factor_y)
-                              for polygon in self._polygons])
+        context = self.context
+        return (context.multipolygon_cls(
+                [scale_polygon(polygon, factor_x, factor_y,
+                               context.contour_cls, context.point_cls,
+                               context.polygon_cls)
+                 for polygon in self._polygons])
                 if factor_x and factor_y
-                else vertices.scale_degenerate(
+                else scale_vertices_degenerate(
                 flatten(polygon.border.vertices for polygon in self._polygons),
-                factor_x, factor_y))
+                factor_x, factor_y, context.multipoint_cls, context.point_cls,
+                context.segment_cls))
 
     def translate(self,
                   step_x: Scalar,
@@ -969,8 +980,8 @@ class Multipolygon(Indexable, Shaped):
         ...                            Point(9, 8)])])]))
         True
         """
-        return Multipolygon([polygon.translate(step_x, step_y)
-                             for polygon in self._polygons])
+        return self.context.multipolygon_cls([polygon.translate(step_x, step_y)
+                                              for polygon in self._polygons])
 
     def validate(self) -> None:
         """
@@ -1087,20 +1098,3 @@ def _locate_point_in_indexed_polygons(tree: r.Tree,
         if location is not Location.EXTERIOR:
             return location
     return Location.EXTERIOR
-
-
-def _rotate_multipolygon_around_origin(multipolygon: Multipolygon,
-                                       cosine: Scalar,
-                                       sine: Scalar) -> Multipolygon:
-    return Multipolygon([rotate_polygon_around_origin(polygon, cosine, sine)
-                         for polygon in multipolygon.polygons])
-
-
-def _rotate_translate_multipolygon(multipolygon: Multipolygon,
-                                   cosine: Scalar,
-                                   sine: Scalar,
-                                   step_x: Scalar,
-                                   step_y: Scalar) -> Multipolygon:
-    return Multipolygon([rotate_translate_polygon(polygon, cosine, sine,
-                                                  step_x, step_y)
-                         for polygon in multipolygon.polygons])

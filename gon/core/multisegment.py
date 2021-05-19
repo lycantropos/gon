@@ -1,6 +1,5 @@
 from functools import partial
-from typing import (Iterable,
-                    List,
+from typing import (List,
                     Optional,
                     Sequence)
 
@@ -31,18 +30,16 @@ from .compound import (Compound,
 from .empty import EMPTY
 from .geometry import Geometry
 from .hints import Scalar
-from .iterable import (non_negative_min,
-                       unique_ever_seen)
+from .iterable import non_negative_min
 from .mix import from_mix_components
-from .multipoint import (Multipoint,
-                         pack_points)
-from .point import (Point,
-                    point_to_step,
-                    scale_point)
-from .segment import (Segment,
-                      rotate_segment_around_origin,
-                      rotate_translate_segment,
-                      scale_segment)
+from .multipoint import Multipoint
+from .point import Point
+from .rotating import (point_to_step,
+                       rotate_segment_around_origin,
+                       rotate_translate_segment)
+from .scaling import (scale_segment,
+                      scale_segments)
+from .segment import Segment
 from .utils import (relate_multipoint_to_linear_compound,
                     to_point_nearest_segment,
                     to_segment_nearest_segment)
@@ -585,14 +582,19 @@ class Multisegment(Indexable, Linear):
         ...                   Segment(Point(1, 0), Point(1, 1))]))
         True
         """
-        return (Multisegment([rotate_segment_around_origin(segment, cosine,
-                                                           sine)
-                              for segment in self._segments])
+        context = self.context
+        return context.multisegment_cls(
+                [rotate_segment_around_origin(segment, cosine, sine,
+                                              context.point_cls,
+                                              context.segment_cls)
+                 for segment in self._segments]
                 if point is None
-                else Multisegment(
-                [rotate_translate_segment(segment, cosine, sine,
-                                          *point_to_step(point, cosine, sine))
-                 for segment in self._segments]))
+                else [rotate_translate_segment(segment, cosine, sine,
+                                               *point_to_step(point, cosine,
+                                                              sine),
+                                               context.point_cls,
+                                               context.segment_cls)
+                      for segment in self._segments])
 
     def scale(self,
               factor_x: Scalar,
@@ -618,12 +620,22 @@ class Multisegment(Indexable, Linear):
         """
         if factor_y is None:
             factor_y = factor_x
-        return (Multisegment([scale_segment(segment, factor_x, factor_y)
-                              for segment in self._segments])
+        context = self.context
+        return (context.multisegment_cls(
+                [scale_segment(segment, factor_x, factor_y,
+                               context.multipoint_cls, context.point_cls,
+                               context.segment_cls)
+                 for segment in self._segments])
                 if factor_x and factor_y
-                else (_scale_segments(self._segments, factor_x, factor_y)
+                else (scale_segments(self._segments, factor_x, factor_y,
+                                     context.empty, context.mix_cls,
+                                     context.multipoint_cls,
+                                     context.multisegment_cls,
+                                     context.point_cls)
                       if factor_x or factor_y
-                      else Multipoint([Point(factor_x, factor_y)])))
+                      else
+                      context.multipoint_cls([context.point_cls(factor_x,
+                                                                factor_y)])))
 
     def translate(self,
                   step_x: Scalar,
@@ -645,8 +657,8 @@ class Multisegment(Indexable, Linear):
         ...                   Segment(Point(1, 3), Point(2, 3))]))
         True
         """
-        return Multisegment([segment.translate(step_x, step_y)
-                             for segment in self._segments])
+        return self.context.multisegment_cls([segment.translate(step_x, step_y)
+                                              for segment in self._segments])
 
     def validate(self) -> None:
         """
@@ -696,18 +708,3 @@ def _locate_point(multisegment: Multisegment,
             if point_in_multisegment(point, multisegment,
                                      context=context) is Relation.DISJOINT
             else Location.BOUNDARY)
-
-
-def _scale_segments(segments: Iterable[Segment],
-                    factor_x: Scalar,
-                    factor_y: Scalar) -> Compound:
-    scaled_points, scaled_segments = [], []
-    for segment in segments:
-        if ((factor_x or not segment.is_horizontal) and factor_y
-                or factor_x and not segment.is_vertical):
-            scaled_segments.append(segment.scale(factor_x, factor_y))
-        else:
-            scaled_points.append(scale_point(segment.start, factor_x,
-                                             factor_y))
-    return (pack_points(unique_ever_seen(scaled_points))
-            | Multisegment(scaled_segments))
