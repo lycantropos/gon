@@ -1,12 +1,9 @@
 from abc import (ABC,
                  abstractmethod)
-from typing import (TYPE_CHECKING,
-                    Optional)
+from typing import Optional
 
-from .hints import Scalar
-
-if TYPE_CHECKING:
-    from .point import Point
+from ground.hints import (Point,
+                          Scalar)
 
 
 class Geometry(ABC):
@@ -22,7 +19,7 @@ class Geometry(ABC):
     def rotate(self,
                cosine: Scalar,
                sine: Scalar,
-               point: Optional['Point'] = None) -> 'Geometry':
+               point: Optional[Point] = None) -> 'Geometry':
         """
         Rotates geometric object by given cosine & sine around given point.
         """
