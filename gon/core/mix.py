@@ -48,16 +48,31 @@ class Mix(Indexable):
         Memory complexity:
             ``O(elements_count)``
 
-        where ``elements_count = discrete_size + linear_size\
- + shaped_vertices_count``,
-        ``discrete_size = len(points)``,
-        ``linear_size = len(segments)``,
-        ``shaped_vertices_count = sum(len(polygon.border.vertices)\
- + sum(len(hole.vertices) for hole in polygon.holes)\
- for polygon in polygons)``,
-        ``points = [] if self.discrete is EMPTY else self.discrete.points``,
-        ``segments = [] if self.linear is EMPTY else self.linear.segments``,
-        ``polygons = [] if self.shaped is EMPTY else self.shaped.polygons``.
+        where
+
+            .. code-block:: python
+
+                elements_count = discrete_size + linear_size\
+ + shaped_vertices_count
+                discrete_size = len(points)
+                linear_size = len(segments)
+                shaped_vertices_count = (sum(len(polygon.border.vertices)
+                                         + sum(len(hole.vertices)
+                                               for hole in polygon.holes)
+                                         for polygon in polygons)
+                points = [] if self.discrete is EMPTY else self.discrete.points
+                segments = ([]
+                            if self.linear is EMPTY
+                            else (self.linear.segments
+                                  if isinstance(self.linear, Multisegment)
+                                  else (self.linear.edges
+                                        if isinstance(self.linear, Contour)
+                                        else [self.linear])))
+                polygons = ([]
+                            if self.shaped is EMPTY
+                            else (self.shaped.polygons
+                                  if isinstance(self.linear, Multipolygon)
+                                  else [self.shaped]))
 
         >>> from gon.base import (Contour, Mix, Multipoint, Point, Polygon,
         ...                       Segment)
@@ -113,16 +128,31 @@ class Mix(Indexable):
         Memory complexity:
             ``O(1)``
 
-        where ``elements_count = discrete_size + linear_size\
- + shaped_vertices_count``,
-        ``discrete_size = len(points)``,
-        ``linear_size = len(segments)``,
-        ``shaped_vertices_count = sum(len(polygon.border.vertices)\
- + sum(len(hole.vertices) for hole in polygon.holes)\
- for polygon in polygons)``,
-        ``points = [] if self.discrete is EMPTY else self.discrete.points``,
-        ``segments = [] if self.linear is EMPTY else self.linear.segments``,
-        ``polygons = [] if self.shaped is EMPTY else self.shaped.polygons``.
+        where
+
+            .. code-block:: python
+
+                elements_count = discrete_size + linear_size\
+ + shaped_vertices_count
+                discrete_size = len(points)
+                linear_size = len(segments)
+                shaped_vertices_count = (sum(len(polygon.border.vertices)
+                                         + sum(len(hole.vertices)
+                                               for hole in polygon.holes)
+                                         for polygon in polygons)
+                points = [] if self.discrete is EMPTY else self.discrete.points
+                segments = ([]
+                            if self.linear is EMPTY
+                            else (self.linear.segments
+                                  if isinstance(self.linear, Multisegment)
+                                  else (self.linear.edges
+                                        if isinstance(self.linear, Contour)
+                                        else [self.linear])))
+                polygons = ([]
+                            if self.shaped is EMPTY
+                            else (self.shaped.polygons
+                                  if isinstance(self.linear, Multipolygon)
+                                  else [self.shaped]))
 
         >>> from gon.base import (Contour, Mix, Multipoint, Point, Polygon,
         ...                       Segment)
@@ -160,16 +190,31 @@ class Mix(Indexable):
         Memory complexity:
             ``O(1)``
 
-        where ``elements_count = discrete_size + linear_size\
- + shaped_vertices_count``,
-        ``discrete_size = len(points)``,
-        ``linear_size = len(segments)``,
-        ``shaped_vertices_count = sum(len(polygon.border.vertices)\
- + sum(len(hole.vertices) for hole in polygon.holes)\
- for polygon in polygons)``,
-        ``points = [] if self.discrete is EMPTY else self.discrete.points``,
-        ``segments = [] if self.linear is EMPTY else self.linear.segments``,
-        ``polygons = [] if self.shaped is EMPTY else self.shaped.polygons``.
+        where
+
+            .. code-block:: python
+
+                elements_count = discrete_size + linear_size\
+ + shaped_vertices_count
+                discrete_size = len(points)
+                linear_size = len(segments)
+                shaped_vertices_count = (sum(len(polygon.border.vertices)
+                                         + sum(len(hole.vertices)
+                                               for hole in polygon.holes)
+                                         for polygon in polygons)
+                points = [] if self.discrete is EMPTY else self.discrete.points
+                segments = ([]
+                            if self.linear is EMPTY
+                            else (self.linear.segments
+                                  if isinstance(self.linear, Multisegment)
+                                  else (self.linear.edges
+                                        if isinstance(self.linear, Contour)
+                                        else [self.linear])))
+                polygons = ([]
+                            if self.shaped is EMPTY
+                            else (self.shaped.polygons
+                                  if isinstance(self.linear, Multipolygon)
+                                  else [self.shaped]))
 
         >>> from gon.base import (Contour, Mix, Multipoint, Point, Polygon,
         ...                       Segment)
@@ -195,16 +240,31 @@ class Mix(Indexable):
         Memory complexity:
             ``O(1)``
 
-        where ``elements_count = discrete_size + linear_size\
- + shaped_vertices_count``,
-        ``discrete_size = len(points)``,
-        ``linear_size = len(segments)``,
-        ``shaped_vertices_count = sum(len(polygon.border.vertices)\
- + sum(len(hole.vertices) for hole in polygon.holes)\
- for polygon in polygons)``,
-        ``points = [] if self.discrete is EMPTY else self.discrete.points``,
-        ``segments = [] if self.linear is EMPTY else self.linear.segments``,
-        ``polygons = [] if self.shaped is EMPTY else self.shaped.polygons``.
+        where
+
+            .. code-block:: python
+
+                elements_count = discrete_size + linear_size\
+ + shaped_vertices_count
+                discrete_size = len(points)
+                linear_size = len(segments)
+                shaped_vertices_count = (sum(len(polygon.border.vertices)
+                                         + sum(len(hole.vertices)
+                                               for hole in polygon.holes)
+                                         for polygon in polygons)
+                points = [] if self.discrete is EMPTY else self.discrete.points
+                segments = ([]
+                            if self.linear is EMPTY
+                            else (self.linear.segments
+                                  if isinstance(self.linear, Multisegment)
+                                  else (self.linear.edges
+                                        if isinstance(self.linear, Contour)
+                                        else [self.linear])))
+                polygons = ([]
+                            if self.shaped is EMPTY
+                            else (self.shaped.polygons
+                                  if isinstance(self.linear, Multipolygon)
+                                  else [self.shaped]))
 
         >>> from gon.base import (Contour, Mix, Multipoint, Point, Polygon,
         ...                       Segment)
@@ -239,16 +299,31 @@ class Mix(Indexable):
         Memory complexity:
             ``O(1)``
 
-        where ``elements_count = discrete_size + linear_size\
- + shaped_vertices_count``,
-        ``discrete_size = len(points)``,
-        ``linear_size = len(segments)``,
-        ``shaped_vertices_count = sum(len(polygon.border.vertices)\
- + sum(len(hole.vertices) for hole in polygon.holes)\
- for polygon in polygons)``,
-        ``points = [] if self.discrete is EMPTY else self.discrete.points``,
-        ``segments = [] if self.linear is EMPTY else self.linear.segments``,
-        ``polygons = [] if self.shaped is EMPTY else self.shaped.polygons``.
+        where
+
+            .. code-block:: python
+
+                elements_count = discrete_size + linear_size\
+ + shaped_vertices_count
+                discrete_size = len(points)
+                linear_size = len(segments)
+                shaped_vertices_count = (sum(len(polygon.border.vertices)
+                                         + sum(len(hole.vertices)
+                                               for hole in polygon.holes)
+                                         for polygon in polygons)
+                points = [] if self.discrete is EMPTY else self.discrete.points
+                segments = ([]
+                            if self.linear is EMPTY
+                            else (self.linear.segments
+                                  if isinstance(self.linear, Multisegment)
+                                  else (self.linear.edges
+                                        if isinstance(self.linear, Contour)
+                                        else [self.linear])))
+                polygons = ([]
+                            if self.shaped is EMPTY
+                            else (self.shaped.polygons
+                                  if isinstance(self.linear, Multipolygon)
+                                  else [self.shaped]))
 
         >>> from gon.base import (Contour, Mix, Multipoint, Point, Polygon,
         ...                       Segment)
@@ -282,13 +357,31 @@ class Mix(Indexable):
         Memory complexity:
             ``O(1)``
 
-        where ``components_size = discrete_size + linear_size + shaped_size``,
-        ``discrete_size = len(points)``,
-        ``linear_size = len(segments)``,
-        ``shaped_size = len(polygons)``,
-        ``points = [] if self.discrete is EMPTY else self.discrete.points``,
-        ``segments = [] if self.linear is EMPTY else self.linear.segments``,
-        ``polygons = [] if self.shaped is EMPTY else self.shaped.polygons``.
+        where
+
+            .. code-block:: python
+
+                elements_count = discrete_size + linear_size\
+ + shaped_vertices_count
+                discrete_size = len(points)
+                linear_size = len(segments)
+                shaped_vertices_count = (sum(len(polygon.border.vertices)
+                                         + sum(len(hole.vertices)
+                                               for hole in polygon.holes)
+                                         for polygon in polygons)
+                points = [] if self.discrete is EMPTY else self.discrete.points
+                segments = ([]
+                            if self.linear is EMPTY
+                            else (self.linear.segments
+                                  if isinstance(self.linear, Multisegment)
+                                  else (self.linear.edges
+                                        if isinstance(self.linear, Contour)
+                                        else [self.linear])))
+                polygons = ([]
+                            if self.shaped is EMPTY
+                            else (self.shaped.polygons
+                                  if isinstance(self.linear, Multipolygon)
+                                  else [self.shaped]))
 
         >>> from gon.base import (Contour, Mix, Multipoint, Point, Polygon,
         ...                       Segment)
@@ -312,16 +405,31 @@ class Mix(Indexable):
         Memory complexity:
             ``O(1)``
 
-        where ``elements_count = discrete_size + linear_size\
- + shaped_vertices_count``,
-        ``discrete_size = len(points)``,
-        ``linear_size = len(segments)``,
-        ``shaped_vertices_count = sum(len(polygon.border.vertices)\
- + sum(len(hole.vertices) for hole in polygon.holes)\
- for polygon in polygons)``,
-        ``points = [] if self.discrete is EMPTY else self.discrete.points``,
-        ``segments = [] if self.linear is EMPTY else self.linear.segments``,
-        ``polygons = [] if self.shaped is EMPTY else self.shaped.polygons``.
+        where
+
+            .. code-block:: python
+
+                elements_count = discrete_size + linear_size\
+ + shaped_vertices_count
+                discrete_size = len(points)
+                linear_size = len(segments)
+                shaped_vertices_count = (sum(len(polygon.border.vertices)
+                                         + sum(len(hole.vertices)
+                                               for hole in polygon.holes)
+                                         for polygon in polygons)
+                points = [] if self.discrete is EMPTY else self.discrete.points
+                segments = ([]
+                            if self.linear is EMPTY
+                            else (self.linear.segments
+                                  if isinstance(self.linear, Multisegment)
+                                  else (self.linear.edges
+                                        if isinstance(self.linear, Contour)
+                                        else [self.linear])))
+                polygons = ([]
+                            if self.shaped is EMPTY
+                            else (self.shaped.polygons
+                                  if isinstance(self.linear, Multipolygon)
+                                  else [self.shaped]))
 
         >>> from gon.base import (Contour, Mix, Multipoint, Point, Polygon,
         ...                       Segment)
@@ -356,16 +464,31 @@ class Mix(Indexable):
         Memory complexity:
             ``O(1)``
 
-        where ``elements_count = discrete_size + linear_size\
- + shaped_vertices_count``,
-        ``discrete_size = len(points)``,
-        ``linear_size = len(segments)``,
-        ``shaped_vertices_count = sum(len(polygon.border.vertices)\
- + sum(len(hole.vertices) for hole in polygon.holes)\
- for polygon in polygons)``,
-        ``points = [] if self.discrete is EMPTY else self.discrete.points``,
-        ``segments = [] if self.linear is EMPTY else self.linear.segments``,
-        ``polygons = [] if self.shaped is EMPTY else self.shaped.polygons``.
+        where
+
+            .. code-block:: python
+
+                elements_count = discrete_size + linear_size\
+ + shaped_vertices_count
+                discrete_size = len(points)
+                linear_size = len(segments)
+                shaped_vertices_count = (sum(len(polygon.border.vertices)
+                                         + sum(len(hole.vertices)
+                                               for hole in polygon.holes)
+                                         for polygon in polygons)
+                points = [] if self.discrete is EMPTY else self.discrete.points
+                segments = ([]
+                            if self.linear is EMPTY
+                            else (self.linear.segments
+                                  if isinstance(self.linear, Multisegment)
+                                  else (self.linear.edges
+                                        if isinstance(self.linear, Contour)
+                                        else [self.linear])))
+                polygons = ([]
+                            if self.shaped is EMPTY
+                            else (self.shaped.polygons
+                                  if isinstance(self.linear, Multipolygon)
+                                  else [self.shaped]))
 
         >>> from gon.base import (Contour, Mix, Multipoint, Point, Polygon,
         ...                       Segment)
@@ -399,16 +522,31 @@ class Mix(Indexable):
         Memory complexity:
             ``O(elements_count)``
 
-        where ``elements_count = discrete_size + linear_size\
- + shaped_vertices_count``,
-        ``discrete_size = len(points)``,
-        ``linear_size = len(segments)``,
-        ``shaped_vertices_count = sum(len(polygon.border.vertices)\
- + sum(len(hole.vertices) for hole in polygon.holes)\
- for polygon in polygons)``,
-        ``points = [] if self.discrete is EMPTY else self.discrete.points``,
-        ``segments = [] if self.linear is EMPTY else self.linear.segments``,
-        ``polygons = [] if self.shaped is EMPTY else self.shaped.polygons``.
+        where
+
+            .. code-block:: python
+
+                elements_count = discrete_size + linear_size\
+ + shaped_vertices_count
+                discrete_size = len(points)
+                linear_size = len(segments)
+                shaped_vertices_count = (sum(len(polygon.border.vertices)
+                                         + sum(len(hole.vertices)
+                                               for hole in polygon.holes)
+                                         for polygon in polygons)
+                points = [] if self.discrete is EMPTY else self.discrete.points
+                segments = ([]
+                            if self.linear is EMPTY
+                            else (self.linear.segments
+                                  if isinstance(self.linear, Multisegment)
+                                  else (self.linear.edges
+                                        if isinstance(self.linear, Contour)
+                                        else [self.linear])))
+                polygons = ([]
+                            if self.shaped is EMPTY
+                            else (self.shaped.polygons
+                                  if isinstance(self.linear, Multipolygon)
+                                  else [self.shaped]))
 
         >>> from gon.base import (Contour, Mix, Multipoint, Point, Polygon,
         ...                       Segment)
@@ -463,16 +601,31 @@ class Mix(Indexable):
         Memory complexity:
             ``O(1)``
 
-        where ``elements_count = discrete_size + linear_size\
- + shaped_vertices_count``,
-        ``discrete_size = len(points)``,
-        ``linear_size = len(segments)``,
-        ``shaped_vertices_count = sum(len(polygon.border.vertices)\
- + sum(len(hole.vertices) for hole in polygon.holes)\
- for polygon in polygons)``,
-        ``points = [] if self.discrete is EMPTY else self.discrete.points``,
-        ``segments = [] if self.linear is EMPTY else self.linear.segments``,
-        ``polygons = [] if self.shaped is EMPTY else self.shaped.polygons``.
+        where
+
+            .. code-block:: python
+
+                elements_count = discrete_size + linear_size\
+ + shaped_vertices_count
+                discrete_size = len(points)
+                linear_size = len(segments)
+                shaped_vertices_count = (sum(len(polygon.border.vertices)
+                                         + sum(len(hole.vertices)
+                                               for hole in polygon.holes)
+                                         for polygon in polygons)
+                points = [] if self.discrete is EMPTY else self.discrete.points
+                segments = ([]
+                            if self.linear is EMPTY
+                            else (self.linear.segments
+                                  if isinstance(self.linear, Multisegment)
+                                  else (self.linear.edges
+                                        if isinstance(self.linear, Contour)
+                                        else [self.linear])))
+                polygons = ([]
+                            if self.shaped is EMPTY
+                            else (self.shaped.polygons
+                                  if isinstance(self.linear, Multipolygon)
+                                  else [self.shaped]))
         """
         return ((other - self.discrete) & (other - self.linear)
                 & other - self.shaped)
@@ -486,16 +639,31 @@ class Mix(Indexable):
         Memory complexity:
             ``O(1)``
 
-        where ``elements_count = discrete_size + linear_size\
- + shaped_vertices_count``,
-        ``discrete_size = len(points)``,
-        ``linear_size = len(segments)``,
-        ``shaped_vertices_count = sum(len(polygon.border.vertices)\
- + sum(len(hole.vertices) for hole in polygon.holes)\
- for polygon in polygons)``,
-        ``points = [] if self.discrete is EMPTY else self.discrete.points``,
-        ``segments = [] if self.linear is EMPTY else self.linear.segments``,
-        ``polygons = [] if self.shaped is EMPTY else self.shaped.polygons``.
+        where
+
+            .. code-block:: python
+
+                elements_count = discrete_size + linear_size\
+ + shaped_vertices_count
+                discrete_size = len(points)
+                linear_size = len(segments)
+                shaped_vertices_count = (sum(len(polygon.border.vertices)
+                                         + sum(len(hole.vertices)
+                                               for hole in polygon.holes)
+                                         for polygon in polygons)
+                points = [] if self.discrete is EMPTY else self.discrete.points
+                segments = ([]
+                            if self.linear is EMPTY
+                            else (self.linear.segments
+                                  if isinstance(self.linear, Multisegment)
+                                  else (self.linear.edges
+                                        if isinstance(self.linear, Contour)
+                                        else [self.linear])))
+                polygons = ([]
+                            if self.shaped is EMPTY
+                            else (self.shaped.polygons
+                                  if isinstance(self.linear, Multipolygon)
+                                  else [self.shaped]))
 
         >>> from gon.base import (EMPTY, Contour, Mix, Multipoint, Point,
         ...                       Polygon, Segment)
@@ -521,16 +689,31 @@ class Mix(Indexable):
         Memory complexity:
             ``O(elements_count)``
 
-        where ``elements_count = discrete_size + linear_size\
- + shaped_vertices_count``,
-        ``discrete_size = len(points)``,
-        ``linear_size = len(segments)``,
-        ``shaped_vertices_count = sum(len(polygon.border.vertices)\
- + sum(len(hole.vertices) for hole in polygon.holes)\
- for polygon in polygons)``,
-        ``points = [] if self.discrete is EMPTY else self.discrete.points``,
-        ``segments = [] if self.linear is EMPTY else self.linear.segments``,
-        ``polygons = [] if self.shaped is EMPTY else self.shaped.polygons``.
+        where
+
+            .. code-block:: python
+
+                elements_count = discrete_size + linear_size\
+ + shaped_vertices_count
+                discrete_size = len(points)
+                linear_size = len(segments)
+                shaped_vertices_count = (sum(len(polygon.border.vertices)
+                                         + sum(len(hole.vertices)
+                                               for hole in polygon.holes)
+                                         for polygon in polygons)
+                points = [] if self.discrete is EMPTY else self.discrete.points
+                segments = ([]
+                            if self.linear is EMPTY
+                            else (self.linear.segments
+                                  if isinstance(self.linear, Multisegment)
+                                  else (self.linear.edges
+                                        if isinstance(self.linear, Contour)
+                                        else [self.linear])))
+                polygons = ([]
+                            if self.shaped is EMPTY
+                            else (self.shaped.polygons
+                                  if isinstance(self.linear, Multipolygon)
+                                  else [self.shaped]))
 
         >>> from gon.base import (EMPTY, Contour, Mix, Multipoint, Point,
         ...                       Polygon, Segment)
@@ -587,14 +770,31 @@ class Mix(Indexable):
         Memory complexity:
             ``O(1)``
 
-        where ``elements_count = linear_size\
- if self.shaped is EMPTY else shaped_vertices_count``,
-        ``linear_size = len(segments)``,
-        ``shaped_vertices_count = sum(len(polygon.border.vertices)\
- + sum(len(hole.vertices) for hole in polygon.holes)\
- for polygon in polygons)``,
-        ``segments = [] if self.linear is EMPTY else self.linear.segments``,
-        ``polygons = [] if self.shaped is EMPTY else self.shaped.polygons``.
+        where
+
+            .. code-block:: python
+
+                elements_count = discrete_size + linear_size\
+ + shaped_vertices_count
+                discrete_size = len(points)
+                linear_size = len(segments)
+                shaped_vertices_count = (sum(len(polygon.border.vertices)
+                                         + sum(len(hole.vertices)
+                                               for hole in polygon.holes)
+                                         for polygon in polygons)
+                points = [] if self.discrete is EMPTY else self.discrete.points
+                segments = ([]
+                            if self.linear is EMPTY
+                            else (self.linear.segments
+                                  if isinstance(self.linear, Multisegment)
+                                  else (self.linear.edges
+                                        if isinstance(self.linear, Contour)
+                                        else [self.linear])))
+                polygons = ([]
+                            if self.shaped is EMPTY
+                            else (self.shaped.polygons
+                                  if isinstance(self.linear, Multipolygon)
+                                  else [self.shaped]))
 
         >>> from gon.base import (Contour, Mix, Multipoint, Point, Polygon,
         ...                       Segment)
@@ -692,13 +892,31 @@ class Mix(Indexable):
         Memory complexity:
             ``O(1)``
 
-        where ``elements_count = linear_size + shaped_vertices_count``,
-        ``linear_size = len(segments)``,
-        ``shaped_vertices_count = sum(len(polygon.border.vertices)\
- + sum(len(hole.vertices) for hole in polygon.holes)\
- for polygon in polygons)``,
-        ``segments = [] if self.linear is EMPTY else self.linear.segments``,
-        ``polygons = [] if self.shaped is EMPTY else self.shaped.polygons``.
+        where
+
+            .. code-block:: python
+
+                elements_count = discrete_size + linear_size\
+ + shaped_vertices_count
+                discrete_size = len(points)
+                linear_size = len(segments)
+                shaped_vertices_count = (sum(len(polygon.border.vertices)
+                                         + sum(len(hole.vertices)
+                                               for hole in polygon.holes)
+                                         for polygon in polygons)
+                points = [] if self.discrete is EMPTY else self.discrete.points
+                segments = ([]
+                            if self.linear is EMPTY
+                            else (self.linear.segments
+                                  if isinstance(self.linear, Multisegment)
+                                  else (self.linear.edges
+                                        if isinstance(self.linear, Contour)
+                                        else [self.linear])))
+                polygons = ([]
+                            if self.shaped is EMPTY
+                            else (self.shaped.polygons
+                                  if isinstance(self.linear, Multipolygon)
+                                  else [self.shaped]))
 
         >>> from gon.base import (Contour, Mix, Multipoint, Point, Polygon,
         ...                       Segment)
@@ -725,13 +943,31 @@ class Mix(Indexable):
         Memory complexity:
             ``O(elements_count)``
 
-        where ``elements_count = linear_size + shaped_vertices_count``,
-        ``linear_size = len(segments)``,
-        ``shaped_vertices_count = sum(len(polygon.border.vertices)\
- + sum(len(hole.vertices) for hole in polygon.holes)\
- for polygon in polygons)``,
-        ``segments = [] if self.linear is EMPTY else self.linear.segments``,
-        ``polygons = [] if self.shaped is EMPTY else self.shaped.polygons``.
+        where
+
+            .. code-block:: python
+
+                elements_count = discrete_size + linear_size\
+ + shaped_vertices_count
+                discrete_size = len(points)
+                linear_size = len(segments)
+                shaped_vertices_count = (sum(len(polygon.border.vertices)
+                                         + sum(len(hole.vertices)
+                                               for hole in polygon.holes)
+                                         for polygon in polygons)
+                points = [] if self.discrete is EMPTY else self.discrete.points
+                segments = ([]
+                            if self.linear is EMPTY
+                            else (self.linear.segments
+                                  if isinstance(self.linear, Multisegment)
+                                  else (self.linear.edges
+                                        if isinstance(self.linear, Contour)
+                                        else [self.linear])))
+                polygons = ([]
+                            if self.shaped is EMPTY
+                            else (self.shaped.polygons
+                                  if isinstance(self.linear, Multipolygon)
+                                  else [self.shaped]))
 
         >>> from gon.base import (Contour, Mix, Multipoint, Point, Polygon,
         ...                       Segment)
@@ -760,16 +996,31 @@ class Mix(Indexable):
         Memory complexity:
             ``O(1)``
 
-        where ``elements_count = discrete_size + linear_size\
- + shaped_vertices_count``,
-        ``discrete_size = len(points)``,
-        ``linear_size = len(segments)``,
-        ``shaped_vertices_count = sum(len(polygon.border.vertices)\
- + sum(len(hole.vertices) for hole in polygon.holes)\
- for polygon in polygons)``,
-        ``points = [] if self.discrete is EMPTY else self.discrete.points``,
-        ``segments = [] if self.linear is EMPTY else self.linear.segments``,
-        ``polygons = [] if self.shaped is EMPTY else self.shaped.polygons``.
+        where
+
+            .. code-block:: python
+
+                elements_count = discrete_size + linear_size\
+ + shaped_vertices_count
+                discrete_size = len(points)
+                linear_size = len(segments)
+                shaped_vertices_count = (sum(len(polygon.border.vertices)
+                                         + sum(len(hole.vertices)
+                                               for hole in polygon.holes)
+                                         for polygon in polygons)
+                points = [] if self.discrete is EMPTY else self.discrete.points
+                segments = ([]
+                            if self.linear is EMPTY
+                            else (self.linear.segments
+                                  if isinstance(self.linear, Multisegment)
+                                  else (self.linear.edges
+                                        if isinstance(self.linear, Contour)
+                                        else [self.linear])))
+                polygons = ([]
+                            if self.shaped is EMPTY
+                            else (self.shaped.polygons
+                                  if isinstance(self.linear, Multipolygon)
+                                  else [self.shaped]))
 
         >>> from gon.base import (Contour, Mix, Multipoint, Point, Polygon,
         ...                       Segment)
@@ -811,16 +1062,31 @@ class Mix(Indexable):
         Memory complexity:
             ``O(elements_count)``
 
-        where ``elements_count = discrete_size + linear_size\
- + shaped_vertices_count``,
-        ``discrete_size = len(points)``,
-        ``linear_size = len(segments)``,
-        ``shaped_vertices_count = sum(len(polygon.border.vertices)\
- + sum(len(hole.vertices) for hole in polygon.holes)\
- for polygon in polygons)``,
-        ``points = [] if self.discrete is EMPTY else self.discrete.points``,
-        ``segments = [] if self.linear is EMPTY else self.linear.segments``,
-        ``polygons = [] if self.shaped is EMPTY else self.shaped.polygons``.
+        where
+
+            .. code-block:: python
+
+                elements_count = discrete_size + linear_size\
+ + shaped_vertices_count
+                discrete_size = len(points)
+                linear_size = len(segments)
+                shaped_vertices_count = (sum(len(polygon.border.vertices)
+                                         + sum(len(hole.vertices)
+                                               for hole in polygon.holes)
+                                         for polygon in polygons)
+                points = [] if self.discrete is EMPTY else self.discrete.points
+                segments = ([]
+                            if self.linear is EMPTY
+                            else (self.linear.segments
+                                  if isinstance(self.linear, Multisegment)
+                                  else (self.linear.edges
+                                        if isinstance(self.linear, Contour)
+                                        else [self.linear])))
+                polygons = ([]
+                            if self.shaped is EMPTY
+                            else (self.shaped.polygons
+                                  if isinstance(self.linear, Multipolygon)
+                                  else [self.shaped]))
 
         >>> from gon.base import (Contour, Mix, Multipoint, Point, Polygon,
         ...                       Segment)
@@ -855,16 +1121,31 @@ class Mix(Indexable):
         Memory complexity:
             ``O(elements_count)``
 
-        where ``elements_count = discrete_size + linear_size\
- + shaped_vertices_count``,
-        ``discrete_size = len(points)``,
-        ``linear_size = len(segments)``,
-        ``shaped_vertices_count = sum(len(polygon.border.vertices)\
- + sum(len(hole.vertices) for hole in polygon.holes)\
- for polygon in polygons)``,
-        ``points = [] if self.discrete is EMPTY else self.discrete.points``,
-        ``segments = [] if self.linear is EMPTY else self.linear.segments``,
-        ``polygons = [] if self.shaped is EMPTY else self.shaped.polygons``.
+        where
+
+            .. code-block:: python
+
+                elements_count = discrete_size + linear_size\
+ + shaped_vertices_count
+                discrete_size = len(points)
+                linear_size = len(segments)
+                shaped_vertices_count = (sum(len(polygon.border.vertices)
+                                         + sum(len(hole.vertices)
+                                               for hole in polygon.holes)
+                                         for polygon in polygons)
+                points = [] if self.discrete is EMPTY else self.discrete.points
+                segments = ([]
+                            if self.linear is EMPTY
+                            else (self.linear.segments
+                                  if isinstance(self.linear, Multisegment)
+                                  else (self.linear.edges
+                                        if isinstance(self.linear, Contour)
+                                        else [self.linear])))
+                polygons = ([]
+                            if self.shaped is EMPTY
+                            else (self.shaped.polygons
+                                  if isinstance(self.linear, Multipolygon)
+                                  else [self.shaped]))
 
         >>> from gon.base import (Contour, Mix, Multipoint, Point, Polygon,
         ...                       Segment)
@@ -900,16 +1181,31 @@ class Mix(Indexable):
         Memory complexity:
             ``O(elements_count)``
 
-        where ``elements_count = discrete_size + linear_size\
- + shaped_vertices_count``,
-        ``discrete_size = len(points)``,
-        ``linear_size = len(segments)``,
-        ``shaped_vertices_count = sum(len(polygon.border.vertices)\
- + sum(len(hole.vertices) for hole in polygon.holes)\
- for polygon in polygons)``,
-        ``points = [] if self.discrete is EMPTY else self.discrete.points``,
-        ``segments = [] if self.linear is EMPTY else self.linear.segments``,
-        ``polygons = [] if self.shaped is EMPTY else self.shaped.polygons``.
+        where
+
+            .. code-block:: python
+
+                elements_count = discrete_size + linear_size\
+ + shaped_vertices_count
+                discrete_size = len(points)
+                linear_size = len(segments)
+                shaped_vertices_count = (sum(len(polygon.border.vertices)
+                                         + sum(len(hole.vertices)
+                                               for hole in polygon.holes)
+                                         for polygon in polygons)
+                points = [] if self.discrete is EMPTY else self.discrete.points
+                segments = ([]
+                            if self.linear is EMPTY
+                            else (self.linear.segments
+                                  if isinstance(self.linear, Multisegment)
+                                  else (self.linear.edges
+                                        if isinstance(self.linear, Contour)
+                                        else [self.linear])))
+                polygons = ([]
+                            if self.shaped is EMPTY
+                            else (self.shaped.polygons
+                                  if isinstance(self.linear, Multipolygon)
+                                  else [self.shaped]))
 
         >>> from gon.base import (Contour, Mix, Multipoint, Point, Polygon,
         ...                       Segment)
@@ -953,16 +1249,31 @@ class Mix(Indexable):
         Memory complexity:
             ``O(elements_count)``
 
-        where ``elements_count = discrete_size + linear_size\
- + shaped_vertices_count``,
-        ``discrete_size = len(points)``,
-        ``linear_size = len(segments)``,
-        ``shaped_vertices_count = sum(len(polygon.border.vertices)\
- + sum(len(hole.vertices) for hole in polygon.holes)\
- for polygon in polygons)``,
-        ``points = [] if self.discrete is EMPTY else self.discrete.points``,
-        ``segments = [] if self.linear is EMPTY else self.linear.segments``,
-        ``polygons = [] if self.shaped is EMPTY else self.shaped.polygons``.
+        where
+
+            .. code-block:: python
+
+                elements_count = discrete_size + linear_size\
+ + shaped_vertices_count
+                discrete_size = len(points)
+                linear_size = len(segments)
+                shaped_vertices_count = (sum(len(polygon.border.vertices)
+                                         + sum(len(hole.vertices)
+                                               for hole in polygon.holes)
+                                         for polygon in polygons)
+                points = [] if self.discrete is EMPTY else self.discrete.points
+                segments = ([]
+                            if self.linear is EMPTY
+                            else (self.linear.segments
+                                  if isinstance(self.linear, Multisegment)
+                                  else (self.linear.edges
+                                        if isinstance(self.linear, Contour)
+                                        else [self.linear])))
+                polygons = ([]
+                            if self.shaped is EMPTY
+                            else (self.shaped.polygons
+                                  if isinstance(self.linear, Multipolygon)
+                                  else [self.shaped]))
 
         >>> from gon.base import (Contour, Mix, Multipoint, Point, Polygon,
         ...                       Segment)
@@ -994,16 +1305,31 @@ class Mix(Indexable):
         Memory complexity:
             ``O(elements_count)``
 
-        where ``elements_count = discrete_size + linear_size\
- + shaped_vertices_count``,
-        ``discrete_size = len(points)``,
-        ``linear_size = len(segments)``,
-        ``shaped_vertices_count = sum(len(polygon.border.vertices)\
- + sum(len(hole.vertices) for hole in polygon.holes)\
- for polygon in polygons)``,
-        ``points = [] if self.discrete is EMPTY else self.discrete.points``,
-        ``segments = [] if self.linear is EMPTY else self.linear.segments``,
-        ``polygons = [] if self.shaped is EMPTY else self.shaped.polygons``.
+        where
+
+            .. code-block:: python
+
+                elements_count = discrete_size + linear_size\
+ + shaped_vertices_count
+                discrete_size = len(points)
+                linear_size = len(segments)
+                shaped_vertices_count = (sum(len(polygon.border.vertices)
+                                         + sum(len(hole.vertices)
+                                               for hole in polygon.holes)
+                                         for polygon in polygons)
+                points = [] if self.discrete is EMPTY else self.discrete.points
+                segments = ([]
+                            if self.linear is EMPTY
+                            else (self.linear.segments
+                                  if isinstance(self.linear, Multisegment)
+                                  else (self.linear.edges
+                                        if isinstance(self.linear, Contour)
+                                        else [self.linear])))
+                polygons = ([]
+                            if self.shaped is EMPTY
+                            else (self.shaped.polygons
+                                  if isinstance(self.linear, Multipolygon)
+                                  else [self.shaped]))
 
         >>> from gon.base import (Contour, Mix, Multipoint, Point, Polygon,
         ...                       Segment)
