@@ -15,7 +15,9 @@ from .hints import Scalar
 class Point(Geometry):
     __slots__ = '_context', '_coordinates', '_x', '_y'
 
-    def __init__(self, x: Scalar, y: Scalar) -> None:
+    def __init__(self, x: Scalar, y: Scalar,
+                 *,
+                 context: Optional[Context] = None) -> None:
         """
         Initializes point.
 
@@ -24,7 +26,7 @@ class Point(Geometry):
         Memory complexity:
             ``O(1)``
         """
-        self._context = get_context()
+        self._context = get_context() if context is None else context
         self._coordinates = self._x, self._y = x, y
 
     __repr__ = generate_repr(__init__)
