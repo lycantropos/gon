@@ -54,7 +54,9 @@ class Multisegment(Indexable, Linear):
     __slots__ = ('_context', '_locate', '_point_nearest_segment',
                  '_segment_nearest_segment', '_segments', '_segments_set')
 
-    def __init__(self, segments: Sequence[Segment]) -> None:
+    def __init__(self, segments: Sequence[Segment],
+                 *,
+                 context: Optional[Context] = None) -> None:
         """
         Initializes multisegment.
 
@@ -65,7 +67,8 @@ class Multisegment(Indexable, Linear):
 
         where ``segments_count = len(segments)``.
         """
-        context = get_context()
+        if context is None:
+            context = get_context()
         self._context = context
         self._segments, self._segments_set = segments, frozenset(segments)
         self._locate = partial(locate_point, self)
