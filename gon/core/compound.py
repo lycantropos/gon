@@ -1,11 +1,11 @@
 from abc import abstractmethod
 
 from ground.base import Relation
+from ground.hints import (Point,
+                          Scalar)
 from sect.decomposition import Location
 
 from .geometry import Geometry
-from .hints import Scalar
-from .point import Point
 
 Relation = Relation
 Location = Location
