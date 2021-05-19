@@ -53,7 +53,9 @@ class Contour(Indexable, Linear):
     __slots__ = ('_context', '_edges', '_locate', '_min_index',
                  '_point_nearest_edge', '_segment_nearest_edge', '_vertices')
 
-    def __init__(self, vertices: Vertices) -> None:
+    def __init__(self, vertices: Vertices,
+                 *,
+                 context: Optional[Context] = None) -> None:
         """
         Initializes contour.
 
@@ -64,7 +66,8 @@ class Contour(Indexable, Linear):
 
         where ``vertices_count = len(vertices)``.
         """
-        context = get_context()
+        if context is None:
+            context = get_context()
         self._context = context
         self._vertices = vertices = tuple(vertices)
         self._min_index = min(range(len(vertices)),
