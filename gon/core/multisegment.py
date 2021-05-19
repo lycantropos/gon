@@ -71,7 +71,8 @@ class Multisegment(Indexable, Linear):
             context = get_context()
         self._context = context
         self._segments, self._segments_set = segments, frozenset(segments)
-        self._locate = partial(locate_point, self)
+        self._locate = partial(_locate_point, self,
+                               context=context)
         self._point_nearest_segment, self._segment_nearest_segment = (
             partial(to_point_nearest_segment, context, segments),
             partial(to_segment_nearest_segment, context, segments))
@@ -688,9 +689,12 @@ class Multisegment(Indexable, Linear):
         return from_mix_components(other - self, self, EMPTY)
 
 
-def locate_point(multisegment: Multisegment, point: Point) -> Location:
+def _locate_point(multisegment: Multisegment,
+                  point: Point,
+                  context: Context) -> Location:
     return (Location.EXTERIOR
-            if point_in_multisegment(point, multisegment) is Relation.DISJOINT
+            if point_in_multisegment(point, multisegment,
+                                     context=context) is Relation.DISJOINT
             else Location.BOUNDARY)
 
 
