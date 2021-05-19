@@ -1,9 +1,9 @@
 from typing import Tuple
 
-from ground.base import Relation
 from hypothesis import given
 
-from gon.base import Compound
+from gon.base import (Compound,
+                      Relation)
 from . import strategies
 
 
