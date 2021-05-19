@@ -474,7 +474,9 @@ class Contour(Indexable, Linear):
         >>> contour.length == 4
         True
         """
-        return _vertices.length(self._vertices)
+        vertices = self._vertices
+        return sum(vertices[index].distance_to(vertices[index - 1])
+                   for index in range(len(vertices)))
 
     @property
     def orientation(self) -> 'Orientation':
