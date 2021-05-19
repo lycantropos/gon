@@ -249,11 +249,12 @@ class Segment(Compound, Linear):
         >>> segment | segment == segment
         True
         """
-        return (pack_mix(other - self, self, self._context.empty,
-                         self._context.empty, self._context.mix_cls)
+        context = self._context
+        return (pack_mix(other - self, self, context.empty, context.empty,
+                         context.mix_cls)
                 if isinstance(other, Multipoint)
                 else (unite_segments(self, other,
-                                     context=self._context)
+                                     context=context)
                       if isinstance(other, Segment)
                       else NotImplemented))
 
@@ -294,11 +295,12 @@ class Segment(Compound, Linear):
         >>> segment ^ segment is EMPTY
         True
         """
-        return (pack_mix(other - self, self, self._context.empty,
-                         self._context.empty, self._context.mix_cls)
+        context = self._context
+        return (pack_mix(other - self, self, context.empty, context.empty,
+                         context.mix_cls)
                 if isinstance(other, Multipoint)
                 else (symmetric_subtract_segments(self, other,
-                                                  context=self._context)
+                                                  context=context)
                       if isinstance(other, Segment)
                       else NotImplemented))
 
