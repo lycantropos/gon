@@ -507,8 +507,8 @@ class Contour(Indexable, Linear):
         where ``vertices_count = len(self.vertices)``.
 
         >>> contour = Contour([Point(0, 0), Point(1, 0), Point(0, 1)])
-        >>> contour.vertices
-        [Point(0, 0), Point(1, 0), Point(0, 1)]
+        >>> contour.vertices == [Point(0, 0), Point(1, 0), Point(0, 1)]
+        True
         """
         return list(self._vertices)
 
