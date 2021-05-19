@@ -29,7 +29,9 @@ from .point import (Point,
 class Multipoint(Indexable):
     __slots__ = '_context', '_points', '_points_set', '_nearest_point'
 
-    def __init__(self, points: Sequence[Point]) -> None:
+    def __init__(self, points: Sequence[Point],
+                 *,
+                 context: Optional[Context] = None) -> None:
         """
         Initializes multipoint.
 
@@ -40,7 +42,8 @@ class Multipoint(Indexable):
 
         where ``points_count = len(points)``.
         """
-        context = get_context()
+        if context is None:
+            context = get_context()
         self._context = context
         self._points, self._points_set = points, frozenset(points)
         self._nearest_point = partial(_to_nearest_point, context, points)
