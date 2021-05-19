@@ -3,14 +3,14 @@ from functools import partial
 from operator import (itemgetter,
                       mul)
 from typing import (List,
-                    Optional)
+                    Optional,
+                    Sequence)
 
 from hypothesis import strategies
 from hypothesis_geometry import planar
 
 from gon.base import Point
-from gon.core.vertices import (MIN_COUNT,
-                               Vertices)
+from gon.core.vertices import MIN_COUNT
 from gon.hints import Scalar
 from tests.utils import (Strategy,
                          identity)
@@ -41,7 +41,7 @@ def to_repeated_points(coordinates: Strategy[Scalar],
             .filter(not_all_unique))
 
 
-def not_all_unique(vertices: Vertices) -> bool:
+def not_all_unique(vertices: Sequence[Point]) -> bool:
     seen = set()
     seen_add = seen.add
     for value in vertices:
