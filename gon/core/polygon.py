@@ -64,7 +64,9 @@ class Polygon(Indexable, Shaped):
 
     def __init__(self,
                  border: Contour,
-                 holes: Optional[Sequence[Contour]] = None) -> None:
+                 holes: Optional[Sequence[Contour]] = None,
+                 *,
+                 context: Optional[Context] = None) -> None:
         """
         Initializes polygon.
 
@@ -76,7 +78,8 @@ class Polygon(Indexable, Shaped):
         where ``vertices_count = len(border.vertices)\
  + sum(len(hole.vertices) for hole in holes)``.
         """
-        context = get_context()
+        if context is None:
+            context = get_context()
         self._context = context
         self._holes = holes = tuple(holes or ())
         self._border, self._holes_set = border, frozenset(holes)
