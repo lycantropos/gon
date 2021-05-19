@@ -8,6 +8,7 @@ from numbers import Real
 from operator import getitem
 from typing import (Any,
                     Callable,
+                    Hashable,
                     Iterable,
                     List,
                     Optional,
@@ -131,6 +132,17 @@ def call(function: Callable[..., Range],
 
 def lift(value: Domain) -> List[Domain]:
     return [value]
+
+
+def not_all_unique(values: Iterable[Hashable]) -> bool:
+    seen = set()
+    seen_add = seen.add
+    for value in values:
+        if value in seen:
+            return True
+        else:
+            seen_add(value)
+    return False
 
 
 def are_compounds_equivalent(left: Compound, right: Compound) -> bool:
