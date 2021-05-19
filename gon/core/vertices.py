@@ -1,19 +1,13 @@
 from itertools import chain
 from typing import Sequence
 
-from .hints import Scalar
-from .point import Point
+from ground.hints import Point
 
 MIN_COUNT = 3
 
 
 def rotate_positions(vertices: Sequence[Point]) -> Sequence[Point]:
     return vertices[:1] + vertices[:0:-1]
-
-
-def length(vertices: Sequence[Point]) -> Scalar:
-    return sum(vertices[index].distance_to(vertices[index - 1])
-               for index in range(len(vertices)))
 
 
 def equal(left: Sequence[Point],
