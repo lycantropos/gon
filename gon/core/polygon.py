@@ -71,8 +71,13 @@ class Polygon(Indexable, Shaped):
         Memory complexity:
             ``O(vertices_count)``
 
-        where ``vertices_count = len(border.vertices)\
- + sum(len(hole.vertices) for hole in holes)``.
+        where
+
+            .. code-block:: python
+
+                vertices_count = (len(self.border.vertices)
+                                  + sum(len(hole.vertices)\
+ for hole in self.holes))
         """
         self._holes = holes = tuple(holes or ())
         self._border, self._holes_set = border, frozenset(holes)
@@ -95,8 +100,13 @@ class Polygon(Indexable, Shaped):
         Memory complexity:
             ``O(vertices_count)``
 
-        where ``vertices_count = len(self.border.vertices)\
- + sum(len(hole.vertices) for hole in self.holes)``.
+        where
+
+            .. code-block:: python
+
+                vertices_count = (len(self.border.vertices)
+                                  + sum(len(hole.vertices)\
+ for hole in self.holes))
 
         >>> from gon.base import Contour, Point, Polygon
         >>> polygon = Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
@@ -137,8 +147,13 @@ class Polygon(Indexable, Shaped):
         Memory complexity:
             ``O(1)``
 
-        where ``vertices_count = len(self.border.vertices)\
- + sum(len(hole.vertices) for hole in self.holes)``.
+        where
+
+            .. code-block:: python
+
+                vertices_count = (len(self.border.vertices)
+                                  + sum(len(hole.vertices)\
+ for hole in self.holes))
 
         >>> from gon.base import Contour, Point, Polygon
         >>> polygon = Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
@@ -173,8 +188,13 @@ class Polygon(Indexable, Shaped):
         Memory complexity:
             ``O(1)``
 
-        where ``vertices_count = len(self.border.vertices)\
- + sum(len(hole.vertices) for hole in self.holes)``.
+        where
+
+            .. code-block:: python
+
+                vertices_count = (len(self.border.vertices)
+                                  + sum(len(hole.vertices)\
+ for hole in self.holes))
 
         >>> from gon.base import Contour, Point, Polygon
         >>> polygon = Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
@@ -198,8 +218,13 @@ class Polygon(Indexable, Shaped):
         Memory complexity:
             ``O(1)``
 
-        where ``vertices_count = len(self.border.vertices)\
- + sum(len(hole.vertices) for hole in self.holes)``.
+        where
+
+            .. code-block:: python
+
+                vertices_count = (len(self.border.vertices)
+                                  + sum(len(hole.vertices)\
+ for hole in self.holes))
 
         >>> from gon.base import Contour, Point, Polygon
         >>> polygon = Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
@@ -225,8 +250,13 @@ class Polygon(Indexable, Shaped):
         Memory complexity:
             ``O(1)``
 
-        where ``vertices_count = len(self.border.vertices)\
- + sum(len(hole.vertices) for hole in self.holes)``.
+        where
+
+            .. code-block:: python
+
+                vertices_count = (len(self.border.vertices)
+                                  + sum(len(hole.vertices)\
+ for hole in self.holes))
 
         >>> from gon.base import Contour, Point, Polygon
         >>> polygon = Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
@@ -252,8 +282,13 @@ class Polygon(Indexable, Shaped):
         Memory complexity:
             ``O(1)``
 
-        where ``vertices_count = len(self.border.vertices)\
- + sum(len(hole.vertices) for hole in self.holes)``.
+        where
+
+            .. code-block:: python
+
+                vertices_count = (len(self.border.vertices)
+                                  + sum(len(hole.vertices)\
+ for hole in self.holes))
 
         >>> from gon.base import Contour, Point, Polygon
         >>> polygon = Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
@@ -274,8 +309,13 @@ class Polygon(Indexable, Shaped):
         Memory complexity:
             ``O(1)``
 
-        where ``vertices_count = len(self.border.vertices)\
- + sum(len(hole.vertices) for hole in self.holes)``.
+        where
+
+            .. code-block:: python
+
+                vertices_count = (len(self.border.vertices)
+                                  + sum(len(hole.vertices)\
+ for hole in self.holes))
 
         >>> from gon.base import Contour, Point, Polygon
         >>> polygon = Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
@@ -303,8 +343,13 @@ class Polygon(Indexable, Shaped):
         Memory complexity:
             ``O(1)``
 
-        where ``vertices_count = len(self.border.vertices)\
- + sum(len(hole.vertices) for hole in self.holes)``.
+        where
+
+            .. code-block:: python
+
+                vertices_count = (len(self.border.vertices)
+                                  + sum(len(hole.vertices)\
+ for hole in self.holes))
 
         >>> from gon.base import Contour, Point, Polygon
         >>> polygon = Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
@@ -331,8 +376,13 @@ class Polygon(Indexable, Shaped):
         Memory complexity:
             ``O(vertices_count)``
 
-        where ``vertices_count = len(self.border.vertices)\
- + sum(len(hole.vertices) for hole in self.holes)``.
+        where
+
+            .. code-block:: python
+
+                vertices_count = (len(self.border.vertices)
+                                  + sum(len(hole.vertices)\
+ for hole in self.holes))
 
         >>> from gon.base import Multipolygon
         >>> from gon.base import Contour, Point, Polygon
@@ -370,8 +420,13 @@ class Polygon(Indexable, Shaped):
         Memory complexity:
             ``O(vertices_count)``
 
-        where ``vertices_count = len(self.border.vertices)\
- + sum(len(hole.vertices) for hole in self.holes)``.
+        where
+
+            .. code-block:: python
+
+                vertices_count = (len(self.border.vertices)
+                                  + sum(len(hole.vertices)\
+ for hole in self.holes))
         """
         return (subtract_polygon_from_segment(other, self,
                                               context=self._context)
@@ -393,8 +448,13 @@ class Polygon(Indexable, Shaped):
         Memory complexity:
             ``O(vertices_count)``
 
-        where ``vertices_count = len(self.border.vertices)\
- + sum(len(hole.vertices) for hole in self.holes)``.
+        where
+
+            .. code-block:: python
+
+                vertices_count = (len(self.border.vertices)
+                                  + sum(len(hole.vertices)\
+ for hole in self.holes))
 
         >>> from gon.base import EMPTY, Contour, Point, Polygon
         >>> polygon = Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
@@ -420,8 +480,13 @@ class Polygon(Indexable, Shaped):
         Memory complexity:
             ``O(vertices_count)``
 
-        where ``vertices_count = len(self.border.vertices)\
- + sum(len(hole.vertices) for hole in self.holes)``.
+        where
+
+            .. code-block:: python
+
+                vertices_count = (len(self.border.vertices)
+                                  + sum(len(hole.vertices)\
+ for hole in self.holes))
 
         >>> from gon.base import EMPTY, Contour, Point, Polygon
         >>> polygon = Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
@@ -460,8 +525,13 @@ class Polygon(Indexable, Shaped):
         Memory complexity:
             ``O(1)``
 
-        where ``vertices_count = len(self.border.vertices)\
- + sum(len(hole.vertices) for hole in self.holes)``.
+        where
+
+            .. code-block:: python
+
+                vertices_count = (len(self.border.vertices)
+                                  + sum(len(hole.vertices)\
+ for hole in self.holes))
 
         >>> from gon.base import Contour, Point, Polygon
         >>> polygon = Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
@@ -507,8 +577,13 @@ class Polygon(Indexable, Shaped):
         Memory complexity:
             ``O(1)``
 
-        where ``vertices_count = len(self.border.vertices)\
- + sum(len(hole.vertices) for hole in self.holes)``.
+        where
+
+            .. code-block:: python
+
+                vertices_count = (len(self.border.vertices)
+                                  + sum(len(hole.vertices)\
+ for hole in self.holes))
 
         >>> from gon.base import Contour, Point, Polygon
         >>> polygon = Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
@@ -562,8 +637,13 @@ class Polygon(Indexable, Shaped):
         Memory complexity:
             ``O(vertices_count)``
 
-        where ``vertices_count = len(self.border.vertices)\
- + sum(len(hole.vertices) for hole in self.holes)``.
+        where
+
+            .. code-block:: python
+
+                vertices_count = (len(self.border.vertices)
+                                  + sum(len(hole.vertices)\
+ for hole in self.holes))
 
         >>> from gon.base import Contour, Point, Polygon, Segment
         >>> polygon = Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
@@ -638,8 +718,13 @@ class Polygon(Indexable, Shaped):
         Memory complexity:
             ``O(1)``
 
-        where ``vertices_count = len(self.border.vertices)\
- + sum(len(hole.vertices) for hole in self.holes)``.
+        where
+
+            .. code-block:: python
+
+                vertices_count = (len(self.border.vertices)
+                                  + sum(len(hole.vertices)\
+ for hole in self.holes))
 
         >>> from gon.base import Contour, Point, Polygon
         >>> polygon = Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
@@ -660,8 +745,13 @@ class Polygon(Indexable, Shaped):
         Memory complexity:
             ``O(1)``
 
-        where ``vertices_count = len(self.border.vertices)\
- + sum(len(hole.vertices) for hole in self.holes)``.
+        where
+
+            .. code-block:: python
+
+                vertices_count = (len(self.border.vertices)
+                                  + sum(len(hole.vertices)\
+ for hole in self.holes))
 
         >>> from gon.base import Contour, Point, Polygon
         >>> polygon = Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
@@ -706,8 +796,13 @@ class Polygon(Indexable, Shaped):
         Memory complexity:
             ``O(vertices_count)``
 
-        where ``vertices_count = len(self.border.vertices)\
- + sum(len(hole.vertices) for hole in self.holes)``.
+        where
+
+            .. code-block:: python
+
+                vertices_count = (len(self.border.vertices)
+                                  + sum(len(hole.vertices)\
+ for hole in self.holes))
 
         >>> from gon.base import Contour, Point, Polygon
         >>> polygon = Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
@@ -732,8 +827,13 @@ class Polygon(Indexable, Shaped):
         Memory complexity:
             ``O(1)``
 
-        where ``vertices_count = len(self.border.vertices)\
- + sum(len(hole.vertices) for hole in self.holes)``.
+        where
+
+            .. code-block:: python
+
+                vertices_count = (len(self.border.vertices)
+                                  + sum(len(hole.vertices)\
+ for hole in self.holes))
 
         >>> from gon.base import Contour, Point, Polygon
         >>> polygon = Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
@@ -768,8 +868,13 @@ class Polygon(Indexable, Shaped):
         Memory complexity:
             ``O(vertices_count)``
 
-        where ``vertices_count = len(self.border.vertices)\
- + sum(len(hole.vertices) for hole in self.holes)``.
+        where
+
+            .. code-block:: python
+
+                vertices_count = (len(self.border.vertices)
+                                  + sum(len(hole.vertices)\
+ for hole in self.holes))
 
         >>> from gon.base import Contour, Point, Polygon
         >>> polygon = Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
@@ -801,8 +906,13 @@ class Polygon(Indexable, Shaped):
         Memory complexity:
             ``O(vertices_count)``
 
-        where ``vertices_count = len(self.border.vertices)\
- + sum(len(hole.vertices) for hole in self.holes)``.
+        where
+
+            .. code-block:: python
+
+                vertices_count = (len(self.border.vertices)
+                                  + sum(len(hole.vertices)\
+ for hole in self.holes))
 
         >>> from gon.base import Contour, Point, Polygon
         >>> polygon = Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
@@ -839,8 +949,13 @@ class Polygon(Indexable, Shaped):
         Memory complexity:
             ``O(vertices_count)``
 
-        where ``vertices_count = len(self.border.vertices)\
- + sum(len(hole.vertices) for hole in self.holes)``.
+        where
+
+            .. code-block:: python
+
+                vertices_count = (len(self.border.vertices)
+                                  + sum(len(hole.vertices)\
+ for hole in self.holes))
 
         >>> from gon.base import Contour, Point, Polygon
         >>> polygon = Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
@@ -876,8 +991,13 @@ class Polygon(Indexable, Shaped):
         Memory complexity:
             ``O(vertices_count)``
 
-        where ``vertices_count = len(self.border.vertices)\
- + sum(len(hole.vertices) for hole in self.holes)``.
+        where
+
+            .. code-block:: python
+
+                vertices_count = (len(self.border.vertices)
+                                  + sum(len(hole.vertices)\
+ for hole in self.holes))
 
         >>> from gon.base import Contour, Point, Polygon
         >>> polygon = Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
@@ -904,8 +1024,13 @@ class Polygon(Indexable, Shaped):
         Memory complexity:
             ``O(vertices_count)``
 
-        where ``vertices_count = len(self.border.vertices)\
- + sum(len(hole.vertices) for hole in self.holes)``.
+        where
+
+            .. code-block:: python
+
+                vertices_count = (len(self.border.vertices)
+                                  + sum(len(hole.vertices)\
+ for hole in self.holes))
 
         >>> from gon.base import Contour, Point, Polygon
         >>> polygon = Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
@@ -936,8 +1061,13 @@ class Polygon(Indexable, Shaped):
         Memory complexity:
             ``O(vertices_count)``
 
-        where ``vertices_count = len(self.border.vertices)\
- + sum(len(hole.vertices) for hole in self.holes)``.
+        where
+
+            .. code-block:: python
+
+                vertices_count = (len(self.border.vertices)
+                                  + sum(len(hole.vertices)\
+ for hole in self.holes))
 
         >>> from gon.base import Contour, Point, Polygon
         >>> polygon = Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
