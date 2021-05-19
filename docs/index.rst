@@ -13,20 +13,20 @@ interfaces
 ==========
 
 .. autoclass:: gon.base.Geometry
+    :members:
     :special-members:
-    :inherited-members:
 .. autoclass:: gon.base.Compound
+    :members:
     :special-members:
-    :inherited-members:
 .. autoclass:: gon.base.Indexable
+    :members:
     :special-members:
-    :inherited-members:
 .. autoclass:: gon.base.Linear
+    :members:
     :special-members:
-    :inherited-members:
 .. autoclass:: gon.base.Shaped
+    :members:
     :special-members:
-    :inherited-members:
 
 primitive geometries
 ====================
