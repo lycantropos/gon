@@ -324,8 +324,8 @@ class Multipoint(Indexable):
         where ``points_count = len(self.points)``.
 
         >>> multipoint = Multipoint([Point(0, 0), Point(1, 0), Point(0, 1)])
-        >>> multipoint.points
-        [Point(0, 0), Point(1, 0), Point(0, 1)]
+        >>> multipoint.points == [Point(0, 0), Point(1, 0), Point(0, 1)]
+        True
         """
         return list(self._points)
 
