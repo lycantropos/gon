@@ -72,9 +72,14 @@ class Multipolygon(Indexable, Shaped):
         Memory complexity:
             ``O(vertices_count)``
 
-        where ``vertices_count = sum(len(polygon.border.vertices)\
- + sum(len(hole.vertices) for hole in polygon.holes)\
- for polygon in polygons)``.
+        where
+
+            .. code-block:: python
+
+                vertices_count = sum(len(polygon.border.vertices)
+                                     + sum(len(hole.vertices)
+                                           for hole in polygon.holes)
+                                     for polygon in self.polygons)
         """
         self._polygons, self._polygons_set = polygons, frozenset(polygons)
         self._locate = partial(_locate_point_in_polygons, polygons)
@@ -90,9 +95,14 @@ class Multipolygon(Indexable, Shaped):
         Memory complexity:
             ``O(vertices_count)``
 
-        where ``vertices_count = sum(len(polygon.border.vertices)\
- + sum(len(hole.vertices) for hole in polygon.holes)\
- for polygon in self.polygons)``.
+        where
+            
+            .. code-block:: python
+
+                vertices_count = sum(len(polygon.border.vertices)
+                                     + sum(len(hole.vertices)
+                                           for hole in polygon.holes)
+                                     for polygon in self.polygons)
 
         >>> from gon.base import Contour, Multipolygon, Point, Polygon
         >>> multipolygon = Multipolygon(
@@ -135,9 +145,14 @@ class Multipolygon(Indexable, Shaped):
         Memory complexity:
             ``O(1)``
 
-        where ``vertices_count = sum(len(polygon.border.vertices)\
- + sum(len(hole.vertices) for hole in polygon.holes)\
- for polygon in self.polygons)``.
+        where
+            
+            .. code-block:: python
+
+                vertices_count = sum(len(polygon.border.vertices)
+                                     + sum(len(hole.vertices)
+                                           for hole in polygon.holes)
+                                     for polygon in self.polygons)
 
         >>> from gon.base import Contour, Multipolygon, Point, Polygon
         >>> multipolygon = Multipolygon(
@@ -203,9 +218,14 @@ class Multipolygon(Indexable, Shaped):
         Memory complexity:
             ``O(1)``
 
-        where ``vertices_count = sum(len(polygon.border.vertices)\
- + sum(len(hole.vertices) for hole in polygon.holes)\
- for polygon in self.polygons)``.
+        where
+            
+            .. code-block:: python
+
+                vertices_count = sum(len(polygon.border.vertices)
+                                     + sum(len(hole.vertices)
+                                           for hole in polygon.holes)
+                                     for polygon in self.polygons)
 
         >>> from gon.base import Contour, Multipolygon, Point, Polygon
         >>> multipolygon = Multipolygon(
@@ -236,9 +256,14 @@ class Multipolygon(Indexable, Shaped):
         Memory complexity:
             ``O(1)``
 
-        where ``vertices_count = sum(len(polygon.border.vertices)\
- + sum(len(hole.vertices) for hole in polygon.holes)\
- for polygon in self.polygons)``.
+        where
+            
+            .. code-block:: python
+
+                vertices_count = sum(len(polygon.border.vertices)
+                                     + sum(len(hole.vertices)
+                                           for hole in polygon.holes)
+                                     for polygon in self.polygons)
 
         >>> from gon.base import Contour, Multipolygon, Point, Polygon
         >>> multipolygon = Multipolygon(
@@ -293,9 +318,14 @@ class Multipolygon(Indexable, Shaped):
         Memory complexity:
             ``O(1)``
 
-        where ``vertices_count = sum(len(polygon.border.vertices)\
- + sum(len(hole.vertices) for hole in polygon.holes)\
- for polygon in self.polygons)``.
+        where
+            
+            .. code-block:: python
+
+                vertices_count = sum(len(polygon.border.vertices)
+                                     + sum(len(hole.vertices)
+                                           for hole in polygon.holes)
+                                     for polygon in self.polygons)
 
         >>> from gon.base import Contour, Multipolygon, Point, Polygon
         >>> multipolygon = Multipolygon(
@@ -328,9 +358,14 @@ class Multipolygon(Indexable, Shaped):
         Memory complexity:
             ``O(1)``
 
-        where ``vertices_count = sum(len(polygon.border.vertices)\
- + sum(len(hole.vertices) for hole in polygon.holes)\
- for polygon in self.polygons)``.
+        where
+            
+            .. code-block:: python
+
+                vertices_count = sum(len(polygon.border.vertices)
+                                     + sum(len(hole.vertices)
+                                           for hole in polygon.holes)
+                                     for polygon in self.polygons)
 
         >>> from gon.base import Contour, Multipolygon, Point, Polygon
         >>> multipolygon = Multipolygon(
@@ -362,9 +397,14 @@ class Multipolygon(Indexable, Shaped):
         Memory complexity:
             ``O(vertices_count)``
 
-        where ``vertices_count = sum(len(polygon.border.vertices)\
- + sum(len(hole.vertices) for hole in polygon.holes)\
- for polygon in self.polygons)``.
+        where
+            
+            .. code-block:: python
+
+                vertices_count = sum(len(polygon.border.vertices)
+                                     + sum(len(hole.vertices)
+                                           for hole in polygon.holes)
+                                     for polygon in self.polygons)
 
         >>> from gon.base import Contour, Multipolygon, Point, Polygon
         >>> multipolygon = Multipolygon(
@@ -411,9 +451,14 @@ class Multipolygon(Indexable, Shaped):
         Memory complexity:
             ``O(vertices_count)``
 
-        where ``vertices_count = sum(len(polygon.border.vertices)\
- + sum(len(hole.vertices) for hole in polygon.holes)\
- for polygon in self.polygons)``.
+        where
+            
+            .. code-block:: python
+
+                vertices_count = sum(len(polygon.border.vertices)
+                                     + sum(len(hole.vertices)
+                                           for hole in polygon.holes)
+                                     for polygon in self.polygons)
         """
         return (subtract_multipolygon_from_segment(other, self,
                                                    context=self._context)
@@ -439,9 +484,14 @@ class Multipolygon(Indexable, Shaped):
         Memory complexity:
             ``O(vertices_count)``
 
-        where ``vertices_count = sum(len(polygon.border.vertices)\
- + sum(len(hole.vertices) for hole in polygon.holes)\
- for polygon in self.polygons)``.
+        where
+            
+            .. code-block:: python
+
+                vertices_count = sum(len(polygon.border.vertices)
+                                     + sum(len(hole.vertices)
+                                           for hole in polygon.holes)
+                                     for polygon in self.polygons)
 
         >>> from gon.base import EMPTY, Contour, Multipolygon, Point, Polygon
         >>> multipolygon = Multipolygon(
@@ -477,9 +527,14 @@ class Multipolygon(Indexable, Shaped):
         Memory complexity:
             ``O(vertices_count)``
 
-        where ``vertices_count = sum(len(polygon.border.vertices)\
- + sum(len(hole.vertices) for hole in polygon.holes)\
- for polygon in self.polygons)``.
+        where
+            
+            .. code-block:: python
+
+                vertices_count = sum(len(polygon.border.vertices)
+                                     + sum(len(hole.vertices)
+                                           for hole in polygon.holes)
+                                     for polygon in self.polygons)
 
         >>> from gon.base import EMPTY, Contour, Multipolygon, Point, Polygon
         >>> multipolygon = Multipolygon(
@@ -529,9 +584,14 @@ class Multipolygon(Indexable, Shaped):
         Memory complexity:
             ``O(1)``
 
-        where ``vertices_count = sum(len(polygon.border.vertices)\
- + sum(len(hole.vertices) for hole in polygon.holes)\
- for polygon in self.polygons)``.
+        where
+            
+            .. code-block:: python
+
+                vertices_count = sum(len(polygon.border.vertices)
+                                     + sum(len(hole.vertices)
+                                           for hole in polygon.holes)
+                                     for polygon in self.polygons)
 
         >>> from gon.base import Contour, Multipolygon, Point, Polygon
         >>> multipolygon = Multipolygon(
@@ -558,9 +618,14 @@ class Multipolygon(Indexable, Shaped):
         Memory complexity:
             ``O(1)``
 
-        where ``vertices_count = sum(len(polygon.border.vertices)\
- + sum(len(hole.vertices) for hole in polygon.holes)\
- for polygon in self.polygons)``.
+        where
+            
+            .. code-block:: python
+
+                vertices_count = sum(len(polygon.border.vertices)
+                                     + sum(len(hole.vertices)
+                                           for hole in polygon.holes)
+                                     for polygon in self.polygons)
 
         >>> from gon.base import Contour, Multipolygon, Point, Polygon
         >>> multipolygon = Multipolygon(
@@ -587,9 +652,14 @@ class Multipolygon(Indexable, Shaped):
         Memory complexity:
             ``O(1)``
 
-        where ``vertices_count = sum(len(polygon.border.vertices)\
- + sum(len(hole.vertices) for hole in polygon.holes)\
- for polygon in self.polygons)``.
+        where
+            
+            .. code-block:: python
+
+                vertices_count = sum(len(polygon.border.vertices)
+                                     + sum(len(hole.vertices)
+                                           for hole in polygon.holes)
+                                     for polygon in self.polygons)
 
         >>> from gon.base import Contour, Multipolygon, Point, Polygon
         >>> multipolygon = Multipolygon(
@@ -650,9 +720,14 @@ class Multipolygon(Indexable, Shaped):
         Memory complexity:
             ``O(1)``
 
-        where ``vertices_count = sum(len(polygon.border.vertices)\
- + sum(len(hole.vertices) for hole in polygon.holes)\
- for polygon in self.polygons)``.
+        where
+            
+            .. code-block:: python
+
+                vertices_count = sum(len(polygon.border.vertices)
+                                     + sum(len(hole.vertices)
+                                           for hole in polygon.holes)
+                                     for polygon in self.polygons)
 
         >>> from gon.base import Contour, Multipolygon, Point, Polygon
         >>> multipolygon = Multipolygon(
@@ -706,9 +781,14 @@ class Multipolygon(Indexable, Shaped):
         Memory complexity:
             ``O(vertices_count)``
 
-        where ``vertices_count = sum(len(polygon.border.vertices)\
- + sum(len(hole.vertices) for hole in polygon.holes)\
- for polygon in self.polygons)``.
+        where
+            
+            .. code-block:: python
+
+                vertices_count = sum(len(polygon.border.vertices)
+                                     + sum(len(hole.vertices)
+                                           for hole in polygon.holes)
+                                     for polygon in self.polygons)
 
         >>> from gon.base import Contour, Multipolygon, Point, Polygon
         >>> multipolygon = Multipolygon(
@@ -760,9 +840,14 @@ class Multipolygon(Indexable, Shaped):
         Memory complexity:
             ``O(1)``
 
-        where ``vertices_count = sum(len(polygon.border.vertices)\
- + sum(len(hole.vertices) for hole in polygon.holes)\
- for polygon in self.polygons)``.
+        where
+            
+            .. code-block:: python
+
+                vertices_count = sum(len(polygon.border.vertices)
+                                     + sum(len(hole.vertices)
+                                           for hole in polygon.holes)
+                                     for polygon in self.polygons)
 
         >>> from gon.base import Contour, Multipolygon, Point, Polygon
         >>> multipolygon = Multipolygon(
@@ -802,9 +887,14 @@ class Multipolygon(Indexable, Shaped):
         Memory complexity:
             ``O(vertices_count)``
 
-        where ``vertices_count = sum(len(polygon.border.vertices)\
- + sum(len(hole.vertices) for hole in polygon.holes)\
- for polygon in self.polygons)``.
+        where
+            
+            .. code-block:: python
+
+                vertices_count = sum(len(polygon.border.vertices)
+                                     + sum(len(hole.vertices)
+                                           for hole in polygon.holes)
+                                     for polygon in self.polygons)
 
         >>> from gon.base import Contour, Multipolygon, Point, Polygon
         >>> multipolygon = Multipolygon(
@@ -844,9 +934,14 @@ class Multipolygon(Indexable, Shaped):
         Memory complexity:
             ``O(vertices_count)``
 
-        where ``vertices_count = sum(len(polygon.border.vertices)\
- + sum(len(hole.vertices) for hole in polygon.holes)\
- for polygon in self.polygons)``.
+        where
+            
+            .. code-block:: python
+
+                vertices_count = sum(len(polygon.border.vertices)
+                                     + sum(len(hole.vertices)
+                                           for hole in polygon.holes)
+                                     for polygon in self.polygons)
 
         >>> from gon.base import Contour, Multipolygon, Point, Polygon
         >>> multipolygon = Multipolygon(
@@ -894,9 +989,14 @@ class Multipolygon(Indexable, Shaped):
         Memory complexity:
             ``O(vertices_count)``
 
-        where ``vertices_count = sum(len(polygon.border.vertices)\
- + sum(len(hole.vertices) for hole in polygon.holes)\
- for polygon in self.polygons)``.
+        where
+            
+            .. code-block:: python
+
+                vertices_count = sum(len(polygon.border.vertices)
+                                     + sum(len(hole.vertices)
+                                           for hole in polygon.holes)
+                                     for polygon in self.polygons)
 
         >>> from gon.base import Contour, Multipolygon, Point, Polygon
         >>> multipolygon = Multipolygon(
@@ -947,9 +1047,14 @@ class Multipolygon(Indexable, Shaped):
         Memory complexity:
             ``O(vertices_count)``
 
-        where ``vertices_count = sum(len(polygon.border.vertices)\
- + sum(len(hole.vertices) for hole in polygon.holes)\
- for polygon in self.polygons)``.
+        where
+            
+            .. code-block:: python
+
+                vertices_count = sum(len(polygon.border.vertices)
+                                     + sum(len(hole.vertices)
+                                           for hole in polygon.holes)
+                                     for polygon in self.polygons)
 
         >>> from gon.base import Contour, Multipolygon, Point, Polygon
         >>> multipolygon = Multipolygon(
@@ -985,9 +1090,14 @@ class Multipolygon(Indexable, Shaped):
         Memory complexity:
             ``O(vertices_count)``
 
-        where ``vertices_count = sum(len(polygon.border.vertices)\
- + sum(len(hole.vertices) for hole in polygon.holes)\
- for polygon in self.polygons)``.
+        where
+            
+            .. code-block:: python
+
+                vertices_count = sum(len(polygon.border.vertices)
+                                     + sum(len(hole.vertices)
+                                           for hole in polygon.holes)
+                                     for polygon in self.polygons)
 
         >>> from gon.base import Contour, Multipolygon, Point, Polygon
         >>> multipolygon = Multipolygon(
