@@ -65,7 +65,9 @@ MIN_MULTIPOLYGON_POLYGONS_COUNT = 2
 class Multipolygon(Indexable, Shaped):
     __slots__ = '_context', '_locate', '_polygons', '_polygons_set'
 
-    def __init__(self, polygons: Sequence[Polygon]) -> None:
+    def __init__(self, polygons: Sequence[Polygon],
+                 *,
+                 context: Optional[Context] = None) -> None:
         """
         Initializes multipolygon.
 
@@ -78,8 +80,7 @@ class Multipolygon(Indexable, Shaped):
  + sum(len(hole.vertices) for hole in polygon.holes)\
  for polygon in polygons)``.
         """
-        context = get_context()
-        self._context = context
+        self._context = get_context() if context is None else context
         self._polygons, self._polygons_set = polygons, frozenset(polygons)
         self._locate = partial(_locate_point_in_polygons, polygons)
 
