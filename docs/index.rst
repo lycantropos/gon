@@ -13,66 +13,66 @@ interfaces
 ==========
 
 .. autoclass:: gon.base.Geometry
-    :members:
     :special-members:
+    :inherited-members:
 .. autoclass:: gon.base.Compound
-    :members:
     :special-members:
+    :inherited-members:
 .. autoclass:: gon.base.Indexable
-    :members:
     :special-members:
+    :inherited-members:
 .. autoclass:: gon.base.Linear
-    :members:
     :special-members:
+    :inherited-members:
 .. autoclass:: gon.base.Shaped
-    :members:
     :special-members:
+    :inherited-members:
 
 primitive geometries
 ====================
 .. autoclass:: gon.base.Point
-    :members:
     :special-members:
+    :inherited-members:
 
 degenerate geometries
 =====================
 .. autodata:: gon.base.EMPTY
 .. autoclass:: gon.base.Empty
-    :members:
     :special-members:
+    :inherited-members:
 
 discrete geometries
 ===================
 .. autoclass:: gon.base.Multipoint
-    :members:
     :special-members:
+    :inherited-members:
 
 linear geometries
 =================
 .. autoclass:: gon.base.Segment
-    :members:
     :special-members:
+    :inherited-members:
 .. autoclass:: gon.base.Multisegment
-    :members:
     :special-members:
+    :inherited-members:
 .. autoclass:: gon.base.Contour
-    :members:
     :special-members:
+    :inherited-members:
 
 shaped geometries
 =================
 .. autoclass:: gon.base.Polygon
-    :members:
     :special-members:
+    :inherited-members:
 .. autoclass:: gon.base.Multipolygon
-    :members:
     :special-members:
+    :inherited-members:
 
 mixed geometries
 ================
 .. autoclass:: gon.base.Mix
-    :members:
     :special-members:
+    :inherited-members:
 
 enumerations
 ============
