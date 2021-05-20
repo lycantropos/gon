@@ -1,8 +1,7 @@
 from functools import partial
 from typing import (List,
                     Optional,
-                    Sequence,
-                    Type)
+                    Sequence)
 
 from bentley_ottmann.planar import segments_cross_or_overlap
 from clipping.planar import (complete_intersect_multipolygons,
@@ -25,8 +24,7 @@ from clipping.planar import (complete_intersect_multipolygons,
                              unite_polygon_with_multipolygon,
                              unite_segment_with_multipolygon)
 from ground.base import Context
-from ground.hints import (Box,
-                          Scalar)
+from ground.hints import Scalar
 from locus import r
 from orient.planar import (contour_in_multipolygon,
                            multipolygon_in_multipolygon,
