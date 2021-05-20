@@ -627,7 +627,8 @@ class Multisegment(Indexable, Linear):
                                      context.empty, context.mix_cls,
                                      context.multipoint_cls,
                                      context.multisegment_cls,
-                                     context.point_cls)
+                                     context.point_cls,
+                                     context.segment_cls)
                       if factor_x or factor_y
                       else
                       context.multipoint_cls([context.point_cls(factor_x,
