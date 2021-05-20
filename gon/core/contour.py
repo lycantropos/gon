@@ -814,8 +814,9 @@ class Contour(Indexable, Linear):
                                                 context=self._context)
 
     def _unite_with_multipoint(self, other: Multipoint) -> Compound:
-        return pack_mix(other - self, self, self._context.empty,
-                        self._context.empty, self._context.mix_cls)
+        context = self._context
+        return pack_mix(other - self, self, context.empty, context.empty,
+                        context.mix_cls)
 
     def _unite_with_multisegment(self, other: Multisegment) -> Compound:
         return unite_multisegments(self._as_multisegment(), other,
