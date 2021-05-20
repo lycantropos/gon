@@ -312,7 +312,7 @@ def rotate_segment(segment: Segment,
 to_points_convex_hull = context.points_convex_hull
 
 
-def to_polygon_diagonals(polygon: Polygon) -> Sequence[Segment]:
+def to_polygon_diagonals(polygon: Polygon) -> Multisegment:
     border_vertices = polygon.border.vertices
     diagonals = [Segment(vertex, border_vertices[next_index])
                  for index, vertex in enumerate(border_vertices)

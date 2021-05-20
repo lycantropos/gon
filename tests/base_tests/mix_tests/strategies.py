@@ -6,7 +6,9 @@ from gon.base import (EMPTY,
                       Mix,
                       Multipoint,
                       Multisegment,
+                      Segment,
                       Shaped)
+from gon.hints import Scalar
 from tests.strategies import (coordinates_strategies,
                               coordinates_to_linear_geometries,
                               coordinates_to_mixes,
@@ -41,12 +43,25 @@ def shaped_to_invalid_mix(shaped: Shaped) -> Strategy[Mix]:
                                           for hole in polygon.holes))
                             for polygon in polygons))
     edges = list(flatten(polygon.edges for polygon in polygons))
+    scales = strategies.integers(2, 100)
     return (strategies.builds(Mix,
                               sub_lists(vertices,
                                         min_size=2)
                               .map(Multipoint),
                               empty_geometries,
                               strategies.just(shaped))
+            | strategies.builds(
+                    Mix,
+                    empty_geometries,
+                    strategies.builds(stretch_segment_end,
+                                      strategies.sampled_from(edges), scales),
+                    strategies.just(shaped))
+            | strategies.builds(
+                    Mix,
+                    empty_geometries,
+                    strategies.builds(stretch_segment_start,
+                                      strategies.sampled_from(edges), scales),
+                    strategies.just(shaped))
             | strategies.builds(Mix,
                                 empty_geometries,
                                 strategies.sampled_from(polygons)
@@ -58,6 +73,20 @@ def shaped_to_invalid_mix(shaped: Shaped) -> Strategy[Mix]:
                                           min_size=2)
                                 .map(Multisegment),
                                 strategies.just(shaped)))
+
+
+def stretch_segment_end(segment: Segment, scale: Scalar) -> Segment:
+    assert scale > 1
+    return Segment(segment.start, segment.end.translate(
+            scale * (segment.end.x - segment.start.x),
+            scale * (segment.end.y - segment.start.y)))
+
+
+def stretch_segment_start(segment: Segment, scale: Scalar) -> Segment:
+    assert scale > 1
+    return Segment(segment.start.translate(
+            scale * (segment.start.x - segment.end.x),
+            scale * (segment.start.y - segment.end.y)), segment.end)
 
 
 invalid_mixes = (shaped_geometries.flatmap(shaped_to_invalid_mix)
