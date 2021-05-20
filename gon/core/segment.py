@@ -4,7 +4,8 @@ from clipping.planar import (intersect_segments,
                              subtract_segments,
                              symmetric_subtract_segments,
                              unite_segments)
-from ground.hints import Scalar
+from ground.hints import (Point,
+                          Scalar)
 from orient.planar import segment_in_segment
 from reprit.base import generate_repr
 
@@ -14,11 +15,11 @@ from .compound import (Compound,
                        Relation)
 from .contracts import (is_segment_horizontal,
                         is_segment_vertical)
-from .geometry import Geometry
+from .geometry import (Coordinate,
+                       Geometry)
 from .iterable import non_negative_min
 from .multipoint import Multipoint
 from .packing import pack_mix
-from .point import Point
 from .rotating import (point_to_step,
                        rotate_segment_around_origin,
                        rotate_translate_segment)
@@ -26,10 +27,12 @@ from .scaling import scale_segment
 from .utils import relate_multipoint_to_linear_compound
 
 
-class Segment(Compound, Linear):
+class Segment(Compound[Coordinate], Linear[Coordinate]):
     __slots__ = '_endpoints', '_end', '_start'
 
-    def __init__(self, start: Point, end: Point) -> None:
+    def __init__(self,
+                 start: Point[Coordinate],
+                 end: Point[Coordinate]) -> None:
         """
         Initializes segment.
 
@@ -42,7 +45,7 @@ class Segment(Compound, Linear):
 
     __repr__ = generate_repr(__init__)
 
-    def __and__(self, other: Compound) -> Compound:
+    def __and__(self, other: Compound[Coordinate]) -> Compound[Coordinate]:
         """
         Returns intersection of the segment with the other geometry.
 
@@ -63,7 +66,7 @@ class Segment(Compound, Linear):
 
     __rand__ = __and__
 
-    def __contains__(self, point: Point) -> bool:
+    def __contains__(self, point: Point[Coordinate]) -> bool:
         """
         Checks if the segment contains the point.
 
@@ -81,7 +84,7 @@ class Segment(Compound, Linear):
         """
         return bool(self.locate(point))
 
-    def __eq__(self, other: 'Segment') -> bool:
+    def __eq__(self, other: 'Segment[Coordinate]') -> bool:
         """
         Checks if the segment is equal to the other.
 
@@ -107,7 +110,7 @@ class Segment(Compound, Linear):
                     if isinstance(other, Segment)
                     else NotImplemented))
 
-    def __ge__(self, other: Compound) -> bool:
+    def __ge__(self, other: Compound[Coordinate]) -> bool:
         """
         Checks if the segment is a superset of the other geometry.
 
@@ -136,7 +139,7 @@ class Segment(Compound, Linear):
                     if isinstance(other, Compound)
                     else NotImplemented))
 
-    def __gt__(self, other: Compound) -> bool:
+    def __gt__(self, other: Compound[Coordinate]) -> bool:
         """
         Checks if the segment is a strict superset of the other geometry.
 
@@ -183,7 +186,7 @@ class Segment(Compound, Linear):
         """
         return hash(frozenset(self._endpoints))
 
-    def __le__(self, other: Compound) -> bool:
+    def __le__(self, other: Compound[Coordinate]) -> bool:
         """
         Checks if the segment is a subset of the other geometry.
 
@@ -209,7 +212,7 @@ class Segment(Compound, Linear):
                      if isinstance(other, Linear)
                      else NotImplemented))
 
-    def __lt__(self, other: Compound) -> bool:
+    def __lt__(self, other: Compound[Coordinate]) -> bool:
         """
         Checks if the segment is a strict subset of the other geometry.
 
@@ -260,7 +263,7 @@ class Segment(Compound, Linear):
 
     __ror__ = __or__
 
-    def __sub__(self, other: Compound) -> Compound:
+    def __sub__(self, other: Compound[Coordinate]) -> Compound[Coordinate]:
         """
         Returns difference of the segment with the other geometry.
 
@@ -281,7 +284,7 @@ class Segment(Compound, Linear):
                       if isinstance(other, Segment)
                       else NotImplemented))
 
-    def __xor__(self, other: Compound) -> Compound:
+    def __xor__(self, other: Compound[Coordinate]) -> Compound[Coordinate]:
         """
         Returns symmetric difference of the segment with the other geometry.
 
@@ -307,7 +310,7 @@ class Segment(Compound, Linear):
     __rxor__ = __xor__
 
     @property
-    def centroid(self) -> Point:
+    def centroid(self) -> Point[Coordinate]:
         """
         Returns centroid of the segment.
 
@@ -324,7 +327,7 @@ class Segment(Compound, Linear):
         return self._context.segment_centroid(self)
 
     @property
-    def end(self) -> Point:
+    def end(self) -> Point[Coordinate]:
         """
         Returns end of the segment.
 
@@ -393,7 +396,7 @@ class Segment(Compound, Linear):
                 self._context.points_squared_distance(self.start, self.end))
 
     @property
-    def start(self) -> Point:
+    def start(self) -> Point[Coordinate]:
         """
         Returns start of the segment.
 
@@ -409,7 +412,7 @@ class Segment(Compound, Linear):
         """
         return self._start
 
-    def distance_to(self, other: Geometry) -> Scalar:
+    def distance_to(self, other: Geometry[Coordinate]) -> Scalar:
         """
         Returns distance between the segment and the other geometry.
 
@@ -439,7 +442,7 @@ class Segment(Compound, Linear):
                    if isinstance(other, Segment)
                    else other.distance_to(self))))
 
-    def locate(self, point: Point) -> Location:
+    def locate(self, point: Point[Coordinate]) -> Location:
         """
         Finds location of the point relative to the segment.
 
@@ -459,7 +462,7 @@ class Segment(Compound, Linear):
                 if self._context.segment_contains_point(self, point)
                 else Location.EXTERIOR)
 
-    def relate(self, other: Compound) -> Relation:
+    def relate(self, other: Compound[Coordinate]) -> Relation:
         """
         Finds relation between the segment and the other geometry.
 
@@ -481,9 +484,10 @@ class Segment(Compound, Linear):
                       else other.relate(self).complement))
 
     def rotate(self,
-               cosine: Scalar,
-               sine: Scalar,
-               point: Optional[Point] = None) -> 'Segment':
+               cosine: Coordinate,
+               sine: Coordinate,
+               point: Optional[Point[Coordinate]] = None
+               ) -> 'Segment[Coordinate]':
         """
         Rotates the segment by given cosine & sine around given point.
 
@@ -509,8 +513,8 @@ class Segment(Compound, Linear):
                 self._context.point_cls, self._context.segment_cls))
 
     def scale(self,
-              factor_x: Scalar,
-              factor_y: Optional[Scalar] = None) -> Compound:
+              factor_x: Coordinate,
+              factor_y: Optional[Coordinate] = None) -> Compound[Coordinate]:
         """
         Scales the segment by given factor.
 
@@ -530,7 +534,9 @@ class Segment(Compound, Linear):
                              context.multipoint_cls, context.point_cls,
                              context.segment_cls)
 
-    def translate(self, step_x: Scalar, step_y: Scalar) -> 'Segment':
+    def translate(self,
+                  step_x: Coordinate,
+                  step_y: Coordinate) -> 'Segment[Coordinate]':
         """
         Translates the segment by given step.
 

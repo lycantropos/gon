@@ -1,6 +1,5 @@
 from functools import partial
-from typing import (List,
-                    Optional,
+from typing import (Optional,
                     Sequence)
 
 from bentley_ottmann.planar import segments_cross_or_overlap
@@ -42,7 +41,8 @@ from .compound import (Compound,
 from .contour import (Contour,
                       Multisegment,
                       Segment)
-from .geometry import Geometry
+from .geometry import (Coordinate,
+                       Geometry)
 from .iterable import (flatten,
                        non_negative_min)
 from .multipoint import Multipoint
@@ -58,10 +58,10 @@ from .scaling import (scale_polygon,
 MIN_MULTIPOLYGON_POLYGONS_COUNT = 2
 
 
-class Multipolygon(Indexable, Shaped):
+class Multipolygon(Indexable[Coordinate], Shaped[Coordinate]):
     __slots__ = '_locate', '_polygons', '_polygons_set'
 
-    def __init__(self, polygons: Sequence[Polygon]) -> None:
+    def __init__(self, polygons: Sequence[Polygon[Coordinate]]) -> None:
         """
         Initializes multipolygon.
 
@@ -84,7 +84,7 @@ class Multipolygon(Indexable, Shaped):
 
     __repr__ = generate_repr(__init__)
 
-    def __and__(self, other: Compound) -> Compound:
+    def __and__(self, other: Compound[Coordinate]) -> Compound[Coordinate]:
         """
         Returns intersection of the multipolygon with the other geometry.
 
@@ -133,7 +133,7 @@ class Multipolygon(Indexable, Shaped):
 
     __rand__ = __and__
 
-    def __contains__(self, point: Point) -> bool:
+    def __contains__(self, point: Point[Coordinate]) -> bool:
         """
         Checks if the multipolygon contains the point.
 
@@ -181,7 +181,7 @@ class Multipolygon(Indexable, Shaped):
         """
         return bool(self.locate(point))
 
-    def __eq__(self, other: 'Multipolygon') -> bool:
+    def __eq__(self, other: 'Multipolygon[Coordinate]') -> bool:
         """
         Checks if multipolygons are equal.
 
@@ -207,7 +207,7 @@ class Multipolygon(Indexable, Shaped):
                                  if isinstance(other, Multipolygon)
                                  else NotImplemented)
 
-    def __ge__(self, other: Compound) -> bool:
+    def __ge__(self, other: Compound[Coordinate]) -> bool:
         """
         Checks if the multipolygon is a superset of the other geometry.
 
@@ -245,7 +245,7 @@ class Multipolygon(Indexable, Shaped):
                     if isinstance(other, Compound)
                     else NotImplemented))
 
-    def __gt__(self, other: Compound) -> bool:
+    def __gt__(self, other: Compound[Coordinate]) -> bool:
         """
         Checks if the multipolygon is a strict superset of the other geometry.
 
@@ -307,7 +307,7 @@ class Multipolygon(Indexable, Shaped):
         """
         return hash(self._polygons_set)
 
-    def __le__(self, other: Compound) -> bool:
+    def __le__(self, other: Compound[Coordinate]) -> bool:
         """
         Checks if the multipolygon is a subset of the other geometry.
 
@@ -347,7 +347,7 @@ class Multipolygon(Indexable, Shaped):
                      if isinstance(other, Shaped)
                      else NotImplemented))
 
-    def __lt__(self, other: Compound) -> bool:
+    def __lt__(self, other: Compound[Coordinate]) -> bool:
         """
         Checks if the multipolygon is a strict subset of the other geometry.
 
@@ -386,7 +386,7 @@ class Multipolygon(Indexable, Shaped):
                      if isinstance(other, Shaped)
                      else NotImplemented))
 
-    def __or__(self, other: Compound) -> Compound:
+    def __or__(self, other: Compound[Coordinate]) -> Compound[Coordinate]:
         """
         Returns union of the multipolygon with the other geometry.
 
@@ -440,7 +440,7 @@ class Multipolygon(Indexable, Shaped):
 
     __ror__ = __or__
 
-    def __rsub__(self, other: Compound) -> Compound:
+    def __rsub__(self, other: Compound[Coordinate]) -> Compound[Coordinate]:
         """
         Returns difference of the other geometry with the multipolygon.
 
@@ -473,7 +473,7 @@ class Multipolygon(Indexable, Shaped):
                              if isinstance(other, Polygon)
                              else NotImplemented))))
 
-    def __sub__(self, other: Compound) -> Compound:
+    def __sub__(self, other: Compound[Coordinate]) -> Compound[Coordinate]:
         """
         Returns difference of the multipolygon with the other geometry.
 
@@ -515,7 +515,7 @@ class Multipolygon(Indexable, Shaped):
                        if isinstance(other, Multipolygon)
                        else NotImplemented)))
 
-    def __xor__(self, other: Compound) -> Compound:
+    def __xor__(self, other: Compound[Coordinate]) -> Compound[Coordinate]:
         """
         Returns symmetric difference of the multipolygon
         with the other geometry.
@@ -573,7 +573,7 @@ class Multipolygon(Indexable, Shaped):
     __rxor__ = __xor__
 
     @property
-    def area(self) -> Scalar:
+    def area(self) -> Coordinate:
         """
         Returns area of the multipolygon.
 
@@ -607,7 +607,7 @@ class Multipolygon(Indexable, Shaped):
         return sum(polygon.area for polygon in self.polygons)
 
     @property
-    def centroid(self) -> Point:
+    def centroid(self) -> Point[Scalar]:
         """
         Returns centroid of the multipolygon.
 
@@ -675,7 +675,7 @@ class Multipolygon(Indexable, Shaped):
         return sum(polygon.perimeter for polygon in self.polygons)
 
     @property
-    def polygons(self) -> List[Polygon]:
+    def polygons(self) -> Sequence[Polygon[Coordinate]]:
         """
         Returns polygons of the multipolygon.
 
@@ -709,7 +709,7 @@ class Multipolygon(Indexable, Shaped):
         """
         return list(self._polygons)
 
-    def distance_to(self, other: Geometry) -> Scalar:
+    def distance_to(self, other: Geometry[Coordinate]) -> Scalar:
         """
         Returns distance between the multipolygon and the other geometry.
 
@@ -811,7 +811,7 @@ class Multipolygon(Indexable, Shaped):
                                polygons,
                                context=context)
 
-    def locate(self, point: Point) -> Location:
+    def locate(self, point: Point[Coordinate]) -> Location:
         """
         Finds location of the point relative to the multipolygon.
 
@@ -859,7 +859,7 @@ class Multipolygon(Indexable, Shaped):
         """
         return self._locate(point)
 
-    def relate(self, other: Compound) -> Relation:
+    def relate(self, other: Compound[Coordinate]) -> Relation:
         """
         Finds relation between the multipolygon and the other geometry.
 
@@ -904,9 +904,10 @@ class Multipolygon(Indexable, Shaped):
                                    else other.relate(self).complement)))))
 
     def rotate(self,
-               cosine: Scalar,
-               sine: Scalar,
-               point: Optional[Point] = None) -> 'Multipolygon':
+               cosine: Coordinate,
+               sine: Coordinate,
+               point: Optional[Point[Coordinate]] = None
+               ) -> 'Multipolygon[Coordinate]':
         """
         Rotates the multipolygon by given cosine & sine around given point.
 
@@ -960,8 +961,8 @@ class Multipolygon(Indexable, Shaped):
                 context.point_cls, context.polygon_cls))
 
     def scale(self,
-              factor_x: Scalar,
-              factor_y: Optional[Scalar] = None) -> Compound:
+              factor_x: Coordinate,
+              factor_y: Optional[Coordinate] = None) -> Compound[Coordinate]:
         """
         Scales the multipolygon by given factor.
 
@@ -1018,8 +1019,8 @@ class Multipolygon(Indexable, Shaped):
                 context.segment_cls))
 
     def translate(self,
-                  step_x: Scalar,
-                  step_y: Scalar) -> 'Multipolygon':
+                  step_x: Coordinate,
+                  step_y: Coordinate) -> 'Multipolygon[Coordinate]':
         """
         Translates the multipolygon by given step.
 
@@ -1059,8 +1060,9 @@ class Multipolygon(Indexable, Shaped):
         ...                            Point(9, 8)])])]))
         True
         """
-        return self._context.multipolygon_cls([polygon.translate(step_x, step_y)
-                                               for polygon in self.polygons])
+        return self._context.multipolygon_cls(
+                [polygon.translate(step_x, step_y)
+                 for polygon in self.polygons])
 
     def validate(self) -> None:
         """
@@ -1107,18 +1109,19 @@ class Multipolygon(Indexable, Shaped):
             raise ValueError('Polygons should only touch each other '
                              'in discrete number of points.')
 
-    def _as_multiregion(self) -> Sequence[Contour]:
+    def _as_multiregion(self) -> Sequence[Contour[Coordinate]]:
         return [polygon.border for polygon in self.polygons]
 
-    def _distance_to_point(self, other: Point) -> Scalar:
+    def _distance_to_point(self, other: Point[Coordinate]) -> Scalar:
         return non_negative_min(polygon._distance_to_point(other)
                                 for polygon in self.polygons)
 
-    def _distance_to_segment(self, other: Segment) -> Scalar:
+    def _distance_to_segment(self, other: Segment[Coordinate]) -> Scalar:
         return non_negative_min(polygon._distance_to_segment(other)
                                 for polygon in self.polygons)
 
-    def _intersect_with_multipolygon(self, other: 'Multipolygon') -> Compound:
+    def _intersect_with_multipolygon(self, other: 'Multipolygon[Coordinate]'
+                                     ) -> Compound[Coordinate]:
         return (complete_intersect_multipolygons(self, other,
                                                  context=self._context)
                 if (_multipolygon_has_holes(self)
@@ -1127,12 +1130,14 @@ class Multipolygon(Indexable, Shaped):
                                                      other._as_multiregion(),
                                                      context=self._context))
 
-    def _intersect_with_multisegment(self, multisegment: Multisegment
-                                     ) -> Compound:
-        return complete_intersect_multisegment_with_multipolygon(multisegment,
-                                                                 self)
+    def _intersect_with_multisegment(self, other: Multisegment[Coordinate]
+                                     ) -> Compound[Coordinate]:
+        return complete_intersect_multisegment_with_multipolygon(
+                other, self,
+                context=self._context)
 
-    def _intersect_with_polygon(self, other: Polygon) -> Compound:
+    def _intersect_with_polygon(self, other: Polygon[Coordinate]
+                                ) -> Compound[Coordinate]:
         return (complete_intersect_polygon_with_multipolygon(
                 other, self,
                 context=self._context)
@@ -1141,17 +1146,20 @@ class Multipolygon(Indexable, Shaped):
                 other.border, self._as_multiregion(),
                 context=self._context))
 
-    def _subtract_from_multisegment(self, other: Multisegment) -> Compound:
+    def _subtract_from_multisegment(self, other: Multisegment[Coordinate]
+                                    ) -> Compound[Coordinate]:
         return subtract_multipolygon_from_multisegment(other, self,
                                                        context=self._context)
 
-    def _symmetric_subtract_from_multisegment(self, other: Multisegment
-                                              ) -> Compound:
+    def _symmetric_subtract_from_multisegment(self,
+                                              other: Multisegment[Coordinate]
+                                              ) -> Compound[Coordinate]:
         return symmetric_subtract_multipolygon_from_multisegment(
                 other, self,
                 context=self._context)
 
-    def _unite_with_multipoint(self, other: Multipoint) -> Compound:
+    def _unite_with_multipoint(self, other: Multipoint[Coordinate]
+                               ) -> Compound[Coordinate]:
         context = self._context
         return pack_mix(other - self, context.empty, self, context.empty,
                         context.mix_cls)

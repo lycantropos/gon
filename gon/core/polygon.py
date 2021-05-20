@@ -18,7 +18,8 @@ from clipping.planar import (complete_intersect_multisegment_with_polygon,
                              unite_polygons,
                              unite_segment_with_polygon)
 from ground.base import Context
-from ground.hints import Scalar
+from ground.hints import (Point,
+                          Scalar)
 from locus import segmental
 from orient.planar import (contour_in_polygon,
                            multisegment_in_polygon,
@@ -37,13 +38,13 @@ from .compound import (Compound,
                        Relation,
                        Shaped)
 from .contour import Contour
-from .geometry import Geometry
+from .geometry import (Coordinate,
+                       Geometry)
 from .iterable import (flatten,
                        non_negative_min)
 from .multipoint import Multipoint
 from .multisegment import Multisegment
 from .packing import pack_mix
-from .point import Point
 from .rotating import (point_to_step,
                        rotate_polygon_around_origin,
                        rotate_translate_polygon)
@@ -56,13 +57,14 @@ from .utils import (to_point_nearest_segment,
 Triangulation = Triangulation
 
 
-class Polygon(Indexable, Shaped):
+class Polygon(Indexable[Coordinate], Shaped[Coordinate]):
     __slots__ = ('_border', '_holes', '_holes_set', '_locate',
                  '_point_nearest_edge', '_segment_nearest_edge')
 
     def __init__(self,
-                 border: Contour,
-                 holes: Optional[Sequence[Contour]] = None) -> None:
+                 border: Contour[Coordinate],
+                 holes: Optional[Sequence[Contour[Coordinate]]] = None
+                 ) -> None:
         """
         Initializes polygon.
 
@@ -510,15 +512,16 @@ class Polygon(Indexable, Shaped):
                        (self._symmetric_subtract_from_multisegment(
                                self._context.multisegment_cls(other.edges))
                         if isinstance(other, Contour)
-                        else (symmetric_subtract_polygons(self, other,
-                                                          context=self._context)
-                              if isinstance(other, Polygon)
-                              else NotImplemented)))))
+                        else
+                        (symmetric_subtract_polygons(self, other,
+                                                     context=self._context)
+                         if isinstance(other, Polygon)
+                         else NotImplemented)))))
 
     __rxor__ = __xor__
 
     @property
-    def area(self) -> Scalar:
+    def area(self) -> Coordinate:
         """
         Returns area of the polygon.
 

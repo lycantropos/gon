@@ -11,7 +11,8 @@ from .core.compound import (Compound,
                             Shaped)
 from .core.contour import Contour as _Contour
 from .core.empty import Empty as _Empty
-from .core.geometry import Geometry
+from .core.geometry import (Coordinate as _Coordinate,
+                            Geometry)
 from .core.mix import Mix as _Mix
 from .core.multipoint import Multipoint as _Multipoint
 from .core.multipolygon import Multipolygon as _Multipolygon
@@ -50,35 +51,35 @@ class Empty(_ContextMixin, _Empty):
 EMPTY = Empty()
 
 
-class Point(_ContextMixin, _Point):
+class Point(_ContextMixin, _Point[_Coordinate]):
     __slots__ = ()
 
 
-class Contour(_ContextMixin, _Contour):
+class Contour(_ContextMixin, _Contour[_Coordinate]):
     __slots__ = ()
 
 
-class Mix(_ContextMixin, _Mix):
+class Mix(_ContextMixin, _Mix[_Coordinate]):
     __slots__ = ()
 
 
-class Multipoint(_ContextMixin, _Multipoint):
+class Multipoint(_ContextMixin, _Multipoint[_Coordinate]):
     __slots__ = ()
 
 
-class Segment(_ContextMixin, _Segment):
+class Segment(_ContextMixin, _Segment[_Coordinate]):
     __slots__ = ()
 
 
-class Multisegment(_ContextMixin, _Multisegment):
+class Multisegment(_ContextMixin, _Multisegment[_Coordinate]):
     __slots__ = ()
 
 
-class Polygon(_ContextMixin, _Polygon):
+class Polygon(_ContextMixin, _Polygon[_Coordinate]):
     __slots__ = ()
 
 
-class Multipolygon(_ContextMixin, _Multipolygon):
+class Multipolygon(_ContextMixin, _Multipolygon[_Coordinate]):
     __slots__ = ()
 
 
