@@ -604,7 +604,7 @@ class Multipolygon(Indexable, Shaped):
         >>> multipolygon.area == 128
         True
         """
-        return sum(polygon.area for polygon in self._polygons)
+        return sum(polygon.area for polygon in self.polygons)
 
     @property
     def centroid(self) -> Point:
@@ -672,7 +672,7 @@ class Multipolygon(Indexable, Shaped):
         >>> multipolygon.perimeter == 128
         True
         """
-        return sum(polygon.perimeter for polygon in self._polygons)
+        return sum(polygon.perimeter for polygon in self.polygons)
 
     @property
     def polygons(self) -> List[Polygon]:
@@ -762,7 +762,7 @@ class Multipolygon(Indexable, Shaped):
                                       for edge in other.edges)
                      if isinstance(other, Polygon)
                      else ((non_negative_min(self._distance_to_segment(edge)
-                                             for polygon in other._polygons
+                                             for polygon in other.polygons
                                              for edge in polygon.edges)
                             if self.disjoint(other)
                             else 0)
@@ -800,7 +800,7 @@ class Multipolygon(Indexable, Shaped):
         ...                            Point(8, 6)])])])
         >>> multipolygon.index()
         """
-        polygons = self._polygons
+        polygons = self.polygons
         for polygon in polygons:
             polygon.index()
         context = self._context
@@ -1010,10 +1010,10 @@ class Multipolygon(Indexable, Shaped):
                 [scale_polygon(polygon, factor_x, factor_y,
                                context.contour_cls, context.point_cls,
                                context.polygon_cls)
-                 for polygon in self._polygons])
+                 for polygon in self.polygons])
                 if factor_x and factor_y
                 else scale_vertices_degenerate(
-                flatten(polygon.border.vertices for polygon in self._polygons),
+                flatten(polygon.border.vertices for polygon in self.polygons),
                 factor_x, factor_y, context.multipoint_cls, context.point_cls,
                 context.segment_cls))
 
@@ -1060,7 +1060,7 @@ class Multipolygon(Indexable, Shaped):
         True
         """
         return self._context.multipolygon_cls([polygon.translate(step_x, step_y)
-                                               for polygon in self._polygons])
+                                               for polygon in self.polygons])
 
     def validate(self) -> None:
         """
@@ -1092,15 +1092,15 @@ class Multipolygon(Indexable, Shaped):
         ...                            Point(8, 6)])])])
         >>> multipolygon.validate()
         """
-        if len(self._polygons) < MIN_MULTIPOLYGON_POLYGONS_COUNT:
+        if len(self.polygons) < MIN_MULTIPOLYGON_POLYGONS_COUNT:
             raise ValueError('Multipolygon should have '
                              'at least {min_size} polygons, '
                              'but found {size}.'
                              .format(min_size=MIN_MULTIPOLYGON_POLYGONS_COUNT,
-                                     size=len(self._polygons)))
-        elif len(self._polygons) > len(self._polygons_set):
+                                     size=len(self.polygons)))
+        elif len(self.polygons) > len(self._polygons_set):
             raise ValueError('Duplicate polygons found.')
-        for polygon in self._polygons:
+        for polygon in self.polygons:
             polygon.validate()
         if segments_cross_or_overlap(
                 list(flatten(polygon.edges for polygon in self.polygons))):
@@ -1108,15 +1108,15 @@ class Multipolygon(Indexable, Shaped):
                              'in discrete number of points.')
 
     def _as_multiregion(self) -> Sequence[Contour]:
-        return [polygon.border for polygon in self._polygons]
+        return [polygon.border for polygon in self.polygons]
 
     def _distance_to_point(self, other: Point) -> Scalar:
         return non_negative_min(polygon._distance_to_point(other)
-                                for polygon in self._polygons)
+                                for polygon in self.polygons)
 
     def _distance_to_segment(self, other: Segment) -> Scalar:
         return non_negative_min(polygon._distance_to_segment(other)
-                                for polygon in self._polygons)
+                                for polygon in self.polygons)
 
     def _intersect_with_multipolygon(self, other: 'Multipolygon') -> Compound:
         return (complete_intersect_multipolygons(self, other,
@@ -1152,8 +1152,9 @@ class Multipolygon(Indexable, Shaped):
                 context=self._context)
 
     def _unite_with_multipoint(self, other: Multipoint) -> Compound:
-        return pack_mix(other - self, self._context.empty, self,
-                        self._context.empty, self._context.mix_cls)
+        context = self._context
+        return pack_mix(other - self, context.empty, self, context.empty,
+                        context.mix_cls)
 
     def _unite_with_multisegment(self, other: Multisegment) -> Compound:
         return unite_multisegment_with_multipolygon(other, self,
