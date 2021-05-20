@@ -13,7 +13,8 @@ from clipping.planar import (complete_intersect_multisegments,
                              unite_multisegments,
                              unite_segment_with_multisegment)
 from ground.base import Context
-from ground.hints import Scalar
+from ground.hints import (Point,
+                          Scalar)
 from locus import segmental
 from orient.planar import (contour_in_contour,
                            multisegment_in_contour,
@@ -29,13 +30,13 @@ from .compound import (Compound,
                        Linear,
                        Location,
                        Relation)
-from .geometry import Geometry
+from .geometry import (Coordinate,
+                       Geometry)
 from .iterable import (non_negative_min,
                        shift_sequence)
 from .multipoint import Multipoint
 from .multisegment import Multisegment
 from .packing import pack_mix
-from .point import Point
 from .rotating import (point_to_step,
                        rotate_contour_around_origin,
                        rotate_translate_contour)
@@ -47,11 +48,11 @@ from .utils import (relate_multipoint_to_linear_compound,
                     to_segment_nearest_segment)
 
 
-class Contour(Indexable, Linear):
+class Contour(Indexable[Coordinate], Linear[Coordinate]):
     __slots__ = ('_edges', '_locate', '_min_index', '_point_nearest_edge',
                  '_segment_nearest_edge', '_vertices')
 
-    def __init__(self, vertices: Sequence[Point]) -> None:
+    def __init__(self, vertices: Sequence[Point[Coordinate]]) -> None:
         """
         Initializes contour.
 
@@ -75,7 +76,7 @@ class Contour(Indexable, Linear):
 
     __repr__ = generate_repr(__init__)
 
-    def __and__(self, other: Compound) -> Compound:
+    def __and__(self, other: Compound[Coordinate]) -> Compound[Coordinate]:
         """
         Returns intersection of the contour with the other geometry.
 
@@ -108,7 +109,7 @@ class Contour(Indexable, Linear):
 
     __rand__ = __and__
 
-    def __contains__(self, point: Point) -> bool:
+    def __contains__(self, point: Point[Coordinate]) -> bool:
         """
         Checks if the contour contains the point.
 
@@ -127,7 +128,7 @@ class Contour(Indexable, Linear):
         """
         return bool(self.locate(point))
 
-    def __eq__(self, other: 'Contour') -> bool:
+    def __eq__(self, other: 'Contour[Coordinate]') -> bool:
         """
         Checks if contours are equal.
 
@@ -152,7 +153,7 @@ class Contour(Indexable, Linear):
                     if isinstance(other, Contour)
                     else NotImplemented))
 
-    def __ge__(self, other: Compound) -> bool:
+    def __ge__(self, other: Compound[Coordinate]) -> bool:
         """
         Checks if the contour is a superset of the other geometry.
 
@@ -180,7 +181,7 @@ class Contour(Indexable, Linear):
                     if isinstance(other, Compound)
                     else NotImplemented))
 
-    def __gt__(self, other: Compound) -> bool:
+    def __gt__(self, other: Compound[Coordinate]) -> bool:
         """
         Checks if the contour is a strict superset of the other geometry.
 
@@ -234,7 +235,7 @@ class Contour(Indexable, Linear):
                         is Orientation.COUNTERCLOCKWISE)
                     else _vertices.rotate_positions(vertices))
 
-    def __le__(self, other: Compound) -> bool:
+    def __le__(self, other: Compound[Coordinate]) -> bool:
         """
         Checks if the contour is a subset of the other geometry.
 
@@ -263,7 +264,7 @@ class Contour(Indexable, Linear):
                      if isinstance(other, Linear)
                      else NotImplemented))
 
-    def __lt__(self, other: Compound) -> bool:
+    def __lt__(self, other: Compound[Coordinate]) -> bool:
         """
         Checks if the contour is a strict subset of the other geometry.
 
@@ -291,7 +292,7 @@ class Contour(Indexable, Linear):
                      if isinstance(other, Linear)
                      else NotImplemented))
 
-    def __or__(self, other: Compound) -> Compound:
+    def __or__(self, other: Compound[Coordinate]) -> Compound[Coordinate]:
         """
         Returns union of the contour with the other geometry.
 
@@ -320,14 +321,13 @@ class Contour(Indexable, Linear):
                       (self._unite_with_multisegment(other)
                        if isinstance(other, Multisegment)
                        else
-                       (self._unite_with_multisegment(
-                               self._context.multisegment_cls(other._edges))
+                       (self._unite_with_multisegment(other._as_multisegment())
                         if isinstance(other, Contour)
                         else NotImplemented))))
 
     __ror__ = __or__
 
-    def __rsub__(self, other: Compound) -> Compound:
+    def __rsub__(self, other: Compound[Coordinate]) -> Compound[Coordinate]:
         """
         Returns difference of the other geometry with the contour.
 
@@ -347,7 +347,7 @@ class Contour(Indexable, Linear):
                       if isinstance(other, Multisegment)
                       else NotImplemented))
 
-    def __sub__(self, other: Compound) -> Compound:
+    def __sub__(self, other: Compound[Coordinate]) -> Compound[Coordinate]:
         """
         Returns difference of the contour with the other geometry.
 
@@ -377,7 +377,7 @@ class Contour(Indexable, Linear):
                         if isinstance(other, Contour)
                         else NotImplemented))))
 
-    def __xor__(self, other: Compound) -> Compound:
+    def __xor__(self, other: Compound[Coordinate]) -> Compound[Coordinate]:
         """
         Returns symmetric difference of the contour with the other geometry.
 
@@ -411,7 +411,7 @@ class Contour(Indexable, Linear):
     __rxor__ = __xor__
 
     @property
-    def centroid(self) -> Point:
+    def centroid(self) -> Point[Scalar]:
         """
         Returns centroid of the contour.
 
@@ -429,7 +429,7 @@ class Contour(Indexable, Linear):
         return self._context.contour_centroid(self)
 
     @property
-    def edges(self) -> Sequence[Segment]:
+    def edges(self) -> Sequence[Segment[Coordinate]]:
         """
         Returns edges of the contour.
 
@@ -466,11 +466,14 @@ class Contour(Indexable, Linear):
         True
         """
         vertices = self._vertices
-        return sum(vertices[index].distance_to(vertices[index - 1])
+        sqrt, points_squared_distance = (self._context.sqrt,
+                                         self._context.points_squared_distance)
+        return sum(sqrt(points_squared_distance(vertices[index],
+                                                vertices[index - 1]))
                    for index in range(len(vertices)))
 
     @property
-    def orientation(self) -> 'Orientation':
+    def orientation(self) -> Orientation:
         """
         Returns orientation of the contour.
 
@@ -490,7 +493,7 @@ class Contour(Indexable, Linear):
                 vertices[(min_index + 1) % len(vertices)])
 
     @property
-    def vertices(self) -> Sequence[Point]:
+    def vertices(self) -> Sequence[Point[Coordinate]]:
         """
         Returns vertices of the contour.
 
@@ -508,7 +511,7 @@ class Contour(Indexable, Linear):
         """
         return list(self._vertices)
 
-    def distance_to(self, other: Geometry) -> Scalar:
+    def distance_to(self, other: Geometry[Coordinate]) -> Scalar:
         """
         Returns distance between the contour and the other geometry.
 
@@ -562,7 +565,7 @@ class Contour(Indexable, Linear):
         self._point_nearest_edge = tree.nearest_to_point_segment
         self._segment_nearest_edge = tree.nearest_segment
 
-    def locate(self, point: Point) -> Location:
+    def locate(self, point: Point[Coordinate]) -> Location:
         """
         Finds location of the point relative to the contour.
 
@@ -582,7 +585,7 @@ class Contour(Indexable, Linear):
         """
         return self._locate(point)
 
-    def relate(self, other: Compound) -> Relation:
+    def relate(self, other: Compound[Coordinate]) -> Relation:
         """
         Finds relation between the contour and the other geometry.
 
@@ -608,7 +611,7 @@ class Contour(Indexable, Linear):
                                   if isinstance(other, Contour)
                                   else other.relate(self).complement))))
 
-    def reverse(self) -> 'Contour':
+    def reverse(self) -> 'Contour[Coordinate]':
         """
         Returns the reversed contour.
 
@@ -628,9 +631,10 @@ class Contour(Indexable, Linear):
                 _vertices.rotate_positions(self._vertices))
 
     def rotate(self,
-               cosine: Scalar,
-               sine: Scalar,
-               point: Optional[Point] = None) -> 'Contour':
+               cosine: Coordinate,
+               sine: Coordinate,
+               point: Optional[Point[Coordinate]] = None
+               ) -> 'Contour[Coordinate]':
         """
         Rotates the contour by given cosine & sine around given point.
 
@@ -658,8 +662,8 @@ class Contour(Indexable, Linear):
                 context.contour_cls, context.point_cls))
 
     def scale(self,
-              factor_x: Scalar,
-              factor_y: Optional[Scalar] = None) -> Compound:
+              factor_x: Coordinate,
+              factor_y: Optional[Coordinate] = None) -> Compound[Coordinate]:
         """
         Scales the contour by given factor.
 
@@ -689,7 +693,7 @@ class Contour(Indexable, Linear):
                                               context.point_cls,
                                               context.segment_cls))
 
-    def to_clockwise(self) -> 'Contour':
+    def to_clockwise(self) -> 'Contour[Coordinate]':
         """
         Returns the clockwise contour.
 
@@ -711,7 +715,7 @@ class Contour(Indexable, Linear):
                 if self.orientation is Orientation.CLOCKWISE
                 else self.reverse())
 
-    def to_counterclockwise(self) -> 'Contour':
+    def to_counterclockwise(self) -> 'Contour[Coordinate]':
         """
         Returns the counterclockwise contour.
 
@@ -734,7 +738,9 @@ class Contour(Indexable, Linear):
                 if self.orientation is Orientation.COUNTERCLOCKWISE
                 else self.reverse())
 
-    def translate(self, step_x: Scalar, step_y: Scalar) -> 'Contour':
+    def translate(self,
+                  step_x: Coordinate,
+                  step_y: Coordinate) -> 'Contour[Coordinate]':
         """
         Translates the contour by given step.
 
@@ -789,42 +795,46 @@ class Contour(Indexable, Linear):
         if edges_intersect(self):
             raise ValueError('Contour should not be self-intersecting.')
 
-    def _as_multisegment(self) -> Multisegment:
+    def _as_multisegment(self) -> Multisegment[Coordinate]:
         return self._context.multisegment_cls(self._edges)
 
-    def _distance_to_point(self, other: Point) -> Scalar:
+    def _distance_to_point(self, other: Point[Coordinate]) -> Scalar:
         return self._context.sqrt(self._context.segment_point_squared_distance(
                 self._point_nearest_edge(other), other))
 
-    def _distance_to_segment(self, other: Segment) -> Scalar:
+    def _distance_to_segment(self, other: Segment[Coordinate]) -> Scalar:
         return self._context.sqrt(self._context.segments_squared_distance(
                 self._segment_nearest_edge(other), other))
 
-    def _intersect_with_multisegment(self, other: Multisegment) -> Compound:
+    def _intersect_with_multisegment(self, other: Multisegment[Coordinate]
+                                     ) -> Compound[Coordinate]:
         return complete_intersect_multisegments(self._as_multisegment(), other,
                                                 context=self._context)
 
-    def _subtract_multisegment(self, other: Multisegment) -> Compound:
+    def _subtract_multisegment(self, other: Multisegment[Coordinate]
+                               ) -> Compound[Coordinate]:
         return subtract_multisegments(self._as_multisegment(), other,
                                       context=self._context)
 
-    def _symmetric_subtract_multisegment(self, other: Multisegment
-                                         ) -> Compound:
+    def _symmetric_subtract_multisegment(self, other: Multisegment[Coordinate]
+                                         ) -> Compound[Coordinate]:
         return symmetric_subtract_multisegments(self._as_multisegment(), other,
                                                 context=self._context)
 
-    def _unite_with_multipoint(self, other: Multipoint) -> Compound:
+    def _unite_with_multipoint(self, other: Multipoint[Coordinate]
+                               ) -> Compound[Coordinate]:
         context = self._context
         return pack_mix(other - self, self, context.empty, context.empty,
                         context.mix_cls)
 
-    def _unite_with_multisegment(self, other: Multisegment) -> Compound:
+    def _unite_with_multisegment(self, other: Multisegment[Coordinate]
+                                 ) -> Compound[Coordinate]:
         return unite_multisegments(self._as_multisegment(), other,
                                    context=self._context)
 
 
-def _locate_point(contour: Contour,
-                  point: Point,
+def _locate_point(contour: Contour[Coordinate],
+                  point: Point[Coordinate],
                   context: Context) -> Location:
     return (Location.BOUNDARY
             if point_in_contour(point, contour,

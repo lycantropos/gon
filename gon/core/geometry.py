@@ -1,13 +1,19 @@
 from abc import (ABC,
                  abstractmethod)
-from typing import Optional
+from numbers import Real
+from typing import (Generic,
+                    Optional,
+                    TypeVar)
 
 from ground.base import Context
 from ground.hints import (Point,
                           Scalar)
+from symba.base import Expression
+
+Coordinate = TypeVar('Coordinate', Real, Expression)
 
 
-class Geometry(ABC):
+class Geometry(Generic[Coordinate], ABC):
     __slots__ = ()
 
     @abstractmethod
@@ -18,23 +24,26 @@ class Geometry(ABC):
 
     @abstractmethod
     def rotate(self,
-               cosine: Scalar,
-               sine: Scalar,
-               point: Optional[Point] = None) -> 'Geometry':
+               cosine: Coordinate,
+               sine: Coordinate,
+               point: Optional[Point[Coordinate]] = None
+               ) -> 'Geometry[Coordinate]':
         """
         Rotates geometric object by given cosine & sine around given point.
         """
 
     @abstractmethod
     def scale(self,
-              factor_x: Scalar,
-              factor_y: Optional[Scalar] = None) -> 'Geometry':
+              factor_x: Coordinate,
+              factor_y: Optional[Coordinate] = None) -> 'Geometry[Coordinate]':
         """
         Scales geometric object by given factor.
         """
 
     @abstractmethod
-    def translate(self, step_x: Scalar, step_y: Scalar) -> 'Geometry':
+    def translate(self,
+                  step_x: Coordinate,
+                  step_y: Coordinate) -> 'Geometry[Coordinate]':
         """
         Translates geometric object by given step.
         """

@@ -14,18 +14,19 @@ from .compound import (Compound,
                        Relation,
                        Shaped)
 from .contracts import MIN_MIX_NON_EMPTY_COMPONENTS
-from .geometry import Geometry
+from .geometry import (Coordinate,
+                       Geometry)
 from .iterable import non_negative_min
 from .packing import pack_mix
 
 
-class Mix(Indexable):
+class Mix(Indexable[Coordinate]):
     __slots__ = '_components', '_discrete', '_linear', '_shaped'
 
     def __init__(self,
-                 discrete: Maybe[Multipoint],
-                 linear: Maybe[Linear],
-                 shaped: Maybe[Shaped]) -> None:
+                 discrete: Maybe[Multipoint[Coordinate]],
+                 linear: Maybe[Linear[Coordinate]],
+                 shaped: Maybe[Shaped[Coordinate]]) -> None:
         """
         Initializes mix.
 
@@ -39,7 +40,7 @@ class Mix(Indexable):
 
     __repr__ = generate_repr(__init__)
 
-    def __and__(self, other: Compound) -> Compound:
+    def __and__(self, other: Compound[Coordinate]) -> Compound[Coordinate]:
         """
         Returns intersection of the mix with the other geometry.
 
@@ -119,7 +120,7 @@ class Mix(Indexable):
 
     __rand__ = __and__
 
-    def __contains__(self, point: Point) -> bool:
+    def __contains__(self, point: Point[Coordinate]) -> bool:
         """
         Checks if the mix contains the point.
 
@@ -182,7 +183,7 @@ class Mix(Indexable):
         """
         return bool(self.locate(point))
 
-    def __eq__(self, other: 'Mix') -> bool:
+    def __eq__(self, other: 'Mix[Coordinate]') -> bool:
         """
         Checks if mixes are equal.
 
@@ -232,7 +233,7 @@ class Mix(Indexable):
                                  if isinstance(other, Mix)
                                  else NotImplemented)
 
-    def __ge__(self, other: Compound) -> bool:
+    def __ge__(self, other: Compound[Coordinate]) -> bool:
         """
         Checks if the mix is a superset of the other geometry.
 
@@ -291,7 +292,7 @@ class Mix(Indexable):
                     if isinstance(other, Compound)
                     else NotImplemented))
 
-    def __gt__(self, other: Compound) -> bool:
+    def __gt__(self, other: Compound[Coordinate]) -> bool:
         """
         Checks if the mix is a strict superset of the other geometry.
 
@@ -397,7 +398,7 @@ class Mix(Indexable):
         """
         return hash(self._components)
 
-    def __le__(self, other: Compound) -> bool:
+    def __le__(self, other: Compound[Coordinate]) -> bool:
         """
         Checks if the mix is a subset of the other geometry.
 
@@ -456,7 +457,7 @@ class Mix(Indexable):
                     if isinstance(other, Compound)
                     else NotImplemented))
 
-    def __lt__(self, other: Compound) -> bool:
+    def __lt__(self, other: Compound[Coordinate]) -> bool:
         """
         Checks if the mix is a strict subset of the other geometry.
 
@@ -514,7 +515,7 @@ class Mix(Indexable):
                      if isinstance(other, Compound)
                      else NotImplemented))
 
-    def __or__(self, other: Compound) -> Compound:
+    def __or__(self, other: Compound[Coordinate]) -> Compound[Coordinate]:
         """
         Returns union of the mix with the other geometry.
 
@@ -592,7 +593,7 @@ class Mix(Indexable):
 
     __ror__ = __or__
 
-    def __rsub__(self, other: Compound) -> Compound:
+    def __rsub__(self, other: Compound[Coordinate]) -> Compound[Coordinate]:
         """
         Returns difference of the other geometry with the mix.
 
@@ -630,7 +631,7 @@ class Mix(Indexable):
         return ((other - self.discrete) & (other - self.linear)
                 & other - self.shaped)
 
-    def __sub__(self, other: Compound) -> Compound:
+    def __sub__(self, other: Compound[Coordinate]) -> Compound[Coordinate]:
         """
         Returns difference of the mix with the other geometry.
 
@@ -680,7 +681,7 @@ class Mix(Indexable):
                         self.shaped - other, self._context.empty,
                         self._context.mix_cls)
 
-    def __xor__(self, other: Compound) -> Compound:
+    def __xor__(self, other: Compound[Coordinate]) -> Compound[Coordinate]:
         """
         Returns symmetric difference of the mix with the other geometry.
 
@@ -759,7 +760,7 @@ class Mix(Indexable):
     __rxor__ = __xor__
 
     @property
-    def centroid(self) -> Point:
+    def centroid(self) -> Point[Coordinate]:
         """
         Returns centroid of the mix.
 
@@ -809,7 +810,7 @@ class Mix(Indexable):
             self.linear if self.shaped is self._context.empty else self.shaped).centroid
 
     @property
-    def discrete(self) -> Maybe[Multipoint]:
+    def discrete(self) -> Maybe[Multipoint[Coordinate]]:
         """
         Returns disrete component of the mix.
 
@@ -832,7 +833,7 @@ class Mix(Indexable):
         return self._discrete
 
     @property
-    def shaped(self) -> Maybe[Shaped]:
+    def shaped(self) -> Maybe[Shaped[Coordinate]]:
         """
         Returns shaped component of the mix.
 
@@ -859,7 +860,7 @@ class Mix(Indexable):
         return self._shaped
 
     @property
-    def linear(self) -> Maybe[Linear]:
+    def linear(self) -> Maybe[Linear[Coordinate]]:
         """
         Returns linear component of the mix.
 
@@ -881,7 +882,7 @@ class Mix(Indexable):
         """
         return self._linear
 
-    def distance_to(self, other: Geometry) -> Scalar:
+    def distance_to(self, other: Geometry[Coordinate]) -> Scalar:
         """
         Returns distance between the mix and the other geometry.
 
@@ -984,7 +985,7 @@ class Mix(Indexable):
         if isinstance(self.shaped, Indexable):
             self.shaped.index()
 
-    def locate(self, point: Point) -> Location:
+    def locate(self, point: Point[Coordinate]) -> Location:
         """
         Finds location of the point relative to the mix.
 
@@ -1051,7 +1052,7 @@ class Mix(Indexable):
                 return location
         return Location.EXTERIOR
 
-    def relate(self, other: Compound) -> Relation:
+    def relate(self, other: Compound[Coordinate]) -> Relation:
         """
         Finds relation between the mix and the other geometry.
 
@@ -1108,9 +1109,9 @@ class Mix(Indexable):
                                   else other.relate(self).complement))))
 
     def rotate(self,
-               cosine: Scalar,
-               sine: Scalar,
-               point: Optional[Point] = None) -> 'Mix':
+               cosine: Coordinate,
+               sine: Coordinate,
+               point: Optional[Point[Coordinate]] = None) -> 'Mix[Coordinate]':
         """
         Rotates the mix by given cosine & sine around given point.
 
@@ -1169,8 +1170,8 @@ class Mix(Indexable):
                                      self.shaped.rotate(cosine, sine, point))
 
     def scale(self,
-              factor_x: Scalar,
-              factor_y: Optional[Scalar] = None) -> Compound:
+              factor_x: Coordinate,
+              factor_y: Optional[Coordinate] = None) -> Compound[Coordinate]:
         """
         Scales the mix by given factor.
 
@@ -1238,7 +1239,9 @@ class Mix(Indexable):
                       self._context.multipoint_cls(
                               [self._context.point_cls(factor_x, factor_y)])))
 
-    def translate(self, step_x: Scalar, step_y: Scalar) -> 'Mix':
+    def translate(self,
+                  step_x: Coordinate,
+                  step_y: Coordinate) -> 'Mix[Coordinate]':
         """
         Translates the mix by given step.
 
@@ -1365,12 +1368,12 @@ class Mix(Indexable):
                              in (Relation.OVERLAP, Relation.COMPOSITE)
                              for hole in polygon.holes)
                       for polygon in (self.shaped.polygons
-                                      if isinstance(self.shaped, Multipolygon)
-                                      else [self.shaped]))):
+                if isinstance(self.shaped, Multipolygon)
+                else [self.shaped]))):
             raise ValueError('Linear component should not overlap '
                              'shaped component borders.')
 
-    def _relate_linear(self, other: Linear) -> Relation:
+    def _relate_linear(self, other: Linear[Coordinate]) -> Relation:
         if self.shaped is self._context.empty:
             linear_relation = self.linear.relate(other)
             if linear_relation is Relation.DISJOINT:
@@ -1415,7 +1418,7 @@ class Mix(Indexable):
             else:
                 return shaped_relation
 
-    def _relate_mix(self, other: 'Mix') -> Relation:
+    def _relate_mix(self, other: 'Mix[Coordinate]') -> Relation:
         if self.shaped is other.shaped is self._context.empty:
             linear_components_relation = self.linear.relate(other.linear)
             if linear_components_relation is Relation.DISJOINT:
@@ -1846,7 +1849,7 @@ class Mix(Indexable):
         else:
             return shaped_components_relation
 
-    def _relate_discrete(self, other: Multipoint) -> Relation:
+    def _relate_discrete(self, other: Multipoint[Coordinate]) -> Relation:
         if self.shaped is self._context.empty:
             linear_relation = self.linear.relate(other)
             if linear_relation is Relation.DISJOINT:
@@ -1924,7 +1927,7 @@ class Mix(Indexable):
                 else:
                     return linear_relation
 
-    def _relate_shaped(self, other: Shaped) -> Relation:
+    def _relate_shaped(self, other: Shaped[Coordinate]) -> Relation:
         if self.shaped is self._context.empty:
             linear_relation = self.linear.relate(other)
             if (linear_relation is Relation.DISJOINT
