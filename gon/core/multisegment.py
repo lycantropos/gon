@@ -430,7 +430,7 @@ class Multisegment(Indexable, Linear):
         >>> multisegment.length == 2
         True
         """
-        return sum(segment.length for segment in self._segments)
+        return sum(segment.length for segment in self.segments)
 
     @property
     def segments(self) -> List[Segment]:
@@ -501,7 +501,7 @@ class Multisegment(Indexable, Linear):
         """
         self._locate = Graph.from_multisegment(self,
                                                context=self._context).locate
-        tree = segmental.Tree(self._segments)
+        tree = segmental.Tree(self.segments)
         self._point_nearest_segment = tree.nearest_to_point_segment
         self._segment_nearest_segment = tree.nearest_segment
 
@@ -582,14 +582,14 @@ class Multisegment(Indexable, Linear):
                 [rotate_segment_around_origin(segment, cosine, sine,
                                               context.point_cls,
                                               context.segment_cls)
-                 for segment in self._segments]
+                 for segment in self.segments]
                 if point is None
                 else [rotate_translate_segment(segment, cosine, sine,
                                                *point_to_step(point, cosine,
                                                               sine),
                                                context.point_cls,
                                                context.segment_cls)
-                      for segment in self._segments])
+                      for segment in self.segments])
 
     def scale(self,
               factor_x: Scalar,
@@ -621,9 +621,9 @@ class Multisegment(Indexable, Linear):
                 [scale_segment(segment, factor_x, factor_y,
                                context.multipoint_cls, context.point_cls,
                                context.segment_cls)
-                 for segment in self._segments])
+                 for segment in self.segments])
                 if factor_x and factor_y
-                else (scale_segments(self._segments, factor_x, factor_y,
+                else (scale_segments(self.segments, factor_x, factor_y,
                                      context.empty, context.mix_cls,
                                      context.multipoint_cls,
                                      context.multisegment_cls,
@@ -655,8 +655,9 @@ class Multisegment(Indexable, Linear):
         ...                   Segment(Point(1, 3), Point(2, 3))]))
         True
         """
-        return self._context.multisegment_cls([segment.translate(step_x, step_y)
-                                               for segment in self._segments])
+        return self._context.multisegment_cls(
+                [segment.translate(step_x, step_y)
+                 for segment in self.segments])
 
     def validate(self) -> None:
         """
@@ -674,7 +675,7 @@ class Multisegment(Indexable, Linear):
         ...                              Segment(Point(0, 1), Point(1, 1))])
         >>> multisegment.validate()
         """
-        segments = self._segments
+        segments = self.segments
         if len(segments) < MIN_MULTISEGMENT_SEGMENTS_COUNT:
             raise ValueError('Multisegment should have '
                              'at least {min_size} segments, '
