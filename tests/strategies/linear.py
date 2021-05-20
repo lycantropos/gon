@@ -85,6 +85,7 @@ invalid_multisegments = ((empty_sequences
                           | to_segments_rotations(rational_segments)
                           | to_repeated_segments(segments))
                          .map(Multisegment))
+invalid_linear_geometries = invalid_segments | invalid_multisegments
 small_contours = (
     strategies.builds(Contour,
                       coordinates_strategies
