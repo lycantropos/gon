@@ -18,6 +18,7 @@ from typing import (Any,
                     TypeVar)
 
 import pytest
+from clipping.planar import segments_to_multisegment
 from ground.base import get_context
 from hypothesis import strategies
 from hypothesis.strategies import SearchStrategy
@@ -33,7 +34,8 @@ from gon.base import (EMPTY,
                       Point,
                       Polygon,
                       Relation,
-                      Segment)
+                      Segment,
+                      Shaped)
 from gon.core.iterable import shift_sequence
 from gon.hints import Scalar
 
@@ -261,11 +263,11 @@ def mix_to_points(mix: Mix) -> Sequence[Point]:
 
 def mix_to_polygons(mix: Mix) -> Sequence[Polygon]:
     shaped = mix.shaped
-    return ([]
-            if shaped is EMPTY
-            else (shaped.polygons
-                  if isinstance(shaped, Multipolygon)
-                  else [shaped]))
+    return [] if shaped is EMPTY else shaped_to_polygons(shaped)
+
+
+def shaped_to_polygons(shaped: Shaped) -> Sequence[Polygon]:
+    return shaped.polygons if isinstance(shaped, Multipolygon) else [shaped]
 
 
 def mix_to_segments(mix: Mix) -> Sequence[Segment]:
@@ -308,3 +310,11 @@ def rotate_segment(segment: Segment,
 
 
 to_points_convex_hull = context.points_convex_hull
+
+
+def to_polygon_diagonals(polygon: Polygon) -> Sequence[Segment]:
+    border_vertices = polygon.border.vertices
+    diagonals = [Segment(vertex, border_vertices[next_index])
+                 for index, vertex in enumerate(border_vertices)
+                 for next_index in range(index + 2, len(border_vertices))]
+    return segments_to_multisegment(diagonals)

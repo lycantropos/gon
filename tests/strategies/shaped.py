@@ -69,3 +69,4 @@ invalid_multipolygons = strategies.builds(Multipolygon,
                                           | strategies.lists(invalid_polygons)
                                           | repeated_polygons
                                           | overlapping_polygons)
+invalid_shaped_geometries = invalid_polygons | invalid_multipolygons

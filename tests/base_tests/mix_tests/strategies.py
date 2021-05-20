@@ -1,77 +1,91 @@
 from itertools import chain
 
-from bentley_ottmann.planar import segments_cross_or_overlap
 from hypothesis import strategies
 
 from gon.base import (EMPTY,
                       Mix,
                       Multipoint,
-                      Multipolygon,
                       Multisegment,
-                      Segment)
+                      Shaped)
 from tests.strategies import (coordinates_strategies,
+                              coordinates_to_linear_geometries,
                               coordinates_to_mixes,
                               coordinates_to_multipoints,
-                              coordinates_to_multipolygons,
-                              coordinates_to_multisegments,
                               coordinates_to_points,
+                              coordinates_to_shaped_geometries,
+                              invalid_linear_geometries,
                               invalid_multipoints,
-                              invalid_multipolygons,
-                              invalid_multisegments)
+                              invalid_shaped_geometries)
 from tests.utils import (Strategy,
                          cleave_in_tuples,
                          flatten,
+                         shaped_to_polygons,
                          sub_lists,
                          to_pairs,
+                         to_polygon_diagonals,
                          to_triplets)
 
 mixes = coordinates_strategies.flatmap(coordinates_to_mixes)
 empty_geometries = strategies.just(EMPTY)
 multipoints = coordinates_strategies.flatmap(coordinates_to_multipoints)
-multisegments = coordinates_strategies.flatmap(coordinates_to_multisegments)
-multipolygons = coordinates_strategies.flatmap(coordinates_to_multipolygons)
+linear_geometries = (coordinates_strategies
+                     .flatmap(coordinates_to_linear_geometries))
+shaped_geometries = (coordinates_strategies
+                     .flatmap(coordinates_to_shaped_geometries))
 
 
-def multipolygon_to_invalid_mix(multipolygon: Multipolygon) -> Strategy[Mix]:
+def shaped_to_invalid_mix(shaped: Shaped) -> Strategy[Mix]:
+    polygons = shaped_to_polygons(shaped)
     vertices = list(flatten(chain(polygon.border.vertices,
                                   flatten(hole.vertices
                                           for hole in polygon.holes))
-                            for polygon in multipolygon.polygons))
-    edges = list(flatten(polygon.edges for polygon in multipolygon.polygons))
-    segments = edges + [Segment(vertices[index - 1], vertices[index])
-                        for index in range(len(vertices))]
-    return strategies.builds(
-            Mix,
-            empty_geometries | sub_lists(vertices).map(Multipoint),
-            sub_lists(segments)
-            .filter(lambda candidates: segments_cross_or_overlap(edges
-                                                                 + candidates))
-            .map(Multisegment),
-            strategies.just(multipolygon))
+                            for polygon in polygons))
+    edges = list(flatten(polygon.edges for polygon in polygons))
+    return (strategies.builds(Mix,
+                              sub_lists(vertices,
+                                        min_size=2)
+                              .map(Multipoint),
+                              empty_geometries,
+                              strategies.just(shaped))
+            | strategies.builds(Mix,
+                                empty_geometries,
+                                strategies.sampled_from(polygons)
+                                .map(to_polygon_diagonals),
+                                strategies.just(shaped))
+            | strategies.builds(Mix,
+                                empty_geometries,
+                                sub_lists(edges,
+                                          min_size=2)
+                                .map(Multisegment),
+                                strategies.just(shaped)))
 
 
-invalid_mixes = (multipolygons.flatmap(multipolygon_to_invalid_mix)
+invalid_mixes = (shaped_geometries.flatmap(shaped_to_invalid_mix)
                  | strategies.builds(Mix, empty_geometries | multipoints,
                                      empty_geometries, empty_geometries)
                  | strategies.builds(Mix, empty_geometries,
-                                     empty_geometries | multisegments,
+                                     empty_geometries | linear_geometries,
                                      empty_geometries)
                  | strategies.builds(Mix, empty_geometries, empty_geometries,
-                                     empty_geometries | multipolygons)
+                                     empty_geometries | shaped_geometries)
                  | strategies.builds(Mix, invalid_multipoints,
-                                     empty_geometries | multisegments,
-                                     multipolygons)
-                 | strategies.builds(Mix, invalid_multipoints, multisegments,
-                                     empty_geometries | multipolygons)
+                                     empty_geometries | linear_geometries,
+                                     shaped_geometries)
+                 | strategies.builds(Mix, invalid_multipoints,
+                                     linear_geometries,
+                                     empty_geometries | shaped_geometries)
                  | strategies.builds(Mix, empty_geometries | multipoints,
-                                     invalid_multisegments, multipolygons)
-                 | strategies.builds(Mix, multipoints, invalid_multisegments,
-                                     empty_geometries | multipolygons)
+                                     invalid_linear_geometries,
+                                     shaped_geometries)
                  | strategies.builds(Mix, multipoints,
-                                     empty_geometries | multisegments,
-                                     invalid_multipolygons)
+                                     invalid_linear_geometries,
+                                     empty_geometries | shaped_geometries)
+                 | strategies.builds(Mix, multipoints,
+                                     empty_geometries | linear_geometries,
+                                     invalid_shaped_geometries)
                  | strategies.builds(Mix, empty_geometries | multipoints,
-                                     multisegments, invalid_multipolygons))
+                                     linear_geometries,
+                                     invalid_shaped_geometries))
 mixes_with_points = (coordinates_strategies
                      .flatmap(cleave_in_tuples(coordinates_to_mixes,
                                                coordinates_to_points)))
