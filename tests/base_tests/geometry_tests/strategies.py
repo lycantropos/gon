@@ -12,7 +12,8 @@ from tests.strategies import (coordinates_strategies,
                               coordinates_to_segments,
                               rational_coordinates_strategies,
                               rational_cosines_sines,
-                              to_non_zero_coordinates)
+                              to_non_zero_coordinates,
+                              to_zero_coordinates)
 from tests.utils import (call,
                          cleave_in_tuples,
                          identity,
@@ -46,13 +47,19 @@ rational_geometries_with_non_zero_coordinates_pairs = strategies.builds(
 empty_compounds_with_coordinates_pairs = (
     coordinates_strategies.flatmap(cleave_in_tuples(empty_compounds_factory,
                                                     identity, identity)))
-geometries_with_coordinates_pairs = (
-    (strategies.builds(call,
-                       geometries_factories
-                       .map(lambda factory: cleave_in_tuples(factory, identity,
-                                                             identity)),
-                       coordinates_strategies)
-     .flatmap(identity)))
+geometries_with_coordinates_pairs = strategies.builds(
+        call,
+        geometries_factories.map(lambda factory
+                                 : cleave_in_tuples(factory,
+                                                    to_zero_coordinates,
+                                                    identity))
+        | geometries_factories.map(lambda factory
+                                   : cleave_in_tuples(factory, identity,
+                                                      to_zero_coordinates))
+        | geometries_factories.map(lambda factory
+                                   : cleave_in_tuples(factory, identity,
+                                                      identity)),
+        coordinates_strategies).flatmap(identity)
 rational_geometries_with_points = (
     (strategies.builds(call,
                        geometries_factories
