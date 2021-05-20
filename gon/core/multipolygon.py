@@ -1162,19 +1162,6 @@ class Multipolygon(Indexable, Shaped):
                                                     context=self._context)
 
 
-def _multipolygon_has_holes(multipolygon: Multipolygon) -> bool:
-    return any(polygon.holes for polygon in multipolygon.polygons)
-
-
-def _locate_point_in_polygons(polygons: Sequence[Polygon],
-                              point: Point) -> Location:
-    for polygon in polygons:
-        location = polygon.locate(point)
-        if location is not Location.EXTERIOR:
-            return location
-    return Location.EXTERIOR
-
-
 def _locate_point_in_indexed_polygons(tree: r.Tree,
                                       polygons: Sequence[Polygon],
                                       point: Point,
@@ -1186,3 +1173,16 @@ def _locate_point_in_indexed_polygons(tree: r.Tree,
         if location is not Location.EXTERIOR:
             return location
     return Location.EXTERIOR
+
+
+def _locate_point_in_polygons(polygons: Sequence[Polygon],
+                              point: Point) -> Location:
+    for polygon in polygons:
+        location = polygon.locate(point)
+        if location is not Location.EXTERIOR:
+            return location
+    return Location.EXTERIOR
+
+
+def _multipolygon_has_holes(multipolygon: Multipolygon) -> bool:
+    return any(polygon.holes for polygon in multipolygon.polygons)
