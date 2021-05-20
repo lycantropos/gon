@@ -431,7 +431,7 @@ class Contour(Indexable, Linear):
     @property
     def edges(self) -> Sequence[Segment]:
         """
-        Returns vertices of the contour.
+        Returns edges of the contour.
 
         Time complexity:
             ``O(vertices_count)``
