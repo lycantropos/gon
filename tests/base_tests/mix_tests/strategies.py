@@ -1,4 +1,3 @@
-from fractions import Fraction
 from itertools import chain
 
 from hypothesis import strategies
@@ -26,6 +25,7 @@ from tests.utils import (Strategy,
                          sub_lists,
                          to_pairs,
                          to_polygon_diagonals,
+                         to_rational_segment,
                          to_triplets)
 
 mixes = coordinates_strategies.flatmap(coordinates_to_mixes)
@@ -45,6 +45,7 @@ def shaped_to_invalid_mix(shaped: Shaped) -> Strategy[Mix]:
                             for polygon in polygons))
     edges = list(flatten(polygon.edges for polygon in polygons))
     scales = strategies.integers(2, 100)
+    rational_edges = strategies.sampled_from(edges).map(to_rational_segment)
     return (strategies.builds(Mix,
                               sub_lists(vertices,
                                         min_size=2)
@@ -54,14 +55,14 @@ def shaped_to_invalid_mix(shaped: Shaped) -> Strategy[Mix]:
             | strategies.builds(
                     Mix,
                     empty_geometries,
-                    strategies.builds(stretch_segment_end,
-                                      strategies.sampled_from(edges), scales),
+                    strategies.builds(stretch_segment_end, rational_edges,
+                                      scales),
                     strategies.just(shaped))
             | strategies.builds(
                     Mix,
                     empty_geometries,
-                    strategies.builds(stretch_segment_start,
-                                      strategies.sampled_from(edges), scales),
+                    strategies.builds(stretch_segment_start, rational_edges,
+                                      scales),
                     strategies.just(shaped))
             | strategies.builds(Mix,
                                 empty_geometries,
@@ -78,22 +79,18 @@ def shaped_to_invalid_mix(shaped: Shaped) -> Strategy[Mix]:
 
 def stretch_segment_end(segment: Segment, scale: Scalar) -> Segment:
     assert scale > 1
-    return Segment(
-            segment.start,
-            segment.end.translate(scale * (Fraction(segment.end.x)
-                                           - Fraction(segment.start.x)),
-                                  scale * (Fraction(segment.end.y)
-                                           - Fraction(segment.start.y))))
+    return Segment(segment.start,
+                   segment.end
+                   .translate(scale * (segment.end.x - segment.start.x),
+                              scale * (segment.end.y - segment.start.y)))
 
 
 def stretch_segment_start(segment: Segment, scale: Scalar) -> Segment:
     assert scale > 1
-    return Segment(
-            segment.start.translate(scale * (Fraction(segment.start.x)
-                                             - Fraction(segment.end.x)),
-                                    scale * (Fraction(segment.start.y)
-                                             - Fraction(segment.end.y))),
-            segment.end)
+    return Segment(segment.start
+                   .translate(scale * (segment.start.x - segment.end.x),
+                              scale * (segment.start.y - segment.end.y)),
+                   segment.end)
 
 
 invalid_mixes = (shaped_geometries.flatmap(shaped_to_invalid_mix)

@@ -318,3 +318,12 @@ def to_polygon_diagonals(polygon: Polygon) -> Multisegment:
                  for index, vertex in enumerate(border_vertices)
                  for next_index in range(index + 2, len(border_vertices))]
     return segments_to_multisegment(diagonals)
+
+
+def to_rational_segment(segment: Segment) -> Segment:
+    return Segment(to_rational_point(segment.start),
+                   to_rational_point(segment.end))
+
+
+def to_rational_point(point: Point) -> Point:
+    return Point(Fraction(point.x), Fraction(point.y))
