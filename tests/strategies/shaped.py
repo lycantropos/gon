@@ -1,4 +1,5 @@
 from itertools import repeat
+from typing import Tuple
 
 from hypothesis import strategies
 from hypothesis_geometry import planar
@@ -7,6 +8,8 @@ from gon.base import (Contour,
                       Multipolygon,
                       Polygon)
 from tests.utils import (Strategy,
+                         arg_min,
+                         divide_by_int,
                          lift,
                          sub_lists,
                          to_points_convex_hull)
@@ -46,8 +49,23 @@ invalid_polygons = (
 repeated_polygons = (strategies.builds(repeat, polygons,
                                        strategies.integers(2, 100))
                      .map(list))
+
+
+def to_polygon_with_overlapping_polygon(polygon: Polygon
+                                        ) -> Tuple[Polygon, Polygon]:
+    border_vertices = polygon.border.vertices
+    min_vertex_index = arg_min(border_vertices)
+    min_vertex, other_vertex = (border_vertices[min_vertex_index],
+                                border_vertices[min_vertex_index - 1])
+    return (polygon,
+            polygon.translate(divide_by_int(other_vertex.x - min_vertex.x, 2),
+                              divide_by_int(other_vertex.y - min_vertex.y, 2)))
+
+
+overlapping_polygons = polygons.map(to_polygon_with_overlapping_polygon)
 invalid_multipolygons = strategies.builds(Multipolygon,
                                           empty_sequences
                                           | polygons.map(lift)
                                           | strategies.lists(invalid_polygons)
-                                          | repeated_polygons)
+                                          | repeated_polygons
+                                          | overlapping_polygons)

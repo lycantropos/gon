@@ -134,6 +134,11 @@ def lift(value: Domain) -> List[Domain]:
     return [value]
 
 
+def arg_min(sequence: Sequence[Domain]) -> int:
+    return min(range(len(sequence)),
+               key=sequence.__getitem__)
+
+
 def not_all_unique(values: Iterable[Hashable]) -> bool:
     seen = set()
     seen_add = seen.add
