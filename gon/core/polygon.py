@@ -79,8 +79,8 @@ class Polygon(Indexable, Shaped):
                                   + sum(len(hole.vertices)\
  for hole in self.holes))
         """
-        self._holes = holes = tuple(holes or ())
-        self._border, self._holes_set = border, frozenset(holes)
+        self._border, self._holes, self._holes_set = (border, holes,
+                                                      frozenset(holes))
         context = self._context
         self._locate = partial(_locate_point, self,
                                context=context)
