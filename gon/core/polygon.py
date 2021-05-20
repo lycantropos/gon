@@ -79,6 +79,8 @@ class Polygon(Indexable, Shaped):
                                   + sum(len(hole.vertices)\
  for hole in self.holes))
         """
+        if holes is None:
+            holes = []
         self._border, self._holes, self._holes_set = (border, holes,
                                                       frozenset(holes))
         context = self._context
