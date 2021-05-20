@@ -15,7 +15,8 @@ from ground.hints import (Contour,
 from .contracts import (is_segment_horizontal,
                         is_segment_vertical)
 from .iterable import unique_ever_seen
-from .packing import (pack_points,
+from .packing import (pack_mix,
+                      pack_points,
                       pack_segments)
 
 
@@ -151,11 +152,7 @@ def scale_segments(segments: Iterable[Segment],
         else:
             scaled_points.append(scale_point(segment.start, factor_x, factor_y,
                                              point_cls))
-    discrete = pack_points(unique_ever_seen(scaled_points), empty,
-                           multipoint_cls)
-    linear = pack_segments(scaled_segments, empty, multisegment_cls)
-    return (mix_cls(discrete, linear, empty)
-            if discrete is not empty and linear is not empty
-            else (discrete
-                  if discrete is not empty
-                  else linear))
+    return pack_mix(pack_points(unique_ever_seen(scaled_points), empty,
+                                multipoint_cls),
+                    pack_segments(scaled_segments, empty, multisegment_cls),
+                    empty, empty, mix_cls)
