@@ -806,25 +806,8 @@ class Multipolygon(Indexable, Shaped):
         for polygon in polygons:
             polygon.index()
         context = self._context
-
-        def polygon_to_interval(polygon: Polygon,
-                                box_cls: Type[Box] = context.box_cls) -> Box:
-            border_vertices = iter(polygon.border._vertices)
-            first_vertex = next(border_vertices)
-            x_min = x_max = first_vertex.x
-            y_min = y_max = first_vertex.y
-            for vertex in border_vertices:
-                if vertex.x < x_min:
-                    x_min = vertex.x
-                elif vertex.x > x_max:
-                    x_max = vertex.x
-                if vertex.y < y_min:
-                    y_min = vertex.y
-                elif vertex.y > y_max:
-                    y_max = vertex.y
-            return box_cls(x_min, x_max, y_min, y_max)
-
-        tree = r.Tree([polygon_to_interval(polygon) for polygon in polygons],
+        to_polygon_box = context.polygon_box
+        tree = r.Tree([to_polygon_box(polygon) for polygon in polygons],
                       context=context)
         self._locate = partial(_locate_point_in_indexed_polygons, tree,
                                polygons,
