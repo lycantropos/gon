@@ -88,9 +88,10 @@ class Mix(Indexable):
         discrete_part = self.discrete & other
         linear_part = self.linear & other
         shaped_part = self.shaped & other
+        context = self._context
         if isinstance(linear_part, Multipoint):
             shaped_part |= linear_part
-            linear_part = self._context.empty
+            linear_part = context.empty
         elif isinstance(linear_part, Mix):
             shaped_part |= linear_part.discrete
             linear_part = linear_part.linear
@@ -99,22 +100,22 @@ class Mix(Indexable):
             if isinstance(linear_part, Mix):
                 discrete_part |= linear_part.discrete
                 linear_part = linear_part.linear
-            shaped_part = self._context.empty
+            shaped_part = context.empty
         elif isinstance(shaped_part, Linear):
             linear_part |= shaped_part
-            shaped_part = self._context.empty
+            shaped_part = context.empty
         elif isinstance(shaped_part, Mix):
             linear_part = (linear_part | shaped_part.linear
                            | shaped_part.discrete)
             shaped_part = shaped_part.shaped
         if isinstance(linear_part, Multipoint):
             discrete_part |= linear_part
-            linear_part = self._context.empty
+            linear_part = context.empty
         elif isinstance(linear_part, Mix):
             discrete_part |= linear_part.discrete
             linear_part = linear_part.linear
-        return pack_mix(discrete_part, linear_part, shaped_part,
-                        self._context.empty, self._context.mix_cls)
+        return pack_mix(discrete_part, linear_part, shaped_part, context.empty,
+                        context.mix_cls)
 
     __rand__ = __and__
 
@@ -559,32 +560,31 @@ class Mix(Indexable):
         >>> mix | mix == mix
         True
         """
+        context = self._context
         if isinstance(other, Multipoint):
-            return self._context.mix_cls(
-                    self.discrete | (other - self.shaped - self.linear),
-                    self.linear, self.shaped)
+            return context.mix_cls(self.discrete
+                                   | (other - self.shaped - self.linear),
+                                   self.linear, self.shaped)
         elif isinstance(other, Linear):
             discrete_part, linear_part = self.discrete, self.linear
             shaped_part = self.shaped | other
             if isinstance(shaped_part, Linear):
                 linear_part = linear_part | shaped_part | discrete_part
-                shaped_part = self._context.empty
+                shaped_part = context.empty
             elif isinstance(shaped_part, Mix):
                 linear_part = linear_part | shaped_part.linear | discrete_part
                 shaped_part = shaped_part.shaped
             else:
                 # other is subset of the shaped component
-                return pack_mix(discrete_part, linear_part,
-                                shaped_part, self._context.empty,
-                                self._context.mix_cls)
+                return pack_mix(discrete_part, linear_part, shaped_part,
+                                context.empty, context.mix_cls)
             if isinstance(linear_part, Mix):
                 discrete_part, linear_part = (linear_part.discrete,
                                               linear_part.linear)
             else:
-                discrete_part = self._context.empty
+                discrete_part = context.empty
             return pack_mix(discrete_part, linear_part, shaped_part,
-                            self._context.empty,
-                            self._context.mix_cls)
+                            context.empty, context.mix_cls)
         elif isinstance(other, (Shaped, Mix)):
             return self.shaped | other | self.linear | self.discrete
         else:
@@ -726,33 +726,31 @@ class Mix(Indexable):
         >>> mix ^ mix is EMPTY
         True
         """
+        context = self._context
         if isinstance(other, Multipoint):
             rest_other = other - self.shaped - self.linear
             return pack_mix(self.discrete ^ rest_other, self.linear,
-                            self.shaped, self._context.empty,
-                            self._context.mix_cls)
+                            self.shaped, context.empty, context.mix_cls)
         elif isinstance(other, Linear):
             discrete_part, linear_part = self.discrete, self.linear
             shaped_part = self.shaped ^ other
             if isinstance(shaped_part, Linear):
                 linear_part = linear_part ^ shaped_part ^ discrete_part
-                shaped_part = self._context.empty
+                shaped_part = context.empty
             elif isinstance(shaped_part, Mix):
                 linear_part = linear_part ^ shaped_part.linear ^ discrete_part
                 shaped_part = shaped_part.shaped
             else:
                 # other is subset of the shaped component
-                return pack_mix(discrete_part, linear_part,
-                                shaped_part, self._context.empty,
-                                self._context.mix_cls)
+                return pack_mix(discrete_part, linear_part, shaped_part,
+                                context.empty, context.mix_cls)
             if isinstance(linear_part, Mix):
                 discrete_part, linear_part = (linear_part.discrete,
                                               linear_part.linear)
             else:
-                discrete_part = self._context.empty
+                discrete_part = context.empty
             return pack_mix(discrete_part, linear_part, shaped_part,
-                            self._context.empty,
-                            self._context.mix_cls)
+                            context.empty, context.mix_cls)
         elif isinstance(other, (Shaped, Mix)):
             return self.shaped ^ other ^ self.linear ^ self.discrete
         else:
