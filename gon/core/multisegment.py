@@ -499,12 +499,11 @@ class Multisegment(Indexable, Linear):
         ...                              Segment(Point(0, 1), Point(1, 1))])
         >>> multisegment.index()
         """
-        if len(self._segments) > 1:
-            self._locate = Graph.from_multisegment(self,
-                                                   context=self._context).locate
-            tree = segmental.Tree(self._segments)
-            self._point_nearest_segment = tree.nearest_to_point_segment
-            self._segment_nearest_segment = tree.nearest_segment
+        self._locate = Graph.from_multisegment(self,
+                                               context=self._context).locate
+        tree = segmental.Tree(self._segments)
+        self._point_nearest_segment = tree.nearest_to_point_segment
+        self._segment_nearest_segment = tree.nearest_segment
 
     def locate(self, point: Point) -> Location:
         """
