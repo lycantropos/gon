@@ -1,3 +1,4 @@
+from fractions import Fraction
 from itertools import chain
 
 from hypothesis import strategies
@@ -77,16 +78,22 @@ def shaped_to_invalid_mix(shaped: Shaped) -> Strategy[Mix]:
 
 def stretch_segment_end(segment: Segment, scale: Scalar) -> Segment:
     assert scale > 1
-    return Segment(segment.start, segment.end.translate(
-            scale * (segment.end.x - segment.start.x),
-            scale * (segment.end.y - segment.start.y)))
+    return Segment(
+            segment.start,
+            segment.end.translate(scale * (Fraction(segment.end.x)
+                                           - Fraction(segment.start.x)),
+                                  scale * (Fraction(segment.end.y)
+                                           - Fraction(segment.start.y))))
 
 
 def stretch_segment_start(segment: Segment, scale: Scalar) -> Segment:
     assert scale > 1
-    return Segment(segment.start.translate(
-            scale * (segment.start.x - segment.end.x),
-            scale * (segment.start.y - segment.end.y)), segment.end)
+    return Segment(
+            segment.start.translate(scale * (Fraction(segment.start.x)
+                                             - Fraction(segment.end.x)),
+                                    scale * (Fraction(segment.start.y)
+                                             - Fraction(segment.end.y))),
+            segment.end)
 
 
 invalid_mixes = (shaped_geometries.flatmap(shaped_to_invalid_mix)
