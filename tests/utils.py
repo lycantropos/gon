@@ -13,6 +13,7 @@ from typing import (Any,
                     List,
                     Optional,
                     Sequence,
+                    Set,
                     Tuple,
                     Type,
                     TypeVar)
@@ -142,7 +143,7 @@ def arg_min(sequence: Sequence[Domain]) -> int:
 
 
 def not_all_unique(values: Iterable[Hashable]) -> bool:
-    seen = set()
+    seen = set()  # type: Set[Hashable]
     seen_add = seen.add
     for value in values:
         if value in seen:
@@ -164,19 +165,9 @@ def robust_invert(value: Scalar) -> Scalar:
     return 1 / Fraction(value)
 
 
-def scale_segment(segment: Segment,
-                  *,
-                  scale: Scalar) -> Segment:
-    return Segment(segment.start,
-                   Point(segment.start.x
-                         + scale * (segment.end.x - segment.start.x),
-                         segment.start.y
-                         + scale * (segment.end.y - segment.start.y)))
-
-
 def reflect_segment(segment: Segment) -> Segment:
-    return scale_segment(segment,
-                         scale=-1)
+    return scale_segment_end(segment,
+                             scale=-1)
 
 
 def reverse_segment(segment: Segment) -> Segment:
@@ -206,6 +197,16 @@ def shift_multipoint(multipoint: Multipoint, step: int) -> Multipoint:
 
 def shift_multisegment(multisegment: Multisegment, step: int) -> Multisegment:
     return Multisegment(shift_sequence(multisegment.segments, step))
+
+
+def scale_segment_end(segment: Segment[Scalar],
+                      scale: Scalar) -> Segment[Scalar]:
+    assert scale
+    return Segment(segment.start,
+                   Point(segment.start.x
+                         + scale * (segment.end.x - segment.start.x),
+                         segment.start.y
+                         + scale * (segment.end.y - segment.start.y)))
 
 
 def divide_by_int(dividend: Scalar, divisor: int) -> Scalar:
@@ -274,11 +275,9 @@ def mix_to_segments(mix: Mix) -> Sequence[Segment]:
     linear = mix.linear
     return ([]
             if linear is EMPTY
-            else (linear.segments
-                  if isinstance(linear, Multisegment)
-                  else (linear.edges
-                        if isinstance(linear, Contour)
-                        else [linear])))
+            else ([linear]
+                  if isinstance(linear, Segment)
+                  else linear.segments))
 
 
 def segment_to_rotations(segment: Segment,
@@ -320,10 +319,10 @@ def to_polygon_diagonals(polygon: Polygon) -> Multisegment:
     return segments_to_multisegment(diagonals)
 
 
-def to_rational_segment(segment: Segment) -> Segment:
+def to_rational_segment(segment: Segment[Real]) -> Segment[Fraction]:
     return Segment(to_rational_point(segment.start),
                    to_rational_point(segment.end))
 
 
-def to_rational_point(point: Point) -> Point:
+def to_rational_point(point: Point[Real]) -> Point[Fraction]:
     return Point(Fraction(point.x), Fraction(point.y))
