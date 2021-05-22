@@ -1,9 +1,6 @@
 from typing import Optional
 
 from ground.hints import (Maybe,
-                          Multipoint,
-                          Multipolygon,
-                          Point,
                           Scalar)
 from reprit.base import generate_repr
 
@@ -17,7 +14,9 @@ from .contracts import MIN_MIX_NON_EMPTY_COMPONENTS
 from .geometry import (Coordinate,
                        Geometry)
 from .iterable import non_negative_min
+from .multipoint import Multipoint
 from .packing import pack_mix
+from .point import Point
 
 
 class Mix(Indexable[Coordinate]):
@@ -780,8 +779,9 @@ class Mix(Indexable[Coordinate]):
         >>> mix.centroid == Point(3, 3)
         True
         """
-        return (
-            self.linear if self.shaped is self._context.empty else self.shaped).centroid
+        return (self.linear
+                if self.shaped is self._context.empty
+                else self.shaped).centroid
 
     @property
     def discrete(self) -> Maybe[Multipoint[Coordinate]]:
@@ -1325,9 +1325,11 @@ class Mix(Indexable[Coordinate]):
                       or any(hole.relate(self.linear)
                              in (Relation.OVERLAP, Relation.COMPOSITE)
                              for hole in polygon.holes)
-                      for polygon in (self.shaped.polygons
-                if isinstance(self.shaped, Multipolygon)
-                else [self.shaped]))):
+                      for polygon in (
+                              self.shaped.polygons
+                              if isinstance(self.shaped,
+                                            self._context.multipolygon_cls)
+                              else [self.shaped]))):
             raise ValueError('Linear component should not overlap '
                              'shaped component borders.')
 

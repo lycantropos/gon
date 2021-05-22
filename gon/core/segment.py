@@ -4,8 +4,7 @@ from clipping.planar import (intersect_segments,
                              subtract_segments,
                              symmetric_subtract_segments,
                              unite_segments)
-from ground.hints import (Point,
-                          Scalar)
+from ground.hints import Scalar
 from orient.planar import segment_in_segment
 from reprit.base import generate_repr
 
@@ -20,6 +19,7 @@ from .geometry import (Coordinate,
 from .iterable import non_negative_min
 from .multipoint import Multipoint
 from .packing import pack_mix
+from .point import Point
 from .rotating import (point_to_step,
                        rotate_segment_around_origin,
                        rotate_translate_segment)
