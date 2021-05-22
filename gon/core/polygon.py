@@ -123,21 +123,19 @@ class Polygon(Indexable[Coordinate], Shaped[Coordinate]):
         return (complete_intersect_segment_with_polygon(other, self,
                                                         context=self._context)
                 if isinstance(other, Segment)
-                else (self._intersect_with_multisegment(other)
-                      if isinstance(other, Multisegment)
-                      else
-                      (self._intersect_with_multisegment(
-                              self._context.multisegment_cls(other.edges))
-                       if isinstance(other, Contour)
-                       else
-                       ((complete_intersect_polygons(self, other,
-                                                     context=self._context)
-                         if self.holes or other.holes
-                         else complete_intersect_regions(self.border,
-                                                         other.border,
-                                                         context=self._context))
-                        if isinstance(other, Polygon)
-                        else NotImplemented))))
+                else
+                (complete_intersect_multisegment_with_polygon(
+                        other, self,
+                        context=self._context)
+                 if isinstance(other, Linear)
+                 else ((complete_intersect_polygons(self, other,
+                                                    context=self._context)
+                        if self.holes or other.holes
+                        else complete_intersect_regions(self.border,
+                                                        other.border,
+                                                        context=self._context))
+                       if isinstance(other, Polygon)
+                       else NotImplemented)))
 
     __rand__ = __and__
 
@@ -403,15 +401,13 @@ class Polygon(Indexable[Coordinate], Shaped[Coordinate]):
                                                  context=self._context)
                       if isinstance(other, Segment)
                       else
-                      (self._unite_with_multisegment(other)
-                       if isinstance(other, Multisegment)
-                       else (self._unite_with_multisegment(
-                              self._context.multisegment_cls(other.edges))
-                             if isinstance(other, Contour)
-                             else (unite_polygons(self, other,
-                                                  context=self._context)
-                                   if isinstance(other, Polygon)
-                                   else NotImplemented)))))
+                      (unite_multisegment_with_polygon(other, self,
+                                                       context=self._context)
+                       if isinstance(other, Linear)
+                       else (unite_polygons(self, other,
+                                            context=self._context)
+                             if isinstance(other, Polygon)
+                             else NotImplemented))))
 
     __ror__ = __or__
 
@@ -435,13 +431,10 @@ class Polygon(Indexable[Coordinate], Shaped[Coordinate]):
         return (subtract_polygon_from_segment(other, self,
                                               context=self._context)
                 if isinstance(other, Segment)
-                else (self._subtract_from_multisegment(other)
-                      if isinstance(other, Multisegment)
-                      else
-                      (self._subtract_from_multisegment(
-                              self._context.multisegment_cls(other.edges))
-                       if isinstance(other, Contour)
-                       else NotImplemented)))
+                else (subtract_polygon_from_multisegment(other, self,
+                                                         context=self._context)
+                      if isinstance(other, Linear)
+                      else NotImplemented))
 
     def __sub__(self, other: Compound) -> Compound:
         """
@@ -506,17 +499,15 @@ class Polygon(Indexable[Coordinate], Shaped[Coordinate]):
                 (symmetric_subtract_polygon_from_segment(other, self,
                                                          context=self._context)
                  if isinstance(other, Segment)
-                 else (self._symmetric_subtract_from_multisegment(other)
-                       if isinstance(other, Multisegment)
-                       else
-                       (self._symmetric_subtract_from_multisegment(
-                               self._context.multisegment_cls(other.edges))
-                        if isinstance(other, Contour)
-                        else
-                        (symmetric_subtract_polygons(self, other,
-                                                     context=self._context)
-                         if isinstance(other, Polygon)
-                         else NotImplemented)))))
+                 else
+                 (symmetric_subtract_polygon_from_multisegment(
+                         other, self,
+                         context=self._context)
+                  if isinstance(other, Linear)
+                  else (symmetric_subtract_polygons(self, other,
+                                                    context=self._context)
+                        if isinstance(other, Polygon)
+                        else NotImplemented))))
 
     __rxor__ = __xor__
 
@@ -665,8 +656,8 @@ class Polygon(Indexable[Coordinate], Shaped[Coordinate]):
         ...                   Segment(Point(4, 4), Point(4, 2))]
         True
         """
-        return list(chain(self.border.edges,
-                          flatten(hole.edges for hole in self.holes)))
+        return list(chain(self.border.segments,
+                          flatten(hole.segments for hole in self.holes)))
 
     @property
     def holes(self) -> Sequence[Contour]:
@@ -1115,12 +1106,6 @@ class Polygon(Indexable[Coordinate], Shaped[Coordinate]):
                     and self._locate(other.end) is Location.EXTERIOR)
                 else 0)
 
-    def _intersect_with_multisegment(self, multisegment: Multisegment
-                                     ) -> Compound:
-        return complete_intersect_multisegment_with_polygon(
-                multisegment, self,
-                context=self._context)
-
     def _linear_distance_to_segment(self, other: Segment) -> Scalar:
         return self._context.segments_squared_distance(
                 self._segment_nearest_edge(other), other)
@@ -1129,23 +1114,9 @@ class Polygon(Indexable[Coordinate], Shaped[Coordinate]):
         return self._context.segment_point_squared_distance(
                 self._point_nearest_edge(other), other)
 
-    def _subtract_from_multisegment(self, other: Multisegment) -> Compound:
-        return subtract_polygon_from_multisegment(other, self,
-                                                  context=self._context)
-
-    def _symmetric_subtract_from_multisegment(self, other: Multisegment
-                                              ) -> Compound:
-        return symmetric_subtract_polygon_from_multisegment(
-                other, self,
-                context=self._context)
-
     def _unite_with_multipoint(self, other: Multipoint) -> Compound:
         return pack_mix(other - self, self._context.empty, self,
                         self._context.empty, self._context.mix_cls)
-
-    def _unite_with_multisegment(self, other: Multisegment) -> Compound:
-        return unite_multisegment_with_polygon(other, self,
-                                               context=self._context)
 
 
 def _locate_point(polygon: Polygon,

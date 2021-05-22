@@ -49,8 +49,8 @@ from .utils import (relate_multipoint_to_linear_compound,
 
 
 class Contour(Indexable[Coordinate], Linear[Coordinate]):
-    __slots__ = ('_edges', '_locate', '_min_index', '_point_nearest_edge',
-                 '_segment_nearest_edge', '_vertices')
+    __slots__ = ('_locate', '_min_index', '_point_nearest_segment',
+                 '_segment_nearest_segment', '_segments', '_vertices')
 
     def __init__(self, vertices: Sequence[Point[Coordinate]]) -> None:
         """
@@ -69,10 +69,10 @@ class Contour(Indexable[Coordinate], Linear[Coordinate]):
         context = self._context
         self._locate = partial(_locate_point, self,
                                context=context)
-        self._edges = edges = context.contour_edges(self)
-        self._point_nearest_edge, self._segment_nearest_edge = (
-            partial(to_point_nearest_segment, context, edges),
-            partial(to_segment_nearest_segment, context, edges))
+        self._segments = segments = context.contour_edges(self)
+        self._point_nearest_segment, self._segment_nearest_segment = (
+            partial(to_point_nearest_segment, context, segments),
+            partial(to_segment_nearest_segment, context, segments))
 
     __repr__ = generate_repr(__init__)
 
@@ -96,16 +96,13 @@ class Contour(Indexable[Coordinate], Linear[Coordinate]):
         True
         """
         return (complete_intersect_segment_with_multisegment(
-                other, self._as_multisegment(),
+                other, self,
                 context=self._context)
                 if isinstance(other, Segment)
-                else (self._intersect_with_multisegment(other)
-                      if isinstance(other, Multisegment)
-                      else
-                      (self._intersect_with_multisegment(
-                              other._as_multisegment())
-                       if isinstance(other, Contour)
-                       else NotImplemented)))
+                else (complete_intersect_multisegments(self, other,
+                                                       context=self._context)
+                      if isinstance(other, Linear)
+                      else NotImplemented))
 
     __rand__ = __and__
 
@@ -313,17 +310,13 @@ class Contour(Indexable[Coordinate], Linear[Coordinate]):
         """
         return (self._unite_with_multipoint(other)
                 if isinstance(other, Multipoint)
-                else (unite_segment_with_multisegment(other,
-                                                      self._as_multisegment(),
+                else (unite_segment_with_multisegment(other, self,
                                                       context=self._context)
                       if isinstance(other, Segment)
-                      else
-                      (self._unite_with_multisegment(other)
-                       if isinstance(other, Multisegment)
-                       else
-                       (self._unite_with_multisegment(other._as_multisegment())
-                        if isinstance(other, Contour)
-                        else NotImplemented))))
+                      else (unite_multisegments(self, other,
+                                                context=self._context)
+                            if isinstance(other, Linear)
+                            else NotImplemented)))
 
     __ror__ = __or__
 
@@ -339,10 +332,10 @@ class Contour(Indexable[Coordinate], Linear[Coordinate]):
         where ``vertices_count = len(self.vertices)``.
         """
         return (subtract_multisegment_from_segment(other,
-                                                   self._as_multisegment(),
+                                                   self,
                                                    context=self._context)
                 if isinstance(other, Segment)
-                else (subtract_multisegments(other, self._as_multisegment(),
+                else (subtract_multisegments(other, self,
                                              context=self._context)
                       if isinstance(other, Multisegment)
                       else NotImplemented))
@@ -365,17 +358,13 @@ class Contour(Indexable[Coordinate], Linear[Coordinate]):
         """
         return (self
                 if isinstance(other, Multipoint)
-                else
-                (subtract_segment_from_multisegment(self._as_multisegment(),
-                                                    other,
-                                                    context=self._context)
-                 if isinstance(other, Segment)
-                 else (self._subtract_multisegment(other)
-                       if isinstance(other, Multisegment)
-                       else
-                       (self._subtract_multisegment(other._as_multisegment())
-                        if isinstance(other, Contour)
-                        else NotImplemented))))
+                else (subtract_segment_from_multisegment(self, other,
+                                                         context=self._context)
+                      if isinstance(other, Segment)
+                      else (subtract_multisegments(self, other,
+                                                   context=self._context)
+                            if isinstance(other, Linear)
+                            else NotImplemented)))
 
     def __xor__(self, other: Compound[Coordinate]) -> Compound[Coordinate]:
         """
@@ -397,16 +386,13 @@ class Contour(Indexable[Coordinate], Linear[Coordinate]):
                 if isinstance(other, Multipoint)
                 else
                 (symmetric_subtract_multisegment_from_segment(
-                        other, self._as_multisegment(),
+                        other, self,
                         context=self._context)
                  if isinstance(other, Segment)
-                 else
-                 (self._symmetric_subtract_multisegment(other)
-                  if isinstance(other, Multisegment)
-                  else (self._symmetric_subtract_multisegment(
-                         other._as_multisegment())
-                        if isinstance(other, Contour)
-                        else NotImplemented))))
+                 else (symmetric_subtract_multisegments(self, other,
+                                                        context=self._context)
+                       if isinstance(other, Linear)
+                       else NotImplemented)))
 
     __rxor__ = __xor__
 
@@ -429,9 +415,9 @@ class Contour(Indexable[Coordinate], Linear[Coordinate]):
         return self._context.contour_centroid(self)
 
     @property
-    def edges(self) -> Sequence[Segment[Coordinate]]:
+    def segments(self) -> Sequence[Segment[Coordinate]]:
         """
-        Returns edges of the contour.
+        Returns segments of the contour.
 
         Time complexity:
             ``O(vertices_count)``
@@ -442,12 +428,12 @@ class Contour(Indexable[Coordinate], Linear[Coordinate]):
 
         >>> from gon.base import Contour, Point, Segment
         >>> contour = Contour([Point(0, 0), Point(1, 0), Point(0, 1)])
-        >>> contour.edges == [Segment(Point(0, 1), Point(0, 0)),
-        ...                   Segment(Point(0, 0), Point(1, 0)),
-        ...                   Segment(Point(1, 0), Point(0, 1))]
+        >>> contour.segments == [Segment(Point(0, 1), Point(0, 0)),
+        ...                      Segment(Point(0, 0), Point(1, 0)),
+        ...                      Segment(Point(1, 0), Point(0, 1))]
         True
         """
-        return list(self._edges)
+        return list(self._segments)
 
     @property
     def length(self) -> Scalar:
@@ -538,7 +524,7 @@ class Contour(Indexable[Coordinate], Linear[Coordinate]):
                                          for segment in other.segments)
                         if isinstance(other, Multisegment)
                         else (non_negative_min(self._distance_to_segment(edge)
-                                               for edge in other.edges)
+                                               for edge in other.segments)
                               if isinstance(other, Contour)
                               else other.distance_to(self))))))
 
@@ -558,12 +544,12 @@ class Contour(Indexable[Coordinate], Linear[Coordinate]):
         >>> contour = Contour([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> contour.index()
         """
-        graph = Graph.from_multisegment(self._as_multisegment(),
+        graph = Graph.from_multisegment(self,
                                         context=self._context)
         self._locate = graph.locate
-        tree = segmental.Tree(self._edges)
-        self._point_nearest_edge = tree.nearest_to_point_segment
-        self._segment_nearest_edge = tree.nearest_segment
+        tree = segmental.Tree(self._segments)
+        self._point_nearest_segment = tree.nearest_to_point_segment
+        self._segment_nearest_segment = tree.nearest_segment
 
     def locate(self, point: Point[Coordinate]) -> Location:
         """
@@ -795,42 +781,19 @@ class Contour(Indexable[Coordinate], Linear[Coordinate]):
         if edges_intersect(self):
             raise ValueError('Contour should not be self-intersecting.')
 
-    def _as_multisegment(self) -> Multisegment[Coordinate]:
-        return self._context.multisegment_cls(self._edges)
-
     def _distance_to_point(self, other: Point[Coordinate]) -> Scalar:
         return self._context.sqrt(self._context.segment_point_squared_distance(
-                self._point_nearest_edge(other), other))
+                self._point_nearest_segment(other), other))
 
     def _distance_to_segment(self, other: Segment[Coordinate]) -> Scalar:
         return self._context.sqrt(self._context.segments_squared_distance(
-                self._segment_nearest_edge(other), other))
-
-    def _intersect_with_multisegment(self, other: Multisegment[Coordinate]
-                                     ) -> Compound[Coordinate]:
-        return complete_intersect_multisegments(self._as_multisegment(), other,
-                                                context=self._context)
-
-    def _subtract_multisegment(self, other: Multisegment[Coordinate]
-                               ) -> Compound[Coordinate]:
-        return subtract_multisegments(self._as_multisegment(), other,
-                                      context=self._context)
-
-    def _symmetric_subtract_multisegment(self, other: Multisegment[Coordinate]
-                                         ) -> Compound[Coordinate]:
-        return symmetric_subtract_multisegments(self._as_multisegment(), other,
-                                                context=self._context)
+                self._segment_nearest_segment(other), other))
 
     def _unite_with_multipoint(self, other: Multipoint[Coordinate]
                                ) -> Compound[Coordinate]:
         context = self._context
         return pack_mix(other - self, self, context.empty, context.empty,
                         context.mix_cls)
-
-    def _unite_with_multisegment(self, other: Multisegment[Coordinate]
-                                 ) -> Compound[Coordinate]:
-        return unite_multisegments(self._as_multisegment(), other,
-                                   context=self._context)
 
 
 def _locate_point(contour: Contour[Coordinate],
