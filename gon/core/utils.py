@@ -37,10 +37,10 @@ def to_point_nearest_segment(context: Context,
 
 
 def to_segment_nearest_segment(context: Context,
-                               edges: Sequence[Segment],
+                               segments: Sequence[Segment],
                                segment: Segment) -> Segment:
     def distance_to_segment(candidate: Segment) -> Scalar:
         return context.segments_squared_distance(candidate, segment)
 
-    return min(edges,
+    return min(segments,
                key=distance_to_segment)

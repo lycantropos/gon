@@ -119,17 +119,16 @@ class Multipolygon(Indexable[Coordinate], Shaped[Coordinate]):
                 other, self,
                 context=self._context)
                 if isinstance(other, Segment)
-                else (self._intersect_with_multisegment(other)
-                      if isinstance(other, Multisegment)
-                      else
-                      (self._intersect_with_multisegment(
-                              self._context.multisegment_cls(other.edges))
-                       if isinstance(other, Contour)
-                       else (self._intersect_with_polygon(other)
-                             if isinstance(other, Polygon)
-                             else (self._intersect_with_multipolygon(other)
-                                   if isinstance(other, Multipolygon)
-                                   else NotImplemented)))))
+                else
+                (complete_intersect_multisegment_with_multipolygon(
+                        other, self,
+                        context=self._context)
+                 if isinstance(other, Linear)
+                 else (self._intersect_with_polygon(other)
+                       if isinstance(other, Polygon)
+                       else (self._intersect_with_multipolygon(other)
+                             if isinstance(other, Multipolygon)
+                             else NotImplemented))))
 
     __rand__ = __and__
 
@@ -424,19 +423,16 @@ class Multipolygon(Indexable[Coordinate], Shaped[Coordinate]):
                                                  context=self._context)
                  if isinstance(other, Segment)
                  else
-                 (self._unite_with_multisegment(other)
-                  if isinstance(other, Multisegment)
-                  else
-                  (self._unite_with_multisegment(
-                          self._context.multisegment_cls(other.edges))
-                   if isinstance(other, Contour)
-                   else (unite_polygon_with_multipolygon(other, self,
-                                                         context=self._context)
-                         if isinstance(other, Polygon)
-                         else (unite_multipolygons(self, other,
-                                                   context=self._context)
-                               if isinstance(other, Multipolygon)
-                               else NotImplemented))))))
+                 (unite_multisegment_with_multipolygon(other, self,
+                                                       context=self._context)
+                  if isinstance(other, Linear)
+                  else (unite_polygon_with_multipolygon(other, self,
+                                                        context=self._context)
+                        if isinstance(other, Polygon)
+                        else (unite_multipolygons(self, other,
+                                                  context=self._context)
+                              if isinstance(other, Multipolygon)
+                              else NotImplemented)))))
 
     __ror__ = __or__
 
@@ -461,17 +457,15 @@ class Multipolygon(Indexable[Coordinate], Shaped[Coordinate]):
         return (subtract_multipolygon_from_segment(other, self,
                                                    context=self._context)
                 if isinstance(other, Segment)
-                else (self._subtract_from_multisegment(other)
-                      if isinstance(other, Multisegment)
-                      else
-                      (self._subtract_from_multisegment(
-                              self._context.multisegment_cls(other.edges))
-                       if isinstance(other, Contour)
-                       else (subtract_multipolygon_from_polygon(
-                              other, self,
-                              context=self._context)
-                             if isinstance(other, Polygon)
-                             else NotImplemented))))
+                else
+                (subtract_multipolygon_from_multisegment(other, self,
+                                                         context=self._context)
+                 if isinstance(other, Linear)
+                 else
+                 (subtract_multipolygon_from_polygon(other, self,
+                                                     context=self._context)
+                  if isinstance(other, Polygon)
+                  else NotImplemented)))
 
     def __sub__(self, other: Compound[Coordinate]) -> Compound[Coordinate]:
         """
@@ -554,21 +548,20 @@ class Multipolygon(Indexable[Coordinate], Shaped[Coordinate]):
                         other, self,
                         context=self._context)
                  if isinstance(other, Segment)
-                 else (self._symmetric_subtract_from_multisegment(other)
-                       if isinstance(other, Multisegment)
-                       else (self._symmetric_subtract_from_multisegment(
-                        self._context.multisegment_cls(other.edges))
-                             if isinstance(other, Contour)
-                             else
-                             (symmetric_subtract_multipolygon_from_polygon(
-                                     other, self,
-                                     context=self._context)
-                              if isinstance(other, Polygon)
-                              else (symmetric_subtract_multipolygons(
-                                     self, other,
-                                     context=self._context)
-                                    if isinstance(other, Multipolygon)
-                                    else NotImplemented))))))
+                 else (symmetric_subtract_multipolygon_from_multisegment(
+                        other, self,
+                        context=self._context)
+                       if isinstance(other, Linear)
+                       else
+                       (symmetric_subtract_multipolygon_from_polygon(
+                               other, self,
+                               context=self._context)
+                        if isinstance(other, Polygon)
+                        else (symmetric_subtract_multipolygons(
+                               self, other,
+                               context=self._context)
+                              if isinstance(other, Multipolygon)
+                              else NotImplemented)))))
 
     __rxor__ = __xor__
 
@@ -752,22 +745,18 @@ class Multipolygon(Indexable[Coordinate], Shaped[Coordinate]):
                   else
                   (non_negative_min(self._distance_to_segment(segment)
                                     for segment in other.segments)
-                   if isinstance(other, Multisegment)
+                   if isinstance(other, Linear)
                    else
                    (non_negative_min(self._distance_to_segment(edge)
                                      for edge in other.edges)
-                    if isinstance(other, Contour)
-                    else
-                    (non_negative_min(self._distance_to_segment(edge)
-                                      for edge in other.edges)
-                     if isinstance(other, Polygon)
-                     else ((non_negative_min(self._distance_to_segment(edge)
-                                             for polygon in other.polygons
-                                             for edge in polygon.edges)
-                            if self.disjoint(other)
-                            else 0)
-                           if isinstance(other, Multipolygon)
-                           else other.distance_to(self))))))))
+                    if isinstance(other, Polygon)
+                    else ((non_negative_min(self._distance_to_segment(edge)
+                                            for polygon in other.polygons
+                                            for edge in polygon.edges)
+                           if self.disjoint(other)
+                           else 0)
+                          if isinstance(other, Multipolygon)
+                          else other.distance_to(self)))))))
 
     def index(self) -> None:
         """
@@ -1130,12 +1119,6 @@ class Multipolygon(Indexable[Coordinate], Shaped[Coordinate]):
                                                      other._as_multiregion(),
                                                      context=self._context))
 
-    def _intersect_with_multisegment(self, other: Multisegment[Coordinate]
-                                     ) -> Compound[Coordinate]:
-        return complete_intersect_multisegment_with_multipolygon(
-                other, self,
-                context=self._context)
-
     def _intersect_with_polygon(self, other: Polygon[Coordinate]
                                 ) -> Compound[Coordinate]:
         return (complete_intersect_polygon_with_multipolygon(
@@ -1146,27 +1129,11 @@ class Multipolygon(Indexable[Coordinate], Shaped[Coordinate]):
                 other.border, self._as_multiregion(),
                 context=self._context))
 
-    def _subtract_from_multisegment(self, other: Multisegment[Coordinate]
-                                    ) -> Compound[Coordinate]:
-        return subtract_multipolygon_from_multisegment(other, self,
-                                                       context=self._context)
-
-    def _symmetric_subtract_from_multisegment(self,
-                                              other: Multisegment[Coordinate]
-                                              ) -> Compound[Coordinate]:
-        return symmetric_subtract_multipolygon_from_multisegment(
-                other, self,
-                context=self._context)
-
     def _unite_with_multipoint(self, other: Multipoint[Coordinate]
                                ) -> Compound[Coordinate]:
         context = self._context
         return pack_mix(other - self, context.empty, self, context.empty,
                         context.mix_cls)
-
-    def _unite_with_multisegment(self, other: Multisegment) -> Compound:
-        return unite_multisegment_with_multipolygon(other, self,
-                                                    context=self._context)
 
 
 def _locate_point_in_indexed_polygons(tree: r.Tree,

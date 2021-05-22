@@ -64,11 +64,9 @@ class Mix(Indexable[Coordinate]):
                 points = [] if self.discrete is EMPTY else self.discrete.points
                 segments = ([]
                             if self.linear is EMPTY
-                            else (self.linear.segments
-                                  if isinstance(self.linear, Multisegment)
-                                  else (self.linear.edges
-                                        if isinstance(self.linear, Contour)
-                                        else [self.linear])))
+                            else ([self.linear]
+                                  if isinstance(self.linear, Segment)
+                                  else self.linear.segments))
                 polygons = ([]
                             if self.shaped is EMPTY
                             else (self.shaped.polygons
@@ -145,11 +143,9 @@ class Mix(Indexable[Coordinate]):
                 points = [] if self.discrete is EMPTY else self.discrete.points
                 segments = ([]
                             if self.linear is EMPTY
-                            else (self.linear.segments
-                                  if isinstance(self.linear, Multisegment)
-                                  else (self.linear.edges
-                                        if isinstance(self.linear, Contour)
-                                        else [self.linear])))
+                            else ([self.linear]
+                                  if isinstance(self.linear, Segment)
+                                  else self.linear.segments))
                 polygons = ([]
                             if self.shaped is EMPTY
                             else (self.shaped.polygons
@@ -207,11 +203,9 @@ class Mix(Indexable[Coordinate]):
                 points = [] if self.discrete is EMPTY else self.discrete.points
                 segments = ([]
                             if self.linear is EMPTY
-                            else (self.linear.segments
-                                  if isinstance(self.linear, Multisegment)
-                                  else (self.linear.edges
-                                        if isinstance(self.linear, Contour)
-                                        else [self.linear])))
+                            else ([self.linear]
+                                  if isinstance(self.linear, Segment)
+                                  else self.linear.segments))
                 polygons = ([]
                             if self.shaped is EMPTY
                             else (self.shaped.polygons
@@ -257,11 +251,9 @@ class Mix(Indexable[Coordinate]):
                 points = [] if self.discrete is EMPTY else self.discrete.points
                 segments = ([]
                             if self.linear is EMPTY
-                            else (self.linear.segments
-                                  if isinstance(self.linear, Multisegment)
-                                  else (self.linear.edges
-                                        if isinstance(self.linear, Contour)
-                                        else [self.linear])))
+                            else ([self.linear]
+                                  if isinstance(self.linear, Segment)
+                                  else self.linear.segments))
                 polygons = ([]
                             if self.shaped is EMPTY
                             else (self.shaped.polygons
@@ -316,11 +308,9 @@ class Mix(Indexable[Coordinate]):
                 points = [] if self.discrete is EMPTY else self.discrete.points
                 segments = ([]
                             if self.linear is EMPTY
-                            else (self.linear.segments
-                                  if isinstance(self.linear, Multisegment)
-                                  else (self.linear.edges
-                                        if isinstance(self.linear, Contour)
-                                        else [self.linear])))
+                            else ([self.linear]
+                                  if isinstance(self.linear, Segment)
+                                  else self.linear.segments))
                 polygons = ([]
                             if self.shaped is EMPTY
                             else (self.shaped.polygons
@@ -374,11 +364,9 @@ class Mix(Indexable[Coordinate]):
                 points = [] if self.discrete is EMPTY else self.discrete.points
                 segments = ([]
                             if self.linear is EMPTY
-                            else (self.linear.segments
-                                  if isinstance(self.linear, Multisegment)
-                                  else (self.linear.edges
-                                        if isinstance(self.linear, Contour)
-                                        else [self.linear])))
+                            else ([self.linear]
+                                  if isinstance(self.linear, Segment)
+                                  else self.linear.segments))
                 polygons = ([]
                             if self.shaped is EMPTY
                             else (self.shaped.polygons
@@ -422,11 +410,9 @@ class Mix(Indexable[Coordinate]):
                 points = [] if self.discrete is EMPTY else self.discrete.points
                 segments = ([]
                             if self.linear is EMPTY
-                            else (self.linear.segments
-                                  if isinstance(self.linear, Multisegment)
-                                  else (self.linear.edges
-                                        if isinstance(self.linear, Contour)
-                                        else [self.linear])))
+                            else ([self.linear]
+                                  if isinstance(self.linear, Segment)
+                                  else self.linear.segments))
                 polygons = ([]
                             if self.shaped is EMPTY
                             else (self.shaped.polygons
@@ -481,11 +467,9 @@ class Mix(Indexable[Coordinate]):
                 points = [] if self.discrete is EMPTY else self.discrete.points
                 segments = ([]
                             if self.linear is EMPTY
-                            else (self.linear.segments
-                                  if isinstance(self.linear, Multisegment)
-                                  else (self.linear.edges
-                                        if isinstance(self.linear, Contour)
-                                        else [self.linear])))
+                            else ([self.linear]
+                                  if isinstance(self.linear, Segment)
+                                  else self.linear.segments))
                 polygons = ([]
                             if self.shaped is EMPTY
                             else (self.shaped.polygons
@@ -539,11 +523,9 @@ class Mix(Indexable[Coordinate]):
                 points = [] if self.discrete is EMPTY else self.discrete.points
                 segments = ([]
                             if self.linear is EMPTY
-                            else (self.linear.segments
-                                  if isinstance(self.linear, Multisegment)
-                                  else (self.linear.edges
-                                        if isinstance(self.linear, Contour)
-                                        else [self.linear])))
+                            else ([self.linear]
+                                  if isinstance(self.linear, Segment)
+                                  else self.linear.segments))
                 polygons = ([]
                             if self.shaped is EMPTY
                             else (self.shaped.polygons
@@ -617,11 +599,9 @@ class Mix(Indexable[Coordinate]):
                 points = [] if self.discrete is EMPTY else self.discrete.points
                 segments = ([]
                             if self.linear is EMPTY
-                            else (self.linear.segments
-                                  if isinstance(self.linear, Multisegment)
-                                  else (self.linear.edges
-                                        if isinstance(self.linear, Contour)
-                                        else [self.linear])))
+                            else ([self.linear]
+                                  if isinstance(self.linear, Segment)
+                                  else self.linear.segments))
                 polygons = ([]
                             if self.shaped is EMPTY
                             else (self.shaped.polygons
@@ -655,11 +635,9 @@ class Mix(Indexable[Coordinate]):
                 points = [] if self.discrete is EMPTY else self.discrete.points
                 segments = ([]
                             if self.linear is EMPTY
-                            else (self.linear.segments
-                                  if isinstance(self.linear, Multisegment)
-                                  else (self.linear.edges
-                                        if isinstance(self.linear, Contour)
-                                        else [self.linear])))
+                            else ([self.linear]
+                                  if isinstance(self.linear, Segment)
+                                  else self.linear.segments))
                 polygons = ([]
                             if self.shaped is EMPTY
                             else (self.shaped.polygons
@@ -705,11 +683,9 @@ class Mix(Indexable[Coordinate]):
                 points = [] if self.discrete is EMPTY else self.discrete.points
                 segments = ([]
                             if self.linear is EMPTY
-                            else (self.linear.segments
-                                  if isinstance(self.linear, Multisegment)
-                                  else (self.linear.edges
-                                        if isinstance(self.linear, Contour)
-                                        else [self.linear])))
+                            else ([self.linear]
+                                  if isinstance(self.linear, Segment)
+                                  else self.linear.segments))
                 polygons = ([]
                             if self.shaped is EMPTY
                             else (self.shaped.polygons
@@ -784,11 +760,9 @@ class Mix(Indexable[Coordinate]):
                 points = [] if self.discrete is EMPTY else self.discrete.points
                 segments = ([]
                             if self.linear is EMPTY
-                            else (self.linear.segments
-                                  if isinstance(self.linear, Multisegment)
-                                  else (self.linear.edges
-                                        if isinstance(self.linear, Contour)
-                                        else [self.linear])))
+                            else ([self.linear]
+                                  if isinstance(self.linear, Segment)
+                                  else self.linear.segments))
                 polygons = ([]
                             if self.shaped is EMPTY
                             else (self.shaped.polygons
@@ -906,11 +880,9 @@ class Mix(Indexable[Coordinate]):
                 points = [] if self.discrete is EMPTY else self.discrete.points
                 segments = ([]
                             if self.linear is EMPTY
-                            else (self.linear.segments
-                                  if isinstance(self.linear, Multisegment)
-                                  else (self.linear.edges
-                                        if isinstance(self.linear, Contour)
-                                        else [self.linear])))
+                            else ([self.linear]
+                                  if isinstance(self.linear, Segment)
+                                  else self.linear.segments))
                 polygons = ([]
                             if self.shaped is EMPTY
                             else (self.shaped.polygons
@@ -957,11 +929,9 @@ class Mix(Indexable[Coordinate]):
                 points = [] if self.discrete is EMPTY else self.discrete.points
                 segments = ([]
                             if self.linear is EMPTY
-                            else (self.linear.segments
-                                  if isinstance(self.linear, Multisegment)
-                                  else (self.linear.edges
-                                        if isinstance(self.linear, Contour)
-                                        else [self.linear])))
+                            else ([self.linear]
+                                  if isinstance(self.linear, Segment)
+                                  else self.linear.segments))
                 polygons = ([]
                             if self.shaped is EMPTY
                             else (self.shaped.polygons
@@ -1010,11 +980,9 @@ class Mix(Indexable[Coordinate]):
                 points = [] if self.discrete is EMPTY else self.discrete.points
                 segments = ([]
                             if self.linear is EMPTY
-                            else (self.linear.segments
-                                  if isinstance(self.linear, Multisegment)
-                                  else (self.linear.edges
-                                        if isinstance(self.linear, Contour)
-                                        else [self.linear])))
+                            else ([self.linear]
+                                  if isinstance(self.linear, Segment)
+                                  else self.linear.segments))
                 polygons = ([]
                             if self.shaped is EMPTY
                             else (self.shaped.polygons
@@ -1076,11 +1044,9 @@ class Mix(Indexable[Coordinate]):
                 points = [] if self.discrete is EMPTY else self.discrete.points
                 segments = ([]
                             if self.linear is EMPTY
-                            else (self.linear.segments
-                                  if isinstance(self.linear, Multisegment)
-                                  else (self.linear.edges
-                                        if isinstance(self.linear, Contour)
-                                        else [self.linear])))
+                            else ([self.linear]
+                                  if isinstance(self.linear, Segment)
+                                  else self.linear.segments))
                 polygons = ([]
                             if self.shaped is EMPTY
                             else (self.shaped.polygons
@@ -1135,11 +1101,9 @@ class Mix(Indexable[Coordinate]):
                 points = [] if self.discrete is EMPTY else self.discrete.points
                 segments = ([]
                             if self.linear is EMPTY
-                            else (self.linear.segments
-                                  if isinstance(self.linear, Multisegment)
-                                  else (self.linear.edges
-                                        if isinstance(self.linear, Contour)
-                                        else [self.linear])))
+                            else ([self.linear]
+                                  if isinstance(self.linear, Segment)
+                                  else self.linear.segments))
                 polygons = ([]
                             if self.shaped is EMPTY
                             else (self.shaped.polygons
@@ -1195,11 +1159,9 @@ class Mix(Indexable[Coordinate]):
                 points = [] if self.discrete is EMPTY else self.discrete.points
                 segments = ([]
                             if self.linear is EMPTY
-                            else (self.linear.segments
-                                  if isinstance(self.linear, Multisegment)
-                                  else (self.linear.edges
-                                        if isinstance(self.linear, Contour)
-                                        else [self.linear])))
+                            else ([self.linear]
+                                  if isinstance(self.linear, Segment)
+                                  else self.linear.segments))
                 polygons = ([]
                             if self.shaped is EMPTY
                             else (self.shaped.polygons
@@ -1265,11 +1227,9 @@ class Mix(Indexable[Coordinate]):
                 points = [] if self.discrete is EMPTY else self.discrete.points
                 segments = ([]
                             if self.linear is EMPTY
-                            else (self.linear.segments
-                                  if isinstance(self.linear, Multisegment)
-                                  else (self.linear.edges
-                                        if isinstance(self.linear, Contour)
-                                        else [self.linear])))
+                            else ([self.linear]
+                                  if isinstance(self.linear, Segment)
+                                  else self.linear.segments))
                 polygons = ([]
                             if self.shaped is EMPTY
                             else (self.shaped.polygons
@@ -1321,11 +1281,9 @@ class Mix(Indexable[Coordinate]):
                 points = [] if self.discrete is EMPTY else self.discrete.points
                 segments = ([]
                             if self.linear is EMPTY
-                            else (self.linear.segments
-                                  if isinstance(self.linear, Multisegment)
-                                  else (self.linear.edges
-                                        if isinstance(self.linear, Contour)
-                                        else [self.linear])))
+                            else ([self.linear]
+                                  if isinstance(self.linear, Segment)
+                                  else self.linear.segments))
                 polygons = ([]
                             if self.shaped is EMPTY
                             else (self.shaped.polygons
