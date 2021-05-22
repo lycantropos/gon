@@ -769,18 +769,14 @@ class Polygon(Indexable[Coordinate], Shaped[Coordinate]):
                   else
                   (non_negative_min(self._distance_to_segment(segment)
                                     for segment in other.segments)
-                   if isinstance(other, Multisegment)
+                   if isinstance(other, Linear)
                    else
-                   (non_negative_min(self._distance_to_segment(edge)
-                                     for edge in other.edges)
-                    if isinstance(other, Contour)
-                    else
-                    ((non_negative_min(self._linear_distance_to_segment(edge)
-                                       for edge in other.edges)
-                      if self.disjoint(other)
-                      else 0)
-                     if isinstance(other, Polygon)
-                     else other.distance_to(self)))))))
+                   ((non_negative_min(self._linear_distance_to_segment(edge)
+                                      for edge in other.edges)
+                     if self.disjoint(other)
+                     else 0)
+                    if isinstance(other, Polygon)
+                    else other.distance_to(self))))))
 
     def index(self) -> None:
         """
