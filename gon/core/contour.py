@@ -544,9 +544,8 @@ class Contour(Indexable[Coordinate], Linear[Coordinate]):
         >>> contour = Contour([Point(0, 0), Point(1, 0), Point(0, 1)])
         >>> contour.index()
         """
-        graph = Graph.from_multisegment(self,
-                                        context=self._context)
-        self._locate = graph.locate
+        self._locate = Graph.from_multisegment(self,
+                                               context=self._context).locate
         tree = segmental.Tree(self._segments)
         self._point_nearest_segment = tree.nearest_to_point_segment
         self._segment_nearest_segment = tree.nearest_segment
