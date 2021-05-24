@@ -25,8 +25,7 @@ from clipping.planar import (complete_intersect_multipolygons,
 from ground.base import Context
 from ground.hints import Scalar
 from locus import r
-from orient.planar import (contour_in_multipolygon,
-                           multipolygon_in_multipolygon,
+from orient.planar import (multipolygon_in_multipolygon,
                            multisegment_in_multipolygon,
                            polygon_in_multipolygon,
                            segment_in_multipolygon)
@@ -38,9 +37,7 @@ from .compound import (Compound,
                        Linear,
                        Relation,
                        Shaped)
-from .contour import (Contour,
-                      Multisegment,
-                      Segment)
+from .contour import Contour
 from .geometry import (Coordinate,
                        Geometry)
 from .iterable import (flatten,
@@ -54,6 +51,7 @@ from .rotating import (point_to_step,
                        rotate_translate_multipolygon)
 from .scaling import (scale_polygon,
                       scale_vertices_degenerate)
+from .segment import Segment
 
 MIN_MULTIPOLYGON_POLYGONS_COUNT = 2
 
@@ -882,15 +880,12 @@ class Multipolygon(Indexable[Coordinate], Shaped[Coordinate]):
         return (segment_in_multipolygon(other, self)
                 if isinstance(other, Segment)
                 else (multisegment_in_multipolygon(other, self)
-                      if isinstance(other, Multisegment)
-                      else (contour_in_multipolygon(other, self)
-                            if isinstance(other, Contour)
-                            else
-                            (polygon_in_multipolygon(other, self)
-                             if isinstance(other, Polygon)
-                             else (multipolygon_in_multipolygon(other, self)
-                                   if isinstance(other, Multipolygon)
-                                   else other.relate(self).complement)))))
+                      if isinstance(other, Linear)
+                      else (polygon_in_multipolygon(other, self)
+                            if isinstance(other, Polygon)
+                            else (multipolygon_in_multipolygon(other, self)
+                                  if isinstance(other, Multipolygon)
+                                  else other.relate(self).complement))))
 
     def rotate(self,
                cosine: Coordinate,
