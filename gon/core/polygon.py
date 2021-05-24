@@ -20,8 +20,7 @@ from clipping.planar import (complete_intersect_multisegment_with_polygon,
 from ground.base import Context
 from ground.hints import Scalar
 from locus import segmental
-from orient.planar import (contour_in_polygon,
-                           multisegment_in_polygon,
+from orient.planar import (multisegment_in_polygon,
                            point_in_polygon,
                            polygon_in_polygon,
                            region_in_multiregion,
@@ -42,7 +41,6 @@ from .geometry import (Coordinate,
 from .iterable import (flatten,
                        non_negative_min)
 from .multipoint import Multipoint
-from .multisegment import Multisegment
 from .packing import pack_mix
 from .point import Point
 from .rotating import (point_to_step,
@@ -879,12 +877,10 @@ class Polygon(Indexable[Coordinate], Shaped[Coordinate]):
         return (segment_in_polygon(other, self)
                 if isinstance(other, Segment)
                 else (multisegment_in_polygon(other, self)
-                      if isinstance(other, Multisegment)
-                      else (contour_in_polygon(other, self)
-                            if isinstance(other, Contour)
-                            else (polygon_in_polygon(other, self)
-                                  if isinstance(other, Polygon)
-                                  else other.relate(self).complement))))
+                      if isinstance(other, Linear)
+                      else (polygon_in_polygon(other, self)
+                            if isinstance(other, Polygon)
+                            else other.relate(self).complement)))
 
     def rotate(self,
                cosine: Scalar,
