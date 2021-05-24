@@ -15,10 +15,9 @@ from clipping.planar import (complete_intersect_multisegments,
 from ground.base import Context
 from ground.hints import Scalar
 from locus import segmental
-from orient.planar import (contour_in_contour,
-                           multisegment_in_contour,
-                           point_in_contour,
-                           segment_in_contour)
+from orient.planar import (multisegment_in_multisegment,
+                           point_in_multisegment,
+                           segment_in_multisegment)
 from reprit.base import generate_repr
 from sect.decomposition import Graph
 
@@ -522,11 +521,8 @@ class Contour(Indexable[Coordinate], Linear[Coordinate]):
                        else
                        (non_negative_min(self._distance_to_segment(segment)
                                          for segment in other.segments)
-                        if isinstance(other, Multisegment)
-                        else (non_negative_min(self._distance_to_segment(edge)
-                                               for edge in other.segments)
-                              if isinstance(other, Contour)
-                              else other.distance_to(self))))))
+                        if isinstance(other, Linear)
+                        else other.distance_to(self)))))
 
     def index(self) -> None:
         """
@@ -588,13 +584,11 @@ class Contour(Indexable[Coordinate], Linear[Coordinate]):
         """
         return (relate_multipoint_to_linear_compound(other, self)
                 if isinstance(other, Multipoint)
-                else (segment_in_contour(other, self)
+                else (segment_in_multisegment(other, self)
                       if isinstance(other, Segment)
-                      else (multisegment_in_contour(other, self)
-                            if isinstance(other, Multisegment)
-                            else (contour_in_contour(other, self)
-                                  if isinstance(other, Contour)
-                                  else other.relate(self).complement))))
+                      else (multisegment_in_multisegment(other, self)
+                            if isinstance(other, Linear)
+                            else other.relate(self).complement)))
 
     def reverse(self) -> 'Contour[Coordinate]':
         """
@@ -799,6 +793,6 @@ def _locate_point(contour: Contour[Coordinate],
                   point: Point[Coordinate],
                   context: Context) -> Location:
     return (Location.BOUNDARY
-            if point_in_contour(point, contour,
-                                context=context)
+            if point_in_multisegment(point, contour,
+                                     context=context)
             else Location.EXTERIOR)
