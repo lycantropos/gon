@@ -1089,7 +1089,8 @@ class Multipolygon(Indexable[Coordinate], Shaped[Coordinate]):
         for polygon in self.polygons:
             polygon.validate()
         if segments_cross_or_overlap(
-                list(flatten(polygon.edges for polygon in self.polygons))):
+                list(flatten(polygon.edges for polygon in self.polygons)),
+                context=self._context):
             raise ValueError('Polygons should only touch each other '
                              'in discrete number of points.')
 
