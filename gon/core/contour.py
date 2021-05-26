@@ -2,7 +2,7 @@ from functools import partial
 from typing import (Optional,
                     Sequence)
 
-from bentley_ottmann.planar import edges_intersect
+from bentley_ottmann.planar import contour_self_intersects
 from clipping.planar import (complete_intersect_multisegments,
                              complete_intersect_segment_with_multisegment,
                              subtract_multisegment_from_segment,
@@ -68,7 +68,7 @@ class Contour(Indexable[Coordinate], Linear[Coordinate]):
         context = self._context
         self._locate = partial(_locate_point, self,
                                context=context)
-        self._segments = segments = context.contour_edges(self)
+        self._segments = segments = context.contour_segments(self)
         self._point_nearest_segment, self._segment_nearest_segment = (
             partial(to_point_nearest_segment, context, segments),
             partial(to_segment_nearest_segment, context, segments))
@@ -771,7 +771,8 @@ class Contour(Indexable[Coordinate], Linear[Coordinate]):
                for index in range(vertices_count)):
             raise ValueError('Consecutive vertices triplets '
                              'should not be on the same line.')
-        if edges_intersect(self):
+        if contour_self_intersects(self,
+                                   context=self._context):
             raise ValueError('Contour should not be self-intersecting.')
 
     def _distance_to_point(self, other: Point[Coordinate]) -> Scalar:
