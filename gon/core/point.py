@@ -231,7 +231,7 @@ class Point(Geometry[Coordinate]):
         >>> Point(1, 0).translate(1, 2) == Point(2, 2)
         True
         """
-        return self._context.point_cls(self.x + step_x, self.y + step_y)
+        return self._context.translate_point(self, step_x, step_y)
 
     def validate(self) -> None:
         """

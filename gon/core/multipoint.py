@@ -480,8 +480,7 @@ class Multipoint(Indexable[Coordinate]):
         ...  == Multipoint([Point(1, 2), Point(2, 2), Point(1, 3)]))
         True
         """
-        return self._context.multipoint_cls([point.translate(step_x, step_y)
-                                             for point in self._points])
+        return self._context.translate_multipoint(self, step_x, step_y)
 
     def validate(self) -> None:
         """

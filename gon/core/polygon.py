@@ -960,7 +960,8 @@ class Polygon(Indexable[Coordinate], Shaped[Coordinate]):
         return self._context.scale_polygon(
                 self, factor_x, factor_x if factor_y is None else factor_y)
 
-    def translate(self, step_x: Scalar, step_y: Scalar) -> 'Polygon':
+    def translate(self, step_x: Scalar, step_y: Scalar
+                  ) -> 'Polygon[Coordinate]':
         """
         Translates the polygon by given step.
 
@@ -989,9 +990,7 @@ class Polygon(Indexable[Coordinate], Shaped[Coordinate]):
         ...                       Point(5, 4)])]))
         True
         """
-        return self._context.polygon_cls(self.border.translate(step_x, step_y),
-                                         [hole.translate(step_x, step_y)
-                                          for hole in self.holes])
+        return self._context.translate_polygon(self, step_x, step_y)
 
     def triangulate(self) -> Triangulation:
         """

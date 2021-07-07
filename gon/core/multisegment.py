@@ -637,9 +637,7 @@ class Multisegment(Indexable[Coordinate], Linear[Coordinate]):
         ...                   Segment(Point(1, 3), Point(2, 3))]))
         True
         """
-        return self._context.multisegment_cls(
-                [segment.translate(step_x, step_y)
-                 for segment in self.segments])
+        return self._context.translate_multisegment(self, step_x, step_y)
 
     def validate(self) -> None:
         """
