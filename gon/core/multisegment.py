@@ -708,7 +708,5 @@ class Multisegment(Indexable[Coordinate], Linear[Coordinate]):
 def _locate_point(multisegment: Multisegment[Coordinate],
                   point: Point[Coordinate],
                   context: Context) -> Location:
-    return (Location.EXTERIOR
-            if point_in_multisegment(point, multisegment,
-                                     context=context) is Relation.DISJOINT
-            else Location.BOUNDARY)
+    return point_in_multisegment(point, multisegment,
+                                 context=context)

@@ -1,9 +1,9 @@
 from abc import abstractmethod
 
-from ground.base import Relation
+from ground.base import (Location,
+                         Relation)
 from ground.hints import (Point,
                           Scalar)
-from sect.decomposition import Location
 
 from .geometry import (Coordinate,
                        Geometry)

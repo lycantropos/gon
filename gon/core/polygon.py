@@ -1114,10 +1114,5 @@ class Polygon(Indexable[Coordinate], Shaped[Coordinate]):
 def _locate_point(polygon: Polygon,
                   point: Point,
                   context: Context) -> Location:
-    relation = point_in_polygon(point, polygon,
-                                context=context)
-    return (Location.EXTERIOR
-            if relation is Relation.DISJOINT
-            else (Location.BOUNDARY
-                  if relation is Relation.COMPONENT
-                  else Location.INTERIOR))
+    return point_in_polygon(point, polygon,
+                            context=context)

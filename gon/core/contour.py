@@ -793,7 +793,5 @@ class Contour(Indexable[Coordinate], Linear[Coordinate]):
 def _locate_point(contour: Contour[Coordinate],
                   point: Point[Coordinate],
                   context: Context) -> Location:
-    return (Location.BOUNDARY
-            if point_in_multisegment(point, contour,
-                                     context=context)
-            else Location.EXTERIOR)
+    return point_in_multisegment(point, contour,
+                                 context=context)
