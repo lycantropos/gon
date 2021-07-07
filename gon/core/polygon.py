@@ -43,9 +43,6 @@ from .iterable import (flatten,
 from .multipoint import Multipoint
 from .packing import pack_mix
 from .point import Point
-from .rotating import (point_to_step,
-                       rotate_polygon_around_origin,
-                       rotate_translate_polygon)
 from .segment import Segment
 from .utils import (to_point_nearest_segment,
                     to_segment_nearest_segment)
@@ -914,15 +911,9 @@ class Polygon(Indexable[Coordinate], Shaped[Coordinate]):
         ...                       Point(0, 4)])]))
         True
         """
-        context = self._context
-        return (rotate_polygon_around_origin(self, cosine, sine,
-                                             context.contour_cls,
-                                             context.point_cls,
-                                             context.polygon_cls)
+        return (self._context.rotate_polygon_around_origin(self, cosine, sine)
                 if point is None
-                else rotate_translate_polygon(
-                self, cosine, sine, *point_to_step(point, cosine, sine),
-                context.contour_cls, context.point_cls, context.polygon_cls))
+                else self._context.rotate_polygon(self, cosine, sine, point))
 
     def scale(self,
               factor_x: Scalar,

@@ -21,9 +21,6 @@ from .iterable import non_negative_min
 from .multipoint import Multipoint
 from .packing import pack_mix
 from .point import Point
-from .rotating import (point_to_step,
-                       rotate_segment_around_origin,
-                       rotate_translate_segment)
 from .utils import relate_multipoint_to_linear_compound
 
 
@@ -503,13 +500,9 @@ class Segment(Compound[Coordinate], Linear[Coordinate]):
         ...  == Segment(Point(2, 0), Point(2, 2)))
         True
         """
-        return (rotate_segment_around_origin(self, cosine, sine,
-                                             self._context.point_cls,
-                                             self._context.segment_cls)
+        return (self._context.rotate_segment_around_origin(self, cosine, sine)
                 if point is None
-                else rotate_translate_segment(
-                self, cosine, sine, *point_to_step(point, cosine, sine),
-                self._context.point_cls, self._context.segment_cls))
+                else self._context.rotate_segment(self, cosine, sine, point))
 
     def scale(self,
               factor_x: Coordinate,

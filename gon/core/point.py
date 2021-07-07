@@ -8,9 +8,6 @@ from symba.base import Expression
 
 from .geometry import (Coordinate,
                        Geometry)
-from .rotating import (point_to_step,
-                       rotate_point_around_origin,
-                       rotate_translate_point)
 
 
 class Point(Geometry[Coordinate]):
@@ -190,12 +187,9 @@ class Point(Geometry[Coordinate]):
         >>> point.rotate(0, 1, Point(1, 1)) == Point(2, 1)
         True
         """
-        return (rotate_point_around_origin(self, cosine, sine,
-                                           self._context.point_cls)
+        return (self._context.rotate_point_around_origin(self, cosine, sine)
                 if point is None
-                else rotate_translate_point(
-                self, cosine, sine, *point_to_step(point, cosine, sine),
-                self._context.point_cls))
+                else self._context.rotate_point(self, cosine, sine, point))
 
     def scale(self,
               factor_x: Coordinate,
