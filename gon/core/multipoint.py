@@ -14,7 +14,7 @@ from .compound import (Compound,
                        Relation)
 from .geometry import (Coordinate,
                        Geometry)
-from .iterable import (non_negative_min)
+from .iterable import non_negative_min
 from .packing import pack_points
 from .point import Point
 
