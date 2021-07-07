@@ -4,7 +4,8 @@ from typing import (AbstractSet,
                     Sequence)
 
 from ground.base import Context
-from ground.hints import Scalar
+from ground.hints import (Maybe,
+                          Scalar)
 from locus import kd
 from reprit.base import generate_repr
 
@@ -15,7 +16,6 @@ from .compound import (Compound,
 from .geometry import (Coordinate,
                        Geometry)
 from .iterable import non_negative_min
-from .packing import pack_points
 from .point import Point
 
 
@@ -54,12 +54,11 @@ class Multipoint(Indexable[Coordinate]):
         >>> multipoint & multipoint == multipoint
         True
         """
-        return (pack_points(self._points_set & other._points_set
-                            if isinstance(other, Multipoint)
-                            else [point
-                                  for point in self._points
-                                  if point in other],
-                            self._context.empty, self._context.multipoint_cls)
+        return (self._pack_points(self._points_set & other._points_set
+                                  if isinstance(other, Multipoint)
+                                  else [point
+                                        for point in self._points
+                                        if point in other])
                 if isinstance(other, Compound)
                 else NotImplemented)
 
@@ -251,12 +250,11 @@ class Multipoint(Indexable[Coordinate]):
         >>> multipoint - multipoint is EMPTY
         True
         """
-        return (pack_points(self._points_set - other._points_set
-                            if isinstance(other, Multipoint)
-                            else [point
-                                  for point in self._points
-                                  if point not in other],
-                            self._context.empty, self._context.multipoint_cls)
+        return (self._pack_points(self._points_set - other._points_set
+                                  if isinstance(other, Multipoint)
+                                  else [point
+                                        for point in self._points
+                                        if point not in other])
                 if isinstance(other, Compound)
                 else NotImplemented)
 
@@ -277,8 +275,7 @@ class Multipoint(Indexable[Coordinate]):
         >>> multipoint ^ multipoint is EMPTY
         True
         """
-        return (pack_points(self._points_set ^ other._points_set,
-                            self._context.empty, self._context.multipoint_cls)
+        return (self._pack_points(self._points_set ^ other._points_set)
                 if isinstance(other, Multipoint)
                 else NotImplemented)
 
@@ -499,6 +496,9 @@ class Multipoint(Indexable[Coordinate]):
     def _distance_to_point(self, other: Point[Coordinate]) -> Scalar:
         return self._context.sqrt(self._context.points_squared_distance(
                 self._nearest_point(other), other))
+
+    def _pack_points(self, points: AbstractSet[Point]) -> Maybe['Multipoint']:
+        return Multipoint(list(points)) if points else self._context.empty
 
     def _relate_geometry(self, other: Compound[Coordinate]) -> Relation:
         disjoint = is_subset = not_interior = not_boundary = True
