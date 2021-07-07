@@ -27,14 +27,15 @@ from ground.hints import Scalar
 from locus import r
 from orient.planar import (multipolygon_in_multipolygon,
                            multisegment_in_multipolygon,
+                           point_in_multipolygon,
                            polygon_in_multipolygon,
                            segment_in_multipolygon)
 from reprit.base import generate_repr
-from sect.decomposition import Location
 
 from .compound import (Compound,
                        Indexable,
                        Linear,
+                       Location,
                        Relation,
                        Shaped)
 from .contour import Contour
@@ -78,7 +79,8 @@ class Multipolygon(Indexable[Coordinate], Shaped[Coordinate]):
                                      for polygon in self.polygons)
         """
         self._polygons, self._polygons_set = polygons, frozenset(polygons)
-        self._locate = partial(_locate_point_in_polygons, polygons)
+        self._locate = partial(_locate_point_in_multipolygon, self,
+                               context=self._context)
 
     __repr__ = generate_repr(__init__)
 
@@ -1145,13 +1147,11 @@ def _locate_point_in_indexed_polygons(tree: r.Tree,
     return Location.EXTERIOR
 
 
-def _locate_point_in_polygons(polygons: Sequence[Polygon],
-                              point: Point) -> Location:
-    for polygon in polygons:
-        location = polygon.locate(point)
-        if location is not Location.EXTERIOR:
-            return location
-    return Location.EXTERIOR
+def _locate_point_in_multipolygon(multipolygon: Multipolygon[Coordinate],
+                                  point: Point[Coordinate],
+                                  context: Context) -> Location:
+    return point_in_multipolygon(point, multipolygon,
+                                 context=context)
 
 
 def _multipolygon_has_holes(multipolygon: Multipolygon) -> bool:

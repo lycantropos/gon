@@ -5,7 +5,8 @@ from clipping.planar import (intersect_segments,
                              symmetric_subtract_segments,
                              unite_segments)
 from ground.hints import Scalar
-from orient.planar import segment_in_segment
+from orient.planar import (point_in_segment,
+                           segment_in_segment)
 from reprit.base import generate_repr
 
 from .compound import (Compound,
@@ -458,9 +459,8 @@ class Segment(Compound[Coordinate], Linear[Coordinate]):
         >>> segment.locate(segment.end) is Location.BOUNDARY
         True
         """
-        return (Location.BOUNDARY
-                if self._context.segment_contains_point(self, point)
-                else Location.EXTERIOR)
+        return point_in_segment(point, self,
+                                context=self._context)
 
     def relate(self, other: Compound[Coordinate]) -> Relation:
         """
