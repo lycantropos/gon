@@ -546,8 +546,7 @@ class Segment(Compound[Coordinate], Linear[Coordinate]):
         >>> segment.translate(1, 2) == Segment(Point(1, 2), Point(3, 2))
         True
         """
-        return self._context.segment_cls(self.start.translate(step_x, step_y),
-                                         self.end.translate(step_x, step_y))
+        return self._context.translate_segment(self, step_x, step_y)
 
     def validate(self) -> None:
         """

@@ -726,8 +726,7 @@ class Contour(Indexable[Coordinate], Linear[Coordinate]):
         ...  == Contour([Point(1, 2), Point(2, 2), Point(1, 3)]))
         True
         """
-        return self._context.contour_cls([vertex.translate(step_x, step_y)
-                                          for vertex in self._vertices])
+        return self._context.translate_contour(self, step_x, step_y)
 
     def validate(self) -> None:
         """

@@ -1033,9 +1033,7 @@ class Multipolygon(Indexable[Coordinate], Shaped[Coordinate]):
         ...                            Point(9, 8)])])]))
         True
         """
-        return self._context.multipolygon_cls(
-                [polygon.translate(step_x, step_y)
-                 for polygon in self.polygons])
+        return self._context.translate_multipolygon(self, step_x, step_y)
 
     def validate(self) -> None:
         """
