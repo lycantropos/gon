@@ -13,8 +13,6 @@ from .compound import (Compound,
                        Linear,
                        Location,
                        Relation)
-from .contracts import (is_segment_horizontal,
-                        is_segment_vertical)
 from .geometry import (Coordinate,
                        Geometry)
 from .iterable import non_negative_min
@@ -355,7 +353,7 @@ class Segment(Compound[Coordinate], Linear[Coordinate]):
         >>> segment.is_horizontal
         True
         """
-        return is_segment_horizontal(self)
+        return self.start.y == self.end.y
 
     @property
     def is_vertical(self) -> bool:
@@ -372,7 +370,7 @@ class Segment(Compound[Coordinate], Linear[Coordinate]):
         >>> segment.is_vertical
         False
         """
-        return is_segment_vertical(self)
+        return self.start.x == self.end.x
 
     @property
     def length(self) -> Scalar:
