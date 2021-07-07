@@ -10,7 +10,7 @@ from ground.hints import (Empty,
                           Point,
                           Shaped)
 
-from .contracts import MIN_MIX_NON_EMPTY_COMPONENTS
+MIN_MIX_NON_EMPTY_COMPONENTS = 2
 
 
 def pack_mix(discrete: Maybe[Multipoint],

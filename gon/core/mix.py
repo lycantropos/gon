@@ -10,12 +10,12 @@ from .compound import (Compound,
                        Location,
                        Relation,
                        Shaped)
-from .contracts import MIN_MIX_NON_EMPTY_COMPONENTS
 from .geometry import (Coordinate,
                        Geometry)
 from .iterable import non_negative_min
 from .multipoint import Multipoint
-from .packing import pack_mix
+from .packing import (MIN_MIX_NON_EMPTY_COMPONENTS,
+                      pack_mix)
 from .point import Point
 
 
