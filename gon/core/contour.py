@@ -445,12 +445,7 @@ class Contour(Indexable[Coordinate], Linear[Coordinate]):
         >>> contour.length == 4
         True
         """
-        vertices = self._vertices
-        sqrt, points_squared_distance = (self._context.sqrt,
-                                         self._context.points_squared_distance)
-        return sum(sqrt(points_squared_distance(vertices[index],
-                                                vertices[index - 1]))
-                   for index in range(len(vertices)))
+        return self._context.contour_length(self)
 
     @property
     def orientation(self) -> Orientation:
