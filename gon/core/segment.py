@@ -389,8 +389,7 @@ class Segment(Compound[Coordinate], Linear[Coordinate]):
         >>> segment.length == 2
         True
         """
-        return self._context.sqrt(
-                self._context.points_squared_distance(self.start, self.end))
+        return self._context.segment_length(self)
 
     @property
     def start(self) -> Point[Coordinate]:
