@@ -498,7 +498,7 @@ class Multipoint(Indexable[Coordinate]):
                 self._nearest_point(other), other))
 
     def _pack_points(self, points: AbstractSet[Point]) -> Maybe['Multipoint']:
-        return Multipoint(list(points)) if points else self._context.empty
+        return type(self)(list(points)) if points else self._context.empty
 
     def _relate_geometry(self, other: Compound[Coordinate]) -> Relation:
         disjoint = is_subset = not_interior = not_boundary = True
