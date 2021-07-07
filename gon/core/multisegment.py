@@ -425,7 +425,7 @@ class Multisegment(Indexable[Coordinate], Linear[Coordinate]):
         >>> multisegment.length == 2
         True
         """
-        return sum(segment.length for segment in self.segments)
+        return self._context.multisegment_length(self)
 
     @property
     def segments(self) -> Sequence[Segment[Coordinate]]:
