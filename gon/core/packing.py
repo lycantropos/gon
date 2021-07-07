@@ -1,5 +1,4 @@
-from typing import (AbstractSet,
-                    Type,
+from typing import (Type,
                     Union)
 
 from ground.hints import (Empty,
@@ -7,7 +6,6 @@ from ground.hints import (Empty,
                           Maybe,
                           Mix,
                           Multipoint,
-                          Point,
                           Shaped)
 
 MIN_MIX_NON_EMPTY_COMPONENTS = 2
@@ -29,9 +27,3 @@ def pack_mix(discrete: Maybe[Multipoint],
                   else (linear
                         if linear is not empty
                         else shaped)))
-
-
-def pack_points(points: AbstractSet[Point],
-                empty: Empty,
-                multipoint_cls: Type[Multipoint]) -> Maybe[Multipoint]:
-    return multipoint_cls(list(points)) if points else empty
