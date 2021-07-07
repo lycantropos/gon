@@ -83,17 +83,13 @@ class Multipolygon(_ContextMixin, _Multipolygon[_Coordinate]):
     __slots__ = ()
 
 
-_initial_context = _get_context()
-_context = _Context(box_cls=_initial_context.box_cls,
-                    contour_cls=Contour,
-                    empty_cls=Empty,
-                    mix_cls=Mix,
-                    multipoint_cls=Multipoint,
-                    multipolygon_cls=Multipolygon,
-                    multisegment_cls=Multisegment,
-                    point_cls=Point,
-                    polygon_cls=Polygon,
-                    segment_cls=Segment,
-                    mode=_initial_context.mode,
-                    sqrt=_initial_context.sqrt)
+_context = _get_context().replace(contour_cls=Contour,
+                                  empty_cls=Empty,
+                                  mix_cls=Mix,
+                                  multipoint_cls=Multipoint,
+                                  multipolygon_cls=Multipolygon,
+                                  multisegment_cls=Multisegment,
+                                  point_cls=Point,
+                                  polygon_cls=Polygon,
+                                  segment_cls=Segment)
 _set_context(_context)
