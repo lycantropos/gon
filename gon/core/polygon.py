@@ -17,7 +17,6 @@ from clipping.planar import (complete_intersect_multisegment_with_polygon,
                              unite_multisegment_with_polygon,
                              unite_polygons,
                              unite_segment_with_polygon)
-from ground.base import Context
 from ground.hints import Scalar
 from locus import segmental
 from orient.planar import (multisegment_in_polygon,
@@ -79,7 +78,8 @@ class Polygon(Indexable[Coordinate], Shaped[Coordinate]):
         self._border, self._holes, self._holes_set = (border, holes,
                                                       frozenset(holes))
         context = self._context
-        self._locate = partial(_locate_point, self,
+        self._locate = partial(point_in_polygon,
+                               polygon=self,
                                context=context)
         edges = self.edges
         self._point_nearest_edge, self._segment_nearest_edge = (
@@ -1089,10 +1089,3 @@ class Polygon(Indexable[Coordinate], Shaped[Coordinate]):
     def _unite_with_multipoint(self, other: Multipoint) -> Compound:
         return pack_mix(other - self, self._context.empty, self,
                         self._context.empty, self._context.mix_cls)
-
-
-def _locate_point(polygon: Polygon,
-                  point: Point,
-                  context: Context) -> Location:
-    return point_in_polygon(point, polygon,
-                            context=context)

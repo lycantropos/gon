@@ -12,7 +12,6 @@ from clipping.planar import (complete_intersect_multisegments,
                              symmetric_subtract_multisegments,
                              unite_multisegments,
                              unite_segment_with_multisegment)
-from ground.base import Context
 from ground.hints import Scalar
 from locus import segmental
 from orient.planar import (multisegment_in_multisegment,
@@ -57,7 +56,8 @@ class Multisegment(Indexable[Coordinate], Linear[Coordinate]):
         """
         self._segments, self._segments_set = segments, frozenset(segments)
         context = self._context
-        self._locate = partial(_locate_point, self,
+        self._locate = partial(point_in_multisegment,
+                               multisegment=self,
                                context=context)
         self._point_nearest_segment, self._segment_nearest_segment = (
             partial(to_point_nearest_segment, context, segments),
@@ -671,10 +671,3 @@ class Multisegment(Indexable[Coordinate], Linear[Coordinate]):
                                ) -> Compound[Coordinate]:
         return pack_mix(other - self, self, self._context.empty,
                         self._context.empty, self._context.mix_cls)
-
-
-def _locate_point(multisegment: Multisegment[Coordinate],
-                  point: Point[Coordinate],
-                  context: Context) -> Location:
-    return point_in_multisegment(point, multisegment,
-                                 context=context)
