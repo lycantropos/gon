@@ -1,5 +1,4 @@
 from typing import (AbstractSet,
-                    Sequence,
                     Type,
                     Union)
 
@@ -8,9 +7,7 @@ from ground.hints import (Empty,
                           Maybe,
                           Mix,
                           Multipoint,
-                          Multisegment,
                           Point,
-                          Segment,
                           Shaped)
 
 from .contracts import MIN_MIX_NON_EMPTY_COMPONENTS
@@ -38,14 +35,3 @@ def pack_points(points: AbstractSet[Point],
                 empty: Empty,
                 multipoint_cls: Type[Multipoint]) -> Maybe[Multipoint]:
     return multipoint_cls(list(points)) if points else empty
-
-
-def pack_segments(segments: Sequence[Point],
-                  empty: Empty,
-                  multisegment_cls: Type[Multisegment]
-                  ) -> Union[Empty, Multisegment, Segment]:
-    return ((multisegment_cls(segments)
-             if len(segments) > 1
-             else segments[0])
-            if segments
-            else empty)
