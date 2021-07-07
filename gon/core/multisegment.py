@@ -32,9 +32,6 @@ from .iterable import non_negative_min
 from .multipoint import Multipoint
 from .packing import pack_mix
 from .point import Point
-from .rotating import (point_to_step,
-                       rotate_segment_around_origin,
-                       rotate_translate_segment)
 from .segment import Segment
 from .utils import (relate_multipoint_to_linear_compound,
                     to_point_nearest_segment,
@@ -576,19 +573,11 @@ class Multisegment(Indexable[Coordinate], Linear[Coordinate]):
         ...                   Segment(Point(1, 0), Point(1, 1))]))
         True
         """
-        context = self._context
-        return context.multisegment_cls(
-                [rotate_segment_around_origin(segment, cosine, sine,
-                                              context.point_cls,
-                                              context.segment_cls)
-                 for segment in self.segments]
+        return (self._context.rotate_multisegment_around_origin(self, cosine,
+                                                                sine)
                 if point is None
-                else [rotate_translate_segment(segment, cosine, sine,
-                                               *point_to_step(point, cosine,
-                                                              sine),
-                                               context.point_cls,
-                                               context.segment_cls)
-                      for segment in self.segments])
+                else self._context.rotate_multisegment(self, cosine, sine,
+                                                       point))
 
     def scale(self,
               factor_x: Coordinate,

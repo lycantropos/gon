@@ -17,9 +17,6 @@ from .geometry import (Coordinate,
 from .iterable import (non_negative_min)
 from .packing import pack_points
 from .point import Point
-from .rotating import (point_to_step,
-                       rotate_points_around_origin,
-                       rotate_translate_points)
 
 
 class Multipoint(Indexable[Coordinate]):
@@ -426,15 +423,11 @@ class Multipoint(Indexable[Coordinate]):
         ...  == Multipoint([Point(2, 0), Point(2, 1), Point(1, 0)]))
         True
         """
-        context = self._context
-        return context.multipoint_cls(
-                rotate_points_around_origin(self._points, cosine, sine,
-                                            context.point_cls)
+        return (self._context.rotate_multipoint_around_origin(self, cosine,
+                                                              sine)
                 if point is None
-                else rotate_translate_points(self._points, cosine, sine,
-                                             *point_to_step(point, cosine,
-                                                            sine),
-                                             context.point_cls))
+                else self._context.rotate_multipoint(self, cosine, sine,
+                                                     point))
 
     def scale(self,
               factor_x: Coordinate,

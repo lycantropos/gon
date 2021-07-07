@@ -47,9 +47,6 @@ from .multipoint import Multipoint
 from .packing import pack_mix
 from .point import Point
 from .polygon import Polygon
-from .rotating import (point_to_step,
-                       rotate_multipolygon_around_origin,
-                       rotate_translate_multipolygon)
 from .segment import Segment
 
 MIN_MULTIPOLYGON_POLYGONS_COUNT = 2
@@ -933,16 +930,11 @@ class Multipolygon(Indexable[Coordinate], Shaped[Coordinate]):
         ...                            Point(-6, 8), Point(-4, 8)])])]))
         True
         """
-        context = self._context
-        return (rotate_multipolygon_around_origin(
-                self, cosine, sine, context.contour_cls,
-                context.multipolygon_cls, context.point_cls,
-                context.polygon_cls)
+        return (self._context.rotate_multipolygon_around_origin(self, cosine,
+                                                                sine)
                 if point is None
-                else rotate_translate_multipolygon(
-                self, cosine, sine, *point_to_step(point, cosine, sine),
-                context.contour_cls, context.multipolygon_cls,
-                context.point_cls, context.polygon_cls))
+                else self._context.rotate_multipolygon(self, cosine, sine,
+                                                       point))
 
     def scale(self,
               factor_x: Coordinate,

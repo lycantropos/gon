@@ -36,9 +36,6 @@ from .multipoint import Multipoint
 from .multisegment import Multisegment
 from .packing import pack_mix
 from .point import Point
-from .rotating import (point_to_step,
-                       rotate_contour_around_origin,
-                       rotate_translate_contour)
 from .segment import Segment
 from .utils import (relate_multipoint_to_linear_compound,
                     to_point_nearest_segment,
@@ -630,13 +627,9 @@ class Contour(Indexable[Coordinate], Linear[Coordinate]):
         ...  == Contour([Point(2, 0), Point(2, 1), Point(1, 0)]))
         True
         """
-        context = self._context
-        return (rotate_contour_around_origin(
-                self, cosine, sine, context.contour_cls, context.point_cls)
+        return (self._context.rotate_contour_around_origin(self, cosine, sine)
                 if point is None
-                else rotate_translate_contour(
-                self, cosine, sine, *point_to_step(point, cosine, sine),
-                context.contour_cls, context.point_cls))
+                else self._context.rotate_contour(self, cosine, sine, point))
 
     def scale(self,
               factor_x: Coordinate,
