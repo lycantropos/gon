@@ -39,8 +39,6 @@ from .point import Point
 from .rotating import (point_to_step,
                        rotate_contour_around_origin,
                        rotate_translate_contour)
-from .scaling import (scale_contour,
-                      scale_contour_degenerate)
 from .segment import Segment
 from .utils import (relate_multipoint_to_linear_compound,
                     to_point_nearest_segment,
@@ -661,16 +659,8 @@ class Contour(Indexable[Coordinate], Linear[Coordinate]):
         ...  == Contour([Point(0, 0), Point(1, 0), Point(0, 2)]))
         True
         """
-        if factor_y is None:
-            factor_y = factor_x
-        context = self._context
-        return (scale_contour(self, factor_x, factor_y, context.contour_cls,
-                              context.point_cls)
-                if factor_x and factor_y
-                else scale_contour_degenerate(self, factor_x, factor_y,
-                                              context.multipoint_cls,
-                                              context.point_cls,
-                                              context.segment_cls))
+        return self._context.scale_contour(
+                self, factor_x, factor_x if factor_y is None else factor_y)
 
     def to_clockwise(self) -> 'Contour[Coordinate]':
         """

@@ -46,8 +46,6 @@ from .point import Point
 from .rotating import (point_to_step,
                        rotate_polygon_around_origin,
                        rotate_translate_polygon)
-from .scaling import (scale_contour_degenerate,
-                      scale_polygon)
 from .segment import Segment
 from .utils import (to_point_nearest_segment,
                     to_segment_nearest_segment)
@@ -959,16 +957,8 @@ class Polygon(Indexable[Coordinate], Shaped[Coordinate]):
         ...                       Point(4, 4)])]))
         True
         """
-        if factor_y is None:
-            factor_y = factor_x
-        context = self._context
-        return (scale_polygon(self, factor_x, factor_y, context.contour_cls,
-                              context.point_cls, context.polygon_cls)
-                if factor_x and factor_y
-                else scale_contour_degenerate(self.border, factor_x,
-                                              factor_y, context.multipoint_cls,
-                                              context.point_cls,
-                                              context.segment_cls))
+        return self._context.scale_polygon(
+                self, factor_x, factor_x if factor_y is None else factor_y)
 
     def translate(self, step_x: Scalar, step_y: Scalar) -> 'Polygon':
         """

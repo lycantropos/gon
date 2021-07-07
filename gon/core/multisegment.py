@@ -35,8 +35,6 @@ from .point import Point
 from .rotating import (point_to_step,
                        rotate_segment_around_origin,
                        rotate_translate_segment)
-from .scaling import (scale_segment,
-                      scale_segments)
 from .segment import Segment
 from .utils import (relate_multipoint_to_linear_compound,
                     to_point_nearest_segment,
@@ -615,25 +613,8 @@ class Multisegment(Indexable[Coordinate], Linear[Coordinate]):
         ...                   Segment(Point(0, 2), Point(1, 2))]))
         True
         """
-        if factor_y is None:
-            factor_y = factor_x
-        context = self._context
-        return (context.multisegment_cls(
-                [scale_segment(segment, factor_x, factor_y,
-                               context.multipoint_cls, context.point_cls,
-                               context.segment_cls)
-                 for segment in self.segments])
-                if factor_x and factor_y
-                else (scale_segments(self.segments, factor_x, factor_y,
-                                     context.empty, context.mix_cls,
-                                     context.multipoint_cls,
-                                     context.multisegment_cls,
-                                     context.point_cls,
-                                     context.segment_cls)
-                      if factor_x or factor_y
-                      else
-                      context.multipoint_cls([context.point_cls(factor_x,
-                                                                factor_y)])))
+        return self._context.scale_multisegment(
+                self, factor_x, factor_x if factor_y is None else factor_y)
 
     def translate(self,
                   step_x: Coordinate,
