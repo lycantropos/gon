@@ -50,8 +50,6 @@ from .polygon import Polygon
 from .rotating import (point_to_step,
                        rotate_multipolygon_around_origin,
                        rotate_translate_multipolygon)
-from .scaling import (scale_polygon,
-                      scale_vertices_degenerate)
 from .segment import Segment
 
 MIN_MULTIPOLYGON_POLYGONS_COUNT = 2
@@ -990,19 +988,8 @@ class Multipolygon(Indexable[Coordinate], Shaped[Coordinate]):
         ...                            Point(8, 16), Point(8, 12)])])]))
         True
         """
-        if factor_y is None:
-            factor_y = factor_x
-        context = self._context
-        return (context.multipolygon_cls(
-                [scale_polygon(polygon, factor_x, factor_y,
-                               context.contour_cls, context.point_cls,
-                               context.polygon_cls)
-                 for polygon in self.polygons])
-                if factor_x and factor_y
-                else scale_vertices_degenerate(
-                flatten(polygon.border.vertices for polygon in self.polygons),
-                factor_x, factor_y, context.multipoint_cls, context.point_cls,
-                context.segment_cls))
+        return self._context.scale_multipolygon(
+                self, factor_x, factor_x if factor_y is None else factor_y)
 
     def translate(self,
                   step_x: Coordinate,

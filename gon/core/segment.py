@@ -24,7 +24,6 @@ from .point import Point
 from .rotating import (point_to_step,
                        rotate_segment_around_origin,
                        rotate_translate_segment)
-from .scaling import scale_segment
 from .utils import relate_multipoint_to_linear_compound
 
 
@@ -528,11 +527,8 @@ class Segment(Compound[Coordinate], Linear[Coordinate]):
         >>> segment.scale(1) == segment.scale(1, 2) == segment
         True
         """
-        context = self._context
-        return scale_segment(self, factor_x,
-                             factor_x if factor_y is None else factor_y,
-                             context.multipoint_cls, context.point_cls,
-                             context.segment_cls)
+        return self._context.scale_segment(
+                self, factor_x, factor_x if factor_y is None else factor_y)
 
     def translate(self,
                   step_x: Coordinate,

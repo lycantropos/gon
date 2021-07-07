@@ -11,7 +11,6 @@ from .geometry import (Coordinate,
 from .rotating import (point_to_step,
                        rotate_point_around_origin,
                        rotate_translate_point)
-from .scaling import scale_point
 
 
 class Point(Geometry[Coordinate]):
@@ -214,9 +213,8 @@ class Point(Geometry[Coordinate]):
         >>> point.scale(1) == point.scale(1, 2) == point
         True
         """
-        return scale_point(self, factor_x,
-                           factor_x if factor_y is None else factor_y,
-                           self._context.point_cls)
+        return self._context.scale_point(
+                self, factor_x, factor_x if factor_y is None else factor_y)
 
     def translate(self,
                   step_x: Coordinate,

@@ -14,14 +14,12 @@ from .compound import (Compound,
                        Relation)
 from .geometry import (Coordinate,
                        Geometry)
-from .iterable import (non_negative_min,
-                       unique_ever_seen)
+from .iterable import (non_negative_min)
 from .packing import pack_points
 from .point import Point
 from .rotating import (point_to_step,
                        rotate_points_around_origin,
                        rotate_translate_points)
-from .scaling import scale_point
 
 
 class Multipoint(Indexable[Coordinate]):
@@ -460,19 +458,8 @@ class Multipoint(Indexable[Coordinate]):
         ...  == Multipoint([Point(0, 0), Point(1, 0), Point(0, 2)]))
         True
         """
-        if factor_y is None:
-            factor_y = factor_x
-        context = self._context
-        return context.multipoint_cls(
-                [scale_point(point, factor_x, factor_y, context.point_cls)
-                 for point in self._points]
-                if factor_x and factor_y
-                else
-                (list(unique_ever_seen(scale_point(point, factor_x, factor_y,
-                                                   context.point_cls)
-                                       for point in self._points))
-                 if factor_x or factor_y
-                 else [context.point_cls(factor_x, factor_y)]))
+        return self._context.scale_multipoint(
+                self, factor_x, factor_x if factor_y is None else factor_y)
 
     def translate(self,
                   step_x: Coordinate,
