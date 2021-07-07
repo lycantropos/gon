@@ -12,7 +12,6 @@ from clipping.planar import (complete_intersect_multisegments,
                              symmetric_subtract_multisegments,
                              unite_multisegments,
                              unite_segment_with_multisegment)
-from ground.base import Context
 from ground.hints import Scalar
 from locus import segmental
 from orient.planar import (multisegment_in_multisegment,
@@ -61,9 +60,10 @@ class Contour(Indexable[Coordinate], Linear[Coordinate]):
         self._min_index = min(range(len(vertices)),
                               key=vertices.__getitem__)
         context = self._context
-        self._locate = partial(_locate_point, self,
-                               context=context)
         self._segments = segments = context.contour_segments(self)
+        self._locate = partial(point_in_multisegment,
+                               multisegment=self,
+                               context=context)
         self._point_nearest_segment, self._segment_nearest_segment = (
             partial(to_point_nearest_segment, context, segments),
             partial(to_segment_nearest_segment, context, segments))
@@ -765,10 +765,3 @@ class Contour(Indexable[Coordinate], Linear[Coordinate]):
         context = self._context
         return pack_mix(other - self, self, context.empty, context.empty,
                         context.mix_cls)
-
-
-def _locate_point(contour: Contour[Coordinate],
-                  point: Point[Coordinate],
-                  context: Context) -> Location:
-    return point_in_multisegment(point, contour,
-                                 context=context)

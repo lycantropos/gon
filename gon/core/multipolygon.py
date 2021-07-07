@@ -74,7 +74,8 @@ class Multipolygon(Indexable[Coordinate], Shaped[Coordinate]):
                                      for polygon in self.polygons)
         """
         self._polygons, self._polygons_set = polygons, frozenset(polygons)
-        self._locate = partial(_locate_point_in_multipolygon, self,
+        self._locate = partial(point_in_multipolygon,
+                               multipolygon=self,
                                context=self._context)
 
     __repr__ = generate_repr(__init__)
@@ -791,8 +792,8 @@ class Multipolygon(Indexable[Coordinate], Shaped[Coordinate]):
         to_polygon_box = context.polygon_box
         tree = r.Tree([to_polygon_box(polygon) for polygon in polygons],
                       context=context)
-        self._locate = partial(_locate_point_in_indexed_polygons, tree,
-                               polygons,
+        self._locate = partial(_locate_point_in_indexed_polygons, polygons,
+                               tree,
                                context=context)
 
     def locate(self, point: Point[Coordinate]) -> Location:
@@ -1111,8 +1112,8 @@ class Multipolygon(Indexable[Coordinate], Shaped[Coordinate]):
                         context.mix_cls)
 
 
-def _locate_point_in_indexed_polygons(tree: r.Tree,
-                                      polygons: Sequence[Polygon],
+def _locate_point_in_indexed_polygons(polygons: Sequence[Polygon],
+                                      tree: r.Tree,
                                       point: Point,
                                       context: Context) -> Location:
     candidates_indices = tree.find_supersets_indices(
@@ -1122,13 +1123,6 @@ def _locate_point_in_indexed_polygons(tree: r.Tree,
         if location is not Location.EXTERIOR:
             return location
     return Location.EXTERIOR
-
-
-def _locate_point_in_multipolygon(multipolygon: Multipolygon[Coordinate],
-                                  point: Point[Coordinate],
-                                  context: Context) -> Location:
-    return point_in_multipolygon(point, multipolygon,
-                                 context=context)
 
 
 def _multipolygon_has_holes(multipolygon: Multipolygon) -> bool:
