@@ -10,7 +10,7 @@ from tests.utils import equivalence
 from . import strategies
 
 
-@given(strategies.rational_non_empty_compounds_with_points)
+@given(strategies.non_empty_compounds_with_points)
 def test_connection_with_contains(compound_with_point: Tuple[Compound, Point]
                                   ) -> None:
     compound, point = compound_with_point

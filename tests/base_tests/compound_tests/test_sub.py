@@ -19,7 +19,7 @@ def test_basic(compounds_pair: Tuple[Compound, Compound]) -> None:
     assert isinstance(result, Compound)
 
 
-@given(strategies.rational_compounds_pairs)
+@given(strategies.compounds_pairs)
 def test_validity(compounds_pair: Tuple[Compound, Compound]) -> None:
     left_compound, right_compound = compounds_pair
 
@@ -67,7 +67,7 @@ def test_connection_with_disjoint(compounds_pair: Tuple[Compound, Compound]
                        are_compounds_equivalent(result, left_compound))
 
 
-@given(strategies.rational_compounds_pairs)
+@given(strategies.compounds_pairs)
 def test_connection_with_subset_relation(compounds_pair
                                          : Tuple[Compound, Compound]) -> None:
     left_compound, right_compound = compounds_pair

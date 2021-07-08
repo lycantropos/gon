@@ -54,7 +54,7 @@ def test_right_absorbing_element(empty_compound_with_compound
     assert result is EMPTY
 
 
-@given(strategies.rational_compounds_pairs)
+@given(strategies.compounds_pairs)
 def test_absorption_identity(compounds_pair: Tuple[Compound, Compound]
                              ) -> None:
     left_compound, right_compound = compounds_pair
@@ -73,7 +73,7 @@ def test_commutativity(compounds_pair: Tuple[Compound, Compound]) -> None:
     assert result == right_compound & left_compound
 
 
-@given(strategies.rational_compounds_triplets)
+@given(strategies.compounds_triplets)
 def test_associativity(compounds_triplet: Tuple[Compound, Compound, Compound]
                        ) -> None:
     left_compound, mid_compound, right_compound = compounds_triplet
@@ -84,7 +84,7 @@ def test_associativity(compounds_triplet: Tuple[Compound, Compound, Compound]
             result, left_compound & (mid_compound & right_compound))
 
 
-@given(strategies.rational_compounds_triplets)
+@given(strategies.compounds_triplets)
 def test_distribution_over_union(compounds_triplet
                                  : Tuple[Compound, Compound, Compound]
                                  ) -> None:
@@ -108,7 +108,7 @@ def test_connection_with_disjoint(compounds_pair: Tuple[Compound, Compound]
                        result is EMPTY)
 
 
-@given(strategies.rational_compounds_pairs)
+@given(strategies.compounds_pairs)
 def test_connection_with_subset_relation(compounds_pair
                                          : Tuple[Compound, Compound]) -> None:
     left_compound, right_compound = compounds_pair

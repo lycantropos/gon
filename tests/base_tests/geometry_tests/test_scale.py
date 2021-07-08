@@ -22,7 +22,7 @@ def test_basic(geometry_with_factors: Tuple[Geometry, Scalar, Scalar]
                        isinstance(geometry, Compound))
 
 
-@given(strategies.rational_geometries_with_non_zero_coordinates_pairs)
+@given(strategies.geometries_with_non_zero_coordinates_pairs)
 def test_round_trip(geometry_with_non_zero_factors
                     : Tuple[Geometry, Scalar, Scalar]) -> None:
     geometry, factor_x, factor_y = geometry_with_non_zero_factors

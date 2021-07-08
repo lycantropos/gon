@@ -7,7 +7,7 @@ from gon.hints import Scalar
 from . import strategies
 
 
-@given(strategies.rational_shaped_geometries_with_non_zero_coordinates_pairs)
+@given(strategies.shaped_geometries_with_non_zero_coordinates_pairs)
 def test_area(shaped_with_factors: Tuple[Shaped, Scalar, Scalar]) -> None:
     shaped, factor_x, factor_y = shaped_with_factors
 
