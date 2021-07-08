@@ -1,10 +1,10 @@
 import sys
 from decimal import Decimal
-from fractions import Fraction
 from functools import partial
 from typing import (Optional,
                     Tuple)
 
+from cfractions import Fraction
 from hypothesis import strategies
 
 from gon.hints import Scalar
@@ -49,16 +49,12 @@ def to_digits_count(number: float,
     return float(str(decimal))
 
 
-rational_coordinates_strategies_factories = {
-    Fraction: partial(strategies.fractions,
-                      max_denominator=MAX_COORDINATE),
-    int: strategies.integers}
-coordinates_strategies_factories = {
-    float: to_floats,
-    **rational_coordinates_strategies_factories}
 coordinates_strategies = strategies.sampled_from(
         [factory(MIN_COORDINATE, MAX_COORDINATE)
-         for factory in coordinates_strategies_factories.values()])
+         for factory in [to_floats,
+                         partial(strategies.fractions,
+                                 max_denominator=MAX_COORDINATE),
+                         strategies.integers]])
 
 
 def to_pythagorean_triplets(*,
