@@ -284,9 +284,10 @@ def rationalize(value: Scalar) -> Scalar:
 def rotate_segment(segment: Segment,
                    pythagorean_triplet: Tuple[int, int, int]) -> Segment:
     area_sine, area_cosine, area = pythagorean_triplet
-    return context.rotate_segment_around_origin(segment,
-                                                Fraction(area_cosine, area),
-                                                Fraction(area_sine, area))
+    return context.rotate_segment(segment,
+                                  Fraction(area_cosine, area),
+                                  Fraction(area_sine, area),
+                                  segment.centroid)
 
 
 def segment_to_rotations(segment: Segment,
