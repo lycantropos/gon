@@ -19,7 +19,7 @@ def test_basic(compounds_pair: Tuple[Compound, Compound]) -> None:
     assert isinstance(result, Compound)
 
 
-@given(strategies.rational_compounds_pairs)
+@given(strategies.compounds_pairs)
 def test_validity(compounds_pair: Tuple[Compound, Compound]) -> None:
     left_compound, right_compound = compounds_pair
 
@@ -65,7 +65,7 @@ def test_commutativity(compounds_pair: Tuple[Compound, Compound]) -> None:
     assert result == right_compound ^ left_compound
 
 
-@given(strategies.rational_equidimensional_compounds_triplets)
+@given(strategies.equidimensional_compounds_triplets)
 def test_associativity(compounds_triplet: Tuple[Compound, Compound, Compound]
                        ) -> None:
     left_compound, mid_compound, right_compound = compounds_triplet
@@ -76,7 +76,7 @@ def test_associativity(compounds_triplet: Tuple[Compound, Compound, Compound]
             result, left_compound ^ (mid_compound ^ right_compound))
 
 
-@given(strategies.rational_compounds_pairs)
+@given(strategies.compounds_pairs)
 def test_equivalents(compounds_pair: Tuple[Compound, Compound]) -> None:
     left_compound, right_compound = compounds_pair
 

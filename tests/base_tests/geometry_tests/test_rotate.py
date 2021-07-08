@@ -8,7 +8,7 @@ from gon.hints import Scalar
 from . import strategies
 
 
-@given(strategies.rational_geometries_points_with_cosines_sines)
+@given(strategies.geometries_points_with_cosines_sines)
 def test_basic(geometry_point_with_cosine_sine
                : Tuple[Tuple[Geometry, Point], Tuple[Scalar, Scalar]]
                ) -> None:
@@ -19,7 +19,7 @@ def test_basic(geometry_point_with_cosine_sine
     assert isinstance(result, type(geometry))
 
 
-@given(strategies.rational_geometries_points_with_cosines_sines)
+@given(strategies.geometries_points_with_cosines_sines)
 def test_around_point(geometry_point_with_cosine_sine
                       : Tuple[Tuple[Geometry, Point],
                               Tuple[Scalar, Scalar]]) -> None:
@@ -32,7 +32,7 @@ def test_around_point(geometry_point_with_cosine_sine
                       .translate(point.x, point.y))
 
 
-@given(strategies.rational_geometries_with_points)
+@given(strategies.geometries_with_points)
 def test_neutral_angle(geometry_with_point: Tuple[Geometry, Point]) -> None:
     geometry, point = geometry_with_point
 
@@ -41,7 +41,7 @@ def test_neutral_angle(geometry_with_point: Tuple[Geometry, Point]) -> None:
     assert result == geometry
 
 
-@given(strategies.rational_geometries_points_with_cosines_sines)
+@given(strategies.geometries_points_with_cosines_sines)
 def test_round_trip(geometry_point_with_cosine_sine
                     : Tuple[Tuple[Geometry, Point],
                             Tuple[Scalar, Scalar]]) -> None:
@@ -52,7 +52,7 @@ def test_round_trip(geometry_point_with_cosine_sine
     assert result.rotate(cosine, -sine, point) == geometry
 
 
-@given(strategies.rational_geometries_points_with_cosines_sines_pairs)
+@given(strategies.geometries_points_with_cosines_sines_pairs)
 def test_consecutive(geometry_point_with_cosine_sine_pair
                      : Tuple[Tuple[Geometry, Point],
                              Tuple[Scalar, Scalar],

@@ -1,5 +1,4 @@
 from .base import (coordinates_strategies,
-                   rational_coordinates_strategies,
                    rational_cosines_sines)
 from .discrete import invalid_multipoints
 from .factories import (coordinates_to_contours,

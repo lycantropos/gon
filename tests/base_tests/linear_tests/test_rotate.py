@@ -8,7 +8,7 @@ from gon.hints import Scalar
 from . import strategies
 
 
-@given(strategies.rational_linear_geometries_points_with_cosines_sines)
+@given(strategies.linear_geometries_points_with_cosines_sines)
 def test_isometry(linear_with_cosine_sine: Tuple[Tuple[Linear, Point],
                                                  Tuple[Scalar, Scalar]]
                   ) -> None:

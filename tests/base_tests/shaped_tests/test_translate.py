@@ -7,7 +7,7 @@ from gon.hints import Scalar
 from . import strategies
 
 
-@given(strategies.rational_shaped_geometries_with_coordinates_pairs)
+@given(strategies.shaped_geometries_with_coordinates_pairs)
 def test_isometry(shaped_with_steps: Tuple[Shaped, Scalar, Scalar]) -> None:
     shaped, step_x, step_y = shaped_with_steps
 

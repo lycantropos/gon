@@ -23,6 +23,16 @@ def test_neutral_step(geometry: Geometry) -> None:
     assert result == geometry
 
 
+@given(strategies.geometries_with_coordinates_pairs)
+def test_round_trip(geometry_with_steps: Tuple[Geometry, Scalar, Scalar]
+                    ) -> None:
+    geometry, step_x, step_y = geometry_with_steps
+
+    result = geometry.translate(step_x, step_y)
+
+    assert result.translate(-step_x, -step_y) == geometry
+
+
 @given(strategies.empty_compounds_with_coordinates_pairs)
 def test_empty(geometry_with_steps: Tuple[Geometry, Scalar, Scalar]) -> None:
     geometry, step_x, step_y = geometry_with_steps
