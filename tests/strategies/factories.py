@@ -14,13 +14,11 @@ from tests.utils import (Strategy,
 MAX_LINEAR_SIZE = 5
 
 
-def to_non_zero_coordinates(coordinates: Strategy[Scalar]
-                            ) -> Strategy[Scalar]:
+def to_non_zero_coordinates(coordinates: Strategy[Scalar]) -> Strategy[Scalar]:
     return coordinates.filter(bool)
 
 
-def to_zero_coordinates(coordinates: Strategy[Scalar]
-                        ) -> Strategy[Scalar]:
+def to_zero_coordinates(coordinates: Strategy[Scalar]) -> Strategy[Scalar]:
     return strategies.builds(call, coordinates.map(type))
 
 

@@ -18,7 +18,6 @@ from tests.utils import (Strategy,
 from .base import coordinates_strategies
 from .factories import coordinates_to_points
 
-points_strategies = coordinates_strategies.map(coordinates_to_points)
 points = coordinates_strategies.flatmap(coordinates_to_points)
 valid_coordinates = coordinates_strategies.flatmap(identity)
 invalid_coordinates = strategies.sampled_from([math.nan, math.inf, -math.inf])

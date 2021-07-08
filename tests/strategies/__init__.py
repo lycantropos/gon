@@ -24,7 +24,6 @@ from .linear import (contours_with_repeated_points,
                      invalid_vertices_contours)
 from .primitive import (invalid_points,
                         points,
-                        points_strategies,
                         repeated_points)
 from .shaped import (invalid_multipolygons,
                      invalid_polygons,
