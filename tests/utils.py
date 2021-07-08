@@ -1,6 +1,5 @@
 from collections import OrderedDict
 from contextlib import contextmanager
-from fractions import Fraction
 from functools import partial
 from itertools import (chain,
                        repeat)
@@ -19,6 +18,7 @@ from typing import (Any,
                     TypeVar)
 
 import pytest
+from cfractions import Fraction
 from clipping.planar import segments_to_multisegment
 from ground.base import get_context
 from hypothesis import strategies
@@ -162,7 +162,7 @@ def is_scalar(value: Any) -> bool:
 
 
 def robust_invert(value: Scalar) -> Scalar:
-    return 1 / Fraction(value)
+    return 1 / rationalize(value)
 
 
 def reflect_segment(segment: Segment) -> Segment:
@@ -210,9 +210,7 @@ def scale_segment_end(segment: Segment[Scalar],
 
 
 def divide_by_int(dividend: Scalar, divisor: int) -> Scalar:
-    return (Fraction(dividend, divisor)
-            if isinstance(dividend, int)
-            else dividend / divisor)
+    return rationalize(dividend) / divisor
 
 
 def compound_to_compound_with_multipoint(compound: Compound
@@ -267,10 +265,6 @@ def mix_to_polygons(mix: Mix) -> Sequence[Polygon]:
     return [] if shaped is EMPTY else shaped_to_polygons(shaped)
 
 
-def shaped_to_polygons(shaped: Shaped) -> Sequence[Polygon]:
-    return shaped.polygons if isinstance(shaped, Multipolygon) else [shaped]
-
-
 def mix_to_segments(mix: Mix) -> Sequence[Segment]:
     linear = mix.linear
     return ([]
@@ -280,11 +274,11 @@ def mix_to_segments(mix: Mix) -> Sequence[Segment]:
                   else linear.segments))
 
 
-def segment_to_rotations(segment: Segment,
-                         pythagorean_triplets: List[Tuple[int, int, int]]
-                         ) -> List[Segment]:
-    return [segment] + [rotate_segment(segment, pythagorean_triplet)
-                        for pythagorean_triplet in pythagorean_triplets]
+def rationalize(value: Scalar) -> Scalar:
+    try:
+        return Fraction(value)
+    except TypeError:
+        return value
 
 
 def rotate_segment(segment: Segment,
@@ -293,6 +287,17 @@ def rotate_segment(segment: Segment,
     return context.rotate_segment_around_origin(segment,
                                                 Fraction(area_cosine, area),
                                                 Fraction(area_sine, area))
+
+
+def segment_to_rotations(segment: Segment,
+                         pythagorean_triplets: List[Tuple[int, int, int]]
+                         ) -> List[Segment]:
+    return [segment] + [rotate_segment(segment, pythagorean_triplet)
+                        for pythagorean_triplet in pythagorean_triplets]
+
+
+def shaped_to_polygons(shaped: Shaped) -> Sequence[Polygon]:
+    return shaped.polygons if isinstance(shaped, Multipolygon) else [shaped]
 
 
 to_points_convex_hull = context.points_convex_hull
@@ -312,4 +317,4 @@ def to_rational_segment(segment: Segment[Real]) -> Segment[Fraction]:
 
 
 def to_rational_point(point: Point[Real]) -> Point[Fraction]:
-    return Point(Fraction(point.x), Fraction(point.y))
+    return Point(rationalize(point.x), rationalize(point.y))

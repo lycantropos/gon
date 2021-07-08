@@ -4,6 +4,7 @@ from hypothesis import given
 
 from gon.base import Shaped
 from gon.hints import Scalar
+from tests.utils import rationalize
 from . import strategies
 
 
@@ -13,4 +14,5 @@ def test_area(shaped_with_factors: Tuple[Shaped, Scalar, Scalar]) -> None:
 
     result = shaped.scale(factor_x, factor_y)
 
-    assert result.area == shaped.area * abs(factor_x * factor_y)
+    assert result.area == shaped.area * abs(rationalize(factor_x)
+                                            * rationalize(factor_y))
