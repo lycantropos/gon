@@ -4,7 +4,6 @@ from hypothesis import strategies
 from hypothesis_geometry import planar
 
 from gon.base import (Linear,
-                      Mix,
                       Multipoint,
                       Shaped)
 from gon.hints import (Maybe,
