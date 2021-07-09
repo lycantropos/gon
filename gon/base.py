@@ -2,7 +2,8 @@ from ground.base import (Context as _Context,
                          get_context as _get_context,
                          set_context as _set_context)
 
-from .core.angle import (Kind,
+from .core.angle import (Angle as _Angle,
+                         Kind,
                          Orientation)
 from .core.compound import (Compound,
                             Indexable,
@@ -80,6 +81,10 @@ class Polygon(_ContextMixin, _Polygon[_Coordinate]):
 
 
 class Multipolygon(_ContextMixin, _Multipolygon[_Coordinate]):
+    __slots__ = ()
+
+
+class Angle(_ContextMixin, _Angle[_Coordinate]):
     __slots__ = ()
 
 
