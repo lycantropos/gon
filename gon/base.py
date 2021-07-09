@@ -2,8 +2,8 @@ from ground.base import (Context as _Context,
                          get_context as _get_context,
                          set_context as _set_context)
 
-from .core.angular import (Kind,
-                           Orientation)
+from .core.angle import (Kind,
+                         Orientation)
 from .core.compound import (Compound,
                             Indexable,
                             Linear,
