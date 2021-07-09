@@ -301,6 +301,10 @@ def shaped_to_polygons(shaped: Shaped) -> Sequence[Polygon]:
     return shaped.polygons if isinstance(shaped, Multipolygon) else [shaped]
 
 
+def square(value: Scalar) -> Scalar:
+    return value * value
+
+
 to_points_convex_hull = context.points_convex_hull
 
 

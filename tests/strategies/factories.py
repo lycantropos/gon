@@ -5,11 +5,14 @@ from hypothesis_geometry import planar
 
 from gon.base import (Linear,
                       Multipoint,
-                      Shaped)
+                      Shaped,
+                      Vector)
 from gon.hints import (Maybe,
                        Scalar)
 from tests.utils import (Strategy,
-                         call)
+                         call,
+                         pack,
+                         to_pairs)
 
 MAX_LINEAR_SIZE = 5
 
@@ -65,3 +68,9 @@ coordinates_to_contours = partial(planar.contours,
 coordinates_to_mixes = planar.mixes
 coordinates_to_polygons = planar.polygons
 coordinates_to_multipolygons = planar.multipolygons
+
+
+def coordinates_to_vectors(coordinates: Strategy[Scalar]
+                           ) -> Strategy[Vector[Scalar]]:
+    return strategies.builds(pack(Vector),
+                             to_pairs(coordinates_to_points(coordinates)))
