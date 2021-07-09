@@ -1,6 +1,7 @@
 from typing import Optional
 
-from ground.hints import Scalar
+from ground.hints import (Point,
+                          Scalar)
 from reprit.base import generate_repr
 
 from .angle import Angle
@@ -8,7 +9,6 @@ from .compound import (Compound,
                        Location,
                        Relation)
 from .geometry import Geometry
-from .point import Point
 
 try:
     from typing import NoReturn
