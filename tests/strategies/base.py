@@ -11,10 +11,8 @@ from gon.base import Angle
 from gon.hints import Scalar
 from tests.utils import (MAX_COORDINATE,
                          MIN_COORDINATE,
-                         Strategy,
-                         pack,
-                         to_triplets)
-from .factories import coordinates_to_points
+                         Strategy)
+from .factories import coordinates_to_angles
 
 
 def to_floats(min_value: Optional[Scalar] = None,
@@ -99,7 +97,5 @@ def pythagorean_triplet_to_rational_cosine_sine(triplet
 
 angles = ((to_pythagorean_triplets(max_value=MAX_COORDINATE)
            .map(pythagorean_triplet_to_rational_cosine_sine))
-          | (coordinates_strategies.map(coordinates_to_points).flatmap(
-                to_triplets)
-             .map(pack(Angle.from_sides))))
+          | coordinates_strategies.flatmap(coordinates_to_angles))
 empty_sequences = strategies.builds(list) | strategies.builds(tuple)
