@@ -9,6 +9,7 @@ from orient.planar import (point_in_segment,
                            segment_in_segment)
 from reprit.base import generate_repr
 
+from .angle import Angle
 from .compound import (Compound,
                        Linear,
                        Location,
@@ -477,8 +478,7 @@ class Segment(Compound[Coordinate], Linear[Coordinate]):
                       else other.relate(self).complement))
 
     def rotate(self,
-               cosine: Coordinate,
-               sine: Coordinate,
+               angle: Angle,
                point: Optional[Point[Coordinate]] = None
                ) -> 'Segment[Coordinate]':
         """
@@ -489,17 +489,19 @@ class Segment(Compound[Coordinate], Linear[Coordinate]):
         Memory complexity:
             ``O(1)``
 
-        >>> from gon.base import Point, Segment
+        >>> from gon.base import Angle, Point, Segment
         >>> segment = Segment(Point(0, 0), Point(2, 0))
-        >>> segment.rotate(1, 0) == segment
+        >>> segment.rotate(Angle(1, 0)) == segment
         True
-        >>> (segment.rotate(0, 1, Point(1, 1))
+        >>> (segment.rotate(Angle(0, 1), Point(1, 1))
         ...  == Segment(Point(2, 0), Point(2, 2)))
         True
         """
-        return (self._context.rotate_segment_around_origin(self, cosine, sine)
+        return (self._context.rotate_segment_around_origin(self, angle.cosine,
+                                                           angle.sine)
                 if point is None
-                else self._context.rotate_segment(self, cosine, sine, point))
+                else self._context.rotate_segment(self, angle.cosine,
+                                                  angle.sine, point))
 
     def scale(self,
               factor_x: Coordinate,

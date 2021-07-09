@@ -32,6 +32,7 @@ from orient.planar import (multipolygon_in_multipolygon,
                            segment_in_multipolygon)
 from reprit.base import generate_repr
 
+from .angle import Angle
 from .compound import (Compound,
                        Indexable,
                        Linear,
@@ -886,8 +887,7 @@ class Multipolygon(Indexable[Coordinate], Shaped[Coordinate]):
                                   else other.relate(self).complement))))
 
     def rotate(self,
-               cosine: Coordinate,
-               sine: Coordinate,
+               angle: Angle,
                point: Optional[Point[Coordinate]] = None
                ) -> 'Multipolygon[Coordinate]':
         """
@@ -907,7 +907,7 @@ class Multipolygon(Indexable[Coordinate], Shaped[Coordinate]):
                                            for hole in polygon.holes)
                                      for polygon in self.polygons)
 
-        >>> from gon.base import Contour, Multipolygon, Point, Polygon
+        >>> from gon.base import Angle, Contour, Multipolygon, Point, Polygon
         >>> multipolygon = Multipolygon(
         ...         [Polygon(Contour([Point(0, 0), Point(14, 0), Point(14, 14),
         ...                           Point(0, 14)]),
@@ -917,9 +917,9 @@ class Multipolygon(Indexable[Coordinate], Shaped[Coordinate]):
         ...                           Point(4, 10)]),
         ...                  [Contour([Point(6, 6), Point(6, 8), Point(8, 8),
         ...                            Point(8, 6)])])])
-        >>> multipolygon.rotate(1, 0) == multipolygon
+        >>> multipolygon.rotate(Angle(1, 0)) == multipolygon
         True
-        >>> (multipolygon.rotate(0, 1, Point(1, 1))
+        >>> (multipolygon.rotate(Angle(0, 1), Point(1, 1))
         ...  == Multipolygon([
         ...          Polygon(Contour([Point(2, 0), Point(2, 14),
         ...                           Point(-12, 14), Point(-12, 0)]),
@@ -931,11 +931,11 @@ class Multipolygon(Indexable[Coordinate], Shaped[Coordinate]):
         ...                            Point(-6, 8), Point(-4, 8)])])]))
         True
         """
-        return (self._context.rotate_multipolygon_around_origin(self, cosine,
-                                                                sine)
+        return (self._context.rotate_multipolygon_around_origin(
+                self, angle.cosine, angle.sine)
                 if point is None
-                else self._context.rotate_multipolygon(self, cosine, sine,
-                                                       point))
+                else self._context.rotate_multipolygon(self, angle.cosine,
+                                                       angle.sine, point))
 
     def scale(self,
               factor_x: Coordinate,

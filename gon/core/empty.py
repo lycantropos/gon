@@ -3,6 +3,7 @@ from typing import Optional
 from ground.hints import Scalar
 from reprit.base import generate_repr
 
+from .angle import Angle
 from .compound import (Compound,
                        Location,
                        Relation)
@@ -278,10 +279,7 @@ class Empty(Compound):
         """
         return Relation.DISJOINT
 
-    def rotate(self,
-               cosine: Scalar,
-               sine: Scalar,
-               point: Optional[Point] = None) -> 'Geometry':
+    def rotate(self, angle: Angle, point: Optional[Point] = None) -> 'Empty':
         """
         Rotates the empty geometry by given angle around given point.
 
@@ -290,8 +288,10 @@ class Empty(Compound):
         Memory complexity:
             ``O(1)``
 
-        >>> from gon.base import EMPTY, Point
-        >>> EMPTY.rotate(1, 0) is EMPTY.rotate(0, 1, Point(1, 1)) is EMPTY
+        >>> from gon.base import EMPTY, Angle, Point
+        >>> (EMPTY.rotate(Angle(1, 0))
+        ...  is EMPTY.rotate(Angle(0, 1), Point(1, 1))
+        ...  is EMPTY)
         True
         """
         return self

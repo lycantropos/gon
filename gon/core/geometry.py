@@ -10,6 +10,8 @@ from ground.hints import (Point,
                           Scalar)
 from symba.base import Expression
 
+from .angle import Angle
+
 Coordinate = TypeVar('Coordinate', Real, Expression)
 
 
@@ -24,8 +26,7 @@ class Geometry(Generic[Coordinate], ABC):
 
     @abstractmethod
     def rotate(self,
-               cosine: Coordinate,
-               sine: Coordinate,
+               angle: Angle,
                point: Optional[Point[Coordinate]] = None
                ) -> 'Geometry[Coordinate]':
         """
