@@ -6,6 +6,7 @@ from ground.hints import Scalar
 from reprit.base import generate_repr
 from symba.base import Expression
 
+from .angle import Angle
 from .geometry import (Coordinate,
                        Geometry)
 
@@ -168,8 +169,7 @@ class Point(Geometry[Coordinate]):
                 else other.distance_to(self))
 
     def rotate(self,
-               cosine: Coordinate,
-               sine: Coordinate,
+               angle: Angle,
                point: Optional['Point[Coordinate]'] = None
                ) -> 'Point[Coordinate]':
         """
@@ -180,16 +180,18 @@ class Point(Geometry[Coordinate]):
         Memory complexity:
             ``O(1)``
 
-        >>> from gon.base import Point
+        >>> from gon.base import Angle, Point
         >>> point = Point(1, 0)
-        >>> point.rotate(1, 0) == point
+        >>> point.rotate(Angle(1, 0)) == point
         True
-        >>> point.rotate(0, 1, Point(1, 1)) == Point(2, 1)
+        >>> point.rotate(Angle(0, 1), Point(1, 1)) == Point(2, 1)
         True
         """
-        return (self._context.rotate_point_around_origin(self, cosine, sine)
+        return (self._context.rotate_point_around_origin(self, angle.cosine,
+                                                         angle.sine)
                 if point is None
-                else self._context.rotate_point(self, cosine, sine, point))
+                else self._context.rotate_point(self, angle.cosine, angle.sine,
+                                                point))
 
     def scale(self,
               factor_x: Coordinate,

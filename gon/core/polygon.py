@@ -28,6 +28,7 @@ from reprit.base import generate_repr
 from sect.decomposition import Graph
 from sect.triangulation import Triangulation
 
+from .angle import Angle
 from .compound import (Compound,
                        Indexable,
                        Linear,
@@ -877,10 +878,7 @@ class Polygon(Indexable[Coordinate], Shaped[Coordinate]):
                             if isinstance(other, Polygon)
                             else other.relate(self).complement)))
 
-    def rotate(self,
-               cosine: Scalar,
-               sine: Scalar,
-               point: Optional[Point] = None) -> 'Polygon':
+    def rotate(self, angle: Angle, point: Optional[Point] = None) -> 'Polygon':
         """
         Rotates the polygon by given angle around given point.
 
@@ -897,23 +895,25 @@ class Polygon(Indexable[Coordinate], Shaped[Coordinate]):
                                   + sum(len(hole.vertices)\
  for hole in self.holes))
 
-        >>> from gon.base import Contour, Point, Polygon
+        >>> from gon.base import Angle, Contour, Point, Polygon
         >>> polygon = Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
         ...                            Point(0, 6)]),
         ...                   [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
         ...                             Point(4, 2)])])
-        >>> polygon.rotate(1, 0) == polygon
+        >>> polygon.rotate(Angle(1, 0)) == polygon
         True
-        >>> (polygon.rotate(0, 1, Point(1, 1))
+        >>> (polygon.rotate(Angle(0, 1), Point(1, 1))
         ...  == Polygon(Contour([Point(2, 0), Point(2, 6), Point(-4, 6),
         ...                      Point(-4, 0)]),
         ...             [Contour([Point(0, 2), Point(-2, 2), Point(-2, 4),
         ...                       Point(0, 4)])]))
         True
         """
-        return (self._context.rotate_polygon_around_origin(self, cosine, sine)
+        return (self._context.rotate_polygon_around_origin(self, angle.cosine,
+                                                           angle.sine)
                 if point is None
-                else self._context.rotate_polygon(self, cosine, sine, point))
+                else self._context.rotate_polygon(self, angle.cosine,
+                                                  angle.sine, point))
 
     def scale(self,
               factor_x: Scalar,

@@ -9,6 +9,7 @@ from ground.hints import (Maybe,
 from locus import kd
 from reprit.base import generate_repr
 
+from .angle import Angle
 from .compound import (Compound,
                        Indexable,
                        Location,
@@ -398,8 +399,7 @@ class Multipoint(Indexable[Coordinate]):
                 else self._relate_geometry(other))
 
     def rotate(self,
-               cosine: Coordinate,
-               sine: Coordinate,
+               angle: Angle,
                point: Optional[Point[Coordinate]] = None
                ) -> 'Multipoint[Coordinate]':
         """
@@ -412,19 +412,19 @@ class Multipoint(Indexable[Coordinate]):
 
         where ``points_count = len(self.points)``.
 
-        >>> from gon.base import Multipoint, Point
+        >>> from gon.base import Angle, Multipoint, Point
         >>> multipoint = Multipoint([Point(0, 0), Point(1, 0), Point(0, 1)])
-        >>> multipoint.rotate(1, 0) == multipoint
+        >>> multipoint.rotate(Angle(1, 0)) == multipoint
         True
-        >>> (multipoint.rotate(0, 1, Point(1, 1))
+        >>> (multipoint.rotate(Angle(0, 1), Point(1, 1))
         ...  == Multipoint([Point(2, 0), Point(2, 1), Point(1, 0)]))
         True
         """
-        return (self._context.rotate_multipoint_around_origin(self, cosine,
-                                                              sine)
+        return (self._context.rotate_multipoint_around_origin(
+                self, angle.cosine, angle.sine)
                 if point is None
-                else self._context.rotate_multipoint(self, cosine, sine,
-                                                     point))
+                else self._context.rotate_multipoint(self, angle.cosine,
+                                                     angle.sine, point))
 
     def scale(self,
               factor_x: Coordinate,

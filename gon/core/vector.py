@@ -4,7 +4,8 @@ from typing import (Generic,
 from ground.base import Context
 from reprit.base import generate_repr
 
-from .angle import (Kind,
+from .angle import (Angle,
+                    Kind,
                     Orientation)
 from .geometry import Coordinate
 from .point import Point
@@ -303,8 +304,7 @@ class Vector(Generic[Coordinate]):
         return self._context.angle_orientation(self.start, self.end, point)
 
     def rotate(self,
-               cosine: Coordinate,
-               sine: Coordinate,
+               angle: Angle,
                point: Optional['Point[Coordinate]'] = None
                ) -> 'Vector[Coordinate]':
         """
@@ -315,16 +315,16 @@ class Vector(Generic[Coordinate]):
         Memory complexity:
             ``O(1)``
 
-        >>> from gon.base import Point, Vector
+        >>> from gon.base import Angle, Point, Vector
         >>> vector = Vector(Point(0, 0), Point(2, 0))
-        >>> vector.rotate(1, 0) == vector
+        >>> vector.rotate(Angle(1, 0)) == vector
         True
-        >>> (vector.rotate(0, 1, Point(1, 1))
+        >>> (vector.rotate(Angle(0, 1), Point(1, 1))
         ...  == Vector(Point(2, 0), Point(2, 2)))
         True
         """
-        return type(self)(self.start.rotate(cosine, sine, point),
-                          self.end.rotate(cosine, sine, point))
+        return type(self)(self.start.rotate(angle, point),
+                          self.end.rotate(angle, point))
 
     def validate(self) -> None:
         """

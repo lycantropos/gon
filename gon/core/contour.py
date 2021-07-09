@@ -21,7 +21,8 @@ from reprit.base import generate_repr
 from sect.decomposition import Graph
 
 from . import vertices as _vertices
-from .angle import Orientation
+from .angle import (Angle,
+                    Orientation)
 from .compound import (Compound,
                        Indexable,
                        Linear,
@@ -600,8 +601,7 @@ class Contour(Indexable[Coordinate], Linear[Coordinate]):
                 _vertices.rotate_positions(self._vertices))
 
     def rotate(self,
-               cosine: Coordinate,
-               sine: Coordinate,
+               angle: Angle,
                point: Optional[Point[Coordinate]] = None
                ) -> 'Contour[Coordinate]':
         """
@@ -614,17 +614,19 @@ class Contour(Indexable[Coordinate], Linear[Coordinate]):
 
         where ``vertices_count = len(self.vertices)``.
 
-        >>> from gon.base import Contour, Point
+        >>> from gon.base import Angle, Contour, Point
         >>> contour = Contour([Point(0, 0), Point(1, 0), Point(0, 1)])
-        >>> contour.rotate(1, 0) == contour
+        >>> contour.rotate(Angle(1, 0)) == contour
         True
-        >>> (contour.rotate(0, 1, Point(1, 1))
+        >>> (contour.rotate(Angle(0, 1), Point(1, 1))
         ...  == Contour([Point(2, 0), Point(2, 1), Point(1, 0)]))
         True
         """
-        return (self._context.rotate_contour_around_origin(self, cosine, sine)
+        return (self._context.rotate_contour_around_origin(self, angle.cosine,
+                                                           angle.sine)
                 if point is None
-                else self._context.rotate_contour(self, cosine, sine, point))
+                else self._context.rotate_contour(self, angle.cosine,
+                                                  angle.sine, point))
 
     def scale(self,
               factor_x: Coordinate,

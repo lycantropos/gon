@@ -20,6 +20,7 @@ from orient.planar import (multisegment_in_multisegment,
 from reprit.base import generate_repr
 from sect.decomposition import Graph
 
+from .angle import Angle
 from .compound import (Compound,
                        Indexable,
                        Linear,
@@ -549,8 +550,7 @@ class Multisegment(Indexable[Coordinate], Linear[Coordinate]):
                             else other.relate(self).complement)))
 
     def rotate(self,
-               cosine: Coordinate,
-               sine: Coordinate,
+               angle: Angle,
                point: Optional[Point[Coordinate]] = None
                ) -> 'Multisegment[Coordinate]':
         """
@@ -563,21 +563,21 @@ class Multisegment(Indexable[Coordinate], Linear[Coordinate]):
 
         where ``segments_count = len(self.segments)``.
 
-        >>> from gon.base import Multisegment, Point, Segment
+        >>> from gon.base import Angle, Multisegment, Point, Segment
         >>> multisegment = Multisegment([Segment(Point(0, 0), Point(1, 0)),
         ...                              Segment(Point(0, 1), Point(1, 1))])
-        >>> multisegment.rotate(1, 0) == multisegment
+        >>> multisegment.rotate(Angle(1, 0)) == multisegment
         True
-        >>> (multisegment.rotate(0, 1, Point(1, 1))
+        >>> (multisegment.rotate(Angle(0, 1), Point(1, 1))
         ...  == Multisegment([Segment(Point(2, 0), Point(2, 1)),
         ...                   Segment(Point(1, 0), Point(1, 1))]))
         True
         """
-        return (self._context.rotate_multisegment_around_origin(self, cosine,
-                                                                sine)
+        return (self._context.rotate_multisegment_around_origin(
+                self, angle.cosine, angle.sine)
                 if point is None
-                else self._context.rotate_multisegment(self, cosine, sine,
-                                                       point))
+                else self._context.rotate_multisegment(self, angle.cosine,
+                                                       angle.sine, point))
 
     def scale(self,
               factor_x: Coordinate,

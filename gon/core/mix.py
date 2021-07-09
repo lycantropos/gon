@@ -4,6 +4,7 @@ from ground.hints import (Maybe,
                           Scalar)
 from reprit.base import generate_repr
 
+from .angle import Angle
 from .compound import (Compound,
                        Indexable,
                        Linear,
@@ -1075,8 +1076,7 @@ class Mix(Indexable[Coordinate]):
                                   else other.relate(self).complement))))
 
     def rotate(self,
-               cosine: Coordinate,
-               sine: Coordinate,
+               angle: Angle,
                point: Optional[Point[Coordinate]] = None) -> 'Mix[Coordinate]':
         """
         Rotates the mix by given angle around given point.
@@ -1110,17 +1110,17 @@ class Mix(Indexable[Coordinate]):
                                   if isinstance(self.linear, Multipolygon)
                                   else [self.shaped]))
 
-        >>> from gon.base import (Contour, Mix, Multipoint, Point, Polygon,
-        ...                       Segment)
+        >>> from gon.base import (Angle, Contour, Mix, Multipoint, Point,
+        ...                       Polygon, Segment)
         >>> mix = Mix(Multipoint([Point(3, 3)]),
         ...           Segment(Point(6, 6), Point(6, 8)),
         ...           Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
         ...                            Point(0, 6)]),
         ...                   [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
         ...                             Point(4, 2)])]))
-        >>> mix.rotate(1, 0) == mix
+        >>> mix.rotate(Angle(1, 0)) == mix
         True
-        >>> (mix.rotate(0, 1, Point(1, 1))
+        >>> (mix.rotate(Angle(0, 1), Point(1, 1))
         ...  == Mix(Multipoint([Point(-1, 3)]),
         ...         Segment(Point(-4, 6), Point(-6, 6)),
         ...         Polygon(Contour([Point(2, 0), Point(2, 6), Point(-4, 6),
@@ -1129,9 +1129,9 @@ class Mix(Indexable[Coordinate]):
         ...                           Point(0, 4)])])))
         True
         """
-        return self._context.mix_cls(self.discrete.rotate(cosine, sine, point),
-                                     self.linear.rotate(cosine, sine, point),
-                                     self.shaped.rotate(cosine, sine, point))
+        return self._context.mix_cls(self.discrete.rotate(angle, point),
+                                     self.linear.rotate(angle, point),
+                                     self.shaped.rotate(angle, point))
 
     def scale(self,
               factor_x: Coordinate,
