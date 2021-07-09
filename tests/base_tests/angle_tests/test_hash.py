@@ -3,8 +3,7 @@ from typing import Tuple
 from hypothesis import given
 
 from gon.base import Angle
-from tests.utils import (equivalence,
-                         implication)
+from tests.utils import implication
 from . import strategies
 
 
@@ -27,8 +26,3 @@ def test_connection_with_equality(angles_pair: Tuple[Angle, Angle]) -> None:
     first, second = angles_pair
 
     assert implication(first == second, hash(first) == hash(second))
-
-
-@given(strategies.angles)
-def test_negated(angle: Angle) -> None:
-    assert equivalence(hash(angle) == hash(-angle), not angle)
