@@ -882,7 +882,7 @@ class Polygon(Indexable[Coordinate], Shaped[Coordinate]):
                sine: Scalar,
                point: Optional[Point] = None) -> 'Polygon':
         """
-        Rotates the polygon by given cosine & sine around given point.
+        Rotates the polygon by given angle around given point.
 
         Time complexity:
             ``O(vertices_count)``

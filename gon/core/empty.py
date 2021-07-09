@@ -283,7 +283,7 @@ class Empty(Compound):
                sine: Scalar,
                point: Optional[Point] = None) -> 'Geometry':
         """
-        Rotates the empty geometry by given cosine & sine around given point.
+        Rotates the empty geometry by given angle around given point.
 
         Time complexity:
             ``O(1)``

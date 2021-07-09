@@ -1079,7 +1079,7 @@ class Mix(Indexable[Coordinate]):
                sine: Coordinate,
                point: Optional[Point[Coordinate]] = None) -> 'Mix[Coordinate]':
         """
-        Rotates the mix by given cosine & sine around given point.
+        Rotates the mix by given angle around given point.
 
         Time complexity:
             ``O(elements_count)``

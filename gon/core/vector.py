@@ -308,7 +308,7 @@ class Vector(Generic[Coordinate]):
                point: Optional['Point[Coordinate]'] = None
                ) -> 'Vector[Coordinate]':
         """
-        Rotates the vector by given cosine & sine around given point.
+        Rotates the vector by given angle around given point.
 
         Time complexity:
             ``O(1)``

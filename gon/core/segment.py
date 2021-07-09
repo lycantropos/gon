@@ -482,7 +482,7 @@ class Segment(Compound[Coordinate], Linear[Coordinate]):
                point: Optional[Point[Coordinate]] = None
                ) -> 'Segment[Coordinate]':
         """
-        Rotates the segment by given cosine & sine around given point.
+        Rotates the segment by given angle around given point.
 
         Time complexity:
             ``O(1)``
