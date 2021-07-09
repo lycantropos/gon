@@ -164,9 +164,7 @@ class Vector(ABC, Generic[Coordinate]):
 
         >>> from gon.base import Point, Vector
         >>> vector = Vector(Point(0, 0), Point(2, 0))
-        >>> hash(vector) == hash(vector)
-        True
-        >>> hash(vector) != hash(-vector)
+        >>> vector * 1 == vector
         True
         """
         return type(self)(self.start.scale(factor), self.end.scale(factor))
