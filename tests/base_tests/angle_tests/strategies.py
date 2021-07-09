@@ -7,23 +7,36 @@ from tests.strategies import (coordinates_strategies,
 from tests.strategies.primitive import (invalid_coordinates,
                                         valid_coordinates)
 from tests.utils import (Strategy,
+                         cleave_in_tuples,
                          pack,
                          to_pairs,
                          to_sign,
                          to_triplets)
 
 
-def to_non_fractional_coordinates(coordinates: Strategy[Scalar]
-                                  ) -> Strategy[Scalar]:
-    def to_non_fractional_coordinate(coordinate: Scalar) -> Scalar:
+def to_non_unit_interval_coordinates(coordinates: Strategy[Scalar]
+                                     ) -> Strategy[Scalar]:
+    def to_non_unit_interval_coordinate(coordinate: Scalar) -> Scalar:
         return coordinate + (to_sign(coordinate) or 1)
 
-    return coordinates.map(to_non_fractional_coordinate)
+    return coordinates.map(to_non_unit_interval_coordinate)
 
 
-non_fractional_coordinates_strategies = (coordinates_strategies
-                                         .map(to_non_fractional_coordinates))
-invalid_angles = ((non_fractional_coordinates_strategies
+def to_zero_coordinates(coordinates: Strategy[Scalar]) -> Strategy[Scalar]:
+    def to_zero_coordinate(coordinate: Scalar) -> Scalar:
+        return coordinate * 0
+
+    return coordinates.map(to_zero_coordinate)
+
+
+non_unit_interval_coordinates_strategies = (
+    coordinates_strategies.map(to_non_unit_interval_coordinates))
+zero_angles_with_angles = (coordinates_strategies
+                           .flatmap(cleave_in_tuples(to_zero_coordinates,
+                                                     coordinates_to_angles))
+                           .map(pack(lambda zero, angle
+                                     : (Angle(1 + zero, zero), angle))))
+invalid_angles = ((non_unit_interval_coordinates_strategies
                    .flatmap(to_pairs).map(pack(Angle)))
                   | strategies.builds(Angle,
                                       invalid_coordinates | valid_coordinates,
