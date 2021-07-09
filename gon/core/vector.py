@@ -10,6 +10,23 @@ from .point import Point
 
 
 class Vector(Generic[Coordinate]):
+    @classmethod
+    def from_position(cls, end: Point[Coordinate]) -> 'Vector[Coordinate]':
+        """
+        Constructs position vector.
+
+        Time complexity:
+            ``O(1)``
+        Memory complexity:
+            ``O(1)``
+
+        >>> from gon.base import Point, Vector
+        >>> vector = Vector.from_position(Point(2, 0))
+        >>> vector == Vector(Point(0, 0), Point(2, 0))
+        True
+        """
+        return cls(cls._context.origin, end)
+
     @property
     def end(self) -> Point[Coordinate]:
         """
