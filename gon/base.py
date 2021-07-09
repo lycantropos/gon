@@ -39,11 +39,8 @@ Triangulation = Triangulation
 
 
 class _ContextMixin:
+    _context = ...  # type: _Context
     __slots__ = ()
-
-    @property
-    def _context(self) -> _Context:
-        return _context
 
 
 class Empty(_ContextMixin, _Empty):
@@ -99,4 +96,5 @@ _context = _get_context().replace(contour_cls=Contour,
                                   point_cls=Point,
                                   polygon_cls=Polygon,
                                   segment_cls=Segment)
+_ContextMixin._context = _context
 _set_context(_context)
