@@ -193,8 +193,6 @@ class Angle(Generic[Scalar]):
         >>> angle = Angle(0, 1)
         >>> hash(angle) == hash(angle)
         True
-        >>> hash(angle) != hash(-angle)
-        True
         """
         return hash((self.cosine, self.sine))
 
