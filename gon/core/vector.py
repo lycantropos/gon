@@ -315,7 +315,7 @@ class Vector(Generic[Coordinate]):
         Memory complexity:
             ``O(1)``
 
-        >>> from gon.base import Point
+        >>> from gon.base import Point, Vector
         >>> vector = Vector(Point(0, 0), Point(2, 0))
         >>> vector.rotate(1, 0) == vector
         True
