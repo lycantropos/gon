@@ -7,10 +7,14 @@ from typing import (Optional,
 from cfractions import Fraction
 from hypothesis import strategies
 
+from gon.base import Angle
 from gon.hints import Scalar
 from tests.utils import (MAX_COORDINATE,
                          MIN_COORDINATE,
-                         Strategy)
+                         Strategy,
+                         pack,
+                         to_triplets)
+from .factories import coordinates_to_points
 
 
 def to_floats(min_value: Optional[Scalar] = None,
@@ -88,11 +92,14 @@ def to_pythagorean_triplets(*,
 
 def pythagorean_triplet_to_rational_cosine_sine(triplet
                                                 : Tuple[Scalar, Scalar, Scalar]
-                                                ) -> Tuple[Scalar, Scalar]:
+                                                ) -> Angle:
     area_cosine, area_sine, area = triplet
-    return Fraction(area_cosine, area), Fraction(area_sine, area)
+    return Angle(Fraction(area_cosine, area), Fraction(area_sine, area))
 
 
-rational_cosines_sines = (to_pythagorean_triplets(max_value=MAX_COORDINATE)
-                          .map(pythagorean_triplet_to_rational_cosine_sine))
+angles = ((to_pythagorean_triplets(max_value=MAX_COORDINATE)
+           .map(pythagorean_triplet_to_rational_cosine_sine))
+          | (coordinates_strategies.map(coordinates_to_points).flatmap(
+                to_triplets)
+             .map(pack(Angle.from_sides))))
 empty_sequences = strategies.builds(list) | strategies.builds(tuple)
