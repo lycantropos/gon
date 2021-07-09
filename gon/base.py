@@ -2,7 +2,8 @@ from ground.base import (Context as _Context,
                          get_context as _get_context,
                          set_context as _set_context)
 
-from .core.angular import Orientation
+from .core.angular import (Kind,
+                           Orientation)
 from .core.compound import (Compound,
                             Indexable,
                             Linear,
@@ -21,6 +22,7 @@ from .core.point import Point as _Point
 from .core.polygon import (Polygon as _Polygon,
                            Triangulation)
 from .core.segment import Segment as _Segment
+from .core.vector import Vector as _Vector
 
 Compound = Compound
 Geometry = Geometry
@@ -28,6 +30,7 @@ Indexable = Indexable
 Linear = Linear
 Shaped = Shaped
 
+Kind = Kind
 Location = Location
 Orientation = Orientation
 Relation = Relation
@@ -80,6 +83,10 @@ class Polygon(_ContextMixin, _Polygon[_Coordinate]):
 
 
 class Multipolygon(_ContextMixin, _Multipolygon[_Coordinate]):
+    __slots__ = ()
+
+
+class Vector(_ContextMixin, _Vector[_Coordinate]):
     __slots__ = ()
 
 
