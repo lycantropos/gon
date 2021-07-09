@@ -165,8 +165,6 @@ class Vector(Generic[Coordinate]):
         >>> vector = Vector(Point(0, 0), Point(2, 0))
         >>> hash(vector) == hash(vector)
         True
-        >>> hash(vector) != hash(-vector)
-        True
         """
         return hash(_sub_points(self.end, self.start))
 
