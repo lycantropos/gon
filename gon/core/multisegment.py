@@ -554,7 +554,7 @@ class Multisegment(Indexable[Coordinate], Linear[Coordinate]):
                point: Optional[Point[Coordinate]] = None
                ) -> 'Multisegment[Coordinate]':
         """
-        Rotates the multisegment by given cosine & sine around given point.
+        Rotates the multisegment by given angle around given point.
 
         Time complexity:
             ``O(segments_count)``

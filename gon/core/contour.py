@@ -605,7 +605,7 @@ class Contour(Indexable[Coordinate], Linear[Coordinate]):
                point: Optional[Point[Coordinate]] = None
                ) -> 'Contour[Coordinate]':
         """
-        Rotates the contour by given cosine & sine around given point.
+        Rotates the contour by given angle around given point.
 
         Time complexity:
             ``O(vertices_count)``

@@ -173,7 +173,7 @@ class Point(Geometry[Coordinate]):
                point: Optional['Point[Coordinate]'] = None
                ) -> 'Point[Coordinate]':
         """
-        Rotates the point by given cosine & sine around given point.
+        Rotates the point by given angle around given point.
 
         Time complexity:
             ``O(1)``

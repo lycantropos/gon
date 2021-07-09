@@ -29,7 +29,7 @@ class Geometry(Generic[Coordinate], ABC):
                point: Optional[Point[Coordinate]] = None
                ) -> 'Geometry[Coordinate]':
         """
-        Rotates geometric object by given cosine & sine around given point.
+        Rotates geometric object by given angle around given point.
         """
 
     @abstractmethod

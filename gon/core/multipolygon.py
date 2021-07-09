@@ -891,7 +891,7 @@ class Multipolygon(Indexable[Coordinate], Shaped[Coordinate]):
                point: Optional[Point[Coordinate]] = None
                ) -> 'Multipolygon[Coordinate]':
         """
-        Rotates the multipolygon by given cosine & sine around given point.
+        Rotates the multipolygon by given angle around given point.
 
         Time complexity:
             ``O(vertices_count)``
