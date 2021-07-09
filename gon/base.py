@@ -30,6 +30,11 @@ Geometry = Geometry
 Indexable = Indexable
 Linear = Linear
 Shaped = Shaped
+Compound.__module__ = __name__
+Geometry.__module__ = __name__
+Indexable.__module__ = __name__
+Linear.__module__ = __name__
+Shaped.__module__ = __name__
 
 Kind = Kind
 Location = Location
