@@ -13,22 +13,22 @@ from symba.base import Expression
 from .angle import Angle
 
 Coordinate = TypeVar('Coordinate', Real, Expression)
+_T = TypeVar('_T')
 
 
 class Geometry(Generic[Coordinate], ABC):
     __slots__ = ()
 
     @abstractmethod
-    def distance_to(self, other: 'Geometry') -> Scalar:
+    def distance_to(self, other: 'Geometry[Coordinate]') -> Scalar:
         """
         Returns distance between geometric objects.
         """
 
     @abstractmethod
-    def rotate(self,
-               angle: Angle,
-               point: Optional[Point[Coordinate]] = None
-               ) -> 'Geometry[Coordinate]':
+    def rotate(self: _T,
+               angle: Angle[Coordinate],
+               point: Optional[Point[Coordinate]] = None) -> _T:
         """
         Rotates geometric object by given angle around given point.
         """
@@ -42,9 +42,7 @@ class Geometry(Generic[Coordinate], ABC):
         """
 
     @abstractmethod
-    def translate(self,
-                  step_x: Coordinate,
-                  step_y: Coordinate) -> 'Geometry[Coordinate]':
+    def translate(self: _T, step_x: Coordinate, step_y: Coordinate) -> _T:
         """
         Translates geometric object by given step.
         """
