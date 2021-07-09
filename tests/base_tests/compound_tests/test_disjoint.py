@@ -2,17 +2,16 @@ from typing import Tuple
 
 from hypothesis import given
 
-from gon.base import (EMPTY,
-                      Compound)
+from gon.base import (Compound, EMPTY)
 from tests.utils import equivalence
 from . import strategies
 
 
 @given(strategies.compounds_pairs)
 def test_basic(compounds_pair: Tuple[Compound, Compound]) -> None:
-    left_compound, right_compound = compounds_pair
+    first, second = compounds_pair
 
-    result = left_compound.disjoint(right_compound)
+    result = first.disjoint(second)
 
     assert isinstance(result, bool)
 
@@ -25,7 +24,6 @@ def test_reflexivity_criteria(compound: Compound) -> None:
 
 @given(strategies.compounds_pairs)
 def test_symmetry(compounds_pair: Tuple[Compound, Compound]) -> None:
-    left_compound, right_compound = compounds_pair
+    first, second = compounds_pair
 
-    assert equivalence(left_compound.disjoint(right_compound),
-                       right_compound.disjoint(left_compound))
+    assert equivalence(first.disjoint(second), second.disjoint(first))

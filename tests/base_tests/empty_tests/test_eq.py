@@ -6,8 +6,8 @@ from . import strategies
 
 
 @given(strategies.empty_geometries, strategies.empty_geometries)
-def test_singularity(left_empty: Empty, right_empty: Empty) -> None:
-    assert left_empty is right_empty
+def test_singularity(first: Empty, third: Empty) -> None:
+    assert first is third
 
 
 @given(strategies.empty_geometries)
@@ -16,14 +16,14 @@ def test_reflexivity(empty: Empty) -> None:
 
 
 @given(strategies.empty_geometries, strategies.empty_geometries)
-def test_symmetry(left_empty: Empty, right_empty: Empty) -> None:
-    assert implication(left_empty == right_empty,
-                       right_empty == left_empty)
+def test_symmetry(first: Empty, third: Empty) -> None:
+    assert implication(first == third,
+                       third == first)
 
 
 @given(strategies.empty_geometries, strategies.empty_geometries,
        strategies.empty_geometries)
-def test_transitivity(left_empty: Empty, mid_empty: Empty, right_empty: Empty
+def test_transitivity(first: Empty, second: Empty, third: Empty
                       ) -> None:
-    assert implication(left_empty == mid_empty == right_empty,
-                       left_empty == right_empty)
+    assert implication(first == second == third,
+                       first == third)

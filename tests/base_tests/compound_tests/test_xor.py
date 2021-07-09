@@ -2,8 +2,7 @@ from typing import Tuple
 
 from hypothesis import given
 
-from gon.base import (EMPTY,
-                      Compound)
+from gon.base import (Compound, EMPTY)
 from tests.utils import (are_compounds_equivalent,
                          implication,
                          not_raises)
@@ -12,18 +11,18 @@ from . import strategies
 
 @given(strategies.compounds_pairs)
 def test_basic(compounds_pair: Tuple[Compound, Compound]) -> None:
-    left_compound, right_compound = compounds_pair
+    first, second = compounds_pair
 
-    result = left_compound ^ right_compound
+    result = first ^ second
 
     assert isinstance(result, Compound)
 
 
 @given(strategies.compounds_pairs)
 def test_validity(compounds_pair: Tuple[Compound, Compound]) -> None:
-    left_compound, right_compound = compounds_pair
+    first, second = compounds_pair
 
-    result = left_compound ^ right_compound
+    result = first ^ second
 
     with not_raises(ValueError):
         result.validate()
@@ -37,8 +36,8 @@ def test_self_inverse(compound: Compound) -> None:
 
 
 @given(strategies.empty_compounds_with_compounds)
-def test_left_neutral_element(empty_compound_with_compound
-                              : Tuple[Compound, Compound]) -> None:
+def test_first(empty_compound_with_compound
+               : Tuple[Compound, Compound]) -> None:
     empty_compound, compound = empty_compound_with_compound
 
     result = empty_compound ^ compound
@@ -47,8 +46,8 @@ def test_left_neutral_element(empty_compound_with_compound
 
 
 @given(strategies.empty_compounds_with_compounds)
-def test_right_neutral_element(empty_compound_with_compound
-                               : Tuple[Compound, Compound]) -> None:
+def test_third(empty_compound_with_compound
+               : Tuple[Compound, Compound]) -> None:
     empty_compound, compound = empty_compound_with_compound
 
     result = compound ^ empty_compound
@@ -58,44 +57,41 @@ def test_right_neutral_element(empty_compound_with_compound
 
 @given(strategies.compounds_pairs)
 def test_commutativity(compounds_pair: Tuple[Compound, Compound]) -> None:
-    left_compound, right_compound = compounds_pair
+    first, second = compounds_pair
 
-    result = left_compound ^ right_compound
+    result = first ^ second
 
-    assert result == right_compound ^ left_compound
+    assert result == second ^ first
 
 
 @given(strategies.equidimensional_compounds_triplets)
 def test_associativity(compounds_triplet: Tuple[Compound, Compound, Compound]
                        ) -> None:
-    left_compound, mid_compound, right_compound = compounds_triplet
+    first, second, third = compounds_triplet
 
-    result = (left_compound ^ mid_compound) ^ right_compound
+    result = (first ^ second) ^ third
 
     assert are_compounds_equivalent(
-            result, left_compound ^ (mid_compound ^ right_compound))
+            result, first ^ (second ^ third))
 
 
 @given(strategies.compounds_pairs)
 def test_equivalents(compounds_pair: Tuple[Compound, Compound]) -> None:
-    left_compound, right_compound = compounds_pair
+    first, second = compounds_pair
 
-    result = left_compound ^ right_compound
+    result = first ^ second
 
     assert are_compounds_equivalent(result,
-                                    (left_compound - right_compound)
-                                    | (right_compound - left_compound))
+                                    (first - second) | (second - first))
     assert are_compounds_equivalent(result,
-                                    (left_compound | right_compound)
-                                    - (left_compound & right_compound))
+                                    (first | second) - (first & second))
 
 
 @given(strategies.compounds_pairs)
 def test_connection_with_disjoint(compounds_pair: Tuple[Compound, Compound]
                                   ) -> None:
-    left_compound, right_compound = compounds_pair
+    first, second = compounds_pair
 
-    result = left_compound ^ right_compound
+    result = first ^ second
 
-    assert implication(left_compound.disjoint(right_compound),
-                       result == left_compound | right_compound)
+    assert implication(first.disjoint(second), result == first | second)

@@ -9,9 +9,9 @@ from . import strategies
 
 @given(strategies.compounds_pairs)
 def test_basic(compounds_pair: Tuple[Compound, Compound]) -> None:
-    left_compound, right_compound = compounds_pair
+    first, second = compounds_pair
 
-    result = left_compound.relate(right_compound)
+    result = first.relate(second)
 
     assert isinstance(result, Relation)
 
@@ -28,8 +28,8 @@ def test_non_empty_self(compound: Compound) -> None:
 
 @given(strategies.compounds_pairs)
 def test_complement(compounds_pair: Tuple[Compound, Compound]) -> None:
-    left_compound, right_compound = compounds_pair
+    first, second = compounds_pair
 
-    result = left_compound.relate(right_compound)
+    result = first.relate(second)
 
-    assert result.complement is right_compound.relate(left_compound)
+    assert result.complement is second.relate(first)

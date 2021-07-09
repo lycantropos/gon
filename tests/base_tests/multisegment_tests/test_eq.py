@@ -18,22 +18,18 @@ def test_reflexivity(multisegment: Multisegment) -> None:
 @given(strategies.multisegments_pairs)
 def test_symmetry(multisegments_pair: Tuple[Multisegment, Multisegment]
                   ) -> None:
-    left_multisegment, right_multisegment = multisegments_pair
+    first, second = multisegments_pair
 
-    assert implication(left_multisegment == right_multisegment,
-                       right_multisegment == left_multisegment)
+    assert implication(first == second, second == first)
 
 
 @given(strategies.multisegments_triplets)
 def test_transitivity(multisegments_triplet
                       : Tuple[Multisegment, Multisegment, Multisegment]
                       ) -> None:
-    (left_multisegment, mid_multisegment,
-     right_multisegment) = multisegments_triplet
+    first, second, third = multisegments_triplet
 
-    assert implication(left_multisegment == mid_multisegment
-                       and mid_multisegment == right_multisegment,
-                       left_multisegment == right_multisegment)
+    assert implication(first == second and second == third, first == third)
 
 
 @given(strategies.multisegments)

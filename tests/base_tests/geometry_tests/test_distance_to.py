@@ -12,27 +12,27 @@ from . import strategies
 
 @given(strategies.non_empty_geometries_pairs)
 def test_basic(geometries_pair: Tuple[Geometry, Geometry]) -> None:
-    left_geometry, right_geometry = geometries_pair
+    first, second = geometries_pair
 
-    result = left_geometry.distance_to(right_geometry)
+    result = first.distance_to(second)
 
     assert is_scalar(result)
 
 
 @given(strategies.non_empty_geometries_pairs)
 def test_commutativity(geometries_pair: Tuple[Geometry, Geometry]) -> None:
-    left_geometry, right_geometry = geometries_pair
+    first, second = geometries_pair
 
-    result = left_geometry.distance_to(right_geometry)
+    result = first.distance_to(second)
 
-    assert result == right_geometry.distance_to(left_geometry)
+    assert result == second.distance_to(first)
 
 
 @given(strategies.non_empty_geometries_pairs)
 def test_value(geometries_pair: Tuple[Geometry, Geometry]) -> None:
-    left_geometry, right_geometry = geometries_pair
+    first, second = geometries_pair
 
-    result = left_geometry.distance_to(right_geometry)
+    result = first.distance_to(second)
 
     assert 0 <= result < math.inf
 

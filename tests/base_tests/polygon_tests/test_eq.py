@@ -14,16 +14,14 @@ def test_reflexivity(polygon: Polygon) -> None:
 
 @given(strategies.polygons_pairs)
 def test_symmetry(polygons_pair: Tuple[Polygon, Polygon]) -> None:
-    left_polygon, right_polygon = polygons_pair
+    first, second = polygons_pair
 
-    assert implication(left_polygon == right_polygon,
-                       right_polygon == left_polygon)
+    assert implication(first == second, second == first)
 
 
 @given(strategies.polygons_triplets)
 def test_transitivity(polygons_triplet: Tuple[Polygon, Polygon, Polygon]
                       ) -> None:
-    left_polygon, mid_polygon, right_polygon = polygons_triplet
+    first, second, third = polygons_triplet
 
-    assert implication(left_polygon == mid_polygon == right_polygon,
-                       left_polygon == right_polygon)
+    assert implication(first == second == third, first == third)

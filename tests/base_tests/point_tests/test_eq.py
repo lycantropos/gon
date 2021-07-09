@@ -14,14 +14,13 @@ def test_reflexivity(point: Point) -> None:
 
 @given(strategies.points_pairs)
 def test_symmetry(points_pair: Tuple[Point, Point]) -> None:
-    left_point, right_point = points_pair
+    first, second = points_pair
 
-    assert implication(left_point == right_point, right_point == left_point)
+    assert implication(first == second, second == first)
 
 
 @given(strategies.points_triplets)
 def test_transitivity(points_triplet: Tuple[Point, Point, Point]) -> None:
-    left_point, mid_point, right_point = points_triplet
+    first, second, third = points_triplet
 
-    assert implication(left_point == mid_point and mid_point == right_point,
-                       left_point == right_point)
+    assert implication(first == second and second == third, first == third)

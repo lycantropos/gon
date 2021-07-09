@@ -23,11 +23,11 @@ def test_connection_with_contains(compound_with_point: Tuple[Compound, Point]
 @given(strategies.non_empty_compounds_pairs)
 def test_connection_with_disjoint(compounds_pair: Tuple[Compound, Compound]
                                   ) -> None:
-    left_compound, right_compound = compounds_pair
+    first, second = compounds_pair
 
-    result = left_compound.distance_to(right_compound)
+    result = first.distance_to(second)
 
-    assert equivalence(bool(result), left_compound.disjoint(right_compound))
+    assert equivalence(bool(result), first.disjoint(second))
 
 
 @given(strategies.indexables_with_non_empty_geometries)

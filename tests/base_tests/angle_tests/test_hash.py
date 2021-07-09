@@ -23,12 +23,10 @@ def test_determinism(angle: Angle) -> None:
 
 
 @given(strategies.angles_pairs)
-def test_connection_with_equality(angles_pair: Tuple[Angle, Angle]
-                                  ) -> None:
-    left_angle, right_angle = angles_pair
+def test_connection_with_equality(angles_pair: Tuple[Angle, Angle]) -> None:
+    first, second = angles_pair
 
-    assert implication(left_angle == right_angle,
-                       hash(left_angle) == hash(right_angle))
+    assert implication(first == second, hash(first) == hash(second))
 
 
 @given(strategies.angles)

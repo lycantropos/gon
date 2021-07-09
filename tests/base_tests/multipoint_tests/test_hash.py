@@ -15,9 +15,8 @@ def test_determinism(multipoint: Multipoint) -> None:
 
 
 @given(strategies.multipoints_pairs)
-def test_connection_with_equality(multipoints_pair: Tuple[Multipoint,
-                                                          Multipoint]) -> None:
-    left_multipoint, right_multipoint = multipoints_pair
+def test_connection_with_equality(multipoints_pair
+                                  : Tuple[Multipoint, Multipoint]) -> None:
+    first, second = multipoints_pair
 
-    assert implication(left_multipoint == right_multipoint,
-                       hash(left_multipoint) == hash(right_multipoint))
+    assert implication(first == second, hash(first) == hash(second))

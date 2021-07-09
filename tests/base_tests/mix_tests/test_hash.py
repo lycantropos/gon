@@ -16,7 +16,6 @@ def test_determinism(mix: Mix) -> None:
 
 @given(strategies.mixes_pairs)
 def test_connection_with_equality(mixes_pair: Tuple[Mix, Mix]) -> None:
-    left_mix, right_mix = mixes_pair
+    first, second = mixes_pair
 
-    assert implication(left_mix == right_mix,
-                       hash(left_mix) == hash(right_mix))
+    assert implication(first == second, hash(first) == hash(second))

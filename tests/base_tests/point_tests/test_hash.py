@@ -23,7 +23,6 @@ def test_determinism(point: Point) -> None:
 
 @given(strategies.points_pairs)
 def test_connection_with_equality(points_pair: Tuple[Point, Point]) -> None:
-    left_point, right_point = points_pair
+    first, second = points_pair
 
-    assert implication(left_point == right_point,
-                       hash(left_point) == hash(right_point))
+    assert implication(first == second, hash(first) == hash(second))

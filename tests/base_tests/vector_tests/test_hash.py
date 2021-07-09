@@ -25,10 +25,9 @@ def test_determinism(vector: Vector) -> None:
 @given(strategies.vectors_pairs)
 def test_connection_with_equality(vectors_pair: Tuple[Vector, Vector]
                                   ) -> None:
-    left_vector, right_vector = vectors_pair
+    first, second = vectors_pair
 
-    assert implication(left_vector == right_vector,
-                       hash(left_vector) == hash(right_vector))
+    assert implication(first == second, hash(first) == hash(second))
 
 
 @given(strategies.vectors)
