@@ -1,5 +1,3 @@
-from abc import (ABC,
-                 abstractmethod)
 from typing import Generic
 
 from ground.base import Context
@@ -11,7 +9,7 @@ from .geometry import Coordinate
 from .point import Point
 
 
-class Vector(ABC, Generic[Coordinate]):
+class Vector(Generic[Coordinate]):
     @property
     def end(self) -> Point[Coordinate]:
         """
@@ -303,10 +301,7 @@ class Vector(ABC, Generic[Coordinate]):
         self.end.validate()
         _sub_points(self.end, self.start).validate()
 
-    @property
-    @abstractmethod
-    def _context(self) -> Context:
-        """Returns context of the vector."""
+    _context = ...  # type: Context
 
 
 def _add_points(first: Point[Coordinate],

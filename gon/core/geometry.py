@@ -55,9 +55,4 @@ class Geometry(Generic[Coordinate], ABC):
         and raises error if any violation was found.
         """
 
-    @property
-    @abstractmethod
-    def _context(self) -> Context:
-        """
-        Returns context of the geometry.
-        """
+    _context = ...  # type: Context
