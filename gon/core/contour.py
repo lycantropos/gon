@@ -21,7 +21,7 @@ from reprit.base import generate_repr
 from sect.decomposition import Graph
 
 from . import vertices as _vertices
-from .angular import Orientation
+from .angle import Orientation
 from .compound import (Compound,
                        Indexable,
                        Linear,

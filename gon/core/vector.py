@@ -4,8 +4,8 @@ from typing import (Generic,
 from ground.base import Context
 from reprit.base import generate_repr
 
-from .angular import (Kind,
-                      Orientation)
+from .angle import (Kind,
+                    Orientation)
 from .geometry import Coordinate
 from .point import Point
 
