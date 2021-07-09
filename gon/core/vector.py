@@ -1,4 +1,5 @@
-from typing import Generic
+from typing import (Generic,
+                    Optional)
 
 from ground.base import Context
 from reprit.base import generate_repr
@@ -300,6 +301,30 @@ class Vector(Generic[Coordinate]):
         True
         """
         return self._context.angle_orientation(self.start, self.end, point)
+
+    def rotate(self,
+               cosine: Coordinate,
+               sine: Coordinate,
+               point: Optional['Point[Coordinate]'] = None
+               ) -> 'Vector[Coordinate]':
+        """
+        Rotates the vector by given cosine & sine around given point.
+
+        Time complexity:
+            ``O(1)``
+        Memory complexity:
+            ``O(1)``
+
+        >>> from gon.base import Point
+        >>> vector = Vector(Point(0, 0), Point(2, 0))
+        >>> vector.rotate(1, 0) == vector
+        True
+        >>> (vector.rotate(0, 1, Point(1, 1))
+        ...  == Vector(Point(2, 0), Point(2, 2)))
+        True
+        """
+        return type(self)(self.start.rotate(cosine, sine, point),
+                          self.end.rotate(cosine, sine, point))
 
     def validate(self) -> None:
         """
