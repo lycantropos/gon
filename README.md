@@ -73,7 +73,7 @@ Usage
 -----
 
 ```python
->>> from gon.base import EMPTY, Contour, Point, Polygon
+>>> from gon.base import EMPTY, Angle, Contour, Point, Polygon
 >>> square = Polygon(Contour([Point(0, 0), Point(4, 0), Point(4, 4),
 ...                           Point(0, 4)]))
 >>> square == square
@@ -117,7 +117,7 @@ True
 True
 >>> square.distance_to(Point(7, 8)) == 5
 True
->>> (square.rotate(0, 1, Point(4, 4))
+>>> (square.rotate(Angle(0, 1), Point(4, 4))
 ...  == Polygon(Contour([Point(8, 0), Point(8, 4), Point(4, 4), Point(4, 0)])))
 True
 >>> (square.scale(1, 2)
