@@ -1,7 +1,8 @@
 from hypothesis import strategies
 
 from gon.base import EMPTY
-from tests.strategies import (coordinates_strategies,
+from tests.strategies import (angles,
+                              coordinates_strategies,
                               coordinates_to_contours,
                               coordinates_to_maybe_linear_geometries,
                               coordinates_to_maybe_multipoints,
@@ -12,8 +13,7 @@ from tests.strategies import (coordinates_strategies,
                               coordinates_to_multisegments,
                               coordinates_to_points,
                               coordinates_to_polygons,
-                              coordinates_to_segments,
-                              rational_cosines_sines)
+                              coordinates_to_segments)
 from tests.utils import (call,
                          cleave_in_tuples,
                          compound_to_compound_with_multipoint,
@@ -66,8 +66,8 @@ non_empty_compounds_with_coordinates_pairs = (
                                                              identity)),
                        coordinates_strategies)
      .flatmap(identity)))
-non_empty_compounds_with_cosines_sines = strategies.tuples(
-        non_empty_compounds, rational_cosines_sines)
+non_empty_compounds_with_angles = strategies.tuples(non_empty_compounds,
+                                                    angles)
 non_empty_compounds_with_points = (
     (strategies.builds(call,
                        non_empty_compounds_factories

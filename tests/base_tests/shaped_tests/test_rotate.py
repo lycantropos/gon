@@ -2,19 +2,18 @@ from typing import Tuple
 
 from hypothesis import given
 
-from gon.base import (Point,
+from gon.base import (Angle,
+                      Point,
                       Shaped)
-from gon.hints import Scalar
 from . import strategies
 
 
-@given(strategies.shaped_geometries_points_with_cosines_sines)
-def test_isometry(shaped_with_cosine_sine: Tuple[Tuple[Shaped, Point],
-                                                 Tuple[Scalar, Scalar]]
+@given(strategies.shaped_geometries_points_with_angles)
+def test_isometry(shaped_with_angle: Tuple[Tuple[Shaped, Point], Angle]
                   ) -> None:
-    (shaped, point), (cosine, sine) = shaped_with_cosine_sine
+    (shaped, point), angle = shaped_with_angle
 
-    result = shaped.rotate(cosine, sine, point)
+    result = shaped.rotate(angle, point)
 
     assert result.area == shaped.area
     assert result.perimeter == shaped.perimeter

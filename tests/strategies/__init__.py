@@ -1,5 +1,5 @@
-from .base import (coordinates_strategies,
-                   rational_cosines_sines)
+from .base import (angles,
+                   coordinates_strategies)
 from .discrete import invalid_multipoints
 from .factories import (coordinates_to_contours,
                         coordinates_to_linear_geometries,

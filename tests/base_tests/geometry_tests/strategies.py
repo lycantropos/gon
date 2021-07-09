@@ -1,7 +1,8 @@
 from hypothesis import strategies
 
 from gon.base import EMPTY
-from tests.strategies import (coordinates_strategies,
+from tests.strategies import (angles,
+                              coordinates_strategies,
                               coordinates_to_contours,
                               coordinates_to_mixes,
                               coordinates_to_multipoints,
@@ -10,7 +11,6 @@ from tests.strategies import (coordinates_strategies,
                               coordinates_to_points,
                               coordinates_to_polygons,
                               coordinates_to_segments,
-                              rational_cosines_sines,
                               to_non_zero_coordinates,
                               to_zero_coordinates)
 from tests.utils import (call,
@@ -67,10 +67,10 @@ geometries_with_points = (
                                                coordinates_to_points)),
                        coordinates_strategies)
      .flatmap(identity)))
-geometries_points_with_cosines_sines = strategies.tuples(
-        geometries_with_points, rational_cosines_sines)
-geometries_points_with_cosines_sines_pairs = strategies.tuples(
-        geometries_with_points, rational_cosines_sines, rational_cosines_sines)
+geometries_points_with_angles = strategies.tuples(geometries_with_points,
+                                                  angles)
+geometries_points_with_angles_pairs = strategies.tuples(geometries_with_points,
+                                                        angles, angles)
 non_empty_geometries_pairs = (strategies.builds(call,
                                                 non_empty_geometries_factories,
                                                 coordinates_strategies)

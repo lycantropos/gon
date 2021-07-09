@@ -2,65 +2,57 @@ from typing import Tuple
 
 from hypothesis import given
 
-from gon.base import (Point,
+from gon.base import (Angle,
+                      Point,
                       Vector)
-from gon.hints import Scalar
 from . import strategies
 
 
-@given(strategies.vectors_points_with_cosines_sines)
-def test_basic(vector_point_with_cosine_sine
-               : Tuple[Tuple[Vector, Point], Tuple[Scalar, Scalar]]
+@given(strategies.vectors_points_with_angles)
+def test_basic(vector_point_with_angle: Tuple[Tuple[Vector, Point], Angle]
                ) -> None:
-    (vector, point), (cosine, sine) = vector_point_with_cosine_sine
+    (vector, point), angle = vector_point_with_angle
 
-    result = vector.rotate(cosine, sine, point)
+    result = vector.rotate(angle, point)
 
     assert isinstance(result, type(vector))
 
 
-@given(strategies.vectors_points_with_cosines_sines)
-def test_around_point(vector_point_with_cosine_sine
-                      : Tuple[Tuple[Vector, Point],
-                              Tuple[Scalar, Scalar]]) -> None:
-    (vector, point), (cosine, sine) = vector_point_with_cosine_sine
+@given(strategies.vectors_points_with_angles)
+def test_around_point(vector_point_with_angle
+                      : Tuple[Tuple[Vector, Point], Angle]) -> None:
+    (vector, point), angle = vector_point_with_angle
 
-    result = vector.rotate(cosine, sine, point)
+    result = vector.rotate(angle, point)
 
-    assert result == vector.rotate(cosine, sine)
+    assert result == vector.rotate(angle)
 
 
 @given(strategies.vectors_with_points)
 def test_neutral_angle(vector_with_point: Tuple[Vector, Point]) -> None:
     vector, point = vector_with_point
 
-    result = vector.rotate(1, 0, point)
+    result = vector.rotate(Angle(1, 0), point)
 
     assert result == vector
 
 
-@given(strategies.vectors_points_with_cosines_sines)
-def test_round_trip(vector_point_with_cosine_sine
-                    : Tuple[Tuple[Vector, Point],
-                            Tuple[Scalar, Scalar]]) -> None:
-    (vector, point), (cosine, sine) = vector_point_with_cosine_sine
+@given(strategies.vectors_points_with_angles)
+def test_round_trip(vector_point_with_angle: Tuple[Tuple[Vector, Point], Angle]
+                    ) -> None:
+    (vector, point), angle = vector_point_with_angle
 
-    result = vector.rotate(cosine, sine, point)
+    result = vector.rotate(angle, point)
 
-    assert result.rotate(cosine, -sine, point) == vector
+    assert result.rotate(-angle, point) == vector
 
 
-@given(strategies.vectors_points_with_cosines_sines_pairs)
-def test_consecutive(vector_point_with_cosine_sine_pair
-                     : Tuple[Tuple[Vector, Point],
-                             Tuple[Scalar, Scalar],
-                             Tuple[Scalar, Scalar]]) -> None:
-    ((vector, point), (first_cosine, first_sine),
-     (second_cosine, second_sine)) = vector_point_with_cosine_sine_pair
+@given(strategies.vectors_points_with_angles_pairs)
+def test_consecutive(vector_point_with_angle_pair
+                     : Tuple[Tuple[Vector, Point], Angle, Angle]) -> None:
+    (vector, point), first_angle, second_angle = vector_point_with_angle_pair
 
-    result = vector.rotate(first_cosine, first_sine, point)
+    result = vector.rotate(first_angle, point)
 
-    angle_sum_cosine = first_cosine * second_cosine - first_sine * second_sine
-    angle_sum_sine = first_sine * second_cosine + second_sine * first_cosine
-    assert (result.rotate(second_cosine, second_sine, point)
-            == vector.rotate(angle_sum_cosine, angle_sum_sine, point))
+    assert (result.rotate(second_angle, point)
+            == vector.rotate(first_angle + second_angle, point))
