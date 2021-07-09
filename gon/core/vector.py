@@ -201,6 +201,8 @@ class Vector(ABC, Generic[Coordinate]):
         """
         return self
 
+    __rmul__ = __mul__
+
     def __sub__(self, other: 'Vector[Coordinate]') -> 'Vector':
         """
         Returns difference of the vector with the other.
