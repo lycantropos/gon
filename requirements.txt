@@ -1,6 +1,6 @@
 bentley-ottmann>=6.0.0,<7.0
 clipping>=4.0.0,<5.0
-ground>=7.0.0,<8.0
+ground>=7.1.0,<8.0
 locus>=7.0.0,<8.0
 orient>=5.0.0,<6.0
 reprit>=0.6.0,<1.0
