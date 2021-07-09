@@ -1,13 +1,19 @@
 from hypothesis import strategies
 
+from gon.base import Vector
 from tests.strategies import (angles,
                               coordinates_strategies,
                               coordinates_to_points,
-                              coordinates_to_vectors)
+                              coordinates_to_vectors,
+                              invalid_points,
+                              points)
 from tests.utils import (cleave_in_tuples,
                          to_pairs,
                          to_triplets)
 
+invalid_vectors = (strategies.builds(Vector, invalid_points | points,
+                                     invalid_points)
+                   | strategies.builds(Vector, invalid_points, points))
 vectors = coordinates_strategies.flatmap(coordinates_to_vectors)
 vectors_strategies = coordinates_strategies.map(coordinates_to_vectors)
 vectors_pairs = vectors_strategies.flatmap(to_pairs)
