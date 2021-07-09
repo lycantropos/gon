@@ -74,6 +74,16 @@ mixed geometries
     :special-members:
     :inherited-members:
 
+helper geometric objects
+========================
+.. autoclass:: gon.base.Angle
+    :special-members:
+    :inherited-members:
+
+.. autoclass:: gon.base.Vector
+    :special-members:
+    :inherited-members:
+
 enumerations
 ============
 .. autoclass:: gon.base.Location
