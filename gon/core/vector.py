@@ -310,7 +310,7 @@ class Vector(Generic[Coordinate]):
         Memory complexity:
             ``O(1)``
 
-        >>> from gon.base import Orientation, Point, Vector
+        >>> from gon.base import Point, Vector
         >>> vector = Vector(Point(0, 0), Point(2, 0))
         >>> vector.validate()
         """
