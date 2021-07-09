@@ -69,6 +69,14 @@ class Vector(ABC, Generic[Coordinate]):
     def __init__(self,
                  start: Point[Coordinate],
                  end: Point[Coordinate]) -> None:
+        """
+        Initializes vector.
+
+        Time complexity:
+            ``O(1)``
+        Memory complexity:
+            ``O(1)``
+        """
         self._end, self._start = end, start
 
     __repr__ = generate_repr(__init__)
