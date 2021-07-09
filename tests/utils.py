@@ -37,6 +37,7 @@ from gon.base import (EMPTY,
                       Relation,
                       Segment,
                       Shaped)
+from gon.core.angle import to_sign
 from gon.core.iterable import shift_sequence
 from gon.hints import Scalar
 
@@ -69,6 +70,7 @@ def implication(antecedent: bool, consequent: bool) -> bool:
 
 
 flatten = chain.from_iterable
+to_sign = to_sign
 to_unique_ever_seen = OrderedDict.fromkeys
 
 
