@@ -15,18 +15,15 @@ def test_reflexivity(multipolygon: Multipolygon) -> None:
 @given(strategies.multipolygons_pairs)
 def test_symmetry(multipolygons_pair: Tuple[Multipolygon, Multipolygon]
                   ) -> None:
-    left_multipolygon, right_multipolygon = multipolygons_pair
+    first, second = multipolygons_pair
 
-    assert implication(left_multipolygon == right_multipolygon,
-                       right_multipolygon == left_multipolygon)
+    assert implication(first == second, second == first)
 
 
 @given(strategies.multipolygons_triplets)
-def test_transitivity(multipolygons_triplet: Tuple[Multipolygon, Multipolygon,
-                                                   Multipolygon]) -> None:
-    (left_multipolygon, mid_multipolygon,
-     right_multipolygon) = multipolygons_triplet
+def test_transitivity(multipolygons_triplet
+                      : Tuple[Multipolygon, Multipolygon, Multipolygon]
+                      ) -> None:
+    first, second, third = multipolygons_triplet
 
-    assert implication(left_multipolygon == mid_multipolygon
-                       == right_multipolygon,
-                       left_multipolygon == right_multipolygon)
+    assert implication(first == second == third, first == third)

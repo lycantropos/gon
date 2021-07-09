@@ -15,20 +15,17 @@ def test_reflexivity(segment: Segment) -> None:
 
 @given(strategies.segments_pairs)
 def test_symmetry(segments_pair: Tuple[Segment, Segment]) -> None:
-    left_segment, right_segment = segments_pair
+    first, second = segments_pair
 
-    assert implication(left_segment == right_segment,
-                       right_segment == left_segment)
+    assert implication(first == second, second == first)
 
 
 @given(strategies.segments_triplets)
 def test_transitivity(segments_triplet: Tuple[Segment, Segment, Segment]
                       ) -> None:
-    left_segment, mid_segment, right_segment = segments_triplet
+    first, second, third = segments_triplet
 
-    assert implication(left_segment == mid_segment
-                       and mid_segment == right_segment,
-                       left_segment == right_segment)
+    assert implication(first == second and second == third, first == third)
 
 
 @given(strategies.segments)

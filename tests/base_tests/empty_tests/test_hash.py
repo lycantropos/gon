@@ -13,7 +13,7 @@ def test_determinism(empty: Empty) -> None:
 
 
 @given(strategies.empty_geometries, strategies.empty_geometries)
-def test_connection_with_equality(left_empty: Empty,
-                                  right_empty: Empty) -> None:
-    assert implication(left_empty == right_empty,
-                       hash(left_empty) == hash(right_empty))
+def test_connection_with_equality(first: Empty,
+                                  third: Empty) -> None:
+    assert implication(first == third,
+                       hash(first) == hash(third))

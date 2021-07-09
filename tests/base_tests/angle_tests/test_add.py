@@ -9,26 +9,25 @@ from . import strategies
 
 @given(strategies.angles_pairs)
 def test_basic(angles_pair: Tuple[Angle, Angle]) -> None:
-    left_angle, right_angle = angles_pair
+    first, second = angles_pair
 
-    result = left_angle + right_angle
+    result = first + second
 
     assert isinstance(result, Angle)
 
 
 @given(strategies.angles_pairs)
 def test_validity(angles_pair: Tuple[Angle, Angle]) -> None:
-    left_angle, right_angle = angles_pair
+    first, second = angles_pair
 
-    result = left_angle + right_angle
+    result = first + second
 
     with not_raises(ValueError):
         result.validate()
 
 
 @given(strategies.zero_angles_with_angles)
-def test_left_neutral_element(zero_angle_with_angle: Tuple[Angle, Angle]
-                              ) -> None:
+def test_first(zero_angle_with_angle: Tuple[Angle, Angle]) -> None:
     zero_angle, angle = zero_angle_with_angle
 
     result = zero_angle + angle
@@ -37,8 +36,8 @@ def test_left_neutral_element(zero_angle_with_angle: Tuple[Angle, Angle]
 
 
 @given(strategies.zero_angles_with_angles)
-def test_right_neutral_element(zero_angle_with_angle
-                               : Tuple[Angle, Angle]) -> None:
+def test_third(zero_angle_with_angle
+               : Tuple[Angle, Angle]) -> None:
     zero_angle, angle = zero_angle_with_angle
 
     result = angle + zero_angle
@@ -48,27 +47,27 @@ def test_right_neutral_element(zero_angle_with_angle
 
 @given(strategies.angles_pairs)
 def test_commutativity(angles_pair: Tuple[Angle, Angle]) -> None:
-    left_angle, right_angle = angles_pair
+    first, second = angles_pair
 
-    result = left_angle + right_angle
+    result = first + second
 
-    assert result == right_angle + left_angle
+    assert result == second + first
 
 
 @given(strategies.angles_triplets)
 def test_associativity(angles_triplet: Tuple[Angle, Angle, Angle]
                        ) -> None:
-    left_angle, mid_angle, right_angle = angles_triplet
+    first, second, third = angles_triplet
 
-    result = (left_angle + mid_angle) + right_angle
+    result = (first + second) + third
 
-    assert result == left_angle + (mid_angle + right_angle)
+    assert result == first + (second + third)
 
 
 @given(strategies.angles_pairs)
 def test_equivalents(angles_pair: Tuple[Angle, Angle]) -> None:
-    left_angle, right_angle = angles_pair
+    first, second = angles_pair
 
-    result = left_angle + right_angle
+    result = first + second
 
-    assert result == left_angle - (-right_angle)
+    assert result == first - (-second)

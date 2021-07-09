@@ -16,19 +16,17 @@ def test_reflexivity(multipoint: Multipoint) -> None:
 
 @given(strategies.multipoints_pairs)
 def test_symmetry(multipoints_pair: Tuple[Multipoint, Multipoint]) -> None:
-    left_multipoint, right_multipoint = multipoints_pair
+    first, second = multipoints_pair
 
-    assert implication(left_multipoint == right_multipoint,
-                       right_multipoint == left_multipoint)
+    assert implication(first == second, second == first)
 
 
 @given(strategies.multipoints_triplets)
 def test_transitivity(multipoints_triplet: Tuple[Multipoint, Multipoint,
                                                  Multipoint]) -> None:
-    left_multipoint, mid_multipoint, right_multipoint = multipoints_triplet
+    first, second, third = multipoints_triplet
 
-    assert implication(left_multipoint == mid_multipoint == right_multipoint,
-                       left_multipoint == right_multipoint)
+    assert implication(first == second == third, first == third)
 
 
 @given(strategies.multipoints)

@@ -26,10 +26,9 @@ def test_determinism(multisegment: Multisegment) -> None:
 def test_connection_with_equality(
         multisegments_pair: Tuple[Multisegment, Multisegment]
 ) -> None:
-    left_multisegment, right_multisegment = multisegments_pair
+    first, second = multisegments_pair
 
-    assert implication(left_multisegment == right_multisegment,
-                       hash(left_multisegment) == hash(right_multisegment))
+    assert implication(first == second, hash(first) == hash(second))
 
 
 @given(strategies.multisegments)

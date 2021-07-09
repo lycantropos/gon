@@ -25,10 +25,9 @@ def test_determinism(segment: Segment) -> None:
 @given(strategies.segments_pairs)
 def test_connection_with_equality(segments_pair: Tuple[Segment, Segment]
                                   ) -> None:
-    left_segment, right_segment = segments_pair
+    first, second = segments_pair
 
-    assert implication(left_segment == right_segment,
-                       hash(left_segment) == hash(right_segment))
+    assert implication(first == second, hash(first) == hash(second))
 
 
 @given(strategies.segments)

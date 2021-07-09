@@ -27,36 +27,36 @@ def test_components(mix: Mix) -> None:
 
 @given(strategies.mixes_pairs)
 def test_mixes_relations(mixes_pair: Tuple[Mix, Mix]) -> None:
-    left_mix, right_mix = mixes_pair
+    first, second = mixes_pair
 
-    result = left_mix.relate(right_mix)
+    result = first.relate(second)
 
     assert equivalence(result is Relation.DISJOINT,
-                       all(left_component.relate(right_component)
+                       all(first_component.relate(second_component)
                            is Relation.DISJOINT
-                           for left_component, right_component in product(
-                               mix_to_components(left_mix),
-                               mix_to_components(right_mix))))
+                           for first_component, second_component in product(
+                               mix_to_components(first),
+                               mix_to_components(second))))
     assert implication(result is Relation.OVERLAP,
-                       left_mix.shaped is right_mix.shaped is EMPTY
-                       or left_mix.shaped is not EMPTY
-                       and right_mix.shaped is not EMPTY)
+                       first.shaped is second.shaped is EMPTY
+                       or first.shaped is not EMPTY
+                       and second.shaped is not EMPTY)
     assert implication(result in (Relation.COVER, Relation.ENCLOSES),
-                       right_mix.shaped is not EMPTY)
+                       second.shaped is not EMPTY)
     assert implication(result is Relation.COMPOSITE,
                        all(component is EMPTY
-                           or right_mix.relate(component) is Relation.COMPONENT
-                           for component in mix_to_components(left_mix)))
+                           or second.relate(component) is Relation.COMPONENT
+                           for component in mix_to_components(first)))
     assert equivalence(result is Relation.EQUAL,
-                       all(left_component is right_component is EMPTY
-                           or (left_component.relate(right_component)
+                       all(first_component is second_component is EMPTY
+                           or (first_component.relate(second_component)
                                is Relation.EQUAL)
-                           for left_component, right_component in zip(
-                               mix_to_components(left_mix),
-                               mix_to_components(right_mix))))
+                           for first_component, second_component in zip(
+                               mix_to_components(first),
+                               mix_to_components(second))))
     assert implication(result is Relation.COMPONENT,
                        all(component is EMPTY
-                           or left_mix.relate(component) is Relation.COMPONENT
-                           for component in mix_to_components(right_mix)))
+                           or first.relate(component) is Relation.COMPONENT
+                           for component in mix_to_components(second)))
     assert implication(result in (Relation.ENCLOSED, Relation.WITHIN),
-                       left_mix.shaped is not EMPTY)
+                       first.shaped is not EMPTY)

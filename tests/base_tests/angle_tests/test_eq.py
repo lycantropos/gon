@@ -15,23 +15,20 @@ def test_reflexivity(angle: Angle) -> None:
 
 @given(strategies.angles_pairs)
 def test_symmetry(angles_pair: Tuple[Angle, Angle]) -> None:
-    left_angle, right_angle = angles_pair
+    first, second = angles_pair
 
-    assert implication(left_angle == right_angle,
-                       right_angle == left_angle)
+    assert implication(first == second, second == first)
 
 
 @given(strategies.angles_pairs)
 def test_negation(angles_pair: Tuple[Angle, Angle]) -> None:
-    left_angle, right_angle = angles_pair
+    first, second = angles_pair
 
-    assert equivalence(left_angle == right_angle,
-                       -left_angle == -right_angle)
+    assert equivalence(first == second, -first == -second)
 
 
 @given(strategies.angles_triplets)
 def test_transitivity(angles_triplet: Tuple[Angle, Angle, Angle]) -> None:
-    left_angle, mid_angle, right_angle = angles_triplet
+    first, second, third = angles_triplet
 
-    assert implication(left_angle == mid_angle == right_angle,
-                       left_angle == right_angle)
+    assert implication(first == second == third, first == third)

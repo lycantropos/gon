@@ -15,10 +15,8 @@ def test_determinism(multipolygon: Multipolygon) -> None:
 
 
 @given(strategies.multipolygons_pairs)
-def test_connection_with_equality(multipolygons_pair: Tuple[Multipolygon,
-                                                            Multipolygon]
-                                  ) -> None:
-    left_multipolygon, right_multipolygon = multipolygons_pair
+def test_connection_with_equality(multipolygons_pair
+                                  : Tuple[Multipolygon, Multipolygon]) -> None:
+    first, second = multipolygons_pair
 
-    assert implication(left_multipolygon == right_multipolygon,
-                       hash(left_multipolygon) == hash(right_multipolygon))
+    assert implication(first == second, hash(first) == hash(second))

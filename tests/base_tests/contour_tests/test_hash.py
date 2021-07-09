@@ -17,7 +17,6 @@ def test_determinism(contour: Contour) -> None:
 @given(strategies.contours_pairs)
 def test_connection_with_equality(contours_pair: Tuple[Contour, Contour]
                                   ) -> None:
-    left_contour, right_contour = contours_pair
+    first, second = contours_pair
 
-    assert implication(left_contour == right_contour,
-                       hash(left_contour) == hash(right_contour))
+    assert implication(first == second, hash(first) == hash(second))
