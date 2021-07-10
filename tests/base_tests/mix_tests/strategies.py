@@ -4,6 +4,7 @@ from operator import itemgetter
 from hypothesis import strategies
 
 from gon.base import (EMPTY,
+                      Compound,
                       Geometry,
                       Mix,
                       Multipoint,
@@ -129,21 +130,21 @@ mixes_with_points = (coordinates_strategies
 mixes_strategies = coordinates_strategies.map(coordinates_to_mixes)
 
 
-def scale_geometry_preserving_centroid(geometry: Geometry,
+def scale_compound_preserving_centroid(compound: Compound,
                                        factor: Scalar) -> Mix:
-    if geometry is EMPTY:
-        return geometry
-    centroid = geometry.centroid
-    scaled = geometry.scale(factor)
+    if compound is EMPTY:
+        return compound
+    centroid = compound.centroid
+    scaled = compound.scale(factor)
     scaled_centroid = scaled.centroid
     return (scaled.translate(-scaled_centroid.x, -scaled_centroid.y)
             .translate(centroid.x, centroid.y))
 
 
 def scale_mix_preserving_centroids(mix: Mix, factor: Scalar) -> Mix:
-    return Mix(scale_geometry_preserving_centroid(mix.discrete, factor),
-               scale_geometry_preserving_centroid(mix.linear, factor),
-               scale_geometry_preserving_centroid(mix.shaped, factor))
+    return Mix(scale_compound_preserving_centroid(mix.discrete, factor),
+               scale_compound_preserving_centroid(mix.linear, factor),
+               scale_compound_preserving_centroid(mix.shaped, factor))
 
 
 def to_non_zero_coordinates(coordinates: Strategy[Scalar]) -> Strategy[Scalar]:
