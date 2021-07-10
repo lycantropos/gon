@@ -2,9 +2,7 @@ from typing import Tuple
 
 from hypothesis import given
 
-from gon.base import (EMPTY,
-                      Compound,
-                      Relation)
+from gon.base import (Compound, EMPTY, Relation)
 from tests.utils import (are_compounds_equivalent,
                          implication,
                          not_raises)
@@ -97,4 +95,5 @@ def test_connection_with_disjoint(compounds_pair: Tuple[Compound, Compound]
     result = first ^ second
 
     assert implication(first.disjoint(second),
-                       result.relate(first | second) is Relation.EQUAL)
+                       first is second is result is EMPTY
+                       or result.relate(first | second) is Relation.EQUAL)
