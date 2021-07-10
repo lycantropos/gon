@@ -2,7 +2,9 @@ from typing import Tuple
 
 from hypothesis import given
 
-from gon.base import (Compound, EMPTY)
+from gon.base import (EMPTY,
+                      Compound,
+                      Relation)
 from tests.utils import (are_compounds_equivalent,
                          implication,
                          not_raises)
