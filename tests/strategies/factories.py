@@ -76,7 +76,8 @@ coordinates_to_multisegments = partial(planar.multisegments,
                                        max_size=MAX_LINEAR_SIZE)
 coordinates_to_contours = partial(planar.contours,
                                   max_size=MAX_LINEAR_SIZE)
-coordinates_to_mixes = planar.mixes
+coordinates_to_mixes = partial(planar.mixes,
+                               max_segments_size=MAX_LINEAR_SIZE)
 coordinates_to_polygons = planar.polygons
 coordinates_to_multipolygons = planar.multipolygons
 
