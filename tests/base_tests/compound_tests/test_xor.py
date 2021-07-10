@@ -94,4 +94,5 @@ def test_connection_with_disjoint(compounds_pair: Tuple[Compound, Compound]
 
     result = first ^ second
 
-    assert implication(first.disjoint(second), result == first | second)
+    assert implication(first.disjoint(second),
+                       result.relate(first | second) is Relation.EQUAL)
