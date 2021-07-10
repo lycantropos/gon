@@ -74,6 +74,14 @@ to_sign = to_sign
 to_unique_ever_seen = OrderedDict.fromkeys
 
 
+def cleave(*functions: Callable[..., Range]
+           ) -> Callable[..., Tuple[Range, ...]]:
+    def cleft(*args: Any, **kwargs: Any) -> Tuple[Range, ...]:
+        return tuple(function(*args, **kwargs) for function in functions)
+
+    return cleft
+
+
 def identity(argument: Domain) -> Domain:
     return argument
 
