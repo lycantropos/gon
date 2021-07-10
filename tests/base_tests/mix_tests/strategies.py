@@ -1,8 +1,10 @@
 from itertools import chain
+from operator import itemgetter
 
 from hypothesis import strategies
 
 from gon.base import (EMPTY,
+                      Geometry,
                       Mix,
                       Multipoint,
                       Multisegment,
@@ -19,8 +21,10 @@ from tests.strategies import (coordinates_strategies,
                               invalid_multipoints,
                               invalid_shaped_geometries)
 from tests.utils import (Strategy,
+                         cleave,
                          cleave_in_tuples,
                          flatten,
+                         pack,
                          shaped_to_polygons,
                          sub_lists,
                          to_pairs,
@@ -123,5 +127,34 @@ mixes_with_points = (coordinates_strategies
                      .flatmap(cleave_in_tuples(coordinates_to_mixes,
                                                coordinates_to_points)))
 mixes_strategies = coordinates_strategies.map(coordinates_to_mixes)
-mixes_pairs = mixes_strategies.flatmap(to_pairs)
+
+
+def scale_geometry_preserving_centroid(geometry: Geometry,
+                                       factor: Scalar) -> Mix:
+    if geometry is EMPTY:
+        return geometry
+    centroid = geometry.centroid
+    scaled = geometry.scale(factor)
+    scaled_centroid = scaled.centroid
+    return (scaled.translate(-scaled_centroid.x, -scaled_centroid.y)
+            .translate(centroid.x, centroid.y))
+
+
+def scale_mix_preserving_centroids(mix: Mix, factor: Scalar) -> Mix:
+    return Mix(scale_geometry_preserving_centroid(mix.discrete, factor),
+               scale_geometry_preserving_centroid(mix.linear, factor),
+               scale_geometry_preserving_centroid(mix.shaped, factor))
+
+
+def to_non_zero_coordinates(coordinates: Strategy[Scalar]) -> Strategy[Scalar]:
+    return coordinates.filter(bool)
+
+
+mixes_pairs = (
+        strategies.builds(cleave(itemgetter(0),
+                                 pack(scale_mix_preserving_centroids)),
+                          coordinates_strategies.flatmap(
+                                  cleave_in_tuples(coordinates_to_mixes,
+                                                   to_non_zero_coordinates)))
+        | mixes_strategies.flatmap(to_pairs))
 mixes_triplets = mixes_strategies.flatmap(to_triplets)
