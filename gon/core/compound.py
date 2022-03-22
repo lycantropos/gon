@@ -5,14 +5,13 @@ from ground.base import (Location,
 from ground.hints import (Point,
                           Scalar)
 
-from .geometry import (Coordinate,
-                       Geometry)
+from .geometry import Geometry
 
 Relation = Relation
 Location = Location
 
 
-class Compound(Geometry[Coordinate]):
+class Compound(Geometry[Scalar]):
     __slots__ = ()
 
     @property
@@ -22,80 +21,80 @@ class Compound(Geometry[Coordinate]):
         Returns centroid of the geometry.
         """
 
-    def disjoint(self, other: 'Compound[Coordinate]') -> bool:
+    def disjoint(self, other: 'Compound[Scalar]') -> bool:
         """
         Checks if the geometry is disjoint from the other.
         """
         return self.relate(other) is Relation.DISJOINT
 
     @abstractmethod
-    def locate(self, point: Point[Coordinate]) -> Location:
+    def locate(self, point: Point[Scalar]) -> Location:
         """
         Finds location of point relative to the geometry.
         """
 
     @abstractmethod
-    def relate(self, other: 'Compound[Coordinate]') -> Relation:
+    def relate(self, other: 'Compound[Scalar]') -> Relation:
         """
         Finds relation between geometric objects.
         """
 
     @abstractmethod
-    def __and__(self, other: 'Compound[Coordinate]') -> 'Compound[Coordinate]':
+    def __and__(self, other: 'Compound[Scalar]') -> 'Compound[Scalar]':
         """
         Returns intersection of the geometry with the other geometry.
         """
 
     @abstractmethod
-    def __contains__(self, point: Point[Coordinate]) -> bool:
+    def __contains__(self, point: Point[Scalar]) -> bool:
         """
         Checks if the geometry contains the point.
         """
 
     @abstractmethod
-    def __ge__(self, other: 'Compound[Coordinate]') -> bool:
+    def __ge__(self, other: 'Compound[Scalar]') -> bool:
         """
         Checks if the geometry is a superset of the other.
         """
 
     @abstractmethod
-    def __gt__(self, other: 'Compound[Coordinate]') -> bool:
+    def __gt__(self, other: 'Compound[Scalar]') -> bool:
         """
         Checks if the geometry is a strict superset of the other.
         """
 
     @abstractmethod
-    def __le__(self, other: 'Compound[Coordinate]') -> bool:
+    def __le__(self, other: 'Compound[Scalar]') -> bool:
         """
         Checks if the geometry is a subset of the other.
         """
 
     @abstractmethod
-    def __lt__(self, other: 'Compound[Coordinate]') -> bool:
+    def __lt__(self, other: 'Compound[Scalar]') -> bool:
         """
         Checks if the geometry is a strict subset of the other.
         """
 
     @abstractmethod
-    def __or__(self, other: 'Compound[Coordinate]') -> 'Compound[Coordinate]':
+    def __or__(self, other: 'Compound[Scalar]') -> 'Compound[Scalar]':
         """
         Returns union of the geometry with the other geometry.
         """
 
     @abstractmethod
-    def __sub__(self, other: 'Compound[Coordinate]') -> 'Compound[Coordinate]':
+    def __sub__(self, other: 'Compound[Scalar]') -> 'Compound[Scalar]':
         """
         Returns difference of the geometry with the other geometry.
         """
 
     @abstractmethod
-    def __xor__(self, other: 'Compound[Coordinate]') -> 'Compound[Coordinate]':
+    def __xor__(self, other: 'Compound[Scalar]') -> 'Compound[Scalar]':
         """
         Returns symmetric difference of the geometry with the other geometry.
         """
 
 
-class Linear(Geometry[Coordinate]):
+class Linear(Geometry[Scalar]):
     __slots__ = ()
 
     @property
@@ -106,12 +105,12 @@ class Linear(Geometry[Coordinate]):
         """
 
 
-class Shaped(Geometry[Coordinate]):
+class Shaped(Geometry[Scalar]):
     __slots__ = ()
 
     @property
     @abstractmethod
-    def area(self) -> Coordinate:
+    def area(self) -> Scalar:
         """
         Returns area of the geometry.
         """
@@ -124,7 +123,7 @@ class Shaped(Geometry[Coordinate]):
         """
 
 
-class Indexable(Compound[Coordinate]):
+class Indexable(Compound[Scalar]):
     __slots__ = ()
 
     @abstractmethod

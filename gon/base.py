@@ -1,6 +1,7 @@
 from ground.base import (Context as _Context,
                          get_context as _get_context,
                          set_context as _set_context)
+from ground.hints import Scalar as _Scalar
 
 from .core.angle import (Angle as _Angle,
                          Kind,
@@ -13,8 +14,7 @@ from .core.compound import (Compound,
                             Shaped)
 from .core.contour import Contour as _Contour
 from .core.empty import Empty as _Empty
-from .core.geometry import (Coordinate as _Coordinate,
-                            Geometry)
+from .core.geometry import Geometry
 from .core.mix import Mix as _Mix
 from .core.multipoint import Multipoint as _Multipoint
 from .core.multipolygon import Multipolygon as _Multipolygon
@@ -57,43 +57,43 @@ class Empty(_ContextMixin, _Empty):
 EMPTY = Empty()
 
 
-class Point(_ContextMixin, _Point[_Coordinate]):
+class Point(_ContextMixin, _Point[_Scalar]):
     __slots__ = ()
 
 
-class Contour(_ContextMixin, _Contour[_Coordinate]):
+class Contour(_ContextMixin, _Contour[_Scalar]):
     __slots__ = ()
 
 
-class Mix(_ContextMixin, _Mix[_Coordinate]):
+class Mix(_ContextMixin, _Mix[_Scalar]):
     __slots__ = ()
 
 
-class Multipoint(_ContextMixin, _Multipoint[_Coordinate]):
+class Multipoint(_ContextMixin, _Multipoint[_Scalar]):
     __slots__ = ()
 
 
-class Segment(_ContextMixin, _Segment[_Coordinate]):
+class Segment(_ContextMixin, _Segment[_Scalar]):
     __slots__ = ()
 
 
-class Multisegment(_ContextMixin, _Multisegment[_Coordinate]):
+class Multisegment(_ContextMixin, _Multisegment[_Scalar]):
     __slots__ = ()
 
 
-class Polygon(_ContextMixin, _Polygon[_Coordinate]):
+class Polygon(_ContextMixin, _Polygon[_Scalar]):
     __slots__ = ()
 
 
-class Multipolygon(_ContextMixin, _Multipolygon[_Coordinate]):
+class Multipolygon(_ContextMixin, _Multipolygon[_Scalar]):
     __slots__ = ()
 
 
-class Angle(_ContextMixin, _Angle[_Coordinate]):
+class Angle(_ContextMixin, _Angle[_Scalar]):
     __slots__ = ()
 
 
-class Vector(_ContextMixin, _Vector[_Coordinate]):
+class Vector(_ContextMixin, _Vector[_Scalar]):
     __slots__ = ()
 
 

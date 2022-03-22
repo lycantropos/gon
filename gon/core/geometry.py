@@ -1,6 +1,5 @@
 from abc import (ABC,
                  abstractmethod)
-from numbers import Real
 from typing import (Generic,
                     Optional,
                     TypeVar)
@@ -8,41 +7,39 @@ from typing import (Generic,
 from ground.base import Context
 from ground.hints import (Point,
                           Scalar)
-from symba.base import Expression
 
 from .angle import Angle
 
-Coordinate = TypeVar('Coordinate', Real, Expression)
 _T = TypeVar('_T')
 
 
-class Geometry(Generic[Coordinate], ABC):
+class Geometry(Generic[Scalar], ABC):
     __slots__ = ()
 
     @abstractmethod
-    def distance_to(self, other: 'Geometry[Coordinate]') -> Scalar:
+    def distance_to(self, other: 'Geometry[Scalar]') -> Scalar:
         """
         Returns distance between geometric objects.
         """
 
     @abstractmethod
     def rotate(self: _T,
-               angle: Angle[Coordinate],
-               point: Optional[Point[Coordinate]] = None) -> _T:
+               angle: Angle[Scalar],
+               point: Optional[Point[Scalar]] = None) -> _T:
         """
         Rotates geometric object by given angle around given point.
         """
 
     @abstractmethod
     def scale(self,
-              factor_x: Coordinate,
-              factor_y: Optional[Coordinate] = None) -> 'Geometry[Coordinate]':
+              factor_x: Scalar,
+              factor_y: Optional[Scalar] = None) -> 'Geometry[Scalar]':
         """
         Scales geometric object by given factor.
         """
 
     @abstractmethod
-    def translate(self: _T, step_x: Coordinate, step_y: Coordinate) -> _T:
+    def translate(self: _T, step_x: Scalar, step_y: Scalar) -> _T:
         """
         Translates geometric object by given step.
         """
