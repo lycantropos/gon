@@ -5,15 +5,15 @@ services:
     build:
       context: .
       args:
-      - PYTHON_IMAGE=${CPYTHON_IMAGE_NAME}
-      - PYTHON_IMAGE_VERSION=${CPYTHON_IMAGE_VERSION}
+        - IMAGE_NAME=${CPYTHON_IMAGE_NAME}
+        - IMAGE_VERSION=${CPYTHON_IMAGE_VERSION}
     image: lycantropos/gon-cpython:4.0.0
     volumes:
-      - ./gon/:/opt/gon/gon/
-      - ./tests/:/opt/gon/tests/
-      - ./README.md:/opt/gon/README.md
-      - ./requirements.txt:/opt/gon/requirements.txt
-      - ./requirements-tests.txt:/opt/gon/requirements-tests.txt
-      - ./setup.py:/opt/gon/setup.py
+      - ./gon:/opt/gon/gon
       - ./pytest.ini:/opt/gon/pytest.ini
+      - ./README.md:/opt/gon/README.md
+      - ./requirements-tests.txt:/opt/gon/requirements-tests.txt
+      - ./requirements.txt:/opt/gon/requirements.txt
+      - ./setup.py:/opt/gon/setup.py
+      - ./tests:/opt/gon/tests
     entrypoint: pytest

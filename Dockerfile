@@ -1,19 +1,20 @@
-ARG PYTHON_IMAGE
-ARG PYTHON_IMAGE_VERSION
+ARG IMAGE_NAME
+ARG IMAGE_VERSION
 
-FROM ${PYTHON_IMAGE}:${PYTHON_IMAGE_VERSION}
+FROM ${IMAGE_NAME}:${IMAGE_VERSION}
 
 RUN pip install --upgrade pip setuptools
 
 WORKDIR /opt/gon
 
-COPY gon gon/
-COPY tests/ tests/
-COPY README.md .
 COPY requirements.txt .
-COPY requirements-tests.txt .
-COPY setup.py .
-COPY pytest.ini .
+RUN pip install -r requirements.txt
 
-RUN pip install --force-reinstall -r requirements.txt
-RUN pip install --force-reinstall -r requirements-tests.txt
+COPY requirements-tests.txt .
+RUN pip install -r requirements-tests.txt
+
+COPY README.md .
+COPY pytest.ini .
+COPY setup.py .
+COPY gon gon
+COPY tests tests
