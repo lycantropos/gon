@@ -7,14 +7,13 @@ from reprit.base import generate_repr
 from symba.base import Expression
 
 from .angle import Angle
-from .geometry import (Coordinate,
-                       Geometry)
+from .geometry import Geometry
 
 
-class Point(Geometry[Coordinate]):
+class Point(Geometry[Scalar]):
     __slots__ = '_coordinates', '_x', '_y'
 
-    def __init__(self, x: Coordinate, y: Coordinate) -> None:
+    def __init__(self, x: Scalar, y: Scalar) -> None:
         """
         Initializes point.
 
@@ -42,7 +41,7 @@ class Point(Geometry[Coordinate]):
         """
         return hash(self._coordinates)
 
-    def __eq__(self, other: 'Point[Coordinate]') -> bool:
+    def __eq__(self, other: 'Point[Scalar]') -> bool:
         """
         Checks if the point is equal to the other.
 
@@ -65,7 +64,7 @@ class Point(Geometry[Coordinate]):
                 if isinstance(other, Point)
                 else NotImplemented)
 
-    def __le__(self, other: 'Point[Coordinate]') -> bool:
+    def __le__(self, other: 'Point[Scalar]') -> bool:
         """
         Checks if the point is less than or equal to the other.
         Compares points lexicographically, ``x`` coordinates first.
@@ -91,7 +90,7 @@ class Point(Geometry[Coordinate]):
                 if isinstance(other, Point)
                 else NotImplemented)
 
-    def __lt__(self, other: 'Point[Coordinate]') -> bool:
+    def __lt__(self, other: 'Point[Scalar]') -> bool:
         """
         Checks if the point is less than the other.
         Compares points lexicographically, ``x`` coordinates first.
@@ -118,7 +117,7 @@ class Point(Geometry[Coordinate]):
                 else NotImplemented)
 
     @property
-    def x(self) -> Coordinate:
+    def x(self) -> Scalar:
         """
         Returns abscissa of the point.
 
@@ -134,7 +133,7 @@ class Point(Geometry[Coordinate]):
         return self._x
 
     @property
-    def y(self) -> Coordinate:
+    def y(self) -> Scalar:
         """
         Returns ordinate of the point.
 
@@ -149,7 +148,7 @@ class Point(Geometry[Coordinate]):
         """
         return self._y
 
-    def distance_to(self, other: Geometry[Coordinate]) -> Scalar:
+    def distance_to(self, other: Geometry[Scalar]) -> Scalar:
         """
         Returns distance between the point and the other geometry.
 
@@ -170,8 +169,7 @@ class Point(Geometry[Coordinate]):
 
     def rotate(self,
                angle: Angle,
-               point: Optional['Point[Coordinate]'] = None
-               ) -> 'Point[Coordinate]':
+               point: Optional['Point[Scalar]'] = None) -> 'Point[Scalar]':
         """
         Rotates the point by given angle around given point.
 
@@ -194,8 +192,8 @@ class Point(Geometry[Coordinate]):
                                                 point))
 
     def scale(self,
-              factor_x: Coordinate,
-              factor_y: Optional[Coordinate] = None) -> 'Point[Coordinate]':
+              factor_x: Scalar,
+              factor_y: Optional[Scalar] = None) -> 'Point[Scalar]':
         """
         Scales the point by given factor.
 
@@ -212,9 +210,7 @@ class Point(Geometry[Coordinate]):
         return self._context.scale_point(
                 self, factor_x, factor_x if factor_y is None else factor_y)
 
-    def translate(self,
-                  step_x: Coordinate,
-                  step_y: Coordinate) -> 'Point[Coordinate]':
+    def translate(self, step_x: Scalar, step_y: Scalar) -> 'Point[Scalar]':
         """
         Translates the point by given step.
 

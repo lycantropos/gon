@@ -28,8 +28,7 @@ from .compound import (Compound,
                        Linear,
                        Location,
                        Relation)
-from .geometry import (Coordinate,
-                       Geometry)
+from .geometry import Geometry
 from .iterable import (non_negative_min,
                        shift_sequence)
 from .multipoint import Multipoint
@@ -42,11 +41,11 @@ from .utils import (relate_multipoint_to_linear_compound,
                     to_segment_nearest_segment)
 
 
-class Contour(Indexable[Coordinate], Linear[Coordinate]):
+class Contour(Indexable[Scalar], Linear[Scalar]):
     __slots__ = ('_locate', '_min_index', '_point_nearest_segment',
                  '_segment_nearest_segment', '_segments', '_vertices')
 
-    def __init__(self, vertices: Sequence[Point[Coordinate]]) -> None:
+    def __init__(self, vertices: Sequence[Point[Scalar]]) -> None:
         """
         Initializes contour.
 
@@ -67,11 +66,12 @@ class Contour(Indexable[Coordinate], Linear[Coordinate]):
                                context=context)
         self._point_nearest_segment, self._segment_nearest_segment = (
             partial(to_point_nearest_segment, context, segments),
-            partial(to_segment_nearest_segment, context, segments))
+            partial(to_segment_nearest_segment, context, segments)
+        )
 
     __repr__ = generate_repr(__init__)
 
-    def __and__(self, other: Compound[Coordinate]) -> Compound[Coordinate]:
+    def __and__(self, other: Compound[Scalar]) -> Compound[Scalar]:
         """
         Returns intersection of the contour with the other geometry.
 
@@ -101,7 +101,7 @@ class Contour(Indexable[Coordinate], Linear[Coordinate]):
 
     __rand__ = __and__
 
-    def __contains__(self, point: Point[Coordinate]) -> bool:
+    def __contains__(self, point: Point[Scalar]) -> bool:
         """
         Checks if the contour contains the point.
 
@@ -120,7 +120,7 @@ class Contour(Indexable[Coordinate], Linear[Coordinate]):
         """
         return bool(self.locate(point))
 
-    def __eq__(self, other: 'Contour[Coordinate]') -> bool:
+    def __eq__(self, other: 'Contour[Scalar]') -> bool:
         """
         Checks if contours are equal.
 
@@ -145,7 +145,7 @@ class Contour(Indexable[Coordinate], Linear[Coordinate]):
                     if isinstance(other, Contour)
                     else NotImplemented))
 
-    def __ge__(self, other: Compound[Coordinate]) -> bool:
+    def __ge__(self, other: Compound[Scalar]) -> bool:
         """
         Checks if the contour is a superset of the other geometry.
 
@@ -173,7 +173,7 @@ class Contour(Indexable[Coordinate], Linear[Coordinate]):
                     if isinstance(other, Compound)
                     else NotImplemented))
 
-    def __gt__(self, other: Compound[Coordinate]) -> bool:
+    def __gt__(self, other: Compound[Scalar]) -> bool:
         """
         Checks if the contour is a strict superset of the other geometry.
 
@@ -227,7 +227,7 @@ class Contour(Indexable[Coordinate], Linear[Coordinate]):
                         is Orientation.COUNTERCLOCKWISE)
                     else _vertices.rotate_positions(vertices))
 
-    def __le__(self, other: Compound[Coordinate]) -> bool:
+    def __le__(self, other: Compound[Scalar]) -> bool:
         """
         Checks if the contour is a subset of the other geometry.
 
@@ -256,7 +256,7 @@ class Contour(Indexable[Coordinate], Linear[Coordinate]):
                      if isinstance(other, Linear)
                      else NotImplemented))
 
-    def __lt__(self, other: Compound[Coordinate]) -> bool:
+    def __lt__(self, other: Compound[Scalar]) -> bool:
         """
         Checks if the contour is a strict subset of the other geometry.
 
@@ -284,7 +284,7 @@ class Contour(Indexable[Coordinate], Linear[Coordinate]):
                      if isinstance(other, Linear)
                      else NotImplemented))
 
-    def __or__(self, other: Compound[Coordinate]) -> Compound[Coordinate]:
+    def __or__(self, other: Compound[Scalar]) -> Compound[Scalar]:
         """
         Returns union of the contour with the other geometry.
 
@@ -315,7 +315,7 @@ class Contour(Indexable[Coordinate], Linear[Coordinate]):
 
     __ror__ = __or__
 
-    def __rsub__(self, other: Compound[Coordinate]) -> Compound[Coordinate]:
+    def __rsub__(self, other: Compound[Scalar]) -> Compound[Scalar]:
         """
         Returns difference of the other geometry with the contour.
 
@@ -335,7 +335,7 @@ class Contour(Indexable[Coordinate], Linear[Coordinate]):
                       if isinstance(other, Multisegment)
                       else NotImplemented))
 
-    def __sub__(self, other: Compound[Coordinate]) -> Compound[Coordinate]:
+    def __sub__(self, other: Compound[Scalar]) -> Compound[Scalar]:
         """
         Returns difference of the contour with the other geometry.
 
@@ -361,7 +361,7 @@ class Contour(Indexable[Coordinate], Linear[Coordinate]):
                             if isinstance(other, Linear)
                             else NotImplemented)))
 
-    def __xor__(self, other: Compound[Coordinate]) -> Compound[Coordinate]:
+    def __xor__(self, other: Compound[Scalar]) -> Compound[Scalar]:
         """
         Returns symmetric difference of the contour with the other geometry.
 
@@ -410,7 +410,7 @@ class Contour(Indexable[Coordinate], Linear[Coordinate]):
         return self._context.contour_centroid(self)
 
     @property
-    def segments(self) -> Sequence[Segment[Coordinate]]:
+    def segments(self) -> Sequence[Segment[Scalar]]:
         """
         Returns segments of the contour.
 
@@ -469,7 +469,7 @@ class Contour(Indexable[Coordinate], Linear[Coordinate]):
                 vertices[(min_index + 1) % len(vertices)])
 
     @property
-    def vertices(self) -> Sequence[Point[Coordinate]]:
+    def vertices(self) -> Sequence[Point[Scalar]]:
         """
         Returns vertices of the contour.
 
@@ -487,7 +487,7 @@ class Contour(Indexable[Coordinate], Linear[Coordinate]):
         """
         return list(self._vertices)
 
-    def distance_to(self, other: Geometry[Coordinate]) -> Scalar:
+    def distance_to(self, other: Geometry[Scalar]) -> Scalar:
         """
         Returns distance between the contour and the other geometry.
 
@@ -537,7 +537,7 @@ class Contour(Indexable[Coordinate], Linear[Coordinate]):
         self._point_nearest_segment = tree.nearest_to_point_segment
         self._segment_nearest_segment = tree.nearest_segment
 
-    def locate(self, point: Point[Coordinate]) -> Location:
+    def locate(self, point: Point[Scalar]) -> Location:
         """
         Finds location of the point relative to the contour.
 
@@ -557,7 +557,7 @@ class Contour(Indexable[Coordinate], Linear[Coordinate]):
         """
         return self._locate(point)
 
-    def relate(self, other: Compound[Coordinate]) -> Relation:
+    def relate(self, other: Compound[Scalar]) -> Relation:
         """
         Finds relation between the contour and the other geometry.
 
@@ -581,7 +581,7 @@ class Contour(Indexable[Coordinate], Linear[Coordinate]):
                             if isinstance(other, Linear)
                             else other.relate(self).complement)))
 
-    def reverse(self) -> 'Contour[Coordinate]':
+    def reverse(self) -> 'Contour[Scalar]':
         """
         Returns the reversed contour.
 
@@ -602,8 +602,7 @@ class Contour(Indexable[Coordinate], Linear[Coordinate]):
 
     def rotate(self,
                angle: Angle,
-               point: Optional[Point[Coordinate]] = None
-               ) -> 'Contour[Coordinate]':
+               point: Optional[Point[Scalar]] = None) -> 'Contour[Scalar]':
         """
         Rotates the contour by given angle around given point.
 
@@ -629,8 +628,8 @@ class Contour(Indexable[Coordinate], Linear[Coordinate]):
                                                   angle.sine, point))
 
     def scale(self,
-              factor_x: Coordinate,
-              factor_y: Optional[Coordinate] = None) -> Compound[Coordinate]:
+              factor_x: Scalar,
+              factor_y: Optional[Scalar] = None) -> Compound[Scalar]:
         """
         Scales the contour by given factor.
 
@@ -652,7 +651,7 @@ class Contour(Indexable[Coordinate], Linear[Coordinate]):
         return self._context.scale_contour(
                 self, factor_x, factor_x if factor_y is None else factor_y)
 
-    def to_clockwise(self) -> 'Contour[Coordinate]':
+    def to_clockwise(self) -> 'Contour[Scalar]':
         """
         Returns the clockwise contour.
 
@@ -674,7 +673,7 @@ class Contour(Indexable[Coordinate], Linear[Coordinate]):
                 if self.orientation is Orientation.CLOCKWISE
                 else self.reverse())
 
-    def to_counterclockwise(self) -> 'Contour[Coordinate]':
+    def to_counterclockwise(self) -> 'Contour[Scalar]':
         """
         Returns the counterclockwise contour.
 
@@ -698,8 +697,8 @@ class Contour(Indexable[Coordinate], Linear[Coordinate]):
                 else self.reverse())
 
     def translate(self,
-                  step_x: Coordinate,
-                  step_y: Coordinate) -> 'Contour[Coordinate]':
+                  step_x: Scalar,
+                  step_y: Scalar) -> 'Contour[Scalar]':
         """
         Translates the contour by given step.
 
@@ -754,16 +753,17 @@ class Contour(Indexable[Coordinate], Linear[Coordinate]):
                                    context=self._context):
             raise ValueError('Contour should not be self-intersecting.')
 
-    def _distance_to_point(self, other: Point[Coordinate]) -> Scalar:
+    def _distance_to_point(self, other: Point[Scalar]) -> Scalar:
         return self._context.sqrt(self._context.segment_point_squared_distance(
-                self._point_nearest_segment(other), other))
+                self._point_nearest_segment(other), other
+        ))
 
-    def _distance_to_segment(self, other: Segment[Coordinate]) -> Scalar:
+    def _distance_to_segment(self, other: Segment[Scalar]) -> Scalar:
         return self._context.sqrt(self._context.segments_squared_distance(
                 self._segment_nearest_segment(other), other))
 
-    def _unite_with_multipoint(self, other: Multipoint[Coordinate]
-                               ) -> Compound[Coordinate]:
+    def _unite_with_multipoint(self, other: Multipoint[Scalar]
+                               ) -> Compound[Scalar]:
         context = self._context
         return pack_mix(other - self, self, context.empty, context.empty,
                         context.mix_cls)

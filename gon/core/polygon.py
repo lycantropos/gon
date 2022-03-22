@@ -36,8 +36,7 @@ from .compound import (Compound,
                        Relation,
                        Shaped)
 from .contour import Contour
-from .geometry import (Coordinate,
-                       Geometry)
+from .geometry import Geometry
 from .iterable import (flatten,
                        non_negative_min)
 from .multipoint import Multipoint
@@ -50,13 +49,13 @@ from .utils import (to_point_nearest_segment,
 Triangulation = Triangulation
 
 
-class Polygon(Indexable[Coordinate], Shaped[Coordinate]):
+class Polygon(Indexable[Scalar], Shaped[Scalar]):
     __slots__ = ('_border', '_holes', '_holes_set', '_locate',
                  '_point_nearest_edge', '_segment_nearest_edge')
 
     def __init__(self,
-                 border: Contour[Coordinate],
-                 holes: Optional[Sequence[Contour[Coordinate]]] = None
+                 border: Contour[Scalar],
+                 holes: Optional[Sequence[Contour[Scalar]]] = None
                  ) -> None:
         """
         Initializes polygon.
@@ -506,7 +505,7 @@ class Polygon(Indexable[Coordinate], Shaped[Coordinate]):
     __rxor__ = __xor__
 
     @property
-    def area(self) -> Coordinate:
+    def area(self) -> Scalar:
         """
         Returns area of the polygon.
 
@@ -951,8 +950,7 @@ class Polygon(Indexable[Coordinate], Shaped[Coordinate]):
         return self._context.scale_polygon(
                 self, factor_x, factor_x if factor_y is None else factor_y)
 
-    def translate(self, step_x: Scalar, step_y: Scalar
-                  ) -> 'Polygon[Coordinate]':
+    def translate(self, step_x: Scalar, step_y: Scalar) -> 'Polygon[Scalar]':
         """
         Translates the polygon by given step.
 

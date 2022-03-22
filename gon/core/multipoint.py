@@ -14,16 +14,15 @@ from .compound import (Compound,
                        Indexable,
                        Location,
                        Relation)
-from .geometry import (Coordinate,
-                       Geometry)
+from .geometry import Geometry
 from .iterable import non_negative_min
 from .point import Point
 
 
-class Multipoint(Indexable[Coordinate]):
+class Multipoint(Indexable[Scalar]):
     __slots__ = '_points', '_points_set', '_nearest_point'
 
-    def __init__(self, points: Sequence[Point[Coordinate]]) -> None:
+    def __init__(self, points: Sequence[Point[Scalar]]) -> None:
         """
         Initializes multipoint.
 
@@ -39,7 +38,7 @@ class Multipoint(Indexable[Coordinate]):
 
     __repr__ = generate_repr(__init__)
 
-    def __and__(self, other: Compound[Coordinate]) -> Compound[Coordinate]:
+    def __and__(self, other: Compound[Scalar]) -> Compound[Scalar]:
         """
         Returns intersection of the multipoint with the other geometry.
 
@@ -65,7 +64,7 @@ class Multipoint(Indexable[Coordinate]):
 
     __rand__ = __and__
 
-    def __contains__(self, point: Point[Coordinate]) -> bool:
+    def __contains__(self, point: Point[Scalar]) -> bool:
         """
         Checks if the multipoint contains the point.
 
@@ -82,7 +81,7 @@ class Multipoint(Indexable[Coordinate]):
         """
         return point in self._points_set
 
-    def __eq__(self, other: 'Multipoint[Coordinate]') -> bool:
+    def __eq__(self, other: 'Multipoint[Scalar]') -> bool:
         """
         Checks if multipoints are equal.
 
@@ -105,7 +104,7 @@ class Multipoint(Indexable[Coordinate]):
                                  if isinstance(other, Multipoint)
                                  else NotImplemented)
 
-    def __ge__(self, other: Compound[Coordinate]) -> bool:
+    def __ge__(self, other: Compound[Scalar]) -> bool:
         """
         Checks if the multipoint is a superset of the other geometry.
 
@@ -128,7 +127,7 @@ class Multipoint(Indexable[Coordinate]):
                 if isinstance(other, Multipoint)
                 else NotImplemented)
 
-    def __gt__(self, other: Compound[Coordinate]) -> bool:
+    def __gt__(self, other: Compound[Scalar]) -> bool:
         """
         Checks if the multipoint is a strict superset of the other geometry.
 
@@ -167,7 +166,7 @@ class Multipoint(Indexable[Coordinate]):
         """
         return hash(self._points_set)
 
-    def __le__(self, other: Compound[Coordinate]) -> bool:
+    def __le__(self, other: Compound[Scalar]) -> bool:
         """
         Checks if the multipoint is a subset of the other geometry.
 
@@ -190,7 +189,7 @@ class Multipoint(Indexable[Coordinate]):
                 if isinstance(other, Multipoint)
                 else NotImplemented)
 
-    def __lt__(self, other: Compound[Coordinate]) -> bool:
+    def __lt__(self, other: Compound[Scalar]) -> bool:
         """
         Checks if the multipoint is a strict subset of the other geometry.
 
@@ -213,7 +212,7 @@ class Multipoint(Indexable[Coordinate]):
                 if isinstance(other, Multipoint)
                 else NotImplemented)
 
-    def __or__(self, other: Compound[Coordinate]) -> Compound[Coordinate]:
+    def __or__(self, other: Compound[Scalar]) -> Compound[Scalar]:
         """
         Returns union of the multipoint with the other geometry.
 
@@ -234,7 +233,7 @@ class Multipoint(Indexable[Coordinate]):
                 if isinstance(other, Multipoint)
                 else NotImplemented)
 
-    def __sub__(self, other: Compound[Coordinate]) -> Compound[Coordinate]:
+    def __sub__(self, other: Compound[Scalar]) -> Compound[Scalar]:
         """
         Returns difference of the multipoint with the other geometry.
 
@@ -259,7 +258,7 @@ class Multipoint(Indexable[Coordinate]):
                 if isinstance(other, Compound)
                 else NotImplemented)
 
-    def __xor__(self, other: Compound[Coordinate]) -> Compound[Coordinate]:
+    def __xor__(self, other: Compound[Scalar]) -> Compound[Scalar]:
         """
         Returns symmetric difference of the multipoint with the other geometry.
 
@@ -281,7 +280,7 @@ class Multipoint(Indexable[Coordinate]):
                 else NotImplemented)
 
     @property
-    def centroid(self) -> Point[Coordinate]:
+    def centroid(self) -> Point[Scalar]:
         """
         Returns centroid of the multipoint.
 
@@ -300,7 +299,7 @@ class Multipoint(Indexable[Coordinate]):
         return self._context.multipoint_centroid(self)
 
     @property
-    def points(self) -> Sequence[Point[Coordinate]]:
+    def points(self) -> Sequence[Point[Scalar]]:
         """
         Returns points of the multipoint.
 
@@ -318,7 +317,7 @@ class Multipoint(Indexable[Coordinate]):
         """
         return list(self._points)
 
-    def distance_to(self, other: Geometry[Coordinate]) -> Scalar:
+    def distance_to(self, other: Geometry[Scalar]) -> Scalar:
         """
         Returns distance between the multipoint and the other geometry.
 
@@ -356,7 +355,7 @@ class Multipoint(Indexable[Coordinate]):
         """
         self._nearest_point = kd.Tree(self._points).nearest_point
 
-    def locate(self, point: Point[Coordinate]) -> Location:
+    def locate(self, point: Point[Scalar]) -> Location:
         """
         Finds location of the point relative to the multipoint.
 
@@ -376,7 +375,7 @@ class Multipoint(Indexable[Coordinate]):
                 if point in self._points_set
                 else Location.EXTERIOR)
 
-    def relate(self, other: Compound[Coordinate]) -> Relation:
+    def relate(self, other: Compound[Scalar]) -> Relation:
         """
         Finds relation between the multipoint and the other geometry.
 
@@ -400,8 +399,7 @@ class Multipoint(Indexable[Coordinate]):
 
     def rotate(self,
                angle: Angle,
-               point: Optional[Point[Coordinate]] = None
-               ) -> 'Multipoint[Coordinate]':
+               point: Optional[Point[Scalar]] = None) -> 'Multipoint[Scalar]':
         """
         Rotates geometric object by given angle around given point.
 
@@ -427,9 +425,8 @@ class Multipoint(Indexable[Coordinate]):
                                                      angle.sine, point))
 
     def scale(self,
-              factor_x: Coordinate,
-              factor_y: Optional[Coordinate] = None
-              ) -> 'Multipoint[Coordinate]':
+              factor_x: Scalar,
+              factor_y: Optional[Scalar] = None) -> 'Multipoint[Scalar]':
         """
         Scales the multipoint by given factor.
 
@@ -449,11 +446,12 @@ class Multipoint(Indexable[Coordinate]):
         True
         """
         return self._context.scale_multipoint(
-                self, factor_x, factor_x if factor_y is None else factor_y)
+                self, factor_x, factor_x if factor_y is None else factor_y
+        )
 
     def translate(self,
-                  step_x: Coordinate,
-                  step_y: Coordinate) -> 'Multipoint[Coordinate]':
+                  step_x: Scalar,
+                  step_y: Scalar) -> 'Multipoint[Scalar]':
         """
         Translates the multipoint by given step.
 
@@ -493,14 +491,15 @@ class Multipoint(Indexable[Coordinate]):
         for point in points:
             point.validate()
 
-    def _distance_to_point(self, other: Point[Coordinate]) -> Scalar:
+    def _distance_to_point(self, other: Point[Scalar]) -> Scalar:
         return self._context.sqrt(self._context.points_squared_distance(
-                self._nearest_point(other), other))
+                self._nearest_point(other), other
+        ))
 
     def _pack_points(self, points: AbstractSet[Point]) -> Maybe['Multipoint']:
         return type(self)(list(points)) if points else self._context.empty
 
-    def _relate_geometry(self, other: Compound[Coordinate]) -> Relation:
+    def _relate_geometry(self, other: Compound[Scalar]) -> Relation:
         disjoint = is_subset = not_interior = not_boundary = True
         for point in self._points:
             location = other.locate(point)
@@ -543,7 +542,7 @@ def _relate_sets(left: AbstractSet, right: AbstractSet) -> Relation:
 
 
 def _to_nearest_point(context: Context,
-                      points: Sequence[Point[Coordinate]],
-                      point: Point[Coordinate]) -> Point[Coordinate]:
+                      points: Sequence[Point[Scalar]],
+                      point: Point[Scalar]) -> Point[Scalar]:
     return min(points,
                key=partial(context.points_squared_distance, point))

@@ -26,8 +26,7 @@ from .compound import (Compound,
                        Linear,
                        Location,
                        Relation)
-from .geometry import (Coordinate,
-                       Geometry)
+from .geometry import Geometry
 from .iterable import non_negative_min
 from .multipoint import Multipoint
 from .packing import pack_mix
@@ -40,7 +39,7 @@ from .utils import (relate_multipoint_to_linear_compound,
 MIN_MULTISEGMENT_SEGMENTS_COUNT = 2
 
 
-class Multisegment(Indexable[Coordinate], Linear[Coordinate]):
+class Multisegment(Indexable[Scalar], Linear[Scalar]):
     __slots__ = ('_locate', '_point_nearest_segment',
                  '_segment_nearest_segment', '_segments', '_segments_set')
 
@@ -62,11 +61,12 @@ class Multisegment(Indexable[Coordinate], Linear[Coordinate]):
                                context=context)
         self._point_nearest_segment, self._segment_nearest_segment = (
             partial(to_point_nearest_segment, context, segments),
-            partial(to_segment_nearest_segment, context, segments))
+            partial(to_segment_nearest_segment, context, segments)
+        )
 
     __repr__ = generate_repr(__init__)
 
-    def __and__(self, other: Compound[Coordinate]) -> Compound[Coordinate]:
+    def __and__(self, other: Compound[Scalar]) -> Compound[Scalar]:
         """
         Returns intersection of the multisegment with the other geometry.
 
@@ -94,7 +94,7 @@ class Multisegment(Indexable[Coordinate], Linear[Coordinate]):
 
     __rand__ = __and__
 
-    def __contains__(self, point: Point[Coordinate]) -> bool:
+    def __contains__(self, point: Point[Scalar]) -> bool:
         """
         Checks if the multisegment contains the point.
 
@@ -115,7 +115,7 @@ class Multisegment(Indexable[Coordinate], Linear[Coordinate]):
         """
         return bool(self.locate(point))
 
-    def __eq__(self, other: 'Multisegment[Coordinate]') -> bool:
+    def __eq__(self, other: 'Multisegment[Scalar]') -> bool:
         """
         Checks if multisegments are equal.
 
@@ -141,7 +141,7 @@ class Multisegment(Indexable[Coordinate], Linear[Coordinate]):
                                  if isinstance(other, Multisegment)
                                  else NotImplemented)
 
-    def __ge__(self, other: Compound[Coordinate]) -> bool:
+    def __ge__(self, other: Compound[Scalar]) -> bool:
         """
         Checks if the multisegment is a superset of the other geometry.
 
@@ -176,7 +176,7 @@ class Multisegment(Indexable[Coordinate], Linear[Coordinate]):
                     if isinstance(other, Compound)
                     else NotImplemented))
 
-    def __gt__(self, other: Compound[Coordinate]) -> bool:
+    def __gt__(self, other: Compound[Scalar]) -> bool:
         """
         Checks if the multisegment is a strict superset of the other geometry.
 
@@ -228,7 +228,7 @@ class Multisegment(Indexable[Coordinate], Linear[Coordinate]):
         """
         return hash(self._segments_set)
 
-    def __le__(self, other: Compound[Coordinate]) -> bool:
+    def __le__(self, other: Compound[Scalar]) -> bool:
         """
         Checks if the multisegment is a subset of the other geometry.
 
@@ -258,7 +258,7 @@ class Multisegment(Indexable[Coordinate], Linear[Coordinate]):
                      if isinstance(other, Linear)
                      else NotImplemented))
 
-    def __lt__(self, other: Compound[Coordinate]) -> bool:
+    def __lt__(self, other: Compound[Scalar]) -> bool:
         """
         Checks if the multisegment is a strict subset of the other geometry.
 
@@ -288,7 +288,7 @@ class Multisegment(Indexable[Coordinate], Linear[Coordinate]):
                      if isinstance(other, Linear)
                      else NotImplemented))
 
-    def __or__(self, other: Compound[Coordinate]) -> Compound[Coordinate]:
+    def __or__(self, other: Compound[Scalar]) -> Compound[Scalar]:
         """
         Returns union of the multisegment with the other geometry.
 
@@ -317,7 +317,7 @@ class Multisegment(Indexable[Coordinate], Linear[Coordinate]):
 
     __ror__ = __or__
 
-    def __rsub__(self, other: Compound[Coordinate]) -> Compound[Coordinate]:
+    def __rsub__(self, other: Compound[Scalar]) -> Compound[Scalar]:
         """
         Returns difference of the other geometry with the multisegment.
 
@@ -333,7 +333,7 @@ class Multisegment(Indexable[Coordinate], Linear[Coordinate]):
                 if isinstance(other, Segment)
                 else NotImplemented)
 
-    def __sub__(self, other: Compound[Coordinate]) -> Compound[Coordinate]:
+    def __sub__(self, other: Compound[Scalar]) -> Compound[Scalar]:
         """
         Returns difference of the multisegment with the other geometry.
 
@@ -360,7 +360,7 @@ class Multisegment(Indexable[Coordinate], Linear[Coordinate]):
                             if isinstance(other, Multisegment)
                             else NotImplemented)))
 
-    def __xor__(self, other: Compound[Coordinate]) -> Compound[Coordinate]:
+    def __xor__(self, other: Compound[Scalar]) -> Compound[Scalar]:
         """
         Returns symmetric difference of the multisegment
         with the other geometry.
@@ -429,7 +429,7 @@ class Multisegment(Indexable[Coordinate], Linear[Coordinate]):
         return self._context.multisegment_length(self)
 
     @property
-    def segments(self) -> Sequence[Segment[Coordinate]]:
+    def segments(self) -> Sequence[Segment[Scalar]]:
         """
         Returns segments of the multisegment.
 
@@ -449,7 +449,7 @@ class Multisegment(Indexable[Coordinate], Linear[Coordinate]):
         """
         return list(self._segments)
 
-    def distance_to(self, other: Geometry[Coordinate]) -> Scalar:
+    def distance_to(self, other: Geometry[Scalar]) -> Scalar:
         """
         Returns distance between the multisegment and the other geometry.
 
@@ -501,7 +501,7 @@ class Multisegment(Indexable[Coordinate], Linear[Coordinate]):
         self._point_nearest_segment = tree.nearest_to_point_segment
         self._segment_nearest_segment = tree.nearest_segment
 
-    def locate(self, point: Point[Coordinate]) -> Location:
+    def locate(self, point: Point[Scalar]) -> Location:
         """
         Finds location of the point relative to the multisegment.
 
@@ -524,7 +524,7 @@ class Multisegment(Indexable[Coordinate], Linear[Coordinate]):
         """
         return self._locate(point)
 
-    def relate(self, other: Compound[Coordinate]) -> Relation:
+    def relate(self, other: Compound[Scalar]) -> Relation:
         """
         Finds relation between the multisegment and the other geometry.
 
@@ -551,8 +551,8 @@ class Multisegment(Indexable[Coordinate], Linear[Coordinate]):
 
     def rotate(self,
                angle: Angle,
-               point: Optional[Point[Coordinate]] = None
-               ) -> 'Multisegment[Coordinate]':
+               point: Optional[Point[Scalar]] = None
+               ) -> 'Multisegment[Scalar]':
         """
         Rotates the multisegment by given angle around given point.
 
@@ -580,8 +580,8 @@ class Multisegment(Indexable[Coordinate], Linear[Coordinate]):
                                                        angle.sine, point))
 
     def scale(self,
-              factor_x: Coordinate,
-              factor_y: Optional[Coordinate] = None) -> Compound[Coordinate]:
+              factor_x: Scalar,
+              factor_y: Optional[Scalar] = None) -> Compound[Scalar]:
         """
         Scales the multisegment by given factor.
 
@@ -603,11 +603,12 @@ class Multisegment(Indexable[Coordinate], Linear[Coordinate]):
         True
         """
         return self._context.scale_multisegment(
-                self, factor_x, factor_x if factor_y is None else factor_y)
+                self, factor_x, factor_x if factor_y is None else factor_y
+        )
 
     def translate(self,
-                  step_x: Coordinate,
-                  step_y: Coordinate) -> 'Multisegment[Coordinate]':
+                  step_x: Scalar,
+                  step_y: Scalar) -> 'Multisegment[Scalar]':
         """
         Translates the multisegment by given step.
 
@@ -659,15 +660,16 @@ class Multisegment(Indexable[Coordinate], Linear[Coordinate]):
                                      context=self._context):
             raise ValueError('Crossing or overlapping segments found.')
 
-    def _distance_to_point(self, other: Point[Coordinate]) -> Scalar:
+    def _distance_to_point(self, other: Point[Scalar]) -> Scalar:
         return self._context.sqrt(self._context.segment_point_squared_distance(
-                self._point_nearest_segment(other), other))
+                self._point_nearest_segment(other), other
+        ))
 
-    def _distance_to_segment(self, other: Segment[Coordinate]) -> Scalar:
+    def _distance_to_segment(self, other: Segment[Scalar]) -> Scalar:
         return self._context.sqrt(self._context.segments_squared_distance(
                 self._segment_nearest_segment(other), other))
 
-    def _unite_with_multipoint(self, other: Multipoint[Coordinate]
-                               ) -> Compound[Coordinate]:
+    def _unite_with_multipoint(self, other: Multipoint[Scalar]
+                               ) -> Compound[Scalar]:
         return pack_mix(other - self, self, self._context.empty,
                         self._context.empty, self._context.mix_cls)

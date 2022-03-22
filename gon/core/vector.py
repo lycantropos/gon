@@ -2,18 +2,18 @@ from typing import (Generic,
                     Optional)
 
 from ground.base import Context
+from ground.hints import Scalar
 from reprit.base import generate_repr
 
 from .angle import (Angle,
                     Kind,
                     Orientation)
-from .geometry import Coordinate
 from .point import Point
 
 
-class Vector(Generic[Coordinate]):
+class Vector(Generic[Scalar]):
     @classmethod
-    def from_position(cls, end: Point[Coordinate]) -> 'Vector[Coordinate]':
+    def from_position(cls, end: Point[Scalar]) -> 'Vector[Scalar]':
         """
         Constructs position vector.
 
@@ -30,7 +30,7 @@ class Vector(Generic[Coordinate]):
         return cls(cls._context.origin, end)
 
     @property
-    def end(self) -> Point[Coordinate]:
+    def end(self) -> Point[Scalar]:
         """
         Returns end of the vector.
 
@@ -47,7 +47,7 @@ class Vector(Generic[Coordinate]):
         return self._end
 
     @property
-    def length(self) -> Coordinate:
+    def length(self) -> Scalar:
         """
         Returns length of the vector.
 
@@ -65,7 +65,7 @@ class Vector(Generic[Coordinate]):
                 self.start, self.end))
 
     @property
-    def start(self) -> Point[Coordinate]:
+    def start(self) -> Point[Scalar]:
         """
         Returns start of the vector.
 
@@ -83,9 +83,7 @@ class Vector(Generic[Coordinate]):
 
     __slots__ = '_start', '_end'
 
-    def __init__(self,
-                 start: Point[Coordinate],
-                 end: Point[Coordinate]) -> None:
+    def __init__(self, start: Point[Scalar], end: Point[Scalar]) -> None:
         """
         Initializes vector.
 
@@ -98,7 +96,7 @@ class Vector(Generic[Coordinate]):
 
     __repr__ = generate_repr(__init__)
 
-    def __add__(self, other: 'Vector[Coordinate]') -> 'Vector[Coordinate]':
+    def __add__(self, other: 'Vector[Scalar]') -> 'Vector[Scalar]':
         """
         Returns sum of the vector with the other.
 
@@ -133,7 +131,7 @@ class Vector(Generic[Coordinate]):
         """
         return self.start != self.end
 
-    def __eq__(self, other: 'Vector[Coordinate]') -> bool:
+    def __eq__(self, other: 'Vector[Scalar]') -> bool:
         """
         Checks if the vector is equal to the other.
 
@@ -168,7 +166,7 @@ class Vector(Generic[Coordinate]):
         """
         return hash(_sub_points(self.end, self.start))
 
-    def __mul__(self, factor: Coordinate) -> 'Vector[Coordinate]':
+    def __mul__(self, factor: Scalar) -> 'Vector[Scalar]':
         """
         Scales the vector by given factor.
 
@@ -184,7 +182,7 @@ class Vector(Generic[Coordinate]):
         """
         return type(self)(self.start.scale(factor), self.end.scale(factor))
 
-    def __neg__(self) -> 'Vector[Coordinate]':
+    def __neg__(self) -> 'Vector[Scalar]':
         """
         Returns the vector negated.
 
@@ -200,7 +198,7 @@ class Vector(Generic[Coordinate]):
         """
         return type(self)(self.end, self.start)
 
-    def __pos__(self) -> 'Vector[Coordinate]':
+    def __pos__(self) -> 'Vector[Scalar]':
         """
         Returns the vector positive.
 
@@ -218,7 +216,7 @@ class Vector(Generic[Coordinate]):
 
     __rmul__ = __mul__
 
-    def __sub__(self, other: 'Vector[Coordinate]') -> 'Vector':
+    def __sub__(self, other: 'Vector[Scalar]') -> 'Vector':
         """
         Returns difference of the vector with the other.
 
@@ -235,7 +233,7 @@ class Vector(Generic[Coordinate]):
         return type(self)(_sub_points(self.start, other.start),
                           _sub_points(self.end, other.end))
 
-    def cross(self, other: 'Vector[Coordinate]') -> Coordinate:
+    def cross(self, other: 'Vector[Scalar]') -> Scalar:
         """
         Returns cross product of the vector with the other.
 
@@ -252,7 +250,7 @@ class Vector(Generic[Coordinate]):
         return self._context.cross_product(self.start, self.end, other.start,
                                            other.end)
 
-    def dot(self, other: 'Vector[Coordinate]') -> Coordinate:
+    def dot(self, other: 'Vector[Scalar]') -> Scalar:
         """
         Returns dot product of the vector with the other.
 
@@ -269,7 +267,7 @@ class Vector(Generic[Coordinate]):
         return self._context.dot_product(self.start, self.end, other.start,
                                          other.end)
 
-    def kind_of(self, point: Point[Coordinate]) -> Kind:
+    def kind_of(self, point: Point[Scalar]) -> Kind:
         """
         Returns kind of angle formed by the vector and given point.
 
@@ -285,7 +283,7 @@ class Vector(Generic[Coordinate]):
         """
         return self._context.angle_kind(self.start, self.end, point)
 
-    def orientation_of(self, point: Point[Coordinate]) -> Orientation:
+    def orientation_of(self, point: Point[Scalar]) -> Orientation:
         """
         Returns orientation of angle formed by the vector and given point.
 
@@ -303,8 +301,7 @@ class Vector(Generic[Coordinate]):
 
     def rotate(self,
                angle: Angle,
-               point: Optional['Point[Coordinate]'] = None
-               ) -> 'Vector[Coordinate]':
+               point: Optional['Point[Scalar]'] = None) -> 'Vector[Scalar]':
         """
         Rotates the vector by given angle around given point.
 
@@ -344,11 +341,10 @@ class Vector(Generic[Coordinate]):
     _context = ...  # type: Context
 
 
-def _add_points(first: Point[Coordinate],
-                second: Point[Coordinate]) -> Point[Coordinate]:
+def _add_points(first: Point[Scalar], second: Point[Scalar]) -> Point[Scalar]:
     return first.translate(second.x, second.y)
 
 
-def _sub_points(minuend: Point[Coordinate],
-                subtrahend: Point[Coordinate]) -> Point[Coordinate]:
+def _sub_points(minuend: Point[Scalar],
+                subtrahend: Point[Scalar]) -> Point[Scalar]:
     return minuend.translate(-subtrahend.x, -subtrahend.y)
