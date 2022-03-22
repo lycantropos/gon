@@ -89,10 +89,14 @@ pool:
   vmImage: $(image)
 
 steps:
-  - task: UsePythonVersion@0
-    inputs:
-      versionSpec: '$(python.version)'
-      architecture: '$(python.architecture)'
+  - ${{ if ne(variables['python.version'], 'pypy3') }}:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '$(python.version)'
+        architecture: '$(python.architecture)'
+  - ${{ if eq(variables['python.version'], 'pypy3') }}:
+    - bash: echo "alias python='pypy3'" >> ~/.bashrc
+      displayName: 'Set PyPy for Python'
   - bash: python -m pip install --upgrade pip setuptools
     displayName: 'Install packaging tools'
   - bash: python -m pip install -r requirements.txt
