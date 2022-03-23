@@ -94,7 +94,7 @@ steps:
       versionSpec: '$(python.version)'
       architecture: '$(python.architecture)'
     condition: ne(variables['python.version'], 'pypy3')
-  - bash: alias python='pypy3'
+  - bash: pypy3 -m venv venv && echo '##vso[task.prependpath]$(PWD)/venv/bin' && echo '##vso[task.prependpath]$(PWD)/venv/Scripts'
     displayName: 'Set PyPy for Python'
     condition: eq(variables['python.version'], 'pypy3')
   - bash: python -m pip install --upgrade pip setuptools
