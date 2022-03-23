@@ -89,14 +89,14 @@ pool:
   vmImage: $(image)
 
 steps:
-  - ${{ if ne(variables['python.version'], 'pypy3') }}:
-    - task: UsePythonVersion@0
-      inputs:
-        versionSpec: '$(python.version)'
-        architecture: '$(python.architecture)'
-  - ${{ if eq(variables['python.version'], 'pypy3') }}:
-    - bash: echo "alias python='pypy3'" >> ~/.bashrc
-      displayName: 'Set PyPy for Python'
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: '$(python.version)'
+      architecture: '$(python.architecture)'
+    condition: ne(variables['python.version'], 'pypy3')
+  - bash: echo "alias python='pypy3'" >> ~/.bashrc
+    displayName: 'Set PyPy for Python'
+    condition: eq(variables['python.version'], 'pypy3')
   - bash: python -m pip install --upgrade pip setuptools
     displayName: 'Install packaging tools'
   - bash: python -m pip install -r requirements.txt
@@ -116,18 +116,18 @@ steps:
     displayName: 'Upload coverage'
     env:
       CODECOV_TOKEN: $(CODECOV_TOKEN)
-  - ${{ if and(eq(variables['python.version'], '3.7'), startsWith(variables['Build.SourceBranch'], 'refs/tags/')) }}:
+  - ${{ if startsWith(variables['Build.SourceBranch'], 'refs/tags/') }}:
     - bash: python -m pip install --upgrade wheel
-      condition: succeeded()
+      condition: and(eq(variables['python.version'], '3.7'), succeeded())
       displayName: 'Install build dependencies'
     - bash: python setup.py sdist bdist_wheel
-      condition: succeeded()
+      condition: and(eq(variables['python.version'], '3.7'), succeeded())
       displayName: 'Build'
     - bash: python -m pip install --upgrade twine
-      condition: succeeded()
+      condition: and(eq(variables['python.version'], '3.7'), succeeded())
       displayName: 'Install deploy dependencies'
     - bash: twine upload --skip-existing dist/*
-      condition: succeeded()
+      condition: and(eq(variables['python.version'], '3.7'), succeeded())
       displayName: 'Deploy'
       env:
         TWINE_USERNAME: __token__
