@@ -94,7 +94,7 @@ steps:
       versionSpec: '$(python.version)'
       architecture: '$(python.architecture)'
     condition: ne(variables['python.version'], 'pypy3')
-  - bash: echo "alias python='pypy3'" >> ~/.bashrc
+  - bash: alias python='pypy3'
     displayName: 'Set PyPy for Python'
     condition: eq(variables['python.version'], 'pypy3')
   - bash: python -m pip install --upgrade pip setuptools
