@@ -47,7 +47,6 @@ jobs:
   pre-deploy:
     name: Pre-Deploy
     runs-on: ubuntu-latest
-    needs: check
     if: github.event_name == 'push' && contains(github.ref, 'refs/tags/')
     steps:
       - name: '_'
