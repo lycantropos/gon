@@ -162,10 +162,12 @@ class Point(Geometry[Scalar]):
         >>> point.distance_to(point) == 0
         True
         """
-        return (self._context.sqrt(self._context.points_squared_distance(
-                self, other))
-                if isinstance(other, Point)
-                else other.distance_to(self))
+        if isinstance(other, Point):
+            return self._context.sqrt(self._context.points_squared_distance(
+                    self, other
+            ))
+        else:
+            return other.distance_to(self)
 
     def rotate(self,
                angle: Angle,

@@ -33,7 +33,8 @@ class Angle(Generic[Scalar]):
         context = cls._context
         squared_lengths_product = (
                 context.points_squared_distance(vertex, first_ray_point)
-                * context.points_squared_distance(vertex, second_ray_point))
+                * context.points_squared_distance(vertex, second_ray_point)
+        )
         if not squared_lengths_product:
             return cls(1, 0)
         lengths_product_inverted = 1 / context.sqrt(squared_lengths_product)

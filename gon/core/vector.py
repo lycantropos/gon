@@ -62,7 +62,8 @@ class Vector(Generic[Scalar]):
         True
         """
         return self._context.sqrt(self._context.points_squared_distance(
-                self.start, self.end))
+                self.start, self.end
+        ))
 
     @property
     def start(self) -> Point[Scalar]:

@@ -420,21 +420,24 @@ class Segment(Compound[Scalar], Linear[Scalar]):
         >>> segment.distance_to(segment) == 0
         True
         """
-        return (
-            self._context.sqrt(self._context.segment_point_squared_distance(
-                    self, other))
-            if isinstance(other, Point)
-            else
-            (non_negative_min(
+        if isinstance(other, Point):
+            return self._context.sqrt(
+                    self._context.segment_point_squared_distance(self, other)
+            )
+        elif isinstance(other, Multipoint):
+            return non_negative_min(
                     self._context.sqrt(
                             self._context.segment_point_squared_distance(
-                                    self, point))
-                    for point in other.points)
-             if isinstance(other, Multipoint)
-             else (self._context.sqrt(
-                    self._context.segments_squared_distance(self, other))
-                   if isinstance(other, Segment)
-                   else other.distance_to(self))))
+                                    self, point
+                            ))
+                    for point in other.points
+            )
+        elif isinstance(other, Segment):
+            return self._context.sqrt(
+                    self._context.segments_squared_distance(self, other)
+            )
+        else:
+            return other.distance_to(self)
 
     def locate(self, point: Point[Scalar]) -> Location:
         """

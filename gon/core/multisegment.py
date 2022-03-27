@@ -83,14 +83,16 @@ class Multisegment(Indexable[Scalar], Linear[Scalar]):
         >>> multisegment & multisegment == multisegment
         True
         """
-        return (complete_intersect_segment_with_multisegment(
-                other, self,
-                context=self._context)
-                if isinstance(other, Segment)
-                else (complete_intersect_multisegments(self, other,
-                                                       context=self._context)
-                      if isinstance(other, Multisegment)
-                      else NotImplemented))
+        if isinstance(other, Segment):
+            return complete_intersect_segment_with_multisegment(
+                    other, self,
+                    context=self._context
+            )
+        else:
+            return (complete_intersect_multisegments(self, other,
+                                                     context=self._context)
+                    if isinstance(other, Multisegment)
+                    else NotImplemented)
 
     __rand__ = __and__
 
@@ -378,17 +380,18 @@ class Multisegment(Indexable[Scalar], Linear[Scalar]):
         >>> multisegment ^ multisegment is EMPTY
         True
         """
-        return (self._unite_with_multipoint(other)
-                if isinstance(other, Multipoint)
-                else
-                (symmetric_subtract_multisegment_from_segment(
-                        other, self,
-                        context=self._context)
-                 if isinstance(other, Segment)
-                 else (symmetric_subtract_multisegments(self, other,
-                                                        context=self._context)
-                       if isinstance(other, Multisegment)
-                       else NotImplemented)))
+        if isinstance(other, Multipoint):
+            return self._unite_with_multipoint(other)
+        elif isinstance(other, Segment):
+            return symmetric_subtract_multisegment_from_segment(
+                    other, self,
+                    context=self._context
+            )
+        else:
+            return (symmetric_subtract_multisegments(self, other,
+                                                     context=self._context)
+                    if isinstance(other, Multisegment)
+                    else NotImplemented)
 
     __rxor__ = __xor__
 
@@ -573,11 +576,13 @@ class Multisegment(Indexable[Scalar], Linear[Scalar]):
         ...                   Segment(Point(1, 0), Point(1, 1))]))
         True
         """
-        return (self._context.rotate_multisegment_around_origin(
-                self, angle.cosine, angle.sine)
-                if point is None
-                else self._context.rotate_multisegment(self, angle.cosine,
-                                                       angle.sine, point))
+        if point is None:
+            return self._context.rotate_multisegment_around_origin(
+                    self, angle.cosine, angle.sine
+            )
+        else:
+            return self._context.rotate_multisegment(self, angle.cosine,
+                                                     angle.sine, point)
 
     def scale(self,
               factor_x: Scalar,
@@ -667,7 +672,8 @@ class Multisegment(Indexable[Scalar], Linear[Scalar]):
 
     def _distance_to_segment(self, other: Segment[Scalar]) -> Scalar:
         return self._context.sqrt(self._context.segments_squared_distance(
-                self._segment_nearest_segment(other), other))
+                self._segment_nearest_segment(other), other
+        ))
 
     def _unite_with_multipoint(self, other: Multipoint[Scalar]
                                ) -> Compound[Scalar]:
