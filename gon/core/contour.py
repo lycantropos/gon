@@ -90,14 +90,16 @@ class Contour(Indexable[Scalar], Linear[Scalar]):
         ...                   Segment(Point(0, 1), Point(0, 0))]))
         True
         """
-        return (complete_intersect_segment_with_multisegment(
-                other, self,
-                context=self._context)
-                if isinstance(other, Segment)
-                else (complete_intersect_multisegments(self, other,
-                                                       context=self._context)
-                      if isinstance(other, Linear)
-                      else NotImplemented))
+        if isinstance(other, Segment):
+            return complete_intersect_segment_with_multisegment(
+                    other, self,
+                    context=self._context
+            )
+        else:
+            return (complete_intersect_multisegments(self, other,
+                                                     context=self._context)
+                    if isinstance(other, Linear)
+                    else NotImplemented)
 
     __rand__ = __and__
 
@@ -466,7 +468,8 @@ class Contour(Indexable[Scalar], Linear[Scalar]):
         vertices, min_index = self._vertices, self._min_index
         return self._context.angle_orientation(
                 vertices[min_index - 1], vertices[min_index],
-                vertices[(min_index + 1) % len(vertices)])
+                vertices[(min_index + 1) % len(vertices)]
+        )
 
     @property
     def vertices(self) -> Sequence[Point[Scalar]]:
@@ -598,7 +601,8 @@ class Contour(Indexable[Scalar], Linear[Scalar]):
         True
         """
         return self._context.contour_cls(
-                _vertices.rotate_positions(self._vertices))
+                _vertices.rotate_positions(self._vertices)
+        )
 
     def rotate(self,
                angle: Angle,
@@ -649,7 +653,8 @@ class Contour(Indexable[Scalar], Linear[Scalar]):
         True
         """
         return self._context.scale_contour(
-                self, factor_x, factor_x if factor_y is None else factor_y)
+                self, factor_x, factor_x if factor_y is None else factor_y
+        )
 
     def to_clockwise(self) -> 'Contour[Scalar]':
         """
@@ -760,7 +765,8 @@ class Contour(Indexable[Scalar], Linear[Scalar]):
 
     def _distance_to_segment(self, other: Segment[Scalar]) -> Scalar:
         return self._context.sqrt(self._context.segments_squared_distance(
-                self._segment_nearest_segment(other), other))
+                self._segment_nearest_segment(other), other
+        ))
 
     def _unite_with_multipoint(self, other: Multipoint[Scalar]
                                ) -> Compound[Scalar]:

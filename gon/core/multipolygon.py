@@ -111,20 +111,22 @@ class Multipolygon(Indexable[Scalar], Shaped[Scalar]):
         >>> multipolygon & multipolygon == multipolygon
         True
         """
-        return (complete_intersect_segment_with_multipolygon(
-                other, self,
-                context=self._context)
-                if isinstance(other, Segment)
-                else
-                (complete_intersect_multisegment_with_multipolygon(
-                        other, self,
-                        context=self._context)
-                 if isinstance(other, Linear)
-                 else (self._intersect_with_polygon(other)
-                       if isinstance(other, Polygon)
-                       else (self._intersect_with_multipolygon(other)
-                             if isinstance(other, Multipolygon)
-                             else NotImplemented))))
+        if isinstance(other, Segment):
+            return complete_intersect_segment_with_multipolygon(
+                    other, self,
+                    context=self._context
+            )
+        elif isinstance(other, Linear):
+            return complete_intersect_multisegment_with_multipolygon(
+                    other, self,
+                    context=self._context
+            )
+        else:
+            return (self._intersect_with_polygon(other)
+                    if isinstance(other, Polygon)
+                    else (self._intersect_with_multipolygon(other)
+                          if isinstance(other, Multipolygon)
+                          else NotImplemented))
 
     __rand__ = __and__
 
@@ -537,27 +539,28 @@ class Multipolygon(Indexable[Scalar], Shaped[Scalar]):
         >>> multipolygon ^ multipolygon is EMPTY
         True
         """
-        return (self._unite_with_multipoint(other)
-                if isinstance(other, Multipoint)
-                else
-                (symmetric_subtract_multipolygon_from_segment(
-                        other, self,
-                        context=self._context)
-                 if isinstance(other, Segment)
-                 else (symmetric_subtract_multipolygon_from_multisegment(
-                        other, self,
-                        context=self._context)
-                       if isinstance(other, Linear)
-                       else
-                       (symmetric_subtract_multipolygon_from_polygon(
-                               other, self,
-                               context=self._context)
-                        if isinstance(other, Polygon)
-                        else (symmetric_subtract_multipolygons(
-                               self, other,
-                               context=self._context)
-                              if isinstance(other, Multipolygon)
-                              else NotImplemented)))))
+        if isinstance(other, Multipoint):
+            return self._unite_with_multipoint(other)
+        elif isinstance(other, Segment):
+            return symmetric_subtract_multipolygon_from_segment(
+                    other, self,
+                    context=self._context
+            )
+        elif isinstance(other, Linear):
+            return symmetric_subtract_multipolygon_from_multisegment(
+                    other, self,
+                    context=self._context
+            )
+        elif isinstance(other, Polygon):
+            return symmetric_subtract_multipolygon_from_polygon(
+                    other, self,
+                    context=self._context
+            )
+        else:
+            return (symmetric_subtract_multipolygons(self, other,
+                                                     context=self._context)
+                    if isinstance(other, Multipolygon)
+                    else NotImplemented)
 
     __rxor__ = __xor__
 
@@ -930,11 +933,13 @@ class Multipolygon(Indexable[Scalar], Shaped[Scalar]):
         ...                            Point(-6, 8), Point(-4, 8)])])]))
         True
         """
-        return (self._context.rotate_multipolygon_around_origin(
-                self, angle.cosine, angle.sine)
-                if point is None
-                else self._context.rotate_multipolygon(self, angle.cosine,
-                                                       angle.sine, point))
+        if point is None:
+            return self._context.rotate_multipolygon_around_origin(
+                    self, angle.cosine, angle.sine
+            )
+        else:
+            return self._context.rotate_multipolygon(self, angle.cosine,
+                                                     angle.sine, point)
 
     def scale(self,
               factor_x: Scalar,
@@ -1070,7 +1075,8 @@ class Multipolygon(Indexable[Scalar], Shaped[Scalar]):
             polygon.validate()
         if segments_cross_or_overlap(
                 list(flatten(polygon.edges for polygon in self.polygons)),
-                context=self._context):
+                context=self._context
+        ):
             raise ValueError('Polygons should only touch each other '
                              'in discrete number of points.')
 
@@ -1097,13 +1103,16 @@ class Multipolygon(Indexable[Scalar], Shaped[Scalar]):
 
     def _intersect_with_polygon(self, other: Polygon[Scalar]
                                 ) -> Compound[Scalar]:
-        return (complete_intersect_polygon_with_multipolygon(
-                other, self,
-                context=self._context)
-                if _multipolygon_has_holes(self) or other.holes
-                else complete_intersect_region_with_multiregion(
-                other.border, self._as_multiregion(),
-                context=self._context))
+        if _multipolygon_has_holes(self) or other.holes:
+            return complete_intersect_polygon_with_multipolygon(
+                    other, self,
+                    context=self._context
+            )
+        else:
+            return complete_intersect_region_with_multiregion(
+                    other.border, self._as_multiregion(),
+                    context=self._context
+            )
 
     def _unite_with_multipoint(self, other: Multipoint[Scalar]
                                ) -> Compound[Scalar]:
@@ -1117,7 +1126,8 @@ def _locate_point_in_indexed_polygons(polygons: Sequence[Polygon],
                                       point: Point,
                                       context: Context) -> Location:
     candidates_indices = tree.find_supersets_indices(
-            context.box_cls(point.x, point.x, point.y, point.y))
+            context.box_cls(point.x, point.x, point.y, point.y)
+    )
     for candidate_index in candidates_indices:
         location = polygons[candidate_index].locate(point)
         if location is not Location.EXTERIOR:

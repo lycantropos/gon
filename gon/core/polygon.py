@@ -84,7 +84,8 @@ class Polygon(Indexable[Scalar], Shaped[Scalar]):
         edges = self.edges
         self._point_nearest_edge, self._segment_nearest_edge = (
             partial(to_point_nearest_segment, context, edges),
-            partial(to_segment_nearest_segment, context, edges))
+            partial(to_segment_nearest_segment, context, edges)
+        )
 
     __repr__ = generate_repr(__init__)
 
@@ -113,22 +114,25 @@ class Polygon(Indexable[Scalar], Shaped[Scalar]):
         >>> polygon & polygon == polygon
         True
         """
-        return (complete_intersect_segment_with_polygon(other, self,
-                                                        context=self._context)
-                if isinstance(other, Segment)
-                else
-                (complete_intersect_multisegment_with_polygon(
-                        other, self,
-                        context=self._context)
-                 if isinstance(other, Linear)
-                 else ((complete_intersect_polygons(self, other,
-                                                    context=self._context)
-                        if self.holes or other.holes
-                        else complete_intersect_regions(self.border,
-                                                        other.border,
-                                                        context=self._context))
-                       if isinstance(other, Polygon)
-                       else NotImplemented)))
+        if isinstance(other, Segment):
+            return complete_intersect_segment_with_polygon(
+                    other, self,
+                    context=self._context
+            )
+        elif isinstance(other, Linear):
+            return complete_intersect_multisegment_with_polygon(
+                    other, self,
+                    context=self._context
+            )
+        else:
+            return ((complete_intersect_polygons(self, other,
+                                                 context=self._context)
+                     if self.holes or other.holes
+                     else complete_intersect_regions(self.border,
+                                                     other.border,
+                                                     context=self._context))
+                    if isinstance(other, Polygon)
+                    else NotImplemented)
 
     __rand__ = __and__
 
@@ -486,21 +490,23 @@ class Polygon(Indexable[Scalar], Shaped[Scalar]):
         >>> polygon ^ polygon is EMPTY
         True
         """
-        return (self._unite_with_multipoint(other)
-                if isinstance(other, Multipoint)
-                else
-                (symmetric_subtract_polygon_from_segment(other, self,
-                                                         context=self._context)
-                 if isinstance(other, Segment)
-                 else
-                 (symmetric_subtract_polygon_from_multisegment(
-                         other, self,
-                         context=self._context)
-                  if isinstance(other, Linear)
-                  else (symmetric_subtract_polygons(self, other,
-                                                    context=self._context)
-                        if isinstance(other, Polygon)
-                        else NotImplemented))))
+        if isinstance(other, Multipoint):
+            return self._unite_with_multipoint(other)
+        elif isinstance(other, Segment):
+            return symmetric_subtract_polygon_from_segment(
+                    other, self,
+                    context=self._context
+            )
+        elif isinstance(other, Linear):
+            return symmetric_subtract_polygon_from_multisegment(
+                    other, self,
+                    context=self._context
+            )
+        else:
+            return (symmetric_subtract_polygons(self, other,
+                                                context=self._context)
+                    if isinstance(other, Polygon)
+                    else NotImplemented)
 
     __rxor__ = __xor__
 
@@ -607,14 +613,14 @@ class Polygon(Indexable[Scalar], Shaped[Scalar]):
         >>> polygon.convex_hull == Polygon(polygon.border, [])
         True
         """
-        context = self._context
-        return (self
-                if self.is_convex
-                else
-                context.polygon_cls(
-                        context.contour_cls(context.points_convex_hull(
-                                self.border.vertices)),
-                        []))
+        if self.is_convex:
+            return self
+        else:
+            context = self._context
+            border = context.contour_cls(context.points_convex_hull(
+                    self.border.vertices
+            ))
+            return context.polygon_cls(border, [])
 
     @property
     def edges(self) -> Sequence[Segment]:
@@ -948,7 +954,8 @@ class Polygon(Indexable[Scalar], Shaped[Scalar]):
         True
         """
         return self._context.scale_polygon(
-                self, factor_x, factor_x if factor_y is None else factor_y)
+                self, factor_x, factor_x if factor_y is None else factor_y
+        )
 
     def translate(self, step_x: Scalar, step_y: Scalar) -> 'Polygon[Scalar]':
         """
@@ -1056,11 +1063,14 @@ class Polygon(Indexable[Scalar], Shaped[Scalar]):
                 subtract_multipolygon_from_polygon(
                         context.polygon_cls(self.border, []),
                         context.multipolygon_cls([context.polygon_cls(hole, [])
-                                                  for hole in self.holes]))
+                                                  for hole in self.holes])
+                )
                 if len(self.holes) > 1
                 else subtract_polygons(
                         context.polygon_cls(self.border, []),
-                        context.polygon_cls(self.holes[0], [])))
+                        context.polygon_cls(self.holes[0], [])
+                )
+            )
             if border_minus_holes != self:
                 raise ValueError('Holes should not tear polygon apart.')
 
@@ -1068,7 +1078,8 @@ class Polygon(Indexable[Scalar], Shaped[Scalar]):
         return self._context.sqrt(
                 self._squared_distance_to_exterior_point(other)
                 if self._locate(other) is Location.EXTERIOR
-                else 0)
+                else 0
+        )
 
     def _distance_to_segment(self, other: Segment) -> Scalar:
         return (self._linear_distance_to_segment(other)
@@ -1078,11 +1089,13 @@ class Polygon(Indexable[Scalar], Shaped[Scalar]):
 
     def _linear_distance_to_segment(self, other: Segment) -> Scalar:
         return self._context.segments_squared_distance(
-                self._segment_nearest_edge(other), other)
+                self._segment_nearest_edge(other), other
+        )
 
     def _squared_distance_to_exterior_point(self, other: Point) -> Scalar:
         return self._context.segment_point_squared_distance(
-                self._point_nearest_edge(other), other)
+                self._point_nearest_edge(other), other
+        )
 
     def _unite_with_multipoint(self, other: Multipoint) -> Compound:
         return pack_mix(other - self, self._context.empty, self,

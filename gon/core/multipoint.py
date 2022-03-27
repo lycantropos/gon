@@ -418,11 +418,13 @@ class Multipoint(Indexable[Scalar]):
         ...  == Multipoint([Point(2, 0), Point(2, 1), Point(1, 0)]))
         True
         """
-        return (self._context.rotate_multipoint_around_origin(
-                self, angle.cosine, angle.sine)
-                if point is None
-                else self._context.rotate_multipoint(self, angle.cosine,
-                                                     angle.sine, point))
+        if point is None:
+            return self._context.rotate_multipoint_around_origin(
+                    self, angle.cosine, angle.sine
+            )
+        else:
+            return self._context.rotate_multipoint(self, angle.cosine,
+                                                   angle.sine, point)
 
     def scale(self,
               factor_x: Scalar,

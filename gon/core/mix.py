@@ -35,7 +35,8 @@ class Mix(Indexable[Scalar]):
             ``O(1)``
         """
         self._components = self._discrete, self._linear, self._shaped = (
-            discrete, linear, shaped)
+            discrete, linear, shaped
+        )
 
     __repr__ = generate_repr(__init__)
 
@@ -1198,7 +1199,8 @@ class Mix(Indexable[Scalar]):
                       if factor_x or factor_y
                       else
                       self._context.multipoint_cls(
-                              [self._context.point_cls(factor_x, factor_y)])))
+                              [self._context.point_cls(factor_x, factor_y)]
+                      )))
 
     def translate(self, step_x: Scalar, step_y: Scalar) -> 'Mix[Scalar]':
         """
@@ -1326,7 +1328,8 @@ class Mix(Indexable[Scalar]):
                               self.shaped.polygons
                               if isinstance(self.shaped,
                                             self._context.multipolygon_cls)
-                              else [self.shaped]))):
+                              else [self.shaped]
+                      ))):
             raise ValueError('Linear component should not overlap '
                              'shaped component borders.')
 
@@ -1524,7 +1527,8 @@ class Mix(Indexable[Scalar]):
                                 else Relation.TOUCH)
                     else:
                         other_discrete_relation = self._relate_discrete(
-                                other.discrete)
+                                other.discrete
+                        )
                         if other_discrete_relation is Relation.CROSS:
                             return other_discrete_relation
                         elif (other_discrete_relation is Relation.ENCLOSED
@@ -1546,7 +1550,8 @@ class Mix(Indexable[Scalar]):
                     return Relation.CROSS
                 else:
                     other_discrete_relation = self._relate_discrete(
-                            other.discrete)
+                            other.discrete
+                    )
                     if other_discrete_relation is Relation.CROSS:
                         return other_discrete_relation
                     elif (other_discrete_relation is Relation.ENCLOSED
@@ -1560,7 +1565,8 @@ class Mix(Indexable[Scalar]):
                                 else Relation.TOUCH)
                     else:
                         discrete_relation = other._relate_discrete(
-                                self.discrete)
+                                self.discrete
+                        )
                         if discrete_relation is Relation.CROSS:
                             return discrete_relation
                         elif (discrete_relation is Relation.ENCLOSED
@@ -1589,7 +1595,8 @@ class Mix(Indexable[Scalar]):
                         return Relation.CROSS
                     elif self.discrete is self._context.empty:
                         other_discrete_relation = self._relate_discrete(
-                                other.discrete)
+                                other.discrete
+                        )
                         return (other_discrete_relation
                                 if other_discrete_relation is Relation.CROSS
                                 else
@@ -1606,7 +1613,8 @@ class Mix(Indexable[Scalar]):
                                        else Relation.TOUCH)))
                     elif other.discrete is self._context.empty:
                         discrete_relation = other._relate_discrete(
-                                self.discrete)
+                                self.discrete
+                        )
                         return (discrete_relation
                                 if discrete_relation is Relation.CROSS
                                 else
@@ -1621,7 +1629,8 @@ class Mix(Indexable[Scalar]):
                                        else Relation.TOUCH)))
                     else:
                         other_discrete_relation = self._relate_discrete(
-                                other.discrete)
+                                other.discrete
+                        )
                         if other_discrete_relation is Relation.CROSS:
                             return other_discrete_relation
                         elif (other_discrete_relation is Relation.ENCLOSED
@@ -1629,7 +1638,8 @@ class Mix(Indexable[Scalar]):
                             return Relation.CROSS
                         else:
                             discrete_relation = other._relate_discrete(
-                                    self.discrete)
+                                    self.discrete
+                            )
                             return (discrete_relation
                                     if discrete_relation is Relation.CROSS
                                     else (Relation.CROSS
@@ -1665,7 +1675,8 @@ class Mix(Indexable[Scalar]):
                         return shaped_components_relation
                     else:
                         discrete_relation = other._relate_discrete(
-                                self.discrete).complement
+                                self.discrete
+                        ).complement
                         return (shaped_components_relation
                                 if (discrete_relation
                                     is shaped_components_relation)
@@ -1682,7 +1693,8 @@ class Mix(Indexable[Scalar]):
                         return Relation.ENCLOSES
                     else:
                         discrete_relation = other._relate_discrete(
-                                self.discrete).complement
+                                self.discrete
+                        ).complement
                         return (Relation.ENCLOSES
                                 if discrete_relation in (Relation.COVER,
                                                          Relation.ENCLOSES,
@@ -1694,7 +1706,8 @@ class Mix(Indexable[Scalar]):
             linear_components_relation = self.linear.relate(other.linear)
             if self.linear is other.linear is self._context.empty:
                 discrete_components_relation = self.discrete.relate(
-                        other.discrete)
+                        other.discrete
+                )
                 return (
                     shaped_components_relation
                     if (self.discrete is other.discrete is self._context.empty
@@ -1703,35 +1716,43 @@ class Mix(Indexable[Scalar]):
                     (discrete_components_relation
                      if (discrete_components_relation is Relation.COMPOSITE
                          or discrete_components_relation is Relation.COMPONENT)
-                     else Relation.OVERLAP))
+                     else Relation.OVERLAP)
+                )
             elif self.linear is self._context.empty:
                 discrete_components_relation = other._relate_discrete(
-                        self.discrete)
+                        self.discrete
+                )
                 return (
                     Relation.COMPOSITE
                     if (discrete_components_relation is Relation.EQUAL
                         or discrete_components_relation is Relation.COMPONENT)
-                    else Relation.OVERLAP)
+                    else Relation.OVERLAP
+                )
             elif other.linear is self._context.empty:
                 discrete_components_relation = self._relate_discrete(
-                        other.discrete)
+                        other.discrete
+                )
                 return (
                     Relation.COMPONENT
                     if (discrete_components_relation is Relation.EQUAL
                         or discrete_components_relation is Relation.COMPONENT)
-                    else Relation.OVERLAP)
+                    else Relation.OVERLAP
+                )
             elif linear_components_relation is Relation.COMPOSITE:
                 discrete_components_relation = other._relate_discrete(
-                        self.discrete)
+                        self.discrete
+                )
                 return (
                     linear_components_relation
                     if (self.discrete is self._context.empty
                         or discrete_components_relation is Relation.EQUAL
                         or discrete_components_relation is Relation.COMPONENT)
-                    else Relation.OVERLAP)
+                    else Relation.OVERLAP
+                )
             elif linear_components_relation is Relation.EQUAL:
                 discrete_components_relation = self.discrete.relate(
-                        other.discrete)
+                        other.discrete
+                )
                 return (
                     shaped_components_relation
                     if (self.discrete is other.discrete is self._context.empty
@@ -1747,16 +1768,19 @@ class Mix(Indexable[Scalar]):
                        if
                        (discrete_components_relation is Relation.COMPONENT
                         or discrete_components_relation is Relation.COMPOSITE)
-                       else Relation.OVERLAP))))
+                       else Relation.OVERLAP)))
+                )
             elif linear_components_relation is Relation.COMPONENT:
                 discrete_components_relation = self._relate_discrete(
-                        other.discrete)
+                        other.discrete
+                )
                 return (
                     linear_components_relation
                     if (other.discrete is self._context.empty
                         or discrete_components_relation is Relation.EQUAL
                         or discrete_components_relation is Relation.COMPONENT)
-                    else Relation.OVERLAP)
+                    else Relation.OVERLAP
+                )
             else:
                 return Relation.OVERLAP
         elif shaped_components_relation in (Relation.COMPONENT,
@@ -1778,7 +1802,8 @@ class Mix(Indexable[Scalar]):
                         return shaped_components_relation
                     else:
                         discrete_relation = self._relate_discrete(
-                                other.discrete)
+                                other.discrete
+                        )
                         return (shaped_components_relation
                                 if (discrete_relation
                                     is shaped_components_relation)
@@ -1795,7 +1820,8 @@ class Mix(Indexable[Scalar]):
                         return Relation.ENCLOSED
                     else:
                         discrete_relation = self._relate_discrete(
-                                other.discrete)
+                                other.discrete
+                        )
                         return (Relation.ENCLOSED
                                 if discrete_relation in (Relation.COMPONENT,
                                                          Relation.ENCLOSED,
