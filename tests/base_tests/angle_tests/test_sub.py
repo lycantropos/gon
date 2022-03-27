@@ -41,7 +41,9 @@ def test_third(zero_angle_with_angle
 def test_commutative_case(angles_pair: Tuple[Angle, Angle]) -> None:
     first, second = angles_pair
 
-    assert equivalence(first - second == second - first, first == second)
+    assert equivalence(first - second == second - first,
+                       (first.sine * second.cosine
+                        == second.sine * first.cosine))
 
 
 @given(strategies.angles_pairs)
