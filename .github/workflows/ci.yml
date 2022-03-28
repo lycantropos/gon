@@ -45,6 +45,7 @@ jobs:
         with:
           fail_ci_if_error: false
         uses: codecov/codecov-action@v2.1.0
+        continue-on-error: true
 
   pre-deploy:
     name: 'Pre-deploy'
