@@ -1,7 +1,7 @@
 gon
 ===
 
-[![](https://dev.azure.com/lycantropos/gon/_apis/build/status/lycantropos.gon?branchName=master)](https://dev.azure.com/lycantropos/gon/_build/latest?definitionId=9&branchName=master "Azure Pipelines")
+[![](https://github.com/lycantropos/gon/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/lycantropos/gon/actions/workflows/ci.yml "Github Actions")
 [![](https://codecov.io/gh/lycantropos/gon/branch/master/graph/badge.svg)](https://codecov.io/gh/lycantropos/gon "Codecov")
 [![](https://readthedocs.org/projects/gon/badge/?version=latest)](https://gon.readthedocs.io/en/latest "Documentation")
 [![](https://img.shields.io/github/license/lycantropos/gon.svg)](https://github.com/lycantropos/gon/blob/master/LICENSE "License")
@@ -33,8 +33,8 @@ for memory complexity is `O(n)`.
 
 ---
 
-In what follows `python` is an alias for `python3.5` or `pypy3.5`
-or any later version (`python3.6`, `pypy3.6` and so on).
+In what follows `python` is an alias for `python3.6` or `pypy3.6`
+or any later version (`python3.7`, `pypy3.7` and so on).
 
 Installation
 ------------
