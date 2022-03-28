@@ -52,13 +52,13 @@ context = get_context()
 
 
 @contextmanager
-def not_raises(*exceptions: Type[BaseException],
-               format_error: Callable[[BaseException], str]
+def not_raises(*exceptions_classes: Type[BaseException],
+               format_exception: Callable[[BaseException], str]
                = 'DID RAISE {}'.format) -> None:
     try:
         yield
-    except exceptions as error:
-        raise pytest.fail(format_error(error))
+    except exceptions_classes as exception:
+        raise pytest.fail(format_exception(exception)) from exception
 
 
 def equivalence(left_statement: bool, right_statement: bool) -> bool:
