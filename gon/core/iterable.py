@@ -1,4 +1,3 @@
-import sys
 from itertools import chain
 from typing import (Iterable,
                     Sequence,
@@ -28,9 +27,4 @@ def shift_sequence(sequence: Sequence[_T], step: int) -> Sequence[_T]:
             else sequence)
 
 
-if sys.version_info < (3, 6):
-    OrderedDict = dict
-else:
-    from collections import OrderedDict
-unique_ever_seen = OrderedDict.fromkeys
-del OrderedDict, sys
+unique_ever_seen = dict.fromkeys
