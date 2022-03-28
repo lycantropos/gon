@@ -1,4 +1,5 @@
-from typing import Optional
+from typing import (NoReturn,
+                    Optional)
 
 from ground.hints import (Point,
                           Scalar)
@@ -9,11 +10,6 @@ from .compound import (Compound,
                        Location,
                        Relation)
 from .geometry import Geometry
-
-try:
-    from typing import NoReturn
-except ImportError:
-    from typing_extensions import NoReturn
 
 
 class Empty(Compound):
