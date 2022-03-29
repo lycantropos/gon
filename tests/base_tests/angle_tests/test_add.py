@@ -27,7 +27,8 @@ def test_validity(angles_pair: Tuple[Angle, Angle]) -> None:
 
 
 @given(strategies.zero_angles_with_angles)
-def test_first(zero_angle_with_angle: Tuple[Angle, Angle]) -> None:
+def test_left_neutral_element(zero_angle_with_angle: Tuple[Angle, Angle]
+                              ) -> None:
     zero_angle, angle = zero_angle_with_angle
 
     result = zero_angle + angle
@@ -36,8 +37,8 @@ def test_first(zero_angle_with_angle: Tuple[Angle, Angle]) -> None:
 
 
 @given(strategies.zero_angles_with_angles)
-def test_third(zero_angle_with_angle
-               : Tuple[Angle, Angle]) -> None:
+def test_right_neutral_element(zero_angle_with_angle: Tuple[Angle, Angle]
+                               ) -> None:
     zero_angle, angle = zero_angle_with_angle
 
     result = angle + zero_angle

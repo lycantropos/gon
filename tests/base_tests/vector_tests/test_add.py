@@ -28,7 +28,7 @@ def test_validity(vectors_pair: Tuple[Vector, Vector]) -> None:
 
 
 @given(strategies.zero_vectors_with_vectors)
-def test_first(zero_vector_with_vector: Tuple[Vector, Vector]
+def test_left_neutral_element(zero_vector_with_vector: Tuple[Vector, Vector]
                               ) -> None:
     zero_vector, vector = zero_vector_with_vector
 
@@ -38,8 +38,8 @@ def test_first(zero_vector_with_vector: Tuple[Vector, Vector]
 
 
 @given(strategies.zero_vectors_with_vectors)
-def test_third(zero_vector_with_vector
-                               : Tuple[Vector, Vector]) -> None:
+def test_right_neutral_element(zero_vector_with_vector: Tuple[Vector, Vector]
+                               ) -> None:
     zero_vector, vector = zero_vector_with_vector
 
     result = vector + zero_vector

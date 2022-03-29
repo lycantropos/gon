@@ -38,8 +38,8 @@ def test_self_inverse(compound: Compound) -> None:
 
 
 @given(strategies.empty_compounds_with_compounds)
-def test_first(empty_compound_with_compound
-               : Tuple[Compound, Compound]) -> None:
+def test_left_neutral_element(empty_compound_with_compound
+                              : Tuple[Compound, Compound]) -> None:
     empty_compound, compound = empty_compound_with_compound
 
     result = empty_compound ^ compound
@@ -48,8 +48,8 @@ def test_first(empty_compound_with_compound
 
 
 @given(strategies.empty_compounds_with_compounds)
-def test_third(empty_compound_with_compound
-               : Tuple[Compound, Compound]) -> None:
+def test_right_neutral_element(empty_compound_with_compound
+                               : Tuple[Compound, Compound]) -> None:
     empty_compound, compound = empty_compound_with_compound
 
     result = compound ^ empty_compound
