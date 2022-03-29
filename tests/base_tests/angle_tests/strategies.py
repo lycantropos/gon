@@ -30,7 +30,8 @@ def to_zero_coordinates(coordinates: Strategy[Scalar]) -> Strategy[Scalar]:
 
 
 non_unit_interval_coordinates_strategies = (
-    coordinates_strategies.map(to_non_unit_interval_coordinates))
+    coordinates_strategies.map(to_non_unit_interval_coordinates)
+)
 zero_angles_with_angles = (coordinates_strategies
                            .flatmap(cleave_in_tuples(to_zero_coordinates,
                                                      coordinates_to_angles))

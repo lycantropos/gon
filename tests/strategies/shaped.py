@@ -45,7 +45,8 @@ invalid_polygons = (
         | (coordinates_strategies.flatmap(planar.convex_contours)
            .flatmap(contour_to_invalid_polygons))
         | (coordinates_strategies.flatmap(planar.contours)
-           .map(contour_to_invalid_polygon)))
+           .map(contour_to_invalid_polygon))
+)
 repeated_polygons = (strategies.builds(repeat, polygons,
                                        strategies.integers(2, 100))
                      .map(list))

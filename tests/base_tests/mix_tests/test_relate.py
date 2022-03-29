@@ -34,9 +34,9 @@ def test_mixes_relations(mixes_pair: Tuple[Mix, Mix]) -> None:
     assert equivalence(result is Relation.DISJOINT,
                        all(first_component.relate(second_component)
                            is Relation.DISJOINT
-                           for first_component, second_component in product(
-                               mix_to_components(first),
-                               mix_to_components(second))))
+                           for first_component, second_component
+                           in product(mix_to_components(first),
+                                      mix_to_components(second))))
     assert implication(result is Relation.OVERLAP,
                        first.shaped is second.shaped is EMPTY
                        or first.shaped is not EMPTY
@@ -51,9 +51,9 @@ def test_mixes_relations(mixes_pair: Tuple[Mix, Mix]) -> None:
                        all(first_component is second_component is EMPTY
                            or (first_component.relate(second_component)
                                is Relation.EQUAL)
-                           for first_component, second_component in zip(
-                               mix_to_components(first),
-                               mix_to_components(second))))
+                           for first_component, second_component
+                           in zip(mix_to_components(first),
+                                  mix_to_components(second))))
     assert implication(result is Relation.COMPONENT,
                        all(component is EMPTY
                            or first.relate(component) is Relation.COMPONENT

@@ -73,8 +73,7 @@ def test_associativity(compounds_triplet: Tuple[Compound, Compound, Compound]
 
     result = (first ^ second) ^ third
 
-    assert are_compounds_equivalent(
-            result, first ^ (second ^ third))
+    assert are_compounds_equivalent(result, first ^ (second ^ third))
 
 
 @given(strategies.compounds_pairs)

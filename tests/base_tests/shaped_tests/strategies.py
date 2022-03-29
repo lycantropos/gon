@@ -12,8 +12,8 @@ from tests.utils import (Strategy,
 shaped_geometries = (coordinates_strategies
                      .flatmap(coordinates_to_shaped_geometries))
 shaped_geometries_with_coordinates_pairs = coordinates_strategies.flatmap(
-        cleave_in_tuples(coordinates_to_shaped_geometries, identity,
-                         identity))
+        cleave_in_tuples(coordinates_to_shaped_geometries, identity, identity)
+)
 
 
 def coordinates_to_non_zero_coordinates(coordinates: Strategy[Scalar]
@@ -22,12 +22,14 @@ def coordinates_to_non_zero_coordinates(coordinates: Strategy[Scalar]
 
 
 shaped_geometries_with_non_zero_coordinates_pairs = (
-    coordinates_strategies.flatmap(
-            cleave_in_tuples(coordinates_to_shaped_geometries,
-                             coordinates_to_non_zero_coordinates,
-                             coordinates_to_non_zero_coordinates)))
+    (coordinates_strategies
+     .flatmap(cleave_in_tuples(coordinates_to_shaped_geometries,
+                               coordinates_to_non_zero_coordinates,
+                               coordinates_to_non_zero_coordinates)))
+)
 shaped_geometries_points_with_angles = strategies.tuples(
         (coordinates_strategies
          .flatmap(cleave_in_tuples(coordinates_to_shaped_geometries,
                                    coordinates_to_points))),
-        angles)
+        angles
+)
