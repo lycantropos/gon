@@ -30,7 +30,8 @@ contours_with_points = (coordinates_strategies
 invalid_contours = invalid_contours
 contours_with_zero_non_zero_coordinates = coordinates_strategies.flatmap(
         cleave_in_tuples(coordinates_to_contours, to_zero_coordinates,
-                         to_non_zero_coordinates))
+                         to_non_zero_coordinates)
+)
 contours_strategies = coordinates_strategies.map(coordinates_to_contours)
 contours_pairs = contours_strategies.flatmap(to_pairs)
 contours_triplets = contours_strategies.flatmap(to_triplets)

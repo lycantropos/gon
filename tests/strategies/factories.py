@@ -51,7 +51,8 @@ def coordinates_to_maybe_linear_geometries(coordinates: Strategy[Scalar]
 
 
 def coordinates_to_maybe_shaped_geometries(
-        coordinates: Strategy[Scalar]) -> Strategy[Maybe[Shaped[Scalar]]]:
+        coordinates: Strategy[Scalar]
+) -> Strategy[Maybe[Shaped[Scalar]]]:
     return empty_geometries | coordinates_to_shaped_geometries(coordinates)
 
 

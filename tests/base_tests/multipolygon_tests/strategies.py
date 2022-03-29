@@ -15,6 +15,7 @@ multipolygons_strategies = (coordinates_strategies
 multipolygons_pairs = multipolygons_strategies.flatmap(to_pairs)
 multipolygons_triplets = multipolygons_strategies.flatmap(to_triplets)
 multipolygons_with_points = (
-    coordinates_strategies.flatmap(
-            cleave_in_tuples(coordinates_to_multipolygons,
-                             coordinates_to_points)))
+    (coordinates_strategies
+     .flatmap(cleave_in_tuples(coordinates_to_multipolygons,
+                               coordinates_to_points)))
+)

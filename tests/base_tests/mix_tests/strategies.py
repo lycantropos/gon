@@ -62,13 +62,15 @@ def shaped_to_invalid_mix(shaped: Shaped) -> Strategy[Mix]:
                     empty_geometries,
                     strategies.builds(stretch_segment_end, rational_edges,
                                       scales),
-                    strategies.just(shaped))
+                    strategies.just(shaped)
+            )
             | strategies.builds(
                     Mix,
                     empty_geometries,
                     strategies.builds(stretch_segment_start, rational_edges,
                                       scales),
-                    strategies.just(shaped))
+                    strategies.just(shaped)
+            )
             | strategies.builds(Mix,
                                 empty_geometries,
                                 strategies.sampled_from(polygons)

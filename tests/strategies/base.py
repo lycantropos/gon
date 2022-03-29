@@ -56,7 +56,8 @@ coordinates_strategies = strategies.sampled_from(
          for factory in [to_floats,
                          partial(strategies.fractions,
                                  max_denominator=MAX_COORDINATE),
-                         strategies.integers]])
+                         strategies.integers]]
+)
 
 
 def to_pythagorean_triplets(*,

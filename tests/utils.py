@@ -240,8 +240,8 @@ def divide_by_int(dividend: Scalar, divisor: int) -> Scalar:
 
 def compound_to_compound_with_multipoint(compound: Compound
                                          ) -> Tuple[Compound, Multipoint]:
-    return (compound, Multipoint(list(to_unique_ever_seen(compound_to_points(
-            compound)))))
+    points = compound_to_points(compound)
+    return (compound, Multipoint(list(to_unique_ever_seen(points))))
 
 
 def compound_to_points(compound: Compound) -> Iterable[Point]:
