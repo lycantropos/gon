@@ -79,8 +79,7 @@ def test_associativity(compounds_triplet: Tuple[Compound, Compound, Compound]
 
     result = (first & second) & third
 
-    assert are_compounds_equivalent(
-            result, first & (second & third))
+    assert are_compounds_equivalent(result, first & (second & third))
 
 
 @given(strategies.compounds_triplets)
@@ -91,9 +90,7 @@ def test_distribution_over_union(compounds_triplet
 
     result = first & (second | third)
 
-    assert are_compounds_equivalent(result,
-                                    (first & second)
-                                    | (first & third))
+    assert are_compounds_equivalent(result, (first & second) | (first & third))
 
 
 @given(strategies.compounds_pairs)
