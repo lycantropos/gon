@@ -15,31 +15,25 @@ def test_reflexivity(compound: Compound) -> None:
 
 @given(strategies.compounds_pairs)
 def test_antisymmetry(compounds_pair: Tuple[Compound, Compound]) -> None:
-    first_compound, second_compound = compounds_pair
+    first, second = compounds_pair
 
-    assert equivalence(first_compound <= second_compound <= first_compound,
-                       first_compound == second_compound)
+    assert equivalence(first <= second <= first, first == second)
 
 
 @given(strategies.compounds_triplets)
 def test_transitivity(compounds_triplet: Tuple[Compound, Compound, Compound]
                       ) -> None:
-    first_compound, second_compound, third_compound = compounds_triplet
+    first, second, third = compounds_triplet
 
-    assert implication(first_compound <= second_compound <= third_compound,
-                       first_compound <= third_compound)
+    assert implication(first <= second <= third, first <= third)
 
 
 @given(strategies.compounds_pairs)
 def test_equivalents(compounds_pair: Tuple[Compound, Compound]) -> None:
-    first_compound, second_compound = compounds_pair
+    first, second = compounds_pair
 
-    result = first_compound <= second_compound
+    result = first <= second
 
-    assert equivalence(result, second_compound >= first_compound)
-    assert equivalence(result,
-                       first_compound < second_compound
-                       or first_compound == second_compound)
-    assert equivalence(result,
-                       second_compound > first_compound
-                       or first_compound == second_compound)
+    assert equivalence(result, second >= first)
+    assert equivalence(result, first < second or first == second)
+    assert equivalence(result, second > first or first == second)
