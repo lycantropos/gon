@@ -82,6 +82,21 @@ def cleave(*functions: Callable[..., Range]
     return cleft
 
 
+_T = TypeVar('_T')
+
+
+def combine_factories(*factories: Strategy[Callable[..., _T]]
+                      ) -> Strategy[Callable[..., Tuple[_T]]]:
+    return strategies.tuples(*factories).map(pack(cleave_in_tuples))
+
+
+def factories_to_values(factories: Strategy[Callable[..., _T]],
+                        *args: Strategy[Any],
+                        **kwargs: Strategy[Any]) -> Strategy[_T]:
+    return (strategies.builds(call, factories, *args, **kwargs)
+            .flatmap(identity))
+
+
 def identity(argument: Domain) -> Domain:
     return argument
 
