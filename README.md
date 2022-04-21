@@ -1,7 +1,7 @@
 gon
 ===
 
-[![](https://github.com/lycantropos/gon/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/lycantropos/gon/actions/workflows/ci.yml "Github Actions")
+[![](https://github.com/lycantropos/gon/workflows/CI/badge.svg)](https://github.com/lycantropos/gon/actions/workflows/ci.yml "Github Actions")
 [![](https://codecov.io/gh/lycantropos/gon/branch/master/graph/badge.svg)](https://codecov.io/gh/lycantropos/gon "Codecov")
 [![](https://readthedocs.org/projects/gon/badge/?version=latest)](https://gon.readthedocs.io/en/latest "Documentation")
 [![](https://img.shields.io/github/license/lycantropos/gon.svg)](https://github.com/lycantropos/gon/blob/master/LICENSE "License")
