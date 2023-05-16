@@ -33,8 +33,8 @@ for memory complexity is `O(n)`.
 
 ---
 
-In what follows `python` is an alias for `python3.6` or `pypy3.6`
-or any later version (`python3.7`, `pypy3.7` and so on).
+In what follows `python` is an alias for `python3.7` or `pypy3.7`
+or any later version (`python3.7`, `pypy3.8` and so on).
 
 Installation
 ------------
